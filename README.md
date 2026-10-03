@@ -228,7 +228,9 @@ graph TD
          </tbody>
       </table>
 </body>
+
 --- 
+
 ### Sprints
 
 | Sprint | Link                            | Início     | Entrega    | Status |
