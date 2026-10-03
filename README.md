@@ -201,7 +201,6 @@ graph TD
          </tbody>
       </table>
 </body>
-
 --- 
 ### Sprints
 
@@ -633,6 +632,29 @@ Uma User Story será considerada concluída quando:
 
 </details>
 
+<details>
+<summary><b>📝 Padrão de Commits</b></summary>
+
+Para garantir a rastreabilidade com o **GitHub Projects** e as **Issues**, adotamos os seguintes padrões:
+
+### Commits
+
+As mensagens devem referenciar o ID da Issue com `#`:
+
+- `tipo(#id_issue): descrição clara`
+- _Exemplo:_ `feat(#1): implementar hash de senha no cadastro`
+
+**Tipos permitidos:**
+
+| Tipo | Descrição |
+| :--- | :--- |
+| **`feat`** | Adição de um novo recurso ou funcionalidade. |
+| **`fix`** | Correção de um erro ou bug. |
+| **`docs`** | Alterações apenas na documentação (ex: README). |
+| **`refactor`** | Mudanças na estrutura do código sem alterar seu comportamento. |
+| **`cleanup`** | Limpeza de código (remover comentários ou trechos inúteis). |
+
+</details>
 
 
 
