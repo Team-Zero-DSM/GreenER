@@ -60,54 +60,81 @@ A plataforma relaciona o uso de recursos computacionais à eficiência energéti
 
 ## 📁 Organização de pastas
 
+Itens identificados como **planejados** representam a estrutura prevista para as próximas etapas e ainda não existem no repositório.
+
 ```bash
 greener/
+├── .gitignore                        # Arquivos e pastas ignorados pelo Git
 ├── README.md                         # Documentação principal do projeto
-├── .env.example                      # Modelo das variáveis de ambiente
-├── compose.yaml                      # Configuração dos serviços Docker
-│
-├── frontend/                         # Aplicação e interface do usuário
-│   ├── README.md                     # Documentação do frontend
-│   ├── Dockerfile                    # Configuração da imagem Docker do frontend
-│   └── src/                          # Código-fonte do frontend
-│       ├── components/               # Componentes reutilizáveis da interface
-│       ├── pages/                    # Páginas da aplicação
-│       ├── services/                 # Comunicação com APIs e serviços externos
-│       ├── hooks/                    # Hooks personalizados
-│       ├── contexts/                 # Contextos para compartilhamento de estado
-│       └── providers/                # Provedores de contexto e dependências
 │
 ├── backend/                          # API e regras de negócio da aplicação
-│   ├── README.md                     # Documentação do backend
+│   ├── .dockerignore                 # Arquivos excluídos da imagem Docker
+│   ├── .env.example                  # Modelo das variáveis de ambiente do backend
+│   ├── .prettierignore               # Arquivos ignorados pelo Prettier
 │   ├── Dockerfile                    # Configuração da imagem Docker do backend
+│   ├── eslint.config.js              # Configuração do ESLint
+│   ├── package.json                  # Dependências e scripts do backend
+│   ├── package-lock.json             # Versões fixadas das dependências
+│   ├── prettier.config.js            # Configuração do Prettier
+│   ├── tsconfig.json                 # Configuração do TypeScript
 │   └── src/                          # Código-fonte do backend
-│       ├── app.ts                    # Configuração principal da aplicação
+│       ├── app.ts                    # Configuração da aplicação Express
 │       ├── server.ts                 # Inicialização do servidor
-│       ├── db/                       # Configuração de acesso ao banco de dados
-│       │   └── connection.ts         # Conexão com o banco de dados
-│       ├── integrations/             # Integrações com APIs externas
-│       │   ├── metrics-api.ts        # Integração com a API de métricas
-│       │   └── carbon-api.ts         # Integração com a API de carbono
-│       └── modules/                   # Módulos responsáveis pelas funcionalidades
-│           └── coletas/              # Módulo de coleta e processamento de métricas
-│               ├── coletas.routes.ts       # Definição das rotas de coleta
-│               ├── coletas.controller.ts   # Controle das requisições
-│               ├── coletas.service.ts      # Regras de negócio das coletas
-│               └── coletas.repository.ts   # Acesso e persistência dos dados
+│       ├── db/                       # Acesso ao banco de dados (planejado)
+│       │   └── connection.ts         # Conexão com o banco (planejado)
+│       ├── integrations/             # Integrações com APIs externas (planejado)
+│       │   ├── metrics-api.ts        # Integração com a API de métricas (planejado)
+│       │   └── carbon-api.ts         # Integração com a API de carbono (planejado)
+│       └── modules/                  # Módulos de funcionalidades (planejado)
+│           └── coletas/              # Coleta e processamento de métricas (planejado)
+│               ├── coletas.routes.ts       # Rotas de coleta (planejado)
+│               ├── coletas.controller.ts   # Controle das requisições (planejado)
+│               ├── coletas.service.ts      # Regras de negócio (planejado)
+│               └── coletas.repository.ts   # Acesso e persistência (planejado)
 │
-├── database/                         # Estrutura e configuração do banco de dados
-│   ├── README.md                     # Documentação do banco de dados
-│   └── schema.sql                    # Estrutura das tabelas e relacionamentos
+├── compose.yaml                      # Serviços Docker (planejado)
 │
-└── docs/                             # Documentação técnica e de desenvolvimento
-    ├── plano-de-entregas.md          # Planejamento das entregas do projeto
-    ├── arquitetura.md                # Documentação da arquitetura do sistema
-    ├── calculos.md                   # Documentação dos cálculos realizados
-    ├── api.md                        # Documentação das APIs utilizadas
-    └── sprints/                      # Documentação das sprints do projeto
-        ├── sprint-1.md               # Documentação da Sprint 1
-        ├── sprint-2.md               # Documentação da Sprint 2
-        └── sprint-3.md               # Documentação da Sprint 3
+├── database/                         # Banco de dados (planejado)
+│   ├── README.md                     # Documentação do banco (planejado)
+│   └── schema.sql                    # Tabelas e relacionamentos (planejado)
+│
+├── docs/                             # Documentação técnica (planejado)
+│   ├── plano-de-entregas.md          # Planejamento das entregas (planejado)
+│   ├── arquitetura.md                # Arquitetura do sistema (planejado)
+│   ├── calculos.md                   # Cálculos realizados (planejado)
+│   ├── api.md                        # APIs utilizadas (planejado)
+│   └── sprints/                      # Documentação das sprints (planejado)
+│       ├── sprint-1.md               # Sprint 1 (planejado)
+│       ├── sprint-2.md               # Sprint 2 (planejado)
+│       └── sprint-3.md               # Sprint 3 (planejado)
+│
+└── frontend/                         # Aplicação e interface do usuário
+    ├── .dockerignore                 # Arquivos excluídos da imagem Docker
+    ├── .env.example                  # Modelo das variáveis de ambiente do frontend
+    ├── .prettierignore               # Arquivos ignorados pelo Prettier
+    ├── components.json               # Configuração dos componentes shadcn/ui
+    ├── Dockerfile                    # Configuração da imagem Docker do frontend
+    ├── eslint.config.js              # Configuração do ESLint
+    ├── index.html                    # Documento HTML de entrada do Vite
+    ├── package.json                  # Dependências e scripts do frontend
+    ├── package-lock.json             # Versões fixadas das dependências
+    ├── prettier.config.js            # Configuração do Prettier
+    ├── tsconfig.json                 # Configuração do TypeScript
+    ├── vite.config.ts                # Configuração do Vite
+    └── src/                          # Código-fonte do frontend
+        ├── App.tsx                   # Componente principal da aplicação
+        ├── index.css                 # Estilos globais
+        ├── main.tsx                  # Ponto de entrada da aplicação
+        ├── components/               # Componentes reutilizáveis
+        │   └── ui/                   # Componentes de interface
+        │       └── card.tsx
+        ├── lib/                      # Utilitários compartilhados
+        │   └── utils.ts
+        ├── contexts/                 # Contextos para compartilhamento de estado (planejado)
+        ├── hooks/                    # Hooks personalizados (planejado)
+        ├── pages/                    # Páginas da aplicação (planejado)
+        ├── providers/                # Provedores de contexto e dependências (planejado)
+        └── services/                 # Comunicação com APIs e serviços externos (planejado)
 ```
 
 ---
@@ -655,6 +682,5 @@ As mensagens devem referenciar o ID da Issue com `#`:
 | **`cleanup`** | Limpeza de código (remover comentários ou trechos inúteis). |
 
 </details>
-
 
 
