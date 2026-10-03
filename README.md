@@ -114,7 +114,45 @@ greener/
 
 ### 🚀 Como iniciar a aplicação
 
+Para executar o projeto localmente, siga os passos abaixo:
 
+#### Pré-requisitos
+
+ Antes de começar, certifique-se de ter instalado:
+
+- [Docker](https://www.docker.com/)
+- [Git](https://git-scm.com/)
+
+## Como executar
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/Team-Zero-DSM/GreenER.git
+```
+
+### 2. Acesse a pasta do projeto
+
+```bash
+cd greenER
+```
+
+### 3. Configure as variáveis de ambiente
+
+Copie os arquivos .env.example para .env e ajuste os valores conforme necessário:
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+#### 4. Suba os containers
+
+```bash
+docker compose up --build
+```
+
+### 5. Acesse a aplicação
+- Frontend: http://localhost:5173
 
 
 ---
