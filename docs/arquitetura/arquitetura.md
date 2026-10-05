@@ -22,14 +22,6 @@ Ferramenta utilizada para a criação e manutenção dos diagramas UML do projet
 
 Por meio dela são desenvolvidos os diagramas utilizados na documentação da aplicação, permitindo representar visualmente os principais aspectos da solução.
 
-<a href="https://www.lucidchart.com/" target="_blank">
-    <img
-        src="URL_DA_IMAGEM"
-        alt="Lucidchart"
-        height="50"
-    >
-</a>
-
 ---
 
 ## 📋 Diagramas Disponíveis
