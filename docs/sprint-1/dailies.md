@@ -99,3 +99,29 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Continuidade das entregas:** o Diagrama de Caso de Uso foi concluído posteriormente por Henrique, durante o sábado, como continuidade da atividade iniciada neste período.
 
 ---
+
+## 📅 05/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---------|----------|
+| Henrique Bueno | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+ - **Versionamento:** a equipe se reuniu para esclarecer as dificuldades relacionadas aos commits e ao funcionamento das branches, garantindo que todos compreendessem o fluxo de versionamento adotado no projeto.
+
+ - **Poker Planning:** foi realizada a Poker Planning definitiva, com a distribuição das tasks entre os integrantes e a definição das metas do projeto e de como seriam realizadas e entregues.
+
+ - **Frontend:** Gabriel realizou um estudo sobre formas de desenvolver o frontend de maneira mais leve e eficiente, considerando a estrutura que havia sido previamente projetada no Figma por Paulo.
+
+ - **Banco de dados:** Vitor e Pedro finalizaram a definição da documentação relacionada ao banco de dados, enquanto Pedro iniciou sua configuração em Docker para posterior versionamento no projeto.
+
+ - **Modelagem e documentação:** Henrique iniciou a elaboração definitiva do Diagrama de Classes e realizou a documentação das Dailies da Sprint, finalizando os últimos detalhes antes de sua inclusão no projeto.
+
+---
