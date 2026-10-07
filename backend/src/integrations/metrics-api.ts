@@ -5,6 +5,7 @@ import {
     metricsResponseSchema,
     servicesResponseSchema,
     type MetricsService,
+    metricsServiceSchema,
 } from './metrics-api.schema.js';
 
 const BASE_URL = process.env.METRICS_API_URL;
@@ -56,6 +57,9 @@ async function request<T>(path: string, schema: ZodType<T>): Promise<T> {
 
 export function getServices(): Promise<MetricsService[]> {
     return request('/services', servicesResponseSchema);
+}
+export function getServiceById(id: string): Promise<MetricsService> {
+    return request(`/services/${encodeURIComponent(id)}`, metricsServiceSchema);
 }
 
 export function getMetrics(metricsPath: string): Promise<MetricsResponse> {
