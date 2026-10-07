@@ -10,7 +10,7 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 | Membro | Presença |
 |---------|----------|
-| Henrique Bueno | ✅ |
+| Henrique | ✅ |
 | Paulo | ✅ |
 | Gabriel | ✅ |
 | Pedro | ✅ |
@@ -32,7 +32,7 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 | Membro | Presença |
 |---------|----------|
-| Henrique Bueno | ✅ |
+| Henrique | ✅ |
 | Paulo | ✅ |
 | Gabriel | ✅ |
 | Pedro | ✅ |
@@ -58,7 +58,7 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 | Membro | Presença |
 |---------|----------|
-| Henrique Bueno | ✅ |
+| Henrique | ✅ |
 | Paulo | ✅ |
 | Gabriel | ✅ |
 | Pedro | ✅ |
@@ -82,7 +82,7 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 | Membro | Presença |
 |---------|----------|
-| Henrique Bueno | ❌ |
+| Henrique | ❌ |
 | Paulo | ✅ |
 | Gabriel | ✅ |
 | Pedro | ✅ |
@@ -106,7 +106,7 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 | Membro | Presença |
 |---------|----------|
-| Henrique Bueno | ✅ |
+| Henrique | ✅ |
 | Paulo | ✅ |
 | Gabriel | ✅ |
 | Pedro | ✅ |
@@ -123,5 +123,35 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
  - **Banco de dados:** Vitor e Pedro finalizaram a definição da documentação relacionada ao banco de dados, enquanto Pedro iniciou sua configuração em Docker para posterior versionamento no projeto.
 
  - **Modelagem e documentação:** Henrique iniciou a elaboração definitiva do Diagrama de Classes e realizou a documentação das Dailies da Sprint, finalizando os últimos detalhes antes de sua inclusão no projeto.
+
+---
+
+---
+
+## 📅 06/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---------|----------|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Aproveitamento do tempo disponível:** devido ao período de aula, a equipe não teve um horário exclusivo dedicado ao projeto. Ainda assim, foram aproveitados momentos antes e após a aula para alinhamento das atividades e acompanhamento do andamento da Sprint.
+
+- **Planejamento da Sprint:** a equipe revisou as tarefas em andamento, definiu prioridades para os próximos dias e alinhou as entregas previstas para a semana, garantindo que todos os integrantes estivessem cientes dos próximos objetivos.
+
+- **Organização da equipe:** foram realizados alinhamentos sobre o fluxo de desenvolvimento e treinamento de alguns integrantes para fortalecer o entendimento do processo de trabalho adotado pela equipe.
+
+- **Infraestrutura do projeto:** Pedro concluiu a configuração do ambiente de desenvolvimento compartilhado, permitindo que todos os integrantes trabalhem sobre uma mesma base de configuração.
+
+- **Containerização:** foram concluídas as entregas relacionadas à configuração do PostgreSQL em container Docker e à integração dos serviços por meio do Docker Compose, estabelecendo a estrutura inicial necessária para a execução do projeto.
+
+- **Base do projeto:** com as configurações de infraestrutura finalizadas, a equipe consolidou a base técnica necessária para o desenvolvimento das próximas funcionalidades previstas na Sprint.
 
 ---
