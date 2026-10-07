@@ -1,18 +1,11 @@
 import type { ZodType } from 'zod';
 import { ExternalApiError } from '../shared/errors/external-api-error.js';
-import {
-    type MetricsResponse,
-    metricsResponseSchema,
-    servicesResponseSchema,
-    type MetricsService,
-    metricsServiceSchema,
-} from './metrics-api.schema.js';
-
-const BASE_URL = process.env.METRICS_API_URL;
+import { type RegionsResponse, regionsResponseSchema } from './carbon-api.schema.js';
+const BASE_URL = process.env.CARBON_API_URL;
 const TIMEOUT_MS = 8_000;
 
-async function request<T>(path: string, schema: ZodType<T>): Promise<T> {
-    if (!BASE_URL) throw new Error('METRICS_API_URL não configurada');
+async function requestCarbon<T>(path: string, schema: ZodType<T>): Promise<T> {
+    if (!BASE_URL) throw new Error('CARBON_API_URL não configurada');
 
     let response: Response;
     try {
@@ -24,7 +17,7 @@ async function request<T>(path: string, schema: ZodType<T>): Promise<T> {
         throw new ExternalApiError(
             isTimeout
                 ? `Timeout de ${TIMEOUT_MS}ms em ${path}`
-                : `Metrics API indisponível em ${path}`,
+                : `Carbon API indisponível em ${path}`,
             isTimeout ? 'timeout' : 'unavailable',
             { cause: err },
         );
@@ -32,7 +25,7 @@ async function request<T>(path: string, schema: ZodType<T>): Promise<T> {
 
     if (!response.ok) {
         throw new ExternalApiError(
-            `Metrics API respondeu ${response.status} em ${path}`,
+            `Carbon API respondeu ${response.status} em ${path}`,
             'bad_status',
         );
     }
@@ -55,13 +48,6 @@ async function request<T>(path: string, schema: ZodType<T>): Promise<T> {
     return parsed.data;
 }
 
-export function getServices(): Promise<MetricsService[]> {
-    return request('/services', servicesResponseSchema);
-}
-export function getServiceById(id: string): Promise<MetricsService> {
-    return request(`/services/${encodeURIComponent(id)}`, metricsServiceSchema);
-}
-
-export function getMetrics(metricsPath: string): Promise<MetricsResponse> {
-    return request(metricsPath, metricsResponseSchema);
+export function getRegions(): Promise<RegionsResponse> {
+    return requestCarbon('/regions', regionsResponseSchema);
 }
