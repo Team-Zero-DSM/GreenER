@@ -155,3 +155,33 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Base do projeto:** com as configurações de infraestrutura finalizadas, a equipe consolidou a base técnica necessária para o desenvolvimento das próximas funcionalidades previstas na Sprint.
 
 ---
+
+## 📅 07/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---------|----------|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Impedimento de agenda:** devido à realização de uma palestra no período da aula, a equipe não conseguiu realizar a Daily presencialmente. O alinhamento foi realizado de forma remota para manter o acompanhamento das atividades da Sprint.
+
+- **Distribuição das atividades:** a equipe iniciou a execução das tasks definidas no dia anterior, dando continuidade ao planejamento realizado durante o Poker Planning e à divisão das responsabilidades entre os integrantes.
+
+- **Arquitetura do sistema:** Henrique concluiu o diagrama de classes inicial do GreenER, representando as principais entidades, relacionamentos e responsabilidades identificadas para a versão atual do projeto.
+
+- **Integração com serviços:** Pedro e Vitor concluíram a implementação da integração com o endpoint de descoberta de serviços, permitindo a obtenção dos dados disponibilizados pela API.
+
+- **Coleta de métricas:** Pedro e Vitor também concluíram a implementação da integração com o endpoint de métricas dos serviços, possibilitando o acesso às informações necessárias para o processamento dos dados da plataforma.
+
+- **Frontend:** Gabriel iniciou a documentação e o detalhamento do layout definido no Figma, organizando os elementos visuais que serão utilizados na implementação da interface. A atividade permanece em andamento.
+
+- **Página de detalhamento:** Paulo iniciou o desenvolvimento da página de detalhamento de serviços, responsável por apresentar as informações individuais de cada serviço monitorado pela plataforma.
+
+- **Ambiente de desenvolvimento:** foi finalizada a configuração do ambiente de desenvolvimento compartilhado, incluindo a organização das branches, definição do fluxo de trabalho e padronização do uso do Git pela equipe.
