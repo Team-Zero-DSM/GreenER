@@ -2,7 +2,7 @@ export interface Region {
     code: string;
     country: string;
     region: string;
-    city: string;
+    city?: string | null;
     latitude: number;
     longitude: number;
     carbon_intensity_gco2e_per_kwh: number;

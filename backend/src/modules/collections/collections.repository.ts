@@ -19,7 +19,7 @@ export class CollectionsRepository {
                 data.code,
                 data.country,
                 data.region,
-                data.city,
+                data.city ?? null,
                 data.latitude,
                 data.longitude,
                 data.carbon_intensity_gco2e_per_kwh,
@@ -111,6 +111,20 @@ export class CollectionsRepository {
      WHERE external_id = $1
        AND regiao_id IS DISTINCT FROM (SELECT id FROM regiao WHERE codigo = $2)`,
             [externalId, regionCode],
+        );
+        return (result.rowCount ?? 0) > 0;
+    }
+
+    async updateRegion(data: Region): Promise<boolean> {
+        const result = await this.pool.query(
+            `UPDATE regiao
+         SET carbon_intensity = $2,
+             renewable_share_percent = $3,
+             atualizado_em = now()
+         WHERE codigo = $1
+           AND (carbon_intensity, renewable_share_percent)
+               IS DISTINCT FROM ($2::numeric, $3::numeric)`,
+            [data.code, data.carbon_intensity_gco2e_per_kwh, data.renewable_share_percent],
         );
         return (result.rowCount ?? 0) > 0;
     }
