@@ -26,9 +26,10 @@ Por meio dela são desenvolvidos os diagramas utilizados na documentação da ap
 
 ## 📋 Diagramas Disponíveis
 
-| Diagrama    | Descrição                                                                           |
-| ----------- | ----------------------------------------------------------------------------------- |
-| Caso de Uso | Representa os atores envolvidos e os principais objetivos disponíveis na plataforma |
+| Diagrama      | Descrição                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| Caso de Uso   | Representa os atores envolvidos e os principais objetivos disponíveis na plataforma         |
+| Classes       | Representa a estrutura do sistema, suas entidades, atributos, métodos e relacionamentos     |
 
 ---
 
@@ -47,3 +48,21 @@ Por meio dela são desenvolvidos os diagramas utilizados na documentação da ap
 ## Objetivo
 
 Representar os atores envolvidos no sistema e os principais objetivos que podem ser realizados dentro da plataforma GreenER.
+
+---
+
+# 🧩 Diagrama de Classes
+
+## Visualização
+
+<p align="center">
+    <img src="./images/diagrama-de-classes.svg" alt="Diagrama de Classes">
+</p>
+
+## Arquivo Original
+
+🔗 Lucidchart: [Acessar diagrama](https://lucid.app/lucidchart/37acad31-54dc-4cac-aff9-a3d7c1721d7a/view)
+
+## Objetivo
+
+Representar a estrutura estática do sistema, evidenciando as principais entidades do domínio, seus atributos, métodos e relacionamentos, servindo como base para implementação e evolução da aplicação.

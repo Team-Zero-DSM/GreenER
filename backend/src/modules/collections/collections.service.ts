@@ -2,6 +2,7 @@ import { CarbonClient } from '../../integrations/carbon-api.js';
 import type { RegionsResponse } from '../../integrations/carbon-api.schema.js';
 import { MetricsClient } from '../../integrations/metrics-api.js';
 import type { MetricsResponse, MetricsService } from '../../integrations/metrics-api.schema.js';
+import { pool } from '../../db/connection.js';
 import { ExternalApiError } from '../../shared/errors/external-api-error.js';
 import { CollectionsRepository } from './collections.repository.js';
 import type {
@@ -168,4 +169,26 @@ export class CollectionsService {
         if (err.status === 500) return 'unavailable';
         return null;
     }
+}
+
+function createDefaultCollectionsService(): CollectionsService {
+    const carbonUrl = process.env.CARBON_API_URL ?? process.env['CARBON_API_URL '];
+    const metricsUrl = process.env.METRICS_API_URL;
+
+    if (!carbonUrl || !metricsUrl) {
+        throw new Error('URLs das APIs externas não configuradas');
+    }
+
+    return new CollectionsService(
+        new CollectionsRepository(pool),
+        new CarbonClient(carbonUrl),
+        new MetricsClient(metricsUrl),
+    );
+}
+
+export async function runCollectionRound(): Promise<number> {
+    const service = createDefaultCollectionsService();
+    await service.syncRegions();
+    await service.syncServices();
+    return service.runCollectionRound();
 }

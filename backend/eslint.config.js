@@ -16,7 +16,7 @@ export default tseslint.config(
         },
     },
     {
-        files: ['src/server.ts'],
+        files: ['src/server.ts', 'src/jobs/**/*.ts'],
         rules: {
             'no-console': 'off',
         },

@@ -34,6 +34,7 @@ export class CarbonClient {
             throw new ExternalApiError(
                 `Carbon API respondeu ${response.status} em ${path}`,
                 'bad_status',
+                { status: response.status },
             );
         }
 

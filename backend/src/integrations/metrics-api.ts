@@ -48,6 +48,7 @@ export class MetricsClient {
             throw new ExternalApiError(
                 `Metrics API respondeu ${response.status} em ${path}`,
                 'bad_status',
+                { status: response.status },
             );
         }
 
