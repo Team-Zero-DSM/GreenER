@@ -120,6 +120,42 @@ export function ServiceDetailPage() {
           </dl>
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Indicadores ambientais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {service.environmental ? (
+            <dl className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <InfoItem
+                label="Potência estimada"
+                value={`${service.environmental.powerWatts.toLocaleString('pt-BR')} W`}
+              />
+              <InfoItem
+                label="Energia estimada"
+                value={`${service.environmental.energyKwh.toLocaleString('pt-BR', { maximumFractionDigits: 5 })} kWh`}
+              />
+              <InfoItem
+                label="CO₂e estimado"
+                value={`${service.environmental.co2eGrams.toLocaleString('pt-BR')} g`}
+              />
+              <InfoItem
+                label="Intensidade de carbono"
+                value={`${service.environmental.carbonIntensity.toLocaleString('pt-BR')} gCO₂e/kWh`}
+              />
+              <InfoItem
+                label="Energia renovável"
+                value={`${service.environmental.renewableSharePercent.toLocaleString('pt-BR')} %`}
+              />
+            </dl>
+          ) : (
+            <p className="text-muted-foreground">
+              Indicadores ambientais indisponíveis: o serviço não possui
+              métricas para o cálculo.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }
