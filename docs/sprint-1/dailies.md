@@ -185,3 +185,35 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Página de detalhamento:** Paulo iniciou o desenvolvimento da página de detalhamento de serviços, responsável por apresentar as informações individuais de cada serviço monitorado pela plataforma.
 
 - **Ambiente de desenvolvimento:** foi finalizada a configuração do ambiente de desenvolvimento compartilhado, incluindo a organização das branches, definição do fluxo de trabalho e padronização do uso do Git pela equipe.
+
+---
+
+## 📅 08/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---------|----------|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Conclusão do layout:** a equipe concluiu o layout inicial do sistema projetado no Figma, finalizando a definição visual das telas e dos elementos que serão utilizados na interface da plataforma.
+
+- **Frontend:** Paulo e Gabriel iniciaram a implementação definitiva das telas iniciais de detalhamento de serviços, utilizando o layout definido no Figma como referência para o desenvolvimento da interface. A atividade permanece em andamento.
+
+- **Backend:** Pedro deu continuidade à execução de sua task, avançando no desenvolvimento das funcionalidades previstas para a Sprint.
+
+- **Requisição periódica de métricas:** Vitor concluiu a implementação da requisição periódica de métricas, permitindo a obtenção recorrente das informações disponibilizadas pela API para o monitoramento dos serviços.
+
+- **Acompanhamento da Sprint:** Henrique, atuando como Product Owner, realizou a formatação do gráfico Burndown do projeto e estruturou suas informações no arquivo correspondente, permitindo acompanhar a evolução das atividades e o progresso da Sprint.
+
+- **Documentação da Sprint:** Henrique finalizou o arquivo `sprint-1.md`, consolidando as informações referentes à Sprint 1, incluindo seu planejamento, organização e acompanhamento das atividades.
+
+- **Arquitetura do sistema:** Henrique iniciou a elaboração da documentação da arquitetura geral do GreenER e dos diagramas de sequência do site, dando continuidade à representação estrutural do sistema e ao detalhamento da interação entre seus componentes. As atividades permanecem em andamento.
+
+---
