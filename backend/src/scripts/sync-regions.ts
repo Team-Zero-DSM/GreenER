@@ -18,7 +18,6 @@ const service = new CollectionsService(
 
 try {
     await service.syncRegions();
-    console.log('syncRegions terminou');
 } catch (err) {
     console.error('Falhou:', err);
 } finally {
