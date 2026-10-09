@@ -57,3 +57,31 @@ export interface RegionEnergyInfo {
     carbon_intensity: number;
     renewable_share_percent: number;
 }
+
+export interface ActiveService {
+    id: number;
+    external_id: string;
+    metrics_path: string;
+    carbon_intensity: number;
+}
+
+export type ServiceStatus = 'available' | 'metrics_missing' | 'unavailable';
+
+export type ProcessedMetrics = {
+    cpuPercent: number;
+    memoryGb: number;
+    diskGb: number;
+    networkGb: number;
+    collectionIntervalSeconds: number;
+    collectionIntervalHours: number;
+};
+
+export type Emissions = {
+    cpuWatts: number;
+    memoryWatts: number;
+    diskWatts: number;
+    networkWatts: number;
+    powerW: number;
+    energyKwh: number;
+    co2eG: number;
+};

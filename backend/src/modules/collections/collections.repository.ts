@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
 import {
+    ActiveService,
     Collection,
     EstimateParameter,
     RegionEnergyInfo,
     Service,
+    ServiceStatus,
     type Region,
 } from './collections.types.js';
 
@@ -73,23 +75,16 @@ export class CollectionsRepository {
         return (result.rowCount ?? 0) > 0;
     }
 
-    async existsByExternal_id(external_id: string): Promise<boolean> {
-        const result = await this.pool.query(`SELECT 1 FROM servico WHERE external_id = $1`, [
-            external_id,
-        ]);
-        return (result.rowCount ?? 0) > 0;
-    }
-
     async findActiveEstimateParameter(): Promise<EstimateParameter | null> {
         const result = await this.pool.query<EstimateParameter>(
             `SELECT id,
-            cpu_max_watts,
-            ram_watts_per_gb,
-            disk_watts_per_gb,
-            network_watts_per_gb,
-            ativo AS active
-     FROM parametro_estimativa
-     WHERE ativo = true`,
+        cpu_max_watts::float8 AS cpu_max_watts,
+        ram_watts_per_gb::float8 AS ram_watts_per_gb,
+        disk_watts_per_gb::float8 AS disk_watts_per_gb,
+        network_watts_per_gb::float8 AS network_watts_per_gb,
+        ativo AS active
+ FROM parametro_estimativa
+ WHERE ativo = true`,
         );
         return result.rows[0] ?? null;
     }
@@ -125,6 +120,39 @@ export class CollectionsRepository {
            AND (carbon_intensity, renewable_share_percent)
                IS DISTINCT FROM ($2::numeric, $3::numeric)`,
             [data.code, data.carbon_intensity_gco2e_per_kwh, data.renewable_share_percent],
+        );
+        return (result.rowCount ?? 0) > 0;
+    }
+
+    async findActiveServices(): Promise<ActiveService[]> {
+        const result = await this.pool.query<ActiveService>(
+            `SELECT s.id,
+                s.external_id,
+                s.metrics_path,
+                r.carbon_intensity::float8 AS carbon_intensity
+         FROM servico s
+         JOIN regiao r ON r.id = s.regiao_id
+         WHERE s.ativo = true
+         ORDER BY s.id`,
+        );
+        return result.rows;
+    }
+
+    async existsServiceByExternalId(externalId: string): Promise<boolean> {
+        const result = await this.pool.query(`SELECT 1 FROM servico WHERE external_id = $1`, [
+            externalId,
+        ]);
+        return (result.rowCount ?? 0) > 0;
+    }
+
+    async updateStatus(id: number, status: ServiceStatus): Promise<boolean> {
+        const result = await this.pool.query(
+            `UPDATE servico
+         SET status = $1,
+             status_atualizado_em = now()
+         WHERE id = $2
+           AND status <> $1`,
+            [status, id],
         );
         return (result.rowCount ?? 0) > 0;
     }
