@@ -100,6 +100,26 @@ export function ServiceDetailPage() {
           )}
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Localização</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <InfoItem label="Cidade" value={service.location.city} />
+            <InfoItem label="Região" value={service.location.region} />
+            <InfoItem label="País" value={service.location.country} />
+            <InfoItem
+              label="Código da região"
+              value={service.location.regionCode}
+            />
+            <InfoItem
+              label="Coordenadas"
+              value={`${service.location.latitude.toFixed(4)}, ${service.location.longitude.toFixed(4)}`}
+            />
+          </dl>
+        </CardContent>
+      </Card>
     </main>
   );
 }
