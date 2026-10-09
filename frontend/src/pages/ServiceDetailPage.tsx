@@ -18,6 +18,15 @@ const statusInfo: Record<ServiceStatus, { label: string; className: string }> = 
   },
 };
 
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="text-xl font-semibold">{value}</dd>
+    </div>
+  );
+}
+
 export function ServiceDetailPage() {
   const { id } = useParams();
   const service = id ? findServiceById(id) : undefined;
@@ -33,7 +42,7 @@ export function ServiceDetailPage() {
     );
   }
 
-const status = statusInfo[service.status];
+  const status = statusInfo[service.status];
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl space-y-6 bg-background p-6">
@@ -58,6 +67,37 @@ const status = statusInfo[service.status];
             Visto por último em{' '}
             {new Date(service.lastSeenAt).toLocaleString('pt-BR')}
           </p>
+        </CardContent>
+      </Card>
+            <Card>
+        <CardHeader>
+          <CardTitle>Métricas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {service.metrics ? (
+            <dl className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <InfoItem
+                label="CPU"
+                value={`${service.metrics.cpuPercent.toLocaleString('pt-BR')} %`}
+              />
+              <InfoItem
+                label="Memória"
+                value={`${service.metrics.memoryGb.toLocaleString('pt-BR')} GB`}
+              />
+              <InfoItem
+                label="Disco"
+                value={`${service.metrics.diskGb.toLocaleString('pt-BR')} GB`}
+              />
+              <InfoItem
+                label="Rede"
+                value={`${service.metrics.networkGb.toLocaleString('pt-BR')} GB`}
+              />
+            </dl>
+          ) : (
+            <p className="text-muted-foreground">
+              Nenhuma métrica disponível para este serviço.
+            </p>
+          )}
         </CardContent>
       </Card>
     </main>
