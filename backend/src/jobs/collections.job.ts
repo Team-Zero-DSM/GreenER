@@ -17,8 +17,8 @@ async function tick(): Promise<void> {
     timer = undefined;
     console.log('[collection] rodada iniciada');
     try {
-        const results = await runCollectionRound();
-        console.log(`[collection] rodada concluída: ${results.length} serviço(s) coletado(s)`);
+        const collected = await runCollectionRound();
+        console.log(`[collection] rodada concluída: ${collected} serviço(s) coletado(s)`);
     } catch (err) {
         console.error('[collection] rodada abortada:', err);
     } finally {
