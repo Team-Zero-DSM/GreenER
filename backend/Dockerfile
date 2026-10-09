@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim
+FROM public.ecr.aws/docker/library/node:24-bookworm-slim
 WORKDIR /backend
 COPY package*.json ./
 RUN npm ci

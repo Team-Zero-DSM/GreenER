@@ -1,30 +1,16 @@
-// src/metrics-api/metrics.client.ts
+// src/carbon-api/carbon.client.ts
 import type { ZodType } from 'zod';
 import { ExternalApiError } from '../shared/errors/external-api-error.js';
-import {
-    type MetricsResponse,
-    metricsResponseSchema,
-    servicesResponseSchema,
-    type MetricsService,
-    metricsServiceSchema,
-} from './metrics-api.schema.js';
+import { type RegionsResponse, regionsResponseSchema } from './carbon-api.schema.js';
 
-export class MetricsClient {
+export class CarbonClient {
     constructor(
         private readonly baseUrl: string,
         private readonly timeoutMs = 8_000,
     ) {}
 
-    getServices(): Promise<MetricsService[]> {
-        return this.request('/services', servicesResponseSchema);
-    }
-
-    getServiceById(id: string): Promise<MetricsService> {
-        return this.request(`/services/${encodeURIComponent(id)}`, metricsServiceSchema);
-    }
-
-    getMetrics(metricsPath: string): Promise<MetricsResponse> {
-        return this.request(metricsPath, metricsResponseSchema);
+    getRegions(): Promise<RegionsResponse> {
+        return this.request('/regions', regionsResponseSchema);
     }
 
     private async request<T>(path: string, schema: ZodType<T>): Promise<T> {
@@ -38,7 +24,7 @@ export class MetricsClient {
             throw new ExternalApiError(
                 isTimeout
                     ? `Timeout de ${this.timeoutMs}ms em ${path}`
-                    : `Metrics API indisponível em ${path}`,
+                    : `Carbon API indisponível em ${path}`,
                 isTimeout ? 'timeout' : 'unavailable',
                 { cause: err },
             );
@@ -46,7 +32,7 @@ export class MetricsClient {
 
         if (!response.ok) {
             throw new ExternalApiError(
-                `Metrics API respondeu ${response.status} em ${path}`,
+                `Carbon API respondeu ${response.status} em ${path}`,
                 'bad_status',
                 { status: response.status },
             );

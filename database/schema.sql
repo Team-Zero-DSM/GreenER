@@ -19,8 +19,8 @@ CREATE TABLE regiao (
     cidade TEXT,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
-    carbon_intensity NUMERIC(12,4) NOT NULL CHECK (carbon_intensity >= 0),
-    renewable_share_percent NUMERIC(5,2) NOT NULL CHECK (renewable_share_percent BETWEEN 0 AND 100),
+    carbon_intensity NUMERIC NOT NULL CHECK (carbon_intensity >= 0),
+    renewable_share_percent NUMERIC NOT NULL CHECK (renewable_share_percent BETWEEN 0 AND 100),
     atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
