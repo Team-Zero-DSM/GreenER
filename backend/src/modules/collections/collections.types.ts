@@ -3,8 +3,8 @@ export interface Region {
     country: string;
     region: string;
     city?: string | null;
-    latitude: number;
-    longitude: number;
+    latitude?: number | null;
+    longitude?: number | null;
     carbon_intensity_gco2e_per_kwh: number;
     renewable_share_percent: number;
 }
@@ -13,9 +13,9 @@ export interface ServiceLocation {
     region_code: string;
     country: string;
     region: string;
-    city: string;
-    latitude: number;
-    longitude: number;
+    city?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
 }
 
 export interface Service {

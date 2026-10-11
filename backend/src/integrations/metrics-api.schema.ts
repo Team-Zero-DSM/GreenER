@@ -7,9 +7,9 @@ export const metricsServiceSchema = z.object({
         region_code: z.string(),
         country: z.string(),
         region: z.string(),
-        city: z.string(),
-        latitude: z.number(),
-        longitude: z.number(),
+        city: z.string().nullish(),
+        latitude: z.number().nullish(),
+        longitude: z.number().nullish(),
     }),
     metrics_path: z.string(),
 });

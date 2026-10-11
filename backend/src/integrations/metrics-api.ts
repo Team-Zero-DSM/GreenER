@@ -43,6 +43,13 @@ export class MetricsClient {
                 { cause: err },
             );
         }
+        if (response.status === 530) {
+            throw new ExternalApiError(
+                'API auxiliar inacessível: resposta HTTP 530',
+                'bad_status',
+                { status: 530 },
+            );
+        }
 
         if (!response.ok) {
             throw new ExternalApiError(

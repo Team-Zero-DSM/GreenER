@@ -99,15 +99,23 @@ export class CollectionsRepository {
         return result.rows[0] ?? null;
     }
 
-    async updateServiceRegion(externalId: string, regionCode: string): Promise<boolean> {
+    async updateDiscoveredService(externalId: string, regionCode: string): Promise<void> {
         const result = await this.pool.query(
-            `UPDATE servico
-     SET regiao_id = (SELECT id FROM regiao WHERE codigo = $2)
-     WHERE external_id = $1
-       AND regiao_id IS DISTINCT FROM (SELECT id FROM regiao WHERE codigo = $2)`,
+            `
+        UPDATE servico
+        SET regiao_id = (
+                SELECT id FROM regiao WHERE codigo = $2
+            ),
+            ativo = true,
+            ultima_vez_visto_em = now()
+        WHERE external_id = $1
+        `,
             [externalId, regionCode],
         );
-        return (result.rowCount ?? 0) > 0;
+
+        if (result.rowCount !== 1) {
+            throw new Error(`Serviço não encontrado: ${externalId}`);
+        }
     }
 
     async updateRegion(data: Region): Promise<boolean> {
@@ -155,5 +163,17 @@ export class CollectionsRepository {
             [status, id],
         );
         return (result.rowCount ?? 0) > 0;
+    }
+
+    async deactivateMissingServices(discoveredIds: string[]): Promise<void> {
+        await this.pool.query(
+            `
+        UPDATE servico
+        SET ativo = false
+        WHERE ativo = true
+          AND NOT (external_id = ANY($1::text[]))
+        `,
+            [discoveredIds],
+        );
     }
 }

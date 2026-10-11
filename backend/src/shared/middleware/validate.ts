@@ -15,9 +15,19 @@ export function validate<T extends ZodType>(schema: T, source: RequestPart = 'bo
             return;
         }
 
-        const target = req[source] as Record<string, unknown>;
-        Object.keys(target).forEach((key) => delete target[key]);
-        Object.assign(target, result.data);
+        if (source === 'query') {
+            Object.defineProperty(req, 'query', {
+                value: result.data,
+                writable: true,
+                configurable: true,
+                enumerable: true,
+            });
+        } else {
+            const target = req[source] as Record<string, unknown>;
+
+            Object.keys(target).forEach((key) => delete target[key]);
+            Object.assign(target, result.data);
+        }
 
         next();
     };
