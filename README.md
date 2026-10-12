@@ -68,6 +68,7 @@ greener/
 ├── README.md                         # Documentação principal do projeto
 │
 ├── backend/                          # API e regras de negócio da aplicação
+│   ├── arquitetura.md                # Arquitetura do backend
 │   ├── .dockerignore                 # Arquivos excluídos da imagem Docker
 │   ├── .env.example                  # Modelo das variáveis de ambiente do backend
 │   ├── .prettierignore               # Arquivos ignorados pelo Prettier
@@ -98,11 +99,10 @@ greener/
 │   ├── README.md                     # Documentação do banco (planejado)
 │   └── schema.sql                    # Tabelas e relacionamentos (planejado)
 │
-├── docs/                             # Documentação técnica (planejado)
+├── docs/                             # Documentação técnica
 │   ├── plano-de-entregas.md          # Planejamento das entregas (planejado)
-│   ├── arquitetura.md                # Arquitetura do sistema (planejado)
-│   ├── calculos.md                   # Cálculos realizados (planejado)
-│   ├── api.md                        # APIs utilizadas (planejado)
+│   ├── API.md                        # Contratos e integrações das APIs
+│   ├── cálculo.md                    # Fórmulas dos cálculos ambientais
 │   └── sprints/                      # Documentação das sprints (planejado)
 │       ├── sprint-1.md               # Sprint 1 (planejado)
 │       ├── sprint-2.md               # Sprint 2 (planejado)
@@ -684,5 +684,3 @@ As mensagens devem referenciar o ID da Issue com `#`:
 | **`cleanup`** | Limpeza de código (remover comentários ou trechos inúteis). |
 
 </details>
-
-

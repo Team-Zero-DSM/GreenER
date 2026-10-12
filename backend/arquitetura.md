@@ -1,4 +1,8 @@
-# Arquitetura do Software — GreenER
+# Arquitetura do Backend — GreenER
+
+Este documento descreve a organização e as responsabilidades do backend. O
+contrato das APIs está em [docs/API.md](../docs/API.md), e as fórmulas e regras
+dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 
 ## 1. Visão Geral
 
@@ -23,8 +27,8 @@ O backend é responsável por:
 - validar os dados recebidos;
 - monitorar os serviços;
 - executar as coletas periodicamente;
-- calcular consumo energético;
-- calcular emissão estimada de CO₂e;
+- coordenar o cálculo do consumo energético e da emissão estimada de CO₂e,
+  conforme definido em [docs/cálculo.md](../docs/cálculo.md);
 - armazenar o histórico das coletas;
 - disponibilizar os dados para o frontend através de uma API REST.
 
@@ -142,6 +146,7 @@ greener/
 │       └── providers/
 │
 ├── backend/
+│   ├── arquitetura.md
 │   ├── Dockerfile
 │   └── src/
 │       ├── app.ts
@@ -187,14 +192,9 @@ greener/
 │           ├── middlewares/
 │           └── types/
 │
-├── database/
-│   └── schema.sql
-│   └── arquitetura.md
-│   
 └── docs/
-    ├── arquitetura.md
-    ├── calculos.md
-    ├── api.md
+    ├── API.md
+    ├── cálculo.md
     ├── plano-de-entregas.md
     └── sprints/
 ```
@@ -274,16 +274,8 @@ flowchart TD
     D -->|Não| F
 ```
 
-Exemplo:
-
-```text
-PATCH /monitoring-settings
-
-Body:
-{
-    "collectionIntervalSeconds": 30
-}
-```
+O contrato das requisições está descrito em
+[docs/API.md](../docs/API.md).
 
 Antes do controller receber os dados:
 
@@ -419,11 +411,9 @@ Um service pode, por exemplo:
 
 1. solicitar as métricas de um serviço;
 2. obter a intensidade de carbono;
-3. calcular potência;
-4. calcular energia;
-5. calcular CO₂e;
-6. criar uma coleta;
-7. solicitar ao repository que salve a coleta.
+3. aplicar as regras de cálculo ambiental;
+4. criar uma coleta;
+5. solicitar ao repository que salve a coleta.
 
 ---
 
@@ -508,12 +498,10 @@ metrics-api.ts
 
 é responsável pela comunicação com a Greener Metrics Aggregator API.
 
-Principais operações:
+Responsabilidades da integração:
 
 ```text
-GET /services
-
-GET /metrics/{service_id}
+Consultar os serviços disponíveis e obter as métricas de um serviço.
 ```
 
 Conceitualmente:
@@ -524,10 +512,8 @@ getServices()
 getMetrics(serviceId)
 ```
 
-O endpoint `/services` permite descobrir quais serviços existem atualmente no
-ambiente monitorado.
-
-O endpoint `/metrics/{service_id}` fornece as métricas de um serviço específico.
+Os endpoints e os formatos das respostas estão descritos em
+[docs/API.md](../docs/API.md).
 
 ---
 
@@ -541,20 +527,6 @@ carbon-api.ts
 
 é responsável pela comunicação com a Greener Carbon Intensity API.
 
-A API recebe o código da região do serviço.
-
-Exemplo:
-
-```text
-br-sudeste
-```
-
-e retorna dados como:
-
-```text
-carbon_intensity_gco2e_per_kwh
-```
-
 Fluxo:
 
 ```text
@@ -566,8 +538,11 @@ Carbon API
      ↓
 Zod
      ↓
-intensidade de carbono
+dados validados para o service
 ```
+
+Os campos utilizados nessa integração estão descritos em
+[docs/API.md](../docs/API.md).
 
 ---
 
@@ -710,57 +685,18 @@ Rodada
 
 ## Collection Interval da API
 
-A Metrics API retorna:
-
-```text
-collection_interval_seconds
-```
-
-junto das métricas.
-
-Exemplo:
-
-```json
-{
-    "collection_interval_seconds": 27,
-    "metrics": {
-        "cpu_percent": 62.67,
-        "memory_gb": 3.17,
-        "disk_gb": 19.26,
-        "network_gb": 0.45
-    }
-}
-```
-
-Esse valor representa o intervalo relacionado às métricas retornadas e é
-utilizado no cálculo da energia daquela coleta.
-
-Por exemplo:
-
-```text
-27 segundos
-    ↓
-27 / 3600
-    ↓
-0,0075 horas
-```
-
-Esse valor pode então ser utilizado na fórmula de energia.
-
-O `collection_interval_seconds` retornado pela API não deve ser confundido
-automaticamente com o intervalo utilizado pelo Job.
+O contrato da Metrics API inclui o intervalo associado às métricas retornadas.
+Esse intervalo não deve ser confundido com a frequência do Job. O nome do campo
+e seu formato estão descritos em [docs/API.md](../docs/API.md), e seu uso no
+cálculo ambiental está em [docs/cálculo.md](../docs/cálculo.md).
 
 ---
 
 # 19. Descoberta dos Serviços
 
-Antes de realizar as coletas, o GreenER consulta:
-
-```text
-GET /services
-```
-
-para obter a situação atual do ambiente.
+Antes de realizar as coletas, o GreenER consulta a API de métricas para obter a
+situação atual do ambiente. O endpoint correspondente está descrito em
+[docs/API.md](../docs/API.md).
 
 Isso permite detectar:
 
@@ -781,7 +717,7 @@ sequenceDiagram
 
     J->>S: iniciar ciclo
 
-    S->>M: GET /services
+    S->>M: consultar serviços atuais
 
     M-->>S: serviços atuais
 
@@ -803,7 +739,7 @@ flowchart TD
 
     A[Collection Job]
 
-    B[Consultar GET /services]
+    B[Consultar serviços disponíveis]
 
     C[Validar resposta]
 
@@ -811,7 +747,7 @@ flowchart TD
 
     E[Selecionar serviço]
 
-    F[Consultar GET /metrics/service_id]
+    F[Consultar métricas do serviço]
 
     G{Resposta recebida?}
 
@@ -821,13 +757,9 @@ flowchart TD
 
     J[Validar resposta da Carbon API]
 
-    K[Calcular potência]
+    K[Aplicar cálculo ambiental]
 
-    L[Calcular energia]
-
-    M[Calcular CO2e]
-
-    N[Persistir coleta]
+    L[Persistir coleta]
 
     ERROR[Tratar falha]
 
@@ -856,11 +788,7 @@ flowchart TD
 
     K --> L
 
-    L --> M
-
-    M --> N
-
-    N --> MORE
+    L --> MORE
     ERROR --> MORE
 
     MORE -->|Sim| E
@@ -889,11 +817,7 @@ obter intensidade de carbono
     ↓
 validar intensidade
     ↓
-calcular potência
-    ↓
-calcular energia
-    ↓
-calcular CO₂e
+aplicar o cálculo ambiental descrito em docs/cálculo.md
     ↓
 montar coleta
     ↓
@@ -904,187 +828,15 @@ Ele atua como o coordenador da operação.
 
 ---
 
-# 22. Cálculo de Potência
+# 22. Cálculos Ambientais
 
-A potência estimada considera:
-
-```text
-Potência CPU
-+
-Potência Memória
-+
-Potência Disco
-+
-Potência Rede
-```
-
-Fórmula:
-
-```text
-Potência Estimada (W) =
-    Potência CPU
-    + Potência Memória
-    + Potência Disco
-    + Potência Rede
-```
+O Collection Service coordena os cálculos ambientais após validar as métricas e
+obter a intensidade de carbono. As fórmulas e o fluxo detalhado estão em
+[docs/cálculo.md](../docs/cálculo.md).
 
 ---
 
-# 23. Potência da CPU
-
-```text
-Potência CPU (W) =
-
-(Uso de CPU (%) / 100)
-
-×
-
-Potência Máxima da CPU (W)
-```
-
----
-
-# 24. Potência da Memória
-
-```text
-Potência Memória (W) =
-
-Memória Utilizada (GB)
-
-×
-
-Fator de Consumo da Memória (W/GB)
-```
-
----
-
-# 25. Potência de Disco
-
-```text
-Potência Disco (W) =
-
-Uso de Disco (GB)
-
-×
-
-Fator de Consumo do Disco (W/GB)
-```
-
----
-
-# 26. Potência de Rede
-
-```text
-Potência Rede (W) =
-
-Tráfego de Rede (GB)
-
-×
-
-Fator de Consumo da Rede (W/GB)
-```
-
----
-
-# 27. Cálculo de Energia
-
-Depois de calcular a potência:
-
-```text
-Energia (kWh) =
-
-Potência Estimada (W)
-
-×
-
-Tempo de Coleta (h)
-
-/
-
-1000
-```
-
-O tempo recebido em segundos deve ser convertido para horas.
-
-Exemplo:
-
-```text
-27 segundos
-
-27 / 3600
-
-≈ 0,0075 horas
-```
-
----
-
-# 28. Cálculo da Emissão de CO₂e
-
-Depois do cálculo da energia:
-
-```text
-CO₂e (g) =
-
-Energia (kWh)
-
-×
-
-Intensidade de Carbono (gCO₂e/kWh)
-```
-
-O fator de intensidade de carbono é obtido através da Carbon Intensity API.
-
----
-
-# 29. Fluxo do Cálculo Ambiental
-
-```mermaid
-flowchart TD
-
-    A[Métricas]
-
-    B[CPU]
-
-    C[Memória]
-
-    D[Disco]
-
-    E[Rede]
-
-    F[Potência estimada]
-
-    G[Collection Interval]
-
-    H[Converter segundos para horas]
-
-    I[Calcular energia]
-
-    J[Intensidade de Carbono]
-
-    K[Calcular CO2e]
-
-    A --> B
-    A --> C
-    A --> D
-    A --> E
-
-    B --> F
-    C --> F
-    D --> F
-    E --> F
-
-    G --> H
-
-    F --> I
-    H --> I
-
-    I --> K
-    J --> K
-```
-
----
-
-# 30. Persistência da Coleta
+# 23. Persistência da Coleta
 
 Depois dos cálculos, o Collection Service envia os dados para o repository.
 
@@ -1110,7 +862,7 @@ Isso permite posteriormente realizar:
 
 ---
 
-# 31. Consulta do Frontend
+# 24. Consulta do Frontend
 
 O frontend não acessa diretamente as APIs externas.
 
@@ -1129,7 +881,7 @@ sequenceDiagram
 
     U->>F: acessar dashboard
 
-    F->>R: GET /services
+    F->>R: consultar serviços
 
     R->>C: requisição
 
@@ -1152,7 +904,7 @@ sequenceDiagram
 
 ---
 
-# 32. Separação entre Monitoramento e Consulta
+# 25. Separação entre Monitoramento e Consulta
 
 O sistema possui dois fluxos principais.
 
@@ -1195,48 +947,15 @@ para visualizar os dados já armazenados.
 
 ---
 
-# 33. Atualização do Dashboard
+# 26. Atualização do Dashboard
 
-O frontend deve atualizar periodicamente os dados apresentados.
-
-Fluxo:
-
-```mermaid
-flowchart LR
-
-    A[Frontend]
-
-    B[Backend]
-
-    C[PostgreSQL]
-
-    D[Atualizar interface]
-
-    E[Aguardar intervalo]
-
-    A -->|GET| B
-
-    B --> C
-
-    C --> B
-
-    B --> A
-
-    A --> D
-
-    D --> E
-
-    E --> A
-```
-
-A interface deve exibir a data e a hora da última atualização.
-
-O intervalo do frontend não precisa ser obrigatoriamente igual ao intervalo de
-coleta do backend.
+O backend disponibiliza os dados persistidos para consulta. A frequência de
+atualização da interface e a apresentação da última atualização estão descritas
+em [docs/API.md](../docs/API.md).
 
 ---
 
-# 34. Tratamento de Falhas
+# 27. Tratamento de Falhas
 
 O GreenER deve continuar funcionando mesmo quando alguma operação individual
 falhar.
@@ -1263,7 +982,7 @@ falha no banco de dados
 
 ---
 
-# 35. Fluxo de Tratamento de Falhas
+# 28. Fluxo de Tratamento de Falhas
 
 ```mermaid
 flowchart TD
@@ -1299,7 +1018,7 @@ Uma falha em determinado serviço não deve encerrar o monitoramento completo.
 
 ---
 
-# 36. Concorrência das Coletas
+# 29. Concorrência das Coletas
 
 A arquitetura deve permitir que diferentes serviços sejam coletados sem que um
 serviço lento bloqueie necessariamente todos os demais.
@@ -1340,7 +1059,7 @@ problema inicialmente.
 
 ---
 
-# 37. Monitoramento Settings
+# 30. Monitoramento Settings
 
 O módulo `monitoring-settings` é responsável pelas configurações do
 monitoramento.
@@ -1354,10 +1073,6 @@ collection_interval_seconds
 Fluxo de alteração:
 
 ```text
-Frontend
-    ↓
-PATCH /monitoring-settings
-    ↓
 Route
     ↓
 Zod
@@ -1371,11 +1086,12 @@ Repository
 PostgreSQL
 ```
 
-As rotas de configuração protegidas devem utilizar autenticação JWT.
+Os endpoints de configuração estão descritos em [docs/API.md](../docs/API.md) e
+devem utilizar autenticação JWT.
 
 ---
 
-# 38. Autenticação
+# 31. Autenticação
 
 A autenticação da área de configuração é realizada no backend utilizando JWT.
 
@@ -1417,7 +1133,7 @@ flowchart TD
 
 ---
 
-# 39. Acesso às Rotas Protegidas
+# 32. Acesso às Rotas Protegidas
 
 ```mermaid
 flowchart TD
@@ -1449,7 +1165,7 @@ O controle de acesso não deve depender apenas do frontend.
 
 ---
 
-# 40. Banco de Dados
+# 33. Banco de Dados
 
 O GreenER utiliza PostgreSQL.
 
@@ -1479,7 +1195,7 @@ PostgreSQL
 
 ---
 
-# 41. Consultas Parametrizadas
+# 34. Consultas Parametrizadas
 
 Dados recebidos da aplicação não devem ser concatenados diretamente nas
 consultas SQL.
@@ -1498,7 +1214,7 @@ Isso reduz o risco de SQL Injection e mantém a separação entre comando e dado
 
 ---
 
-# 42. Docker
+# 35. Docker
 
 Toda a aplicação deve ser executável através de containers Docker.
 
@@ -1543,7 +1259,7 @@ reinicialização dos containers.
 
 ---
 
-# 43. Fluxo Completo do GreenER
+# 36. Fluxo Completo do GreenER
 
 ```mermaid
 flowchart LR
@@ -1600,7 +1316,7 @@ flowchart LR
 
 ---
 
-# 44. Resumo das Responsabilidades
+# 37. Resumo das Responsabilidades
 
 | Componente | Responsabilidade |
 |---|---|
@@ -1619,9 +1335,9 @@ flowchart LR
 
 ---
 
-# 45. Decisões Arquiteturais
+# 38. Decisões Arquiteturais
 
-## 45.1 Backend modular
+## 38.1 Backend modular
 
 O backend é organizado em módulos de acordo com os recursos e
 responsabilidades da aplicação.
@@ -1638,7 +1354,7 @@ monitoring-settings
 
 ---
 
-## 45.2 Separação entre Controller e Service
+## 38.2 Separação entre Controller e Service
 
 Controllers tratam HTTP.
 
@@ -1649,7 +1365,7 @@ Express.
 
 ---
 
-## 45.3 Repository para acesso ao banco
+## 38.3 Repository para acesso ao banco
 
 O acesso ao PostgreSQL fica concentrado nos repositories.
 
@@ -1657,7 +1373,7 @@ Isso permite manter as consultas SQL separadas das regras de negócio.
 
 ---
 
-## 45.4 Integration para APIs externas
+## 38.4 Integration para APIs externas
 
 Chamadas HTTP para sistemas externos ficam concentradas na camada de
 `integrations`.
@@ -1671,7 +1387,7 @@ Isso evita duplicação de código e facilita o tratamento de:
 
 ---
 
-## 45.5 Zod para validação runtime
+## 38.5 Zod para validação runtime
 
 O Zod é utilizado para garantir que dados recebidos externamente possuam o
 formato esperado antes de serem utilizados pela aplicação.
@@ -1681,7 +1397,7 @@ respostas recebidas das APIs auxiliares.
 
 ---
 
-## 45.6 Job separado da regra de negócio
+## 38.6 Job separado da regra de negócio
 
 O Job é responsável somente pelo agendamento da execução.
 
@@ -1698,7 +1414,7 @@ operação.
 
 ---
 
-## 45.7 Timeout de 8 segundos
+## 38.7 Timeout de 8 segundos
 
 As chamadas externas terão inicialmente timeout de:
 
@@ -1710,7 +1426,7 @@ O valor é uma decisão técnica da equipe e poderá ser revisado durante testes
 
 ---
 
-## 45.8 Persistência histórica
+## 38.8 Persistência histórica
 
 As coletas são armazenadas no PostgreSQL.
 
@@ -1724,7 +1440,7 @@ Isso permite gerar posteriormente:
 
 ---
 
-# 46. Classificação das Decisões
+# 39. Classificação das Decisões
 
 É importante diferenciar requisitos obrigatórios de decisões internas da equipe.
 
@@ -1770,7 +1486,7 @@ evitando adicionar complexidade desnecessária ao projeto.
 
 ---
 
-# 47. Arquitetura Resumida
+# 40. Arquitetura Resumida
 
 ```text
                               USUÁRIO
@@ -1825,7 +1541,7 @@ evitando adicionar complexidade desnecessária ao projeto.
 
 ---
 
-# 48. Fluxo Resumido de uma Coleta
+# 41. Fluxo Resumido de uma Coleta
 
 ```text
 Collection Job
@@ -1834,29 +1550,15 @@ consultar configurações
       ↓
 Collection Service
       ↓
-GET /services
-      ↓
-Zod
+consultar serviços disponíveis
       ↓
 para cada serviço
       ↓
-GET /metrics/{service_id}
+consultar e validar métricas
       ↓
-timeout de 8 segundos
+obter e validar intensidade de carbono
       ↓
-Zod
-      ↓
-obter region_code
-      ↓
-Carbon API
-      ↓
-Zod
-      ↓
-calcular potência
-      ↓
-calcular energia
-      ↓
-calcular CO₂e
+aplicar cálculo ambiental descrito em docs/cálculo.md
       ↓
 Collection Repository
       ↓
@@ -1865,7 +1567,7 @@ PostgreSQL
 
 ---
 
-# 49. Objetivo da Arquitetura
+# 42. Objetivo da Arquitetura
 
 A arquitetura proposta busca manter uma separação clara de responsabilidades,
 permitindo que cada parte da aplicação tenha um objetivo específico.
