@@ -217,3 +217,27 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Arquitetura do sistema:** Henrique iniciou a elaboração da documentação da arquitetura geral do GreenER e dos diagramas de sequência do site, dando continuidade à representação estrutural do sistema e ao detalhamento da interação entre seus componentes. As atividades permanecem em andamento.
 
 ---
+
+## 📅 09/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---------|----------|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ❌ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Backend:** Pedro concluiu a implementação do processamento das métricas recebidas (T07) e realizou a entrega da atividade. A conclusão envolveu alterações significativas no backend, exigindo uma reavaliação da estrutura e do funcionamento geral dos componentes envolvidos.
+
+- **Frontend:** Paulo avançou no desenvolvimento da página de detalhamento de serviço e realizou os testes necessários, concluindo a implementação da tela (T13) durante o dia.
+
+- **Arquitetura do sistema:** Henrique iniciou a estruturação da arquitetura geral do GreenER para a documentação do projeto, organizando os componentes e suas relações como parte da representação estrutural do sistema. A atividade permanece em andamento.
+
+- **Impedimento técnico:** Os computadores da faculdade estavam sujeitos a restrições de firewall que impediam o acesso à API utilizada pelo projeto. Isso impossibilitou a realização dos testes da atualização periódica das métricas, impedindo a conclusão de mais uma tarefa planejada para o dia.
+
+- **Acompanhamento da Sprint:** A equipe avançou na implementação do backend e do frontend, com a conclusão das tasks T07 e T13. Apesar do impedimento relacionado ao acesso à API, houve progresso nas atividades previstas para a Sprint 1.
