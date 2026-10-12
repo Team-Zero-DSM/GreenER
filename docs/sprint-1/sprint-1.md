@@ -78,7 +78,7 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 ## 📈 Burndown da Sprint
 
 <p align="center">
-    <img src="./burndown.svg" alt="Grafico de Burndown">
+    <img src="./Burndown.svg" alt="Gráfico de Burndown">
 </p>
 
 ---
