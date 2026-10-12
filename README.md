@@ -60,7 +60,8 @@ A plataforma relaciona o uso de recursos computacionais à eficiência energéti
 
 ## 📁 Organização de pastas
 
-Itens identificados como **planejados** representam a estrutura prevista para as próximas etapas e ainda não existem no repositório.
+Esta árvore apresenta a organização-alvo do GreenER. As arquiteturas do
+backend e do frontend detalham as responsabilidades e os fluxos de cada camada.
 
 ```bash
 greener/
@@ -68,6 +69,7 @@ greener/
 ├── README.md                         # Documentação principal do projeto
 │
 ├── backend/                          # API e regras de negócio da aplicação
+│   ├── arquitetura.md                # Arquitetura do backend
 │   ├── .dockerignore                 # Arquivos excluídos da imagem Docker
 │   ├── .env.example                  # Modelo das variáveis de ambiente do backend
 │   ├── .prettierignore               # Arquivos ignorados pelo Prettier
@@ -78,37 +80,37 @@ greener/
 │   ├── prettier.config.js            # Configuração do Prettier
 │   ├── tsconfig.json                 # Configuração do TypeScript
 │   └── src/                          # Código-fonte do backend
-│       ├── app.ts                    # Configuração da aplicação Express
-│       ├── server.ts                 # Inicialização do servidor
-│       ├── db/                       # Acesso ao banco de dados (planejado)
-│       │   └── connection.ts         # Conexão com o banco (planejado)
-│       ├── integrations/             # Integrações com APIs externas (planejado)
-│       │   ├── metrics-api.ts        # Integração com a API de métricas (planejado)
-│       │   └── carbon-api.ts         # Integração com a API de carbono (planejado)
-│       └── modules/                  # Módulos de funcionalidades (planejado)
-│           └── coletas/              # Coleta e processamento de métricas (planejado)
-│               ├── coletas.routes.ts       # Rotas de coleta (planejado)
-│               ├── coletas.controller.ts   # Controle das requisições (planejado)
-│               ├── coletas.service.ts      # Regras de negócio (planejado)
-│               └── coletas.repository.ts   # Acesso e persistência (planejado)
+│       ├── app.ts
+│       ├── server.ts
+│       ├── db/
+│       ├── integrations/
+│       ├── jobs/
+│       ├── modules/
+│       │   ├── auth/
+│       │   ├── collections/
+│       │   ├── services/
+│       │   ├── regions/
+│       │   ├── analytics/
+│       │   └── monitoring-settings/
+│       └── shared/
 │
-├── compose.yaml                      # Serviços Docker (planejado)
+├── compose.yaml                      # Serviços Docker
 │
-├── database/                         # Banco de dados (planejado)
-│   ├── README.md                     # Documentação do banco (planejado)
-│   └── schema.sql                    # Tabelas e relacionamentos (planejado)
+├── database/                         # Banco de dados
+│   ├── README.md                     # Documentação do banco
+│   └── schema.sql                    # Tabelas e relacionamentos
 │
-├── docs/                             # Documentação técnica (planejado)
-│   ├── plano-de-entregas.md          # Planejamento das entregas (planejado)
-│   ├── arquitetura.md                # Arquitetura do sistema (planejado)
-│   ├── calculos.md                   # Cálculos realizados (planejado)
-│   ├── api.md                        # APIs utilizadas (planejado)
-│   └── sprints/                      # Documentação das sprints (planejado)
-│       ├── sprint-1.md               # Sprint 1 (planejado)
-│       ├── sprint-2.md               # Sprint 2 (planejado)
-│       └── sprint-3.md               # Sprint 3 (planejado)
+├── docs/                             # Documentação técnica
+│   ├── plano-de-entregas.md          # Planejamento das entregas
+│   ├── API.md                        # Contratos e integrações das APIs
+│   ├── cálculo.md                    # Fórmulas dos cálculos ambientais
+│   └── sprints/                      # Documentação das sprints
+│       ├── sprint-1.md               # Sprint 1
+│       ├── sprint-2.md               # Sprint 2
+│       └── sprint-3.md               # Sprint 3
 │
 └── frontend/                         # Aplicação e interface do usuário
+    ├── arquitetura.md                # Arquitetura-alvo do frontend
     ├── .dockerignore                 # Arquivos excluídos da imagem Docker
     ├── .env.example                  # Modelo das variáveis de ambiente do frontend
     ├── .prettierignore               # Arquivos ignorados pelo Prettier
@@ -125,16 +127,14 @@ greener/
         ├── App.tsx                   # Componente principal da aplicação
         ├── index.css                 # Estilos globais
         ├── main.tsx                  # Ponto de entrada da aplicação
-        ├── components/               # Componentes reutilizáveis
-        │   └── ui/                   # Componentes de interface
-        │       └── card.tsx
-        ├── lib/                      # Utilitários compartilhados
-        │   └── utils.ts
-        ├── contexts/                 # Contextos para compartilhamento de estado (planejado)
-        ├── hooks/                    # Hooks personalizados (planejado)
-        ├── pages/                    # Páginas da aplicação (planejado)
-        ├── providers/                # Provedores de contexto e dependências (planejado)
-        └── services/                 # Comunicação com APIs e serviços externos (planejado)
+        ├── app/                      # Rotas e composição da aplicação
+        ├── components/               # Layout e componentes reutilizáveis
+        ├── pages/                    # Telas do produto
+        ├── services/                 # Comunicação com a API do backend
+        ├── hooks/
+        ├── contexts/
+        ├── types/
+        └── lib/
 ```
 
 ---
@@ -684,5 +684,3 @@ As mensagens devem referenciar o ID da Issue com `#`:
 | **`cleanup`** | Limpeza de código (remover comentários ou trechos inúteis). |
 
 </details>
-
-
