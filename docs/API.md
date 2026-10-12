@@ -1,22 +1,69 @@
-# API — GreenER
+# APIs e Contratos — GreenER
 
-Este documento reúne as operações HTTP mencionadas na arquitetura e os contratos
-das APIs externas utilizadas pelo GreenER. Os detalhes de implementação do
-backend estão em [../backend/arquitetura.md](../backend/arquitetura.md).
+Este documento define as fronteiras de comunicação do GreenER. O frontend
+consome exclusivamente a API interna do backend; o backend integra as APIs
+externas e disponibiliza ao frontend os dados validados e processados.
+Responsabilidades e camadas do backend estão em
+[`../backend/arquitetura.md`](../backend/arquitetura.md).
 
-## API do GreenER
+## 1. Fluxo de comunicação
 
-O frontend consulta o backend GreenER. Não deve acessar diretamente as APIs
-externas.
+```text
+Frontend GreenER
+    ↓ HTTP
+API REST do backend GreenER
+    ├── PostgreSQL
+    ├── Greener Metrics Aggregator API
+    └── Greener Carbon Intensity API
+```
 
-### Operações identificadas
+O frontend não chama diretamente os serviços externos. Os contratos externos
+ficam isolados nas integrações do backend, que validam as respostas antes de
+fornecê-las ao restante da aplicação.
 
-| Método | Caminho | Finalidade |
+## 2. API REST do GreenER
+
+A API interna entrega dados do dashboard, detalhe e histórico de serviços,
+classificações, comparações, regiões e cenários. Também oferece autenticação e
+administração das configurações de monitoramento.
+
+### 2.1. Operações centrais
+
+| Método | Caminho | Responsabilidade |
 |---|---|---|
-| `GET` | `/services` | Consultar os serviços e os dados persistidos disponíveis para o dashboard. |
-| `PATCH` | `/monitoring-settings` | Alterar configurações do monitoramento. |
+| `POST` | `/auth/login` | Validar as credenciais do usuário e emitir um JWT. |
+| `GET` | `/services` | Entregar a lista de serviços e os dados de resumo usados no dashboard. |
+| `GET` | `/services/{service_id}` | Entregar os dados e as métricas mais recentes do serviço. |
+| `GET` | `/services/{service_id}/collections` | Consultar o histórico de coletas do serviço por período. |
+| `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
+| `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
+| `GET` | `/regions` | Entregar regiões e os dados ambientais associados. |
+| `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
+| `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
+| `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |
 
-O exemplo de corpo para a atualização de configuração é:
+As consultas de histórico e analytics usam datas ISO 8601 no intervalo
+`from`–`to`. Os parâmetros são:
+
+| Caminho | Parâmetros |
+|---|---|
+| `/services/{service_id}/collections` | `from`, `to` |
+| `/rankings` | `from`, `to`, `metric` (`energy` ou `co2e`) |
+| `/comparisons` | `serviceIds` (lista), `from`, `to` |
+
+`POST /auth/login` recebe `username` e `password` e retorna um `accessToken`
+JWT. O token é enviado nas chamadas autenticadas pelo cabeçalho
+`Authorization: Bearer <accessToken>`. Operações que alteram configurações ou
+iniciam simulações exigem autenticação JWT; o backend autentica e autoriza cada
+chamada.
+
+`POST /scenarios` recebe `serviceId`, `targetRegionCode`, `from` e `to`. A
+resposta identifica o cenário como simulação e inclui as hipóteses e parâmetros
+utilizados, distinguindo-o de resultados observados.
+
+### 2.2. Configuração de monitoramento
+
+O corpo usado para atualizar o intervalo de coleta é:
 
 ```json
 {
@@ -24,30 +71,40 @@ O exemplo de corpo para a atualização de configuração é:
 }
 ```
 
-O endpoint de login é mencionado no fluxo de autenticação, mas seu caminho e o
-formato completo da requisição e da resposta não estão definidos no documento
-de origem.
+O valor configura o intervalo do Collection Job. Ele é independente da
+frequência com que o frontend atualiza o dashboard e do intervalo que a API de
+métricas associa aos dados de uma coleta.
 
-As rotas de configuração protegidas exigem autenticação JWT. O frontend deve
-apresentar a data e a hora da última atualização dos dados. A frequência de
-atualização da interface não precisa ser igual ao intervalo de coleta do
-backend.
+### 2.3. Respostas e falhas
 
-As entradas das requisições são validadas em tempo de execução. O fluxo
-documentado prevê resposta `400` para dados de requisição inválidos e resposta
-`401` quando o token de acesso não é válido.
+As respostas são JSON e representam dados preparados pelo backend para o
+recurso solicitado. As rotas validam `body`, `params` e `query parameters`
+antes de executar os controllers. Dados inválidos de requisição resultam em
+`400`; ausência de autenticação ou token inválido em rota protegida resulta em
+`401`. Falhas de negócio e de integração são retornadas como erros explícitos,
+sem respostas com aparência de sucesso ou métricas substituídas por zero.
 
-## Greener Metrics Aggregator API
+O frontend apresenta os estados de carregamento, sucesso, ausência de dados,
+desatualização e falha. O horário da última atualização é fornecido junto aos
+dados apresentados.
 
-O backend utiliza a API externa para descobrir os serviços disponíveis e
-consultar as métricas de cada serviço.
+## 3. Greener Metrics Aggregator API
 
-| Método | Caminho | Finalidade |
+Base: `https://metrics.unilaunch.org`.
+
+O backend usa esta API para descobrir serviços monitorados e obter métricas de
+um serviço. A operação de métricas documentada é:
+
+| Método | Caminho | Uso |
 |---|---|---|
-| `GET` | `/services` | Obter a lista atual de serviços monitorados. |
-| `GET` | `/metrics/{service_id}` | Obter as métricas de um serviço específico. |
+| `GET` | `/metrics/{id_servico}` | Obter as métricas operacionais e a localização do serviço identificado. |
 
-O exemplo de resposta documentado para a consulta de métricas é:
+O identificador `checkout-worker` é um exemplo de `id_servico`. A integração de
+descoberta lista os serviços disponíveis conforme a operação definida pelo
+OpenAPI da Metrics Aggregator API. A integração respeita esse contrato, sem
+inferir um caminho de descoberta não confirmado.
+
+O exemplo abaixo representa os campos de métricas usados no projeto:
 
 ```json
 {
@@ -61,24 +118,42 @@ O exemplo de resposta documentado para a consulta de métricas é:
 }
 ```
 
-O intervalo retornado junto às métricas descreve o período relacionado àquela
-coleta. Ele não representa automaticamente o intervalo de execução do Job do
-GreenER. Seu uso no cálculo de energia está descrito em
-[cálculo.md](./cálculo.md).
+O backend valida a resposta externa e converte os dados para os tipos internos
+de domínio antes de armazená-los ou apresentá-los ao frontend. O
+`collection_interval_seconds` descreve o período das métricas recebidas e não
+configura o Collection Job.
 
-## Greener Carbon Intensity API
+## 4. Greener Carbon Intensity API
 
-O backend consulta a intensidade de carbono da região em que o serviço está
-hospedado. A consulta utiliza o código da região; `br-sudeste` é o exemplo
-registrado no documento de origem. Entre os dados retornados está
-`carbon_intensity_gco2e_per_kwh`.
+Base: `https://carbon.unilaunch.org`.
 
-O caminho do endpoint e o formato completo da requisição e da resposta da Carbon
-Intensity API não estão especificados no documento de origem.
+O backend consulta a API para associar dados ambientais à região de um serviço.
+A operação documentada é:
 
-## Tratamento das respostas externas
+| Método | Caminho | Uso |
+|---|---|---|
+| `GET` | `/regions` | Obter as regiões e os indicadores ambientais fornecidos pela API. |
 
-As respostas das APIs externas são consideradas dados não confiáveis até serem
-validadas. O backend valida os dados recebidos antes de utilizá-los. Uma
-resposta inválida ou uma falha externa deve ser tratada sem interromper a coleta
-dos demais serviços.
+O contrato contém dados como código da região, intensidade de carbono em
+`gCO₂e/kWh` e participação renovável. `br-sudeste`, `85 gCO₂e/kWh` e `83%` são
+exemplos de referência; não são valores constantes nem garantias de dados
+atuais. A integração valida e mantém o contexto regional e temporal retornado
+pela API.
+
+## 5. Segurança e isolamento
+
+- O navegador comunica-se somente com a API do GreenER.
+- Credenciais e segredos das integrações externas permanecem no backend.
+- O token JWT acompanha as chamadas autenticadas de acordo com o middleware do
+  backend.
+- CORS permite somente as origens de frontend configuradas para os ambientes
+  do projeto.
+- O backend valida entradas e respostas externas antes de utilizá-las.
+
+## 6. Alinhamento entre contrato e implementação
+
+Rotas, schemas Zod, tipos do backend e tipos consumidos pelo frontend compõem
+um único contrato e são implementados em conjunto. Histórico, ranking,
+comparação, região e simulação são recursos do produto; suas telas consomem os
+dados disponibilizados pelos respectivos módulos do backend e não acessam
+integrações externas diretamente.

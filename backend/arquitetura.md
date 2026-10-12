@@ -4,11 +4,11 @@ Este documento descreve a organização e as responsabilidades do backend. O
 contrato das APIs está em [docs/API.md](../docs/API.md), e as fórmulas e regras
 dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 
-## 1. Visão Geral
+## 1. Visão Geral do Sistema
 
-O GreenER é uma plataforma web responsável por monitorar aplicações de software,
-coletar métricas de infraestrutura e estimar seu impacto ambiental por meio do
-cálculo de consumo energético e emissão aproximada de CO₂ equivalente (CO₂e).
+O GreenER é uma plataforma web que monitora serviços de software, coleta
+métricas de infraestrutura e estima seu impacto ambiental por meio do consumo
+energético estimado e da emissão aproximada de CO₂ equivalente (CO₂e).
 
 A aplicação utiliza duas APIs externas fornecidas pelo projeto:
 
@@ -27,8 +27,8 @@ O backend é responsável por:
 - validar os dados recebidos;
 - monitorar os serviços;
 - executar as coletas periodicamente;
-- coordenar o cálculo do consumo energético e da emissão estimada de CO₂e,
-  conforme definido em [docs/cálculo.md](../docs/cálculo.md);
+- calcular o consumo energético estimado e a emissão aproximada de CO₂e,
+  conforme o modelo definido em [docs/cálculo.md](../docs/cálculo.md);
 - armazenar o histórico das coletas;
 - disponibilizar os dados para o frontend através de uma API REST.
 
@@ -126,7 +126,8 @@ APIs externas.
 
 # 4. Organização Geral do Projeto
 
-A estrutura inicial proposta para o projeto é:
+A estrutura do projeto organiza frontend, backend, banco de dados e
+documentação em áreas separadas:
 
 ```text
 greener/
@@ -138,12 +139,14 @@ greener/
 ├── frontend/
 │   ├── Dockerfile
 │   └── src/
+│       ├── app/
 │       ├── components/
 │       ├── pages/
 │       ├── services/
 │       ├── hooks/
 │       ├── contexts/
-│       └── providers/
+│       ├── types/
+│       └── lib/
 │
 ├── backend/
 │   ├── arquitetura.md
@@ -166,9 +169,18 @@ greener/
 │       │
 │       ├── modules/
 │       │   │
+│       │   ├── auth/
+│       │   │   ├── auth.routes.ts
+│       │   │   ├── auth.controller.ts
+│       │   │   ├── auth.service.ts
+│       │   │   └── auth.schema.ts
+│       │   │
 │       │   ├── collections/
+│       │   │   ├── collections.routes.ts
+│       │   │   ├── collections.controller.ts
 │       │   │   ├── collections.service.ts
 │       │   │   ├── collections.repository.ts
+│       │   │   └── collections.schema.ts
 │       │   │
 │       │   │   
 │       │   │
@@ -179,6 +191,18 @@ greener/
 │       │   │   ├── services.service.ts
 │       │   │   ├── services.repository.ts
 │       │   │   └── services.schema.ts
+│       │   │
+│       │   ├── regions/
+│       │   │   ├── regions.routes.ts
+│       │   │   ├── regions.controller.ts
+│       │   │   ├── regions.service.ts
+│       │   │   └── regions.schema.ts
+│       │   │
+│       │   ├── analytics/
+│       │   │   ├── analytics.routes.ts
+│       │   │   ├── analytics.controller.ts
+│       │   │   ├── analytics.service.ts
+│       │   │   └── analytics.schema.ts
 │       │   │
 │       │   └── monitoring-settings/
 │       │       ├── monitoring-settings.routes.ts
@@ -199,10 +223,9 @@ greener/
     └── sprints/
 ```
 
-A estrutura poderá evoluir conforme novas funcionalidades forem implementadas.
-
-Não devem ser criadas pastas ou abstrações sem uma responsabilidade real na
-aplicação.
+Novas pastas e abstrações devem representar responsabilidades reais do sistema
+e preservar os limites entre interface, regras de negócio, integrações e
+persistência.
 
 ---
 
@@ -407,13 +430,15 @@ flowchart TD
     SERVICE --> REPOSITORY
 ```
 
-Um service pode, por exemplo:
+O Collection Service:
 
 1. solicitar as métricas de um serviço;
 2. obter a intensidade de carbono;
-3. aplicar as regras de cálculo ambiental;
-4. criar uma coleta;
-5. solicitar ao repository que salve a coleta.
+3. validar entradas e parâmetros do modelo;
+4. calcular potência, energia e CO₂e conforme
+   [docs/cálculo.md](../docs/cálculo.md);
+5. criar uma coleta com seu contexto;
+6. solicitar ao repository que persista os dados.
 
 ---
 
@@ -551,7 +576,7 @@ Os campos utilizados nessa integração estão descritos em
 As chamadas para APIs externas possuem timeout para evitar que uma chamada que
 não responde bloqueie indefinidamente o processo de monitoramento.
 
-Inicialmente foi definido:
+O timeout definido para chamadas externas é:
 
 ```text
 Timeout: 8 segundos
@@ -612,8 +637,9 @@ Collection Service
 
 # 17. Configuração do Intervalo
 
-O intervalo utilizado para iniciar as rodadas de monitoramento poderá ser
-armazenado no PostgreSQL.
+O intervalo utilizado para iniciar as rodadas de monitoramento é uma
+configuração persistida no PostgreSQL e administrada pelo módulo
+`monitoring-settings`.
 
 Exemplo conceitual:
 
@@ -649,7 +675,7 @@ flowchart TD
     WAIT --> SETTINGS
 ```
 
-Armazenar essa configuração no banco é uma decisão técnica da equipe.
+O Job consulta essa configuração para agendar as rodadas de monitoramento.
 
 ---
 
@@ -949,9 +975,10 @@ para visualizar os dados já armazenados.
 
 # 26. Atualização do Dashboard
 
-O backend disponibiliza os dados persistidos para consulta. A frequência de
-atualização da interface e a apresentação da última atualização estão descritas
-em [docs/API.md](../docs/API.md).
+O backend disponibiliza os dados persistidos para consulta pelo dashboard. A
+interface consulta periodicamente a API do GreenER, atualiza as informações sem
+recarga manual e apresenta o horário da última atualização. A frequência de
+consulta do frontend é independente do intervalo do Job.
 
 ---
 
@@ -1037,10 +1064,8 @@ esperar
 Serviço C
 ```
 
-Com timeout de 8 segundos, vários serviços indisponíveis poderiam aumentar
-consideravelmente a duração da rodada.
-
-Por esse motivo, a equipe poderá utilizar coleta concorrente.
+Com timeout de 8 segundos, serviços indisponíveis podem aumentar a duração da
+rodada quando são processados em sequência.
 
 Exemplo conceitual:
 
@@ -1051,11 +1076,10 @@ Collection Job ───┼── Serviço B
                   └── Serviço D
 ```
 
-A estratégia específica de concorrência será definida durante a implementação,
-considerando simplicidade, estabilidade e o escopo do projeto.
-
-Não é necessário adicionar filas ou sistemas distribuídos para resolver esse
-problema inicialmente.
+As coletas usam concorrência limitada para que uma requisição lenta não
+bloqueie os demais serviços nem provoque um número ilimitado de operações
+simultâneas. Filas ou sistemas distribuídos não fazem parte da arquitetura do
+GreenER.
 
 ---
 
@@ -1086,14 +1110,15 @@ Repository
 PostgreSQL
 ```
 
-Os endpoints de configuração estão descritos em [docs/API.md](../docs/API.md) e
-devem utilizar autenticação JWT.
+Os endpoints de configuração e de simulação estão descritos em
+[docs/API.md](../docs/API.md) e exigem autenticação JWT.
 
 ---
 
 # 31. Autenticação
 
-A autenticação da área de configuração é realizada no backend utilizando JWT.
+A autenticação das operações protegidas, incluindo configurações de
+monitoramento e simulações, é realizada no backend utilizando JWT.
 
 Fluxo simplificado:
 
@@ -1328,6 +1353,9 @@ flowchart LR
 | Repositories | Concentrar acesso ao PostgreSQL |
 | Integrations | Concentrar comunicação com APIs externas |
 | Collection Job | Iniciar periodicamente os ciclos de monitoramento |
+| Auth | Autenticar usuários e emitir tokens JWT |
+| Regions | Disponibilizar dados regionais de intensidade de carbono |
+| Analytics | Fornecer rankings, comparações e cenários |
 | PostgreSQL | Persistir serviços, coletas e configurações |
 | Metrics API | Fornecer serviços e métricas |
 | Carbon API | Fornecer intensidade de carbono |
@@ -1416,27 +1444,24 @@ operação.
 
 ## 38.7 Timeout de 8 segundos
 
-As chamadas externas terão inicialmente timeout de:
+As chamadas para APIs externas utilizam timeout de:
 
 ```text
 8 segundos
 ```
 
-O valor é uma decisão técnica da equipe e poderá ser revisado durante testes.
+Uma chamada que excede esse limite é abortada e tratada como falha daquela
+operação; a rodada continua processando os demais serviços.
 
 ---
 
 ## 38.8 Persistência histórica
 
-As coletas são armazenadas no PostgreSQL.
+As coletas são armazenadas no PostgreSQL e sustentam consultas históricas,
+gráficos, classificações, comparações e indicadores consolidados.
 
-Isso permite gerar posteriormente:
-
-- gráficos;
-- históricos;
-- rankings;
-- indicadores consolidados;
-- comparação entre serviços.
+Os dados persistidos são consultados pela API do GreenER e apresentados pelo
+frontend conforme os critérios e períodos selecionados.
 
 ---
 
@@ -1444,7 +1469,7 @@ Isso permite gerar posteriormente:
 
 É importante diferenciar requisitos obrigatórios de decisões internas da equipe.
 
-## Requisitos obrigatórios do projeto
+## Requisitos do produto
 
 - React com TypeScript;
 - Node.js com TypeScript;
@@ -1459,7 +1484,7 @@ Isso permite gerar posteriormente:
 - organização do backend em módulos, controllers e services;
 - API HTTP para comunicação com o frontend.
 
-## Decisões técnicas da equipe
+## Decisões arquiteturais adotadas
 
 - utilização de Express;
 - utilização de Zod;
@@ -1470,19 +1495,14 @@ Isso permite gerar posteriormente:
 - armazenamento do intervalo de monitoramento no banco;
 - organização interna dos arquivos dos módulos.
 
-## Decisões ainda em aberto
+## Parâmetros de operação
 
-Alguns detalhes poderão ser definidos durante a implementação:
-
-- quantidade de coletas executadas simultaneamente;
-- estratégia de concorrência;
-- frequência exata do frontend;
-- frequência padrão do Job;
-- política de novas tentativas em caso de falha;
-- estratégia de cache da intensidade de carbono, caso seja necessária.
-
-Essas decisões devem ser tomadas apenas quando houver necessidade real,
-evitando adicionar complexidade desnecessária ao projeto.
+O intervalo de monitoramento é configurável por meio do módulo
+`monitoring-settings` e persistido no PostgreSQL. O intervalo de atualização da
+interface é um parâmetro distinto, mantido independente do agendamento do Job.
+Políticas operacionais adicionais, como número máximo de coletas concorrentes e
+novas tentativas, devem respeitar os limites de tolerância a falhas sem
+introduzir filas ou serviços distribuídos na arquitetura inicial.
 
 ---
 
@@ -1569,7 +1589,7 @@ PostgreSQL
 
 # 42. Objetivo da Arquitetura
 
-A arquitetura proposta busca manter uma separação clara de responsabilidades,
+A arquitetura do GreenER mantém uma separação clara de responsabilidades,
 permitindo que cada parte da aplicação tenha um objetivo específico.
 
 O objetivo não é criar o maior número possível de camadas ou abstrações, mas
@@ -1584,5 +1604,6 @@ organizar o sistema de maneira que seja possível compreender:
 - onde os cálculos ambientais são realizados;
 - como os dados chegam até o usuário.
 
-Dessa forma, o GreenER pode evoluir durante as sprints mantendo uma estrutura
-compreensível para a equipe.
+Dessa forma, o GreenER é construído por etapas sobre uma estrutura
+compreensível, preservando os contratos entre frontend, backend, integrações e
+persistência.
