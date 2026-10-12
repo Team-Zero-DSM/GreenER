@@ -91,9 +91,9 @@ export class CollectionsRepository {
 
     async findEnergyInfoByCode(code: string): Promise<RegionEnergyInfo | null> {
         const result = await this.pool.query<RegionEnergyInfo>(
-            `SELECT carbon_intensity, renewable_share_percent
-     FROM regiao
-     WHERE codigo = $1`,
+            `SELECT carbon_intensity::float8 AS carbon_intensity,renewable_share_percent::float8 AS renewable_share_percent
+            FROM regiao
+            WHERE codigo = $1`,
             [code],
         );
         return result.rows[0] ?? null;
@@ -153,7 +153,7 @@ export class CollectionsRepository {
         return (result.rowCount ?? 0) > 0;
     }
 
-    async updateStatus(id: number, status: ServiceStatus): Promise<boolean> {
+    async updateStatus(id: string, status: ServiceStatus): Promise<boolean> {
         const result = await this.pool.query(
             `UPDATE servico
          SET status = $1,
@@ -165,15 +165,19 @@ export class CollectionsRepository {
         return (result.rowCount ?? 0) > 0;
     }
 
-    async deactivateMissingServices(discoveredIds: string[]): Promise<void> {
-        await this.pool.query(
+    async deactivateMissingServices(
+        discoveredIds: string[],
+    ): Promise<Pick<ActiveService, 'id' | 'external_id'>[]> {
+        const result = await this.pool.query<Pick<ActiveService, 'id' | 'external_id'>>(
             `
         UPDATE servico
         SET ativo = false
         WHERE ativo = true
           AND NOT (external_id = ANY($1::text[]))
+        RETURNING id, external_id
         `,
             [discoveredIds],
         );
+        return result.rows;
     }
 }

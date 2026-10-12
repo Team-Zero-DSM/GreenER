@@ -79,22 +79,49 @@ export class CollectionsService {
             throw err;
         }
 
-        for (const service of services) {
-            const exists = await this.repository.existsServiceByExternalId(service.id);
+        let hadFailures = false;
 
-            if (exists) {
-                await this.repository.updateDiscoveredService(
-                    service.id,
-                    service.location.region_code,
-                );
-            } else {
-                await this.repository.createService(service);
+        for (const service of services) {
+            try {
+                const regionCode = service.location.region_code;
+
+                if (!(await this.repository.existsByCode(regionCode))) {
+                    hadFailures = true;
+
+                    console.error(
+                        `[sync-services] Serviço ${service.id}: ` +
+                            `região ${regionCode} ainda não cadastrada`,
+                    );
+
+                    continue;
+                }
+
+                const exists = await this.repository.existsServiceByExternalId(service.id);
+
+                if (exists) {
+                    await this.repository.updateDiscoveredService(service.id, regionCode);
+                } else {
+                    await this.repository.createService(service);
+                }
+            } catch (err) {
+                hadFailures = true;
+                console.error(`[sync-services] Falha ao sincronizar ${service.id}:`, err);
             }
         }
 
-        const discoveredIds = services.map((service) => service.id);
+        if (!hadFailures) {
+            const discoveredIds = services.map((service) => service.id);
 
-        await this.repository.deactivateMissingServices(discoveredIds);
+            const missingServices = await this.repository.deactivateMissingServices(discoveredIds);
+
+            for (const service of missingServices) {
+                await this.repository.updateStatus(service.id, 'unavailable');
+                console.warn(
+                    `[sync-services] ${service.external_id} ausente da descoberta -> ` +
+                        'ativo=false, status=unavailable',
+                );
+            }
+        }
     }
 
     async runCollectionRound(): Promise<number> {
@@ -115,9 +142,11 @@ export class CollectionsService {
             const reason = outcome.reason;
             const detail =
                 reason instanceof ExternalApiError
-                    ? `${reason.kind}${reason.status ? ` ${reason.status}` : ''}: ${reason.message}`
+                    ? `${reason.kind}${reason.status ? ` HTTP ${reason.status}` : ''}: ${reason.message}`
                     : `inesperado: ${String(reason)}`;
-            console.error(`[collection] falha em ${services[i].external_id} -> ${detail}`);
+            console.error(
+                `[collection] falha em ${services[i].external_id} (${services[i].metrics_path}) -> ${detail}`,
+            );
         });
         return collected;
     }
@@ -190,8 +219,8 @@ export class CollectionsService {
 
         if (err.kind !== 'bad_status') return null;
 
-        if (err.status === 404) return 'metrics_missing';
-        if (err.status === 500) return 'unavailable';
+        if (err.status === 404) return 'unavailable';
+        if (err.status === 500) return 'metrics_missing';
 
         return null;
     }

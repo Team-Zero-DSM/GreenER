@@ -26,8 +26,8 @@ export interface Service {
 }
 
 export interface Collection {
-    service_id: number;
-    estimate_parameter_id: number;
+    service_id: string;
+    estimate_parameter_id: string;
     collected_at?: Date;
     metric_interval_seconds: number;
     cpu_percent: number;
@@ -45,7 +45,7 @@ export interface Collection {
 }
 
 export interface EstimateParameter {
-    id: number;
+    id: string;
     cpu_max_watts: number;
     ram_watts_per_gb: number;
     disk_watts_per_gb: number;
@@ -59,7 +59,7 @@ export interface RegionEnergyInfo {
 }
 
 export interface ActiveService {
-    id: number;
+    id: string;
     external_id: string;
     metrics_path: string;
     carbon_intensity: number;
