@@ -5,6 +5,7 @@ import type { MetricsResponse, MetricsService } from '../../integrations/metrics
 import { pool } from '../../db/connection.js';
 import { ExternalApiError } from '../../shared/errors/external-api-error.js';
 import { CollectionsRepository } from './collections.repository.js';
+import { monitoringService } from '../monitoring/monitoring.service.js';
 import type {
     ActiveService,
     Emissions,
@@ -24,7 +25,9 @@ export class CollectionsService {
         let response: RegionsResponse;
         try {
             response = await this.carbon.getRegions();
+            monitoringService.recordDependency('carbon', 'available');
         } catch (err) {
+            monitoringService.recordDependency('carbon', 'unavailable');
             if (
                 err instanceof ExternalApiError &&
                 err.kind === 'bad_status' &&
@@ -55,7 +58,9 @@ export class CollectionsService {
                 } else {
                     await this.repository.createRegion(region);
                 }
+                monitoringService.recordDependency('database', 'available');
             } catch (err) {
+                monitoringService.recordDependency('database', 'unavailable');
                 console.error(`Falha ao sincronizar região ${region.code}:`, err);
             }
         }
@@ -66,7 +71,9 @@ export class CollectionsService {
 
         try {
             services = await this.metrics.getServices();
+            monitoringService.recordDependency('metricsDiscovery', 'available');
         } catch (err) {
+            monitoringService.recordDependency('metricsDiscovery', 'unavailable');
             if (err instanceof ExternalApiError) {
                 console.warn(
                     `[sync-services] falha na API de métricas ` +
@@ -85,8 +92,11 @@ export class CollectionsService {
             try {
                 const regionCode = service.location.region_code;
 
-                if (!(await this.repository.existsByCode(regionCode))) {
+                const regionExists = await this.repository.existsByCode(regionCode);
+                monitoringService.recordDependency('database', 'available');
+                if (!regionExists) {
                     hadFailures = true;
+                    monitoringService.recordRoundFailure();
 
                     console.error(
                         `[sync-services] Serviço ${service.id}: ` +
@@ -103,8 +113,10 @@ export class CollectionsService {
                 } else {
                     await this.repository.createService(service);
                 }
+                monitoringService.recordDependency('database', 'available');
             } catch (err) {
                 hadFailures = true;
+                monitoringService.recordDependency('database', 'unavailable');
                 console.error(`[sync-services] Falha ao sincronizar ${service.id}:`, err);
             }
         }
@@ -112,23 +124,39 @@ export class CollectionsService {
         if (!hadFailures) {
             const discoveredIds = services.map((service) => service.id);
 
-            const missingServices = await this.repository.deactivateMissingServices(discoveredIds);
+            try {
+                const missingServices =
+                    await this.repository.deactivateMissingServices(discoveredIds);
 
-            for (const service of missingServices) {
-                await this.repository.updateStatus(service.id, 'unavailable');
-                console.warn(
-                    `[sync-services] ${service.external_id} ausente da descoberta -> ` +
-                        'ativo=false, status=unavailable',
-                );
+                for (const service of missingServices) {
+                    await this.repository.updateStatus(service.id, 'unavailable');
+                    console.warn(
+                        `[sync-services] ${service.external_id} ausente da descoberta -> ` +
+                            'ativo=false, status=unavailable',
+                    );
+                }
+                monitoringService.recordDependency('database', 'available');
+            } catch (err) {
+                monitoringService.recordDependency('database', 'unavailable');
+                throw err;
             }
         }
     }
 
     async runCollectionRound(): Promise<number> {
-        const params = await this.repository.findActiveEstimateParameter();
+        let params: EstimateParameter | null;
+        let services: ActiveService[];
+        try {
+            params = await this.repository.findActiveEstimateParameter();
+            services = await this.repository.findActiveServices();
+            monitoringService.recordDependency('database', 'available');
+        } catch (err) {
+            monitoringService.recordDependency('database', 'unavailable');
+            throw err;
+        }
         if (!params) throw new Error('Nenhum parâmetro de estimativa ativo');
 
-        const services = await this.repository.findActiveServices();
+        monitoringService.recordAttemptedServices(services.length);
         const outcomes = await Promise.allSettled(
             services.map((service) => this.collectService(service, params)),
         );
@@ -139,6 +167,7 @@ export class CollectionsService {
                 collected++;
                 return;
             }
+            monitoringService.recordRoundFailure();
             const reason = outcome.reason;
             const detail =
                 reason instanceof ExternalApiError
@@ -157,7 +186,7 @@ export class CollectionsService {
             const metrics = this.processMetrics(raw);
             const e = this.calculateEmissions(metrics, params, service.carbon_intensity);
 
-            await this.repository.createCollection({
+            const data = {
                 service_id: service.id,
                 estimate_parameter_id: params.id,
                 metric_interval_seconds: metrics.collectionIntervalSeconds,
@@ -173,11 +202,27 @@ export class CollectionsService {
                 estimated_energy_kwh: e.energyKwh,
                 carbon_intensity: service.carbon_intensity,
                 estimated_co2e_g: e.co2eG,
-            });
-            await this.repository.updateStatus(service.id, 'available');
+            };
+            try {
+                const collectedAt = await this.repository.createCollection(data);
+                monitoringService.recordDependency('database', 'available');
+                monitoringService.recordSuccessfulCollection(collectedAt);
+                await this.repository.updateStatus(service.id, 'available');
+            } catch (err) {
+                monitoringService.recordDependency('database', 'unavailable');
+                throw err;
+            }
         } catch (err) {
             const status = this.statusFromError(err);
-            if (status) await this.repository.updateStatus(service.id, status);
+            if (status) {
+                try {
+                    await this.repository.updateStatus(service.id, status);
+                    monitoringService.recordDependency('database', 'available');
+                } catch (databaseError) {
+                    monitoringService.recordDependency('database', 'unavailable');
+                    throw databaseError;
+                }
+            }
             throw err;
         }
     }

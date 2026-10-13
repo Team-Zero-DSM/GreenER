@@ -154,6 +154,7 @@ greener/
 │   └── src/
 │       ├── app.ts
 │       ├── server.ts
+│       ├── index.ts
 │       │
 │       ├── db/
 │       │   └── connection.ts
@@ -165,7 +166,7 @@ greener/
 │       │   └── carbon-api.schema.ts
 │       │
 │       ├── jobs/
-│       │   └── collection.job.ts
+│       │   └── collections.job.ts
 │       │
 │       ├── modules/
 │       │   │
@@ -180,6 +181,7 @@ greener/
 │       │   │   ├── collections.controller.ts
 │       │   │   ├── collections.service.ts
 │       │   │   ├── collections.repository.ts
+│       │   │   ├── collections.types.ts
 │       │   │   └── collections.schema.ts
 │       │   │
 │       │   │
@@ -190,6 +192,7 @@ greener/
 │       │   │   ├── services.controller.ts
 │       │   │   ├── services.service.ts
 │       │   │   ├── services.repository.ts
+│       │   │   ├── services.types.ts
 │       │   │   └── services.schema.ts
 │       │   │
 │       │   ├── regions/
@@ -202,7 +205,15 @@ greener/
 │       │   │   ├── analytics.routes.ts
 │       │   │   ├── analytics.controller.ts
 │       │   │   ├── analytics.service.ts
+│       │   │   ├── analytics.repository.ts
+│       │   │   ├── analytics.types.ts
 │       │   │   └── analytics.schema.ts
+│       │   │
+│       │   ├── monitoring/
+│       │   │   ├── monitoring.routes.ts
+│       │   │   ├── monitoring.controller.ts
+│       │   │   ├── monitoring.service.ts
+│       │   │   └── monitoring.types.ts
 │       │   │
 │       │   └── monitoring-settings/
 │       │       ├── monitoring-settings.routes.ts
@@ -222,6 +233,16 @@ greener/
     ├── plano-de-entregas.md
     └── sprints/
 ```
+
+O módulo `monitoring` está implementado e expõe
+`GET /api/v1/monitoring/status`. O `monitoring.service.ts` guarda em memória os
+horários, contadores e resultados informados pelo job e pelo serviço de coleta;
+o controller entrega esses dados em JSON. Não há arquivo `state`, repository
+ou tabela própria para esse módulo. Seus dados são reiniciados com o processo.
+Ele é separado de `monitoring-settings`, responsável pelas configurações.
+
+A árvore também contém a organização prevista para funcionalidades futuras;
+ela não comprova que todos os módulos e arquivos já estejam implementados.
 
 Novas pastas e abstrações devem representar responsabilidades reais do sistema
 e preservar os limites entre interface, regras de negócio, integrações e

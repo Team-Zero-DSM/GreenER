@@ -37,8 +37,8 @@ export class CollectionsRepository {
         );
     }
 
-    async createCollection(data: Collection): Promise<void> {
-        await this.pool.query(
+    async createCollection(data: Collection): Promise<Date> {
+        const result = await this.pool.query<{ coletado_em: Date }>(
             `INSERT INTO coleta
        (servico_id, parametro_estimativa_id, coletado_em, intervalo_metrica_segundos,
         cpu_percent, memory_gb, disk_gb, network_gb,
@@ -48,7 +48,8 @@ export class CollectionsRepository {
        ($1, $2, COALESCE($3, now()), $4,
         $5, $6, $7, $8,
         $9, $10, $11, $12,
-        $13, $14, $15, $16)`,
+        $13, $14, $15, $16)
+     RETURNING coletado_em`,
             [
                 data.service_id,
                 data.estimate_parameter_id,
@@ -68,6 +69,7 @@ export class CollectionsRepository {
                 data.estimated_co2e_g,
             ],
         );
+        return result.rows[0].coletado_em;
     }
 
     async existsByCode(code: string): Promise<boolean> {

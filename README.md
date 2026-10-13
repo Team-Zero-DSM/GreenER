@@ -91,6 +91,7 @@ greener/
 │       │   ├── services/
 │       │   ├── regions/
 │       │   ├── analytics/
+│       │   ├── monitoring/            # Estado da execução do job de coleta
 │       │   └── monitoring-settings/
 │       └── shared/
 │

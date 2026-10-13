@@ -38,6 +38,7 @@ administração das configurações de monitoramento.
 | `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
 | `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
 | `GET` | `/regions` | Entregar regiões e os dados ambientais associados. |
+| `GET` | `/monitoring/status` | Informar estado, horários e resultados observados pelo job de coleta. |
 | `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
 | `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
 | `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |
@@ -157,3 +158,67 @@ um único contrato e são implementados em conjunto. Histórico, ranking,
 comparação, região e simulação são recursos do produto; suas telas consomem os
 dados disponibilizados pelos respectivos módulos do backend e não acessam
 integrações externas diretamente.
+
+## 7. Estado do monitoramento — implementado
+
+No servidor atual, as rotas são montadas sob `/api/v1`. Esta consulta é pública,
+não recebe corpo nem parâmetros e não exige JWT:
+
+```http
+GET /api/v1/monitoring/status
+Accept: application/json
+```
+
+Exemplo de resposta HTTP 200:
+
+```json
+{
+  "serverTime": "2026-10-13T19:00:10Z",
+  "running": false,
+  "collectionIntervalSeconds": 30,
+  "lastRoundStartedAt": "2026-10-13T19:00:00Z",
+  "lastRoundFinishedAt": "2026-10-13T19:00:02Z",
+  "nextCollectionAt": "2026-10-13T19:00:32Z",
+  "lastSuccessfulCollectionAt": "2026-10-13T19:00:01Z",
+  "lastRound": {
+    "outcome": "partial",
+    "attemptedServices": 8,
+    "collectedServices": 7,
+    "failedServices": 1
+  },
+  "dependencies": {
+    "metricsDiscovery": "available",
+    "carbon": "available",
+    "database": "available"
+  }
+}
+```
+
+- O estado fica em memória e é reiniciado com o processo. Datas ainda não
+  observadas e `lastRound` começam como `null`; dependências começam como
+  `unknown`. Não é um histórico persistente de rodadas.
+- `running` indica uma rodada em execução. Durante a rodada,
+  `nextCollectionAt` é `null`; depois, informa a previsão do próximo início.
+  Parar o job também remove essa previsão.
+- O intervalo é lido de `COLLECTION_INTERVAL_SECONDS`, com padrão de 30
+  segundos, mantendo o funcionamento atual do job. O contador no frontend
+  é calculado com `serverTime` e `nextCollectionAt`.
+- `attemptedServices` conta os serviços selecionados para consultar métricas;
+  `collectedServices` conta coletas válidas efetivamente gravadas;
+  `failedServices` é a diferença. Uma falha anterior à seleção pode encerrar
+  uma rodada com os três contadores em zero e resultado `failed`.
+- `outcome` é `success` quando a rodada termina sem falha observada, `partial`
+  quando houve falha mas alguma coleta foi gravada e `failed` quando houve
+  falha sem nenhuma coleta gravada. Uma descoberta válida sem serviços pode
+  terminar com `success` e contadores zerados.
+- Falhas na sincronização ou na atualização de status também afetam
+  `outcome`, mesmo que os dados de uma coleta tenham sido gravados.
+- `lastSuccessfulCollectionAt` usa o horário retornado pelo INSERT de uma
+  coleta válida; falhas posteriores não o substituem por horário de tentativa.
+- `dependencies` informa o último resultado observado nas operações de
+  descoberta, carbono e banco. Não representa uma checagem contínua de saúde.
+  Falha de carbono continua visível mesmo quando o cálculo usa fatores antigos.
+- A rota retorna 200 mesmo quando o estado informa falha. Um erro interno ao
+  servir a resposta passa pelo `errorHandler` e retorna 500.
+- A última coleta global não significa que todos os serviços atualizaram.
+  Para cada serviço, o frontend continua usando sua própria `collectedAt`.
