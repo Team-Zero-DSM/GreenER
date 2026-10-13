@@ -28,4 +28,13 @@ export class ServiceRepository {
         );
         return result.rows[0] ?? null;
     }
+
+    async findIdByExternalId(externalId: string): Promise<string | null> {
+        const result = await this.pool.query<{ id: string }>(
+            `SELECT id FROM servico WHERE external_id = $1`,
+            [externalId],
+        );
+
+        return result.rows[0]?.id ?? null;
+    }
 }

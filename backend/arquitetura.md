@@ -13,13 +13,13 @@ energético estimado e da emissão aproximada de CO₂ equivalente (CO₂e).
 A aplicação utiliza duas APIs externas fornecidas pelo projeto:
 
 - **Greener Metrics Aggregator API**
-  - Descoberta dos serviços disponíveis;
-  - Coleta das métricas de CPU, memória, disco e rede;
-  - Obtenção da localização dos serviços.
+    - Descoberta dos serviços disponíveis;
+    - Coleta das métricas de CPU, memória, disco e rede;
+    - Obtenção da localização dos serviços.
 
 - **Greener Carbon Intensity API**
-  - Consulta da intensidade de carbono correspondente à região onde o serviço
-    está hospedado.
+    - Consulta da intensidade de carbono correspondente à região onde o serviço
+      está hospedado.
 
 O backend é responsável por:
 
@@ -182,7 +182,7 @@ greener/
 │       │   │   ├── collections.repository.ts
 │       │   │   └── collections.schema.ts
 │       │   │
-│       │   │   
+│       │   │
 │       │   │
 │       │   │
 │       │   ├── services/
@@ -252,7 +252,6 @@ PostgreSQL / APIs externas
 Cada camada possui uma responsabilidade específica.
 
 ---
-
 
 # 7. Validação com Zod
 
@@ -1343,23 +1342,23 @@ flowchart LR
 
 # 37. Resumo das Responsabilidades
 
-| Componente | Responsabilidade |
-|---|---|
-| Frontend | Apresentar informações e permitir interação com o usuário |
-| Routes | Definir endpoints HTTP |
-| Zod | Validar entradas e dados externos em runtime |
-| Controllers | Receber requisições e produzir respostas HTTP |
-| Services | Implementar e coordenar regras de negócio |
-| Repositories | Concentrar acesso ao PostgreSQL |
-| Integrations | Concentrar comunicação com APIs externas |
-| Collection Job | Iniciar periodicamente os ciclos de monitoramento |
-| Auth | Autenticar usuários e emitir tokens JWT |
-| Regions | Disponibilizar dados regionais de intensidade de carbono |
-| Analytics | Fornecer rankings, comparações e cenários |
-| PostgreSQL | Persistir serviços, coletas e configurações |
-| Metrics API | Fornecer serviços e métricas |
-| Carbon API | Fornecer intensidade de carbono |
-| JWT Middleware | Proteger endpoints que exigem autenticação |
+| Componente     | Responsabilidade                                          |
+| -------------- | --------------------------------------------------------- |
+| Frontend       | Apresentar informações e permitir interação com o usuário |
+| Routes         | Definir endpoints HTTP                                    |
+| Zod            | Validar entradas e dados externos em runtime              |
+| Controllers    | Receber requisições e produzir respostas HTTP             |
+| Services       | Implementar e coordenar regras de negócio                 |
+| Repositories   | Concentrar acesso ao PostgreSQL                           |
+| Integrations   | Concentrar comunicação com APIs externas                  |
+| Collection Job | Iniciar periodicamente os ciclos de monitoramento         |
+| Auth           | Autenticar usuários e emitir tokens JWT                   |
+| Regions        | Disponibilizar dados regionais de intensidade de carbono  |
+| Analytics      | Fornecer rankings, comparações e cenários                 |
+| PostgreSQL     | Persistir serviços, coletas e configurações               |
+| Metrics API    | Fornecer serviços e métricas                              |
+| Carbon API     | Fornecer intensidade de carbono                           |
+| JWT Middleware | Proteger endpoints que exigem autenticação                |
 
 ---
 
