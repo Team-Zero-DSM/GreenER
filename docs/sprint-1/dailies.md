@@ -241,3 +241,35 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Impedimento técnico:** Os computadores da faculdade estavam sujeitos a restrições de firewall que impediam o acesso à API utilizada pelo projeto. Isso impossibilitou a realização dos testes da atualização periódica das métricas, impedindo a conclusão de mais uma tarefa planejada para o dia.
 
 - **Acompanhamento da Sprint:** A equipe avançou na implementação do backend e do frontend, com a conclusão das tasks T07 e T13. Apesar do impedimento relacionado ao acesso à API, houve progresso nas atividades previstas para a Sprint 1.
+
+---
+
+## 📅 12/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---------|----------|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Formato da Daily:** devido ao feriado nacional de Nossa Senhora Aparecida e ao Dia das Crianças, a Daily foi realizada remotamente. Em razão do feriado, houve menor ritmo de trabalho e progresso geral nas atividades da Sprint.
+
+- **Arquitetura do sistema:** Henrique, com o auxílio de Pedro, concluiu a estruturação da arquitetura geral do GreenER, contemplando a organização dos componentes do frontend e do backend, suas relações e o planejamento das entregas do sistema.
+
+- **Diagramas de sequência:** Henrique iniciou a etapa de finalização dos diagramas de sequência do projeto, dando continuidade à documentação técnica e à representação das interações entre os componentes do sistema. A atividade permanece em andamento.
+
+- **Frontend — detalhamento de serviços:** Paulo avançou na finalização dos componentes da área de detalhamento de serviços, dando continuidade à implementação da interface e à organização dos elementos responsáveis pela apresentação das informações dos serviços monitorados.
+
+- **Frontend — página inicial:** Gabriel deu continuidade ao desenvolvimento da página inicial do GreenER, avançando na implementação da tela. A atividade permanece em andamento.
+
+- **Testes de atualização das métricas:** Vitor continuou trabalhando nos testes para validar se as métricas dos serviços estão sendo atualizadas corretamente no backend, buscando verificar o funcionamento da rotina periódica de coleta. A atividade permanece em andamento.
+
+- **Acompanhamento da Sprint:** apesar do menor ritmo de trabalho devido ao feriado, houve avanço na documentação da arquitetura, na implementação do frontend e na validação da atualização das métricas. A equipe deu continuidade às atividades planejadas para a Sprint 1.
+
+---
