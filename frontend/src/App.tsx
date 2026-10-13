@@ -1,6 +1,8 @@
+import { Route, Routes } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ServiceDetailPage } from '@/pages/ServiceDetailPage';
 
-export default function App() {
+function HomePage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
       <Card className="w-full max-w-md">
@@ -14,5 +16,14 @@ export default function App() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/servicos/:id" element={<ServiceDetailPage />} />
+    </Routes>
   );
 }
