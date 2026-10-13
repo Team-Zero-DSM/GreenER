@@ -8,11 +8,13 @@
   },
   "scripts": {
     "dev": "nodemon --legacy-watch --watch src --ext ts --exec tsx src/server.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -38,6 +40,7 @@
     "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "5.9",
-    "typescript-eslint": "^8.71.0"
+    "typescript-eslint": "^8.71.0",
+    "vitest": "3.2.7"
   }
 }
