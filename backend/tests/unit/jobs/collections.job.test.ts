@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as collectionsService from '../modules/collections/collections.service.js';
-import { startCollectionJob, stopCollectionJob } from './collections.job.js';
+import * as collectionsService from '../../../src/modules/collections/collections.service.js';
+import { startCollectionJob, stopCollectionJob } from '../../../src/jobs/collections.job.js';
 
-vi.mock('../modules/collections/collections.service.js', () => ({
+vi.mock('../../../src/modules/collections/collections.service.js', () => ({
     runCollectionRound: vi.fn(),
 }));
 

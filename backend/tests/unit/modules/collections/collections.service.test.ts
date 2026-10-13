@@ -1,19 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { CollectionsService } from './collections.service.js';
-import type { CollectionsRepository } from './collections.repository.js';
-import type { CarbonClient } from '../../integrations/carbon-api.js';
-import type { RegionsResponse } from '../../integrations/carbon-api.schema.js';
-import type { MetricsClient } from '../../integrations/metrics-api.js';
-import type { MetricsResponse } from '../../integrations/metrics-api.schema.js';
-import { ExternalApiError } from '../../shared/errors/external-api-error.js';
+import { CollectionsService } from '../../../../src/modules/collections/collections.service.js';
+import type { CollectionsRepository } from '../../../../src/modules/collections/collections.repository.js';
+import type { CarbonClient } from '../../../../src/integrations/carbon-api.js';
+import type { RegionsResponse } from '../../../../src/integrations/carbon-api.schema.js';
+import type { MetricsClient } from '../../../../src/integrations/metrics-api.js';
+import type { MetricsResponse } from '../../../../src/integrations/metrics-api.schema.js';
+import { ExternalApiError } from '../../../../src/shared/errors/external-api-error.js';
 import type {
     ActiveService,
     Collection,
     EstimateParameter,
     ServiceStatus,
-} from './collections.types.js';
+} from '../../../../src/modules/collections/collections.types.js';
 
-vi.mock('../../db/connection.js', () => ({ pool: {} }));
+vi.mock('../../../../src/db/connection.js', () => ({ pool: {} }));
 
 const mockFindActiveEstimateParameter = vi.fn<() => Promise<EstimateParameter | null>>();
 const mockFindActiveServices = vi.fn<() => Promise<ActiveService[]>>();
