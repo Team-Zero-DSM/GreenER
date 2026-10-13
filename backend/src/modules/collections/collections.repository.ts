@@ -174,8 +174,8 @@ export class CollectionsRepository {
             `
         UPDATE servico
         SET ativo = false
-        WHERE ativo = true
-          AND NOT (external_id = ANY($1::text[]))
+        WHERE NOT (external_id = ANY($1::text[]))
+          AND (ativo = true OR status <> 'unavailable')
         RETURNING id, external_id
         `,
             [discoveredIds],

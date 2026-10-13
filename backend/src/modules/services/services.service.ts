@@ -28,7 +28,7 @@ export class ServicesService {
                           regionCode: service.codigo,
                           country: service.pais!,
                           region: service.regiao!,
-                          city: service.cidade!,
+                          city: service.cidade,
                           latitude: service.latitude === null ? null : round(service.latitude, 2),
                           longitude:
                               service.longitude === null ? null : round(service.longitude, 2),

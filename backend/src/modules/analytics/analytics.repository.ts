@@ -45,7 +45,7 @@ export class AnalyticsRepository {
     }
 
     async SummaryByServiceId(serviceId: string, from: Date, to: Date): Promise<SumaryRow> {
-        const result = await this.pool.query(
+        const result = await this.pool.query<SumaryRow>(
             `
         SELECT COUNT(*)::integer AS sample_count,SUM(energia_estimada_kwh)::float8 AS energy_kwh,SUM(co2e_estimado_g)::float8 AS co2e_grams
         FROM coleta

@@ -272,9 +272,12 @@ graph TD
 | RF10 | Histórico de coletas | O sistema deve armazenar o histórico das coletas realizadas para permitir análise temporal. |
 | RF11 | Atualização contínua | A interface deve atualizar periodicamente os dados apresentados, refletindo as alterações identificadas nas informações dos serviços monitorados. |
 | RF12 | Localização dos serviços | O sistema deve exibir país, região e, quando disponível, cidade onde o serviço está hospedado. |
-| RF13 | Visualização geográfica | O sistema deve apresentar a posição aproximada dos serviços em um mapa, utilizando latitude e longitude fornecidas pela API. |
+| RF13 | Visualização geográfica | O sistema poderá apresentar a posição aproximada dos serviços em um mapa. A ausência de coordenadas não deve impedir a visualização das demais informações. |
 | RF14 | Ranking de impacto | O sistema deve apresentar ranking dos serviços por maior consumo energético ou maior emissão de CO₂e. |
 | RF15 | Comparação entre serviços | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços. |
+
+O mapa é opcional no desafio original, mas foi incluído pela equipe no plano
+atual da Sprint 1. Essa escolha de entrega não muda a redação do requisito.
 
 </details>
 
@@ -283,6 +286,14 @@ graph TD
 <details>
 <summary><b>Requisitos Não Funcionais</b></summary>
 <br>
+
+Os códigos desta tabela são os identificadores internos usados no backlog da
+equipe e não reproduzem integralmente a numeração do PDF do desafio. No PDF,
+existem RNF01 a RNF05, e **RNF05 significa documentação técnica**, correspondente
+ao RNF08 interno abaixo. Autenticação JWT é a restrição **RP06**, persistência
+relaciona-se a **RF10/RP03** e Docker a **RP04**. Nas evidências de avaliação,
+informar essa correspondência para não confundir requisitos do desafio com
+decisões técnicas da equipe.
 
 | **Código** | **Requisito Não Funcional** | **Descrição** |
 | ---------- | --------------------------- | ------------- |

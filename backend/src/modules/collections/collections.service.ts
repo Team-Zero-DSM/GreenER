@@ -127,15 +127,24 @@ export class CollectionsService {
             try {
                 const missingServices =
                     await this.repository.deactivateMissingServices(discoveredIds);
+                monitoringService.recordDependency('database', 'available');
 
                 for (const service of missingServices) {
-                    await this.repository.updateStatus(service.id, 'unavailable');
-                    console.warn(
-                        `[sync-services] ${service.external_id} ausente da descoberta -> ` +
-                            'ativo=false, status=unavailable',
-                    );
+                    try {
+                        await this.repository.updateStatus(service.id, 'unavailable');
+                        monitoringService.recordDependency('database', 'available');
+                        console.warn(
+                            `[sync-services] ${service.external_id} ausente da descoberta -> ` +
+                                'ativo=false, status=unavailable',
+                        );
+                    } catch (err) {
+                        monitoringService.recordDependency('database', 'unavailable');
+                        console.error(
+                            `[sync-services] Falha ao atualizar status de ${service.external_id}:`,
+                            err,
+                        );
+                    }
                 }
-                monitoringService.recordDependency('database', 'available');
             } catch (err) {
                 monitoringService.recordDependency('database', 'unavailable');
                 throw err;
