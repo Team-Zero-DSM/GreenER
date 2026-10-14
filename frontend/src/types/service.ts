@@ -38,5 +38,8 @@ export interface ServiceSummary {
   id: string;
   name: string;
   status: ServiceStatus;
+  lastSeenAt: string;
   location: ServiceLocation;
+  metrics: ServiceMetrics | null;
+  environmental: ServiceEnvironmental | null;
 }
