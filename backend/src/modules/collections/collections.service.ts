@@ -5,6 +5,7 @@ import type { MetricsResponse, MetricsService } from '../../integrations/metrics
 import { pool } from '../../db/connection.js';
 import { ExternalApiError } from '../../shared/errors/external-api-error.js';
 import { CollectionsRepository } from './collections.repository.js';
+import { monitoringService } from '../monitoring/monitoring.service.js';
 import type {
     ActiveService,
     Emissions,
@@ -24,13 +25,29 @@ export class CollectionsService {
         let response: RegionsResponse;
         try {
             response = await this.carbon.getRegions();
+            monitoringService.recordDependency('carbon', 'available');
         } catch (err) {
-            if (err instanceof ExternalApiError) {
+            monitoringService.recordDependency('carbon', 'unavailable');
+            if (
+                err instanceof ExternalApiError &&
+                err.kind === 'bad_status' &&
+                err.status === 530
+            ) {
                 console.warn(
-                    `[sync-regions] falha na API de carbono (${err.kind}), mantendo regiões já salvas`,
+                    '[sync-regions] API de carbono inacessível (530). ' +
+                        'Mantendo regiões já salvas.',
                 );
                 return;
             }
+
+            if (err instanceof ExternalApiError) {
+                console.warn(
+                    `[sync-regions] falha na API de carbono (${err.kind}), ` +
+                        'mantendo regiões já salvas',
+                );
+                return;
+            }
+
             throw err;
         }
 
@@ -41,7 +58,9 @@ export class CollectionsService {
                 } else {
                     await this.repository.createRegion(region);
                 }
+                monitoringService.recordDependency('database', 'available');
             } catch (err) {
+                monitoringService.recordDependency('database', 'unavailable');
                 console.error(`Falha ao sincronizar região ${region.code}:`, err);
             }
         }
@@ -49,39 +68,104 @@ export class CollectionsService {
 
     async syncServices(): Promise<void> {
         let services: MetricsService[];
+
         try {
             services = await this.metrics.getServices();
+            monitoringService.recordDependency('metricsDiscovery', 'available');
         } catch (err) {
+            monitoringService.recordDependency('metricsDiscovery', 'unavailable');
             if (err instanceof ExternalApiError) {
                 console.warn(
-                    `[sync-services] falha na API de métricas (${err.kind}), mantendo serviços já salvos`,
+                    `[sync-services] falha na API de métricas ` +
+                        `(${err.kind}, HTTP ${err.status ?? 'sem resposta'}), ` +
+                        'mantendo serviços já salvos',
                 );
                 return;
             }
+
             throw err;
         }
 
+        let hadFailures = false;
+
         for (const service of services) {
             try {
-                if (await this.repository.existsServiceByExternalId(service.id)) {
-                    await this.repository.updateServiceRegion(
-                        service.id,
-                        service.location.region_code,
+                const regionCode = service.location.region_code;
+
+                const regionExists = await this.repository.existsByCode(regionCode);
+                monitoringService.recordDependency('database', 'available');
+                if (!regionExists) {
+                    hadFailures = true;
+                    monitoringService.recordRoundFailure();
+
+                    console.error(
+                        `[sync-services] Serviço ${service.id}: ` +
+                            `região ${regionCode} ainda não cadastrada`,
                     );
+
+                    continue;
+                }
+
+                const exists = await this.repository.existsServiceByExternalId(service.id);
+
+                if (exists) {
+                    await this.repository.updateDiscoveredService(service.id, regionCode);
                 } else {
                     await this.repository.createService(service);
                 }
+                monitoringService.recordDependency('database', 'available');
             } catch (err) {
-                console.error(`Falha ao sincronizar serviço ${service.id}:`, err);
+                hadFailures = true;
+                monitoringService.recordDependency('database', 'unavailable');
+                console.error(`[sync-services] Falha ao sincronizar ${service.id}:`, err);
+            }
+        }
+
+        if (!hadFailures) {
+            const discoveredIds = services.map((service) => service.id);
+
+            try {
+                const missingServices =
+                    await this.repository.deactivateMissingServices(discoveredIds);
+                monitoringService.recordDependency('database', 'available');
+
+                for (const service of missingServices) {
+                    try {
+                        await this.repository.updateStatus(service.id, 'unavailable');
+                        monitoringService.recordDependency('database', 'available');
+                        console.warn(
+                            `[sync-services] ${service.external_id} ausente da descoberta -> ` +
+                                'ativo=false, status=unavailable',
+                        );
+                    } catch (err) {
+                        monitoringService.recordDependency('database', 'unavailable');
+                        console.error(
+                            `[sync-services] Falha ao atualizar status de ${service.external_id}:`,
+                            err,
+                        );
+                    }
+                }
+            } catch (err) {
+                monitoringService.recordDependency('database', 'unavailable');
+                throw err;
             }
         }
     }
 
     async runCollectionRound(): Promise<number> {
-        const params = await this.repository.findActiveEstimateParameter();
+        let params: EstimateParameter | null;
+        let services: ActiveService[];
+        try {
+            params = await this.repository.findActiveEstimateParameter();
+            services = await this.repository.findActiveServices();
+            monitoringService.recordDependency('database', 'available');
+        } catch (err) {
+            monitoringService.recordDependency('database', 'unavailable');
+            throw err;
+        }
         if (!params) throw new Error('Nenhum parâmetro de estimativa ativo');
 
-        const services = await this.repository.findActiveServices();
+        monitoringService.recordAttemptedServices(services.length);
         const outcomes = await Promise.allSettled(
             services.map((service) => this.collectService(service, params)),
         );
@@ -92,12 +176,15 @@ export class CollectionsService {
                 collected++;
                 return;
             }
+            monitoringService.recordRoundFailure();
             const reason = outcome.reason;
             const detail =
                 reason instanceof ExternalApiError
-                    ? `${reason.kind}${reason.status ? ` ${reason.status}` : ''}: ${reason.message}`
+                    ? `${reason.kind}${reason.status ? ` HTTP ${reason.status}` : ''}: ${reason.message}`
                     : `inesperado: ${String(reason)}`;
-            console.error(`[collection] falha em ${services[i].external_id} -> ${detail}`);
+            console.error(
+                `[collection] falha em ${services[i].external_id} (${services[i].metrics_path}) -> ${detail}`,
+            );
         });
         return collected;
     }
@@ -108,7 +195,7 @@ export class CollectionsService {
             const metrics = this.processMetrics(raw);
             const e = this.calculateEmissions(metrics, params, service.carbon_intensity);
 
-            await this.repository.createCollection({
+            const data = {
                 service_id: service.id,
                 estimate_parameter_id: params.id,
                 metric_interval_seconds: metrics.collectionIntervalSeconds,
@@ -124,12 +211,28 @@ export class CollectionsService {
                 estimated_energy_kwh: e.energyKwh,
                 carbon_intensity: service.carbon_intensity,
                 estimated_co2e_g: e.co2eG,
-            });
-            await this.repository.updateStatus(service.id, 'available');
+            };
+            try {
+                const collectedAt = await this.repository.createCollection(data);
+                monitoringService.recordDependency('database', 'available');
+                monitoringService.recordSuccessfulCollection(collectedAt);
+                await this.repository.updateStatus(service.id, 'available');
+            } catch (err) {
+                monitoringService.recordDependency('database', 'unavailable');
+                throw err;
+            }
         } catch (err) {
             const status = this.statusFromError(err);
-            if (status) await this.repository.updateStatus(service.id, status);
-            throw err; // o allSettled da rodada registra a falha
+            if (status) {
+                try {
+                    await this.repository.updateStatus(service.id, status);
+                    monitoringService.recordDependency('database', 'available');
+                } catch (databaseError) {
+                    monitoringService.recordDependency('database', 'unavailable');
+                    throw databaseError;
+                }
+            }
+            throw err;
         }
     }
 
@@ -163,10 +266,16 @@ export class CollectionsService {
 
     private statusFromError(err: unknown): ServiceStatus | null {
         if (!(err instanceof ExternalApiError)) return null;
+
+        if (err.kind === 'timeout' || err.kind === 'unavailable') {
+            return 'unavailable';
+        }
+
         if (err.kind !== 'bad_status') return null;
 
-        if (err.status === 404) return 'metrics_missing';
-        if (err.status === 500) return 'unavailable';
+        if (err.status === 404) return 'unavailable';
+        if (err.status === 500) return 'metrics_missing';
+
         return null;
     }
 }

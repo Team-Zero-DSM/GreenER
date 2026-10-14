@@ -29,9 +29,10 @@ export class MetricsClient {
 
     private async request<T>(path: string, schema: ZodType<T>): Promise<T> {
         let response: Response;
+        const signal = AbortSignal.timeout(this.timeoutMs);
         try {
             response = await fetch(`${this.baseUrl}${path}`, {
-                signal: AbortSignal.timeout(this.timeoutMs),
+                signal,
             });
         } catch (err) {
             const isTimeout = err instanceof Error && err.name === 'TimeoutError';
@@ -41,6 +42,13 @@ export class MetricsClient {
                     : `Metrics API indisponível em ${path}`,
                 isTimeout ? 'timeout' : 'unavailable',
                 { cause: err },
+            );
+        }
+        if (response.status === 530) {
+            throw new ExternalApiError(
+                'API auxiliar inacessível: resposta HTTP 530',
+                'bad_status',
+                { status: 530 },
             );
         }
 
@@ -53,9 +61,18 @@ export class MetricsClient {
         }
 
         let json: unknown;
+
         try {
             json = await response.json();
         } catch (err) {
+            if (signal.aborted) {
+                throw new ExternalApiError(
+                    `Timeout de ${this.timeoutMs}ms ao ler resposta de ${path}`,
+                    'timeout',
+                    { cause: err },
+                );
+            }
+
             throw new ExternalApiError(`JSON inválido em ${path}`, 'invalid_response', {
                 cause: err,
             });
