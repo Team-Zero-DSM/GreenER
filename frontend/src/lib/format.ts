@@ -22,3 +22,10 @@ export function formatDateTime(value: string | null | undefined): string {
     timeStyle: 'short',
   });
 }
+
+export function formatTime(value: string): string {
+  return new Date(value).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
