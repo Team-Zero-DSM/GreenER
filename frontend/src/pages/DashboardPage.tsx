@@ -19,7 +19,7 @@ export function DashboardPage() {
   );
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl space-y-6 bg-background p-6">
+    <main className="mx-auto max-w-7xl space-y-6 p-6">
       <header>
         <h1 className="text-3xl font-semibold">Serviços</h1>
         <p className="text-muted-foreground">
