@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, useState, type MouseEvent } from 'react';
 import { formatTime } from '@/lib/format';
 
 export interface TimeSeriesPoint {
@@ -18,9 +18,11 @@ const HEIGHT = 220;
 const PAD = { top: 12, right: 12, bottom: 32, left: 96 };
 const INNER_WIDTH = WIDTH - PAD.left - PAD.right;
 const INNER_HEIGHT = HEIGHT - PAD.top - PAD.bottom;
+const TOOLTIP = { width: 170, height: 60 };
 
 export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesChartProps) {
     const gradientId = `grad-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+    const [hovered, setHovered] = useState<number | null>(null);
 
     if (data.length < 2) {
         return <p className="text-sm text-muted-foreground">Sem dados no período.</p>;
@@ -43,12 +45,33 @@ export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesC
     const yTicks = [low, (low + high) / 2, high];
     const xTicks = [0, Math.floor((data.length - 1) / 2), data.length - 1];
 
+    // Converte a posição do mouse (em pixels da tela) no índice do ponto mais próximo.
+    function handleMouseMove(event: MouseEvent<SVGSVGElement>) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const svgX = ((event.clientX - rect.left) / rect.width) * WIDTH;
+        const index = Math.round(((svgX - PAD.left) / INNER_WIDTH) * (data.length - 1));
+        setHovered(Math.min(data.length - 1, Math.max(0, index)));
+    }
+
+    const point = hovered === null ? null : data[hovered];
+    const pointX = hovered === null ? 0 : x(hovered);
+    const pointY = point ? y(point.value) : 0;
+    // A caixa fica à direita do ponto, ou à esquerda quando não cabe.
+    const tooltipX =
+        pointX + 12 + TOOLTIP.width > WIDTH ? pointX - 12 - TOOLTIP.width : pointX + 12;
+    const tooltipY = Math.min(
+        Math.max(pointY - TOOLTIP.height / 2, PAD.top),
+        bottom - TOOLTIP.height,
+    );
+
     return (
         <svg
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
             role="img"
             aria-label={label}
             className="h-auto w-full"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHovered(null)}
         >
             <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -100,17 +123,58 @@ export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesC
                 strokeLinejoin="round"
                 style={{ stroke: color }}
             />
-            {data.map((point, index) => (
+            {data.map((item, index) => (
                 <circle
-                    key={point.time}
+                    key={item.time}
                     cx={x(index)}
-                    cy={y(point.value)}
+                    cy={y(item.value)}
                     r={3}
                     style={{ fill: color }}
-                >
-                    <title>{`${formatTime(point.time)}: ${formatValue(point.value)}`}</title>
-                </circle>
+                />
             ))}
+
+            {point && (
+                <g pointerEvents="none">
+                    <line
+                        x1={pointX}
+                        x2={pointX}
+                        y1={PAD.top}
+                        y2={bottom}
+                        className="stroke-white/30"
+                        strokeDasharray="4 4"
+                    />
+                    <circle
+                        cx={pointX}
+                        cy={pointY}
+                        r={7}
+                        strokeWidth={3}
+                        className="stroke-background"
+                        style={{ fill: color }}
+                    />
+                    <rect
+                        x={tooltipX}
+                        y={tooltipY}
+                        width={TOOLTIP.width}
+                        height={TOOLTIP.height}
+                        rx={8}
+                        className="fill-popover stroke-white/15"
+                    />
+                    <text
+                        x={tooltipX + 12}
+                        y={tooltipY + 24}
+                        className="fill-muted-foreground text-[16px]"
+                    >
+                        {formatTime(point.time)}
+                    </text>
+                    <text
+                        x={tooltipX + 12}
+                        y={tooltipY + 48}
+                        className="fill-foreground text-[18px] font-semibold"
+                    >
+                        {formatValue(point.value)}
+                    </text>
+                </g>
+            )}
         </svg>
     );
 }
