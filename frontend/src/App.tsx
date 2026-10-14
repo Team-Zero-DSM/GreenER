@@ -8,7 +8,7 @@ function HomePage() {
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-emerald-700">GreenER</CardTitle>
+          <CardTitle className="text-2xl text-primary">GreenER</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">

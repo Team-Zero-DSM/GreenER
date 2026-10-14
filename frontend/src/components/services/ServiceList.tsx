@@ -36,7 +36,7 @@ export function ServiceList({ services }: ServiceListProps) {
         </thead>
         <tbody className="divide-y">
           {services.map((service) => (
-            <tr key={service.id} className="hover:bg-muted/50">
+            <tr key={service.id} className="hover:bg-white/5">
               <td className={cellClass}>
                 <strong className="font-semibold">{service.name}</strong>
                 <div className="font-mono text-xs text-muted-foreground">
@@ -73,7 +73,7 @@ export function ServiceList({ services }: ServiceListProps) {
               <td className={cellClass}>
                 <RouterLink
                   to={`/servicos/${service.id}`}
-                  className="font-medium text-emerald-700 hover:underline"
+                  className="font-medium text-primary hover:underline"
                 >
                   Detalhes
                 </RouterLink>

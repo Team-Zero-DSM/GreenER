@@ -30,7 +30,7 @@ export function DashboardPage() {
       {isLoading && (
         <p className="text-muted-foreground">Carregando serviços...</p>
       )}
-      {error && <p className="text-red-700">{error}</p>}
+      {error && <p className="text-destructive">{error}</p>}
 
       {!isLoading && !error && (
         <>

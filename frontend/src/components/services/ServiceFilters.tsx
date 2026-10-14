@@ -11,7 +11,7 @@ interface ServiceFiltersProps {
 
 const fieldClass = 'flex flex-col gap-1 text-sm font-medium';
 const inputClass =
-  'h-9 rounded-md border border-input bg-background px-3 text-sm font-normal';
+  'h-9 rounded-md border border-input bg-secondary px-3 text-sm font-normal';
 
 export function ServiceFilters({
   filters,
