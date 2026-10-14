@@ -33,3 +33,10 @@ export interface ServiceDetail {
   metrics: ServiceMetrics | null;
   environmental: ServiceEnvironmental | null;
 }
+
+export interface ServiceSummary {
+  id: string;
+  name: string;
+  status: ServiceStatus;
+  location: ServiceLocation;
+}
