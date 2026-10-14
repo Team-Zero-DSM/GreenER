@@ -1,7 +1,8 @@
-import { Link as RouterLink } from 'react-router';
+import { Link as RouterLink, useNavigate } from 'react-router';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import type { ServiceSummary } from '@/types/service';
+
 
 interface ServiceListProps {
   services: ServiceSummary[];
@@ -13,6 +14,7 @@ const cellClass = 'px-3 py-2 whitespace-nowrap';
 const numCellClass = 'px-3 py-2 text-right whitespace-nowrap tabular-nums';
 
 export function ServiceList({ services }: ServiceListProps) {
+  const navigate = useNavigate();
   return (
     <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-foreground/10">
       <table className="w-full text-sm">
@@ -36,7 +38,8 @@ export function ServiceList({ services }: ServiceListProps) {
         </thead>
         <tbody className="divide-y">
           {services.map((service) => (
-            <tr key={service.id} className="hover:bg-white/5">
+            <tr key={service.id} onClick={() => navigate(`/servicos/${service.id}`)}
+           className="cursor-pointer hover:bg-white/5">
               <td className={cellClass}>
                 <strong className="font-semibold">{service.name}</strong>
                 <div className="font-mono text-xs text-muted-foreground">

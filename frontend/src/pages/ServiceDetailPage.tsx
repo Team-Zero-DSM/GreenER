@@ -1,141 +1,173 @@
-import { useParams } from 'react-router';
-import { findServiceById } from '@/mocks/services';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { ReactNode } from 'react';
+import { Link as RouterLink, useParams } from 'react-router';
+import { ChartCard } from '@/components/charts/ChartCard';
+import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDateTime, formatNumber } from '@/lib/format';
+import { buildServiceHistory } from '@/mocks/serviceHistory';
+import { findServiceById } from '@/mocks/services';
 
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-xl font-semibold">{value}</dd>
-    </div>
-  );
+const chartColors = {
+    co2e: '#34d399',
+    power: '#fbbf24',
+    cpu: '#3987e5',
+    memory: '#9085e9',
+};
+
+function InfoItem({ label, value }: { label: string; value: ReactNode }) {
+    return (
+        <div>
+            <dt className="text-sm text-muted-foreground">{label}</dt>
+            <dd className="mt-1 text-lg font-semibold">{value}</dd>
+        </div>
+    );
+}
+
+function BackLink() {
+    return (
+        <RouterLink to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+            ← Serviços
+        </RouterLink>
+    );
 }
 
 export function ServiceDetailPage() {
-  const { id } = useParams();
-  const service = id ? findServiceById(id) : undefined;
+    const { id } = useParams();
+    const service = id ? findServiceById(id) : undefined;
 
-  if (!service) {
+    if (!service) {
+        return (
+            <main className="mx-auto max-w-7xl space-y-4 p-6">
+                <BackLink />
+                <h1 className="text-2xl font-semibold">Serviço não encontrado</h1>
+                <p className="text-muted-foreground">
+                    Não existe serviço com o identificador "{id}".
+                </p>
+            </main>
+        );
+    }
+
+    const { location, metrics, environmental } = service;
+    const history = buildServiceHistory(service);
+    const period = 'Últimas 24 horas';
+
     return (
-      <main className="mx-auto  max-w-5xl  p-6">
-        <h1 className="text-2xl font-semibold">Serviço não encontrado</h1>
-        <p className="mt-2 text-muted-foreground">
-          Não existe serviço com o identificador "{id}".
-        </p>
-      </main>
-    );
-  }
+        <main className="mx-auto max-w-7xl space-y-6 p-6">
+            <BackLink />
 
-  return (
-    <main className="mx-auto  max-w-5xl space-y-6  p-6">
-      <header>
-        <p className="text-sm text-muted-foreground">Detalhamento de serviço</p>
-        <h1 className="text-3xl font-semibold">{service.name}</h1>
-        <p className="font-mono text-sm text-muted-foreground">
-          ID: {service.id}
-        </p>
-      </header>
-      <Card>
-        <CardHeader>
-          <CardTitle>Estado do serviço</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
+            <header>
+                <h1 className="text-3xl font-semibold">{service.name}</h1>
+                <p className="text-muted-foreground">
+                    <span className="font-mono">{service.id}</span> · {location.city},{' '}
+                    {location.region}, {location.country}
+                </p>
+            </header>
 
-        <ServiceStatusBadge status={service.status} />
-          <p className="text-sm text-muted-foreground">
-            Visto por último em{' '}
-            {new Date(service.lastSeenAt).toLocaleString('pt-BR')}
-          </p>
-        </CardContent>
-      </Card>
             <Card>
-        <CardHeader>
-          <CardTitle>Métricas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {service.metrics ? (
-            <dl className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <InfoItem
-                label="CPU"
-                value={`${service.metrics.cpuPercent.toLocaleString('pt-BR')} %`}
-              />
-              <InfoItem
-                label="Memória"
-                value={`${service.metrics.memoryGb.toLocaleString('pt-BR')} GB`}
-              />
-              <InfoItem
-                label="Disco"
-                value={`${service.metrics.diskGb.toLocaleString('pt-BR')} GB`}
-              />
-              <InfoItem
-                label="Rede"
-                value={`${service.metrics.networkGb.toLocaleString('pt-BR')} GB`}
-              />
-            </dl>
-          ) : (
-            <p className="text-muted-foreground">
-              Nenhuma métrica disponível para este serviço.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Localização</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-2 gap-4 md:grid-cols-3">
-            <InfoItem label="Cidade" value={service.location.city} />
-            <InfoItem label="Região" value={service.location.region} />
-            <InfoItem label="País" value={service.location.country} />
-            <InfoItem
-              label="Código da região"
-              value={service.location.regionCode}
-            />
-            <InfoItem
-              label="Coordenadas"
-              value={`${service.location.latitude.toFixed(4)}, ${service.location.longitude.toFixed(4)}`}
-            />
-          </dl>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Indicadores ambientais</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {service.environmental ? (
-            <dl className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              <InfoItem
-                label="Potência estimada"
-                value={`${service.environmental.powerWatts.toLocaleString('pt-BR')} W`}
-              />
-              <InfoItem
-                label="Energia estimada"
-                value={`${service.environmental.energyKwh.toLocaleString('pt-BR', { maximumFractionDigits: 5 })} kWh`}
-              />
-              <InfoItem
-                label="CO₂e estimado"
-                value={`${service.environmental.co2eGrams.toLocaleString('pt-BR')} g`}
-              />
-              <InfoItem
-                label="Intensidade de carbono"
-                value={`${service.environmental.carbonIntensity.toLocaleString('pt-BR')} gCO₂e/kWh`}
-              />
-              <InfoItem
-                label="Energia renovável"
-                value={`${service.environmental.renewableSharePercent.toLocaleString('pt-BR')} %`}
-              />
-            </dl>
-          ) : (
-            <p className="text-muted-foreground">
-              Indicadores ambientais indisponíveis: o serviço não possui
-              métricas para o cálculo.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-    </main>
-  );
+                <CardHeader>
+                    <CardTitle>Resumo</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <dl className="grid grid-cols-2 gap-6 md:grid-cols-4">
+                        <InfoItem
+                            label="Estado"
+                            value={<ServiceStatusBadge status={service.status} />}
+                        />
+                        <InfoItem label="Região" value={location.regionCode} />
+                        <InfoItem
+                            label="Coordenadas"
+                            value={`${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
+                        />
+                        <InfoItem
+                            label="Visto por último"
+                            value={formatDateTime(service.lastSeenAt)}
+                        />
+                        <InfoItem label="CPU" value={formatNumber(metrics?.cpuPercent, '%')} />
+                        <InfoItem label="Memória" value={formatNumber(metrics?.memoryGb, 'GB')} />
+                        <InfoItem label="Disco" value={formatNumber(metrics?.diskGb, 'GB')} />
+                        <InfoItem label="Rede" value={formatNumber(metrics?.networkGb, 'GB')} />
+                        <InfoItem
+                            label="Potência estimada"
+                            value={formatNumber(environmental?.powerWatts, 'W', 2)}
+                        />
+                        <InfoItem
+                            label="Energia (última coleta)"
+                            value={formatNumber(environmental?.energyKwh, 'kWh', 5)}
+                        />
+                        <InfoItem
+                            label="CO₂e (última coleta)"
+                            value={formatNumber(environmental?.co2eGrams, 'g', 3)}
+                        />
+                        <InfoItem
+                            label="Intensidade da região"
+                            value={formatNumber(environmental?.carbonIntensity, 'gCO₂e/kWh', 0)}
+                        />
+                        <InfoItem
+                            label="Energia renovável"
+                            value={formatNumber(environmental?.renewableSharePercent, '%')}
+                        />
+                    </dl>
+                </CardContent>
+            </Card>
+
+            {history.length === 0 ? (
+                <Card>
+                    <CardContent>
+                        <p className="text-muted-foreground">
+                            Sem métricas no período. Os gráficos aparecem quando o serviço voltar a
+                            enviar métricas.
+                        </p>
+                    </CardContent>
+                </Card>
+            ) : (
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <ChartCard title="CO₂e por coleta" subtitle={period}>
+                        <TimeSeriesChart
+                            label="CO₂e por coleta"
+                            color={chartColors.co2e}
+                            data={history.map((point) => ({
+                                time: point.collectedAt,
+                                value: point.co2eGrams,
+                            }))}
+                            formatValue={(value) => formatNumber(value, 'g', 3)}
+                        />
+                    </ChartCard>
+                    <ChartCard title="Potência estimada" subtitle={period}>
+                        <TimeSeriesChart
+                            label="Potência estimada"
+                            color={chartColors.power}
+                            data={history.map((point) => ({
+                                time: point.collectedAt,
+                                value: point.powerWatts,
+                            }))}
+                            formatValue={(value) => formatNumber(value, 'W')}
+                        />
+                    </ChartCard>
+                    <ChartCard title="Uso de CPU" subtitle={period}>
+                        <TimeSeriesChart
+                            label="Uso de CPU"
+                            color={chartColors.cpu}
+                            data={history.map((point) => ({
+                                time: point.collectedAt,
+                                value: point.cpuPercent,
+                            }))}
+                            formatValue={(value) => formatNumber(value, '%')}
+                        />
+                    </ChartCard>
+                    <ChartCard title="Memória em uso" subtitle={period}>
+                        <TimeSeriesChart
+                            label="Memória em uso"
+                            color={chartColors.memory}
+                            data={history.map((point) => ({
+                                time: point.collectedAt,
+                                value: point.memoryGb,
+                            }))}
+                            formatValue={(value) => formatNumber(value, 'GB')}
+                        />
+                    </ChartCard>
+                </div>
+            )}
+        </main>
+    );
 }
