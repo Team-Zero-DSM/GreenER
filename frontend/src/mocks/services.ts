@@ -1,4 +1,4 @@
-import type { ServiceDetail } from '@/types/service';
+import type { ServiceDetail, ServiceSummary } from '@/types/service';
 
 const services: ServiceDetail[] = [
   {
@@ -39,8 +39,27 @@ const services: ServiceDetail[] = [
     metrics: null,
     environmental: null,
   },
+  {
+    id: 'svc-003',
+    name: 'Gateway de Autenticação',
+    status: 'unavailable',
+    lastSeenAt: '2026-10-08T09:12:00Z',
+    location: {
+      regionCode: 'DE-HE',
+      country: 'Alemanha',
+      region: 'Hesse',
+      city: 'Frankfurt',
+      latitude: 50.1109,
+      longitude: 8.6821,
+    },
+    metrics: null,
+    environmental: null,
+  },
 ];
 
 export function findServiceById(id: string): ServiceDetail | undefined {
   return services.find((service) => service.id === id);
+}
+export function listServices(): ServiceSummary[] {
+  return services;
 }
