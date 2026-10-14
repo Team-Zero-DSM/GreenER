@@ -6,14 +6,14 @@ export const statusInfo: Record<
 > = {
   available: {
     label: 'Disponível',
-    className: 'bg-emerald-100 text-emerald-800',
+    className: 'bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-400/40',
   },
   metrics_missing: {
     label: 'Sem métricas',
-    className: 'bg-amber-100 text-amber-800',
+    className: 'bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/40',
   },
   unavailable: {
     label: 'Indisponível',
-    className: 'bg-red-100 text-red-800',
+    className: 'bg-red-400/15 text-red-300 ring-1 ring-red-400/40',
   },
 };
