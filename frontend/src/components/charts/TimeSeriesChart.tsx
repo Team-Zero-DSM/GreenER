@@ -1,5 +1,5 @@
 import { useId, useState, type MouseEvent } from 'react';
-import { formatTime } from '@/lib/format';
+import { formatDateTime, formatTime } from '@/lib/format';
 
 export interface TimeSeriesPoint {
     time: string;
@@ -18,43 +18,65 @@ const HEIGHT = 220;
 const PAD = { top: 12, right: 12, bottom: 32, left: 96 };
 const INNER_WIDTH = WIDTH - PAD.left - PAD.right;
 const INNER_HEIGHT = HEIGHT - PAD.top - PAD.bottom;
-const TOOLTIP = { width: 170, height: 60 };
+const TOOLTIP = { width: 190, height: 60 };
 
 export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesChartProps) {
     const gradientId = `grad-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
     const [hovered, setHovered] = useState<number | null>(null);
 
-    if (data.length < 2) {
+    if (data.length === 0) {
         return <p className="text-sm text-muted-foreground">Sem dados no período.</p>;
     }
 
     const values = data.map((point) => point.value);
-    const min = Math.min(...values);
     const max = Math.max(...values);
-    const margin = (max - min || 1) * 0.1;
-    const low = min - margin;
-    const high = max + margin;
+    const low = 0;
+    const high = max > 0 ? max * 1.1 : 1;
+    const startTime = new Date(data[0].time).getTime();
+    const endTime = new Date(data[data.length - 1].time).getTime();
 
-    const x = (index: number) => PAD.left + (index / (data.length - 1)) * INNER_WIDTH;
+    const x = (index: number) =>
+        PAD.left +
+        (endTime === startTime
+            ? 0.5
+            : (new Date(data[index].time).getTime() - startTime) / (endTime - startTime)) *
+            INNER_WIDTH;
     const y = (value: number) => PAD.top + (1 - (value - low) / (high - low)) * INNER_HEIGHT;
 
     const line = data.map((point, index) => `${x(index)},${y(point.value)}`).join(' ');
     const bottom = PAD.top + INNER_HEIGHT;
     const area = `${x(0)},${bottom} ${line} ${x(data.length - 1)},${bottom}`;
 
-    const yTicks = [low, (low + high) / 2, high];
-    const xTicks = [0, Math.floor((data.length - 1) / 2), data.length - 1];
+    const yTicks = [low, high / 4, high / 2, (high * 3) / 4, high];
+    const xTicks = [
+        ...new Set([
+            0,
+            Math.floor((data.length - 1) / 4),
+            Math.floor((data.length - 1) / 2),
+            Math.floor(((data.length - 1) * 3) / 4),
+            data.length - 1,
+        ]),
+    ];
 
     // Converte a posição do mouse (em pixels da tela) no índice do ponto mais próximo.
     function handleMouseMove(event: MouseEvent<SVGSVGElement>) {
         const rect = event.currentTarget.getBoundingClientRect();
         const svgX = ((event.clientX - rect.left) / rect.width) * WIDTH;
-        const index = Math.round(((svgX - PAD.left) / INNER_WIDTH) * (data.length - 1));
+        const time = startTime + ((svgX - PAD.left) / INNER_WIDTH) * (endTime - startTime);
+        const index = data.reduce(
+            (nearest, item, i) =>
+                Math.abs(new Date(item.time).getTime() - time) <
+                Math.abs(new Date(data[nearest].time).getTime() - time)
+                    ? i
+                    : nearest,
+            0,
+        );
         setHovered(Math.min(data.length - 1, Math.max(0, index)));
     }
 
-    const point = hovered === null ? null : data[hovered];
-    const pointX = hovered === null ? 0 : x(hovered);
+    const selected = hovered !== null && hovered < data.length ? hovered : null;
+    const point = selected === null ? null : data[selected];
+    const pointX = selected === null ? 0 : x(selected);
     const pointY = point ? y(point.value) : 0;
     // A caixa fica à direita do ponto, ou à esquerda quando não cabe.
     const tooltipX =
@@ -94,7 +116,7 @@ export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesC
                         y={y(tick)}
                         textAnchor="end"
                         dominantBaseline="middle"
-                        className="fill-muted-foreground text-[18px]"
+                        className="fill-muted-foreground text-[12px]"
                     >
                         {formatValue(tick)}
                     </text>
@@ -109,9 +131,11 @@ export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesC
                     textAnchor={
                         index === 0 ? 'start' : index === data.length - 1 ? 'end' : 'middle'
                     }
-                    className="fill-muted-foreground text-[18px]"
+                    className="fill-muted-foreground text-[12px]"
                 >
-                    {formatTime(data[index].time)}
+                    {endTime - startTime >= 86400000
+                        ? formatDateTime(data[index].time).slice(0, 5)
+                        : formatTime(data[index].time)}
                 </text>
             ))}
 
@@ -123,15 +147,16 @@ export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesC
                 strokeLinejoin="round"
                 style={{ stroke: color }}
             />
-            {data.map((item, index) => (
-                <circle
-                    key={item.time}
-                    cx={x(index)}
-                    cy={y(item.value)}
-                    r={3}
-                    style={{ fill: color }}
-                />
-            ))}
+            {data.length === 1 &&
+                data.map((item, index) => (
+                    <circle
+                        key={item.time}
+                        cx={x(index)}
+                        cy={y(item.value)}
+                        r={3}
+                        style={{ fill: color }}
+                    />
+                ))}
 
             {point && (
                 <g pointerEvents="none">
@@ -162,9 +187,9 @@ export function TimeSeriesChart({ data, label, color, formatValue }: TimeSeriesC
                     <text
                         x={tooltipX + 12}
                         y={tooltipY + 24}
-                        className="fill-muted-foreground text-[16px]"
+                        className="fill-muted-foreground text-[13px]"
                     >
-                        {formatTime(point.time)}
+                        {formatDateTime(point.time)}
                     </text>
                     <text
                         x={tooltipX + 12}
