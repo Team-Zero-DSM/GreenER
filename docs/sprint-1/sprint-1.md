@@ -31,12 +31,12 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 | **T01** | Definir e documentar a arquitetura do projeto | Henrique | ✅ | 5 | RNF08 |
 | **T02** | Configurar estrutura inicial do backend | Pedro | ✅ | 2 | RF01 |
 | **T03** | Implementar integração com o endpoint de descoberta de serviços | Vitor | ✅ | 5 | RF01 |
-| **T04** | Criar modelo de representação dos serviços (DTO/Entidade) | Pedro | 🔄 | 3 | RF01 |
+| **T04** | Criar modelo de representação dos serviços (DTO/Entidade) | Vitor | 🔄 | 3 | RF01 |
 | **T05** | Implementar endpoint interno para disponibilizar os serviços ao frontend | Vitor | ❌ | 5 | RF01 |
 | **T06** | Implementar integração com o endpoint `/metrics/{id_servico}` | Pedro | ✅ | 5 | RF03 |
 | **T07** | Implementar processamento das métricas recebidas | Pedro | ✅ | 5 | RF03 |
 | **T08** | Implementar rotina periódica de coleta de métricas | Vitor | ✅ | 8 | RF03, RF11 |
-| **T09** | Disponibilizar métricas processadas através do backend | Pedro | ❌ | 5 | RF03 |
+| **T09** | Disponibilizar métricas processadas através do backend | Pedro | ✅ | 5 | RF03 |
 | **T10** | Testar atualização periódica das métricas | Vitor | 🔄 | 2 | RF03 |
 | **T11** | Definir layout inicial da aplicação | Paulo/Gabriel | ✅ | 3 | RF09 |
 | **T12** | Desenvolver página inicial do GreenER | Gabriel | 🔄 | 5 | RF09 |
@@ -56,7 +56,7 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 | **T26** | Elaborar documentação inicial de execução do projeto | Henrique | ✅ | 3 | RNF08 |
 | **T27** | Criar diagrama de casos de uso geral do sistema | Henrique | ✅ | 3 | RNF08 |
 | **T28** | Criar diagrama de classes inicial do sistema | Henrique | ✅ | 5 | RNF08, RNF09 |
-| **T29** | Criar diagramas de sequência iniciais do projeto | Henrique | 🔄 | 5 | RNF08, RNF09 |
+| **T29** | Criar diagramas de sequência iniciais do projeto | Henrique | ✅ | 5 | RNF08, RNF09 |
 | **T30** | Documentar modelagem do banco (MER/DER) | Vitor | ✅ | 5 | RNF08, RNF09 |
 
 ## 📌 Legenda de Status
@@ -68,17 +68,17 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 ## 📊 Progresso da Sprint
 
 - **Total:** 120 pontos
-- **Concluídos:** 71 pontos
-- **Em andamento:** 20 pontos
-- **Restantes:** 29 pontos
-- **Progresso Geral:** 59,17%
+- **Concluídos:** 81 pontos
+- **Em andamento:** 13 pontos
+- **Restantes:** 26 pontos
+- **Progresso Geral:** 67,50%
 
 ---
 
 ## 📈 Burndown da Sprint
 
 <p align="center">
-    <img src="./Burndown-sprint1.svg" alt="Gráfico de Burndown">
+    <img src="./Burndown.svg" alt="Gráfico de Burndown">
 </p>
 
 ---

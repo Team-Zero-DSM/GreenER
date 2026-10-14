@@ -273,3 +273,23 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Acompanhamento da Sprint:** apesar do menor ritmo de trabalho devido ao feriado, houve avanço na documentação da arquitetura, na implementação do frontend e na validação da atualização das métricas. A equipe deu continuidade às atividades planejadas para a Sprint 1.
 
 ---
+
+## 📅 13/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---|---|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Documentação do sistema:** Henrique finalizou os diagramas de sequência, concluindo a documentação técnica planejada para a Sprint.
+- **Frontend — página inicial:** Gabriel resolveu os impedimentos anteriores e deu continuidade à implementação da tela inicial do GreenER.
+- **Backend — novos endpoints:** Pedro disponibilizou um Pull Request com atualizações no backend, incluindo novos endpoints para permitir que o frontend acesse informações diretamente da API externa.
+- **Testes da coleta periódica:** Vitor preparou o Pull Request referente aos testes da coleta periódica de métricas, dando continuidade à validação da atualização dos dados.
+- **Impedimentos:** problemas de conectividade com a internet da faculdade prejudicaram o desenvolvimento dos componentes da área de detalhamento de serviços, impedindo a conclusão da tarefa por Paulo.
