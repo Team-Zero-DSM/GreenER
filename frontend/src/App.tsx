@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ServiceDetailPage } from '@/pages/ServiceDetailPage';
+import { DashboardPage } from '@/pages/DashboardPage';
 
 function HomePage() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/servicos/:id" element={<ServiceDetailPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
     </Routes>
   );
 }
