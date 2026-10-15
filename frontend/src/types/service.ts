@@ -1,4 +1,4 @@
-export type ServiceStatus = 'available' | 'metrics_missing' | 'unavailable';
+export type ServiceStatus = 'available' | 'unavailable' | 'metrics_missing' | 'removed' | 'unknown';
 
 export interface ServiceLocation {
   regionCode: string;
@@ -33,3 +33,4 @@ export interface ServiceDetail {
   metrics: ServiceMetrics | null;
   environmental: ServiceEnvironmental | null;
 }
+
