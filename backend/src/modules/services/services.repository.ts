@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { CollectionRow, ServiceRow } from './services.types.js';
+import { CollectionRow, ServiceRow } from './types/services.types.js';
 
 export class ServiceRepository {
     constructor(private readonly pool: Pool) {}

@@ -9,22 +9,6 @@ export interface Region {
     renewable_share_percent: number;
 }
 
-export interface ServiceLocation {
-    region_code: string;
-    country: string;
-    region: string;
-    city?: string | null;
-    latitude?: number | null;
-    longitude?: number | null;
-}
-
-export interface Service {
-    id: string;
-    name: string;
-    location: ServiceLocation;
-    metrics_path: string;
-}
-
 export interface Collection {
     service_id: string;
     estimate_parameter_id: string;

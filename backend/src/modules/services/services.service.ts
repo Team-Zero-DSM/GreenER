@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../shared/errors/NotFoundError.js';
 import { ServiceRepository } from './services.repository.js';
-import { ServiceOverviewDto } from './services.types.js';
+import { ServiceOverviewDto } from './types/services.types.js';
 
 const round = (value: number, decimals: number) => Number(value.toFixed(decimals));
 const toIso = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z');
