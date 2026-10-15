@@ -293,3 +293,24 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Backend — novos endpoints:** Pedro disponibilizou um Pull Request com atualizações no backend, incluindo novos endpoints para permitir que o frontend acesse informações diretamente da API externa.
 - **Testes da coleta periódica:** Vitor preparou o Pull Request referente aos testes da coleta periódica de métricas, dando continuidade à validação da atualização dos dados.
 - **Impedimentos:** problemas de conectividade com a internet da faculdade prejudicaram o desenvolvimento dos componentes da área de detalhamento de serviços, impedindo a conclusão da tarefa por Paulo.
+
+---
+
+## 📅 14/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---|---|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ❌ |
+
+### 📝 Registro da Daily
+
+- **Frontend — componentes:** Paulo concluiu a tarefa dos componentes do frontend, realizando uma entrega importante para a Sprint 1.
+- **Planejamento da Sprint:** Henrique e Pedro começaram a alinhar os ajustes finais e o planejamento do vídeo de apresentação do projeto.
+- **Frontend — página inicial:** Gabriel continuou finalizando a tela inicial e planejou as próximas entregas dos componentes para o feriado de 15/10.
+- **Impedimentos:** Vitor não compareceu por estar doente. A ausência dificultou a comunicação e atrasou a conclusão de um endpoint necessário para Paulo finalizar a integração entre frontend e backend. Apesar da expectativa inicial de pouco avanço devido à aula, a equipe conseguiu concluir uma entrega importante.

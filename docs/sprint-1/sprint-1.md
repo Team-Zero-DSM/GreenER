@@ -31,7 +31,7 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 | **T01** | Definir e documentar a arquitetura do projeto | Henrique | ✅ | 5 | RNF08 |
 | **T02** | Configurar estrutura inicial do backend | Pedro | ✅ | 2 | RF01 |
 | **T03** | Implementar integração com o endpoint de descoberta de serviços | Vitor | ✅ | 5 | RF01 |
-| **T04** | Criar modelo de representação dos serviços (DTO/Entidade) | Vitor | 🔄 | 3 | RF01 |
+| **T04** | Criar modelo de representação dos serviços (DTO/Entidade) | Vitor/Pedro | 🔄 | 3 | RF01 |
 | **T05** | Implementar endpoint interno para disponibilizar os serviços ao frontend | Vitor | ❌ | 5 | RF01 |
 | **T06** | Implementar integração com o endpoint `/metrics/{id_servico}` | Pedro | ✅ | 5 | RF03 |
 | **T07** | Implementar processamento das métricas recebidas | Pedro | ✅ | 5 | RF03 |
@@ -42,7 +42,7 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 | **T12** | Desenvolver página inicial do GreenER | Gabriel | 🔄 | 5 | RF09 |
 | **T13** | Desenvolver página de detalhamento de serviço | Paulo | ✅ | 5 | RF09 |
 | **T14** | Criar componente de listagem dos serviços | Gabriel | ❌ | 3 | RF09 |
-| **T15** | Criar componente de visualização das métricas | Paulo | ❌ | 3 | RF09 |
+| **T15** | Criar componente de visualização das métricas | Paulo | ✅ | 3 | RF09 |
 | **T16** | Implementar indicadores visuais de status dos serviços | Paulo/Gabriel | 🔄 | 3 | RF05, RF06, RF09 |
 | **T17** | Integrar frontend com os endpoints do backend | Paulo/Gabriel | ❌ | 5 | RF09 |
 | **T18** | Implementar atualização automática das informações exibidas | Paulo/Gabriel | ❌ | 8 | RF11, RNF02 |
@@ -68,17 +68,17 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 ## 📊 Progresso da Sprint
 
 - **Total:** 120 pontos
-- **Concluídos:** 81 pontos
+- **Concluídos:** 84 pontos
 - **Em andamento:** 13 pontos
-- **Restantes:** 26 pontos
-- **Progresso Geral:** 67,50%
+- **Restantes:** 23 pontos
+- **Progresso Geral:** 70,00%
 
 ---
 
 ## 📈 Burndown da Sprint
 
 <p align="center">
-    <img src="./Burndown.svg" alt="Gráfico de Burndown">
+    <img src="./Burndown-Sprint1.svg" alt="Gráfico de Burndown">
 </p>
 
 ---
