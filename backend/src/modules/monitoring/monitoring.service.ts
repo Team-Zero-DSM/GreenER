@@ -1,4 +1,8 @@
-import type { DependencyStatus, MonitoringData, MonitoringStatus } from './monitoring.types.js';
+import type {
+    DependencyStatus,
+    MonitoringData,
+    MonitoringStatus,
+} from './types/monitoring.types.js';
 
 export class MonitoringService {
     private readonly data: MonitoringData = {

@@ -1,7 +1,9 @@
 import { CarbonClient } from '../../integrations/carbon-api.js';
 import type { RegionsResponse } from '../../integrations/carbon-api.schema.js';
 import { MetricsClient } from '../../integrations/metrics-api.js';
-import type { MetricsResponse, MetricsService } from '../../integrations/metrics-api.schema.js';
+import { toDiscoveredService } from '../../integrations/metrics-api.mapper.js';
+import type { MetricsResponse } from '../../integrations/metrics-api.schema.js';
+import type { DiscoveredService } from '../../shared/types/index.js';
 import { pool } from '../../db/connection.js';
 import { ExternalApiError } from '../../shared/errors/external-api-error.js';
 import { CollectionsRepository } from './collections.repository.js';
@@ -12,7 +14,7 @@ import type {
     EstimateParameter,
     ProcessedMetrics,
     ServiceStatus,
-} from './collections.types.js';
+} from './types/collections.types.js';
 
 export class CollectionsService {
     constructor(
@@ -67,10 +69,10 @@ export class CollectionsService {
     }
 
     async syncServices(): Promise<void> {
-        let services: MetricsService[];
+        let services: DiscoveredService[];
 
         try {
-            services = await this.metrics.getServices();
+            services = (await this.metrics.getServices()).map(toDiscoveredService);
             monitoringService.recordDependency('metricsDiscovery', 'available');
         } catch (err) {
             monitoringService.recordDependency('metricsDiscovery', 'unavailable');
@@ -90,7 +92,7 @@ export class CollectionsService {
 
         for (const service of services) {
             try {
-                const regionCode = service.location.region_code;
+                const regionCode = service.location.regionCode;
 
                 const regionExists = await this.repository.existsByCode(regionCode);
                 monitoringService.recordDependency('database', 'available');

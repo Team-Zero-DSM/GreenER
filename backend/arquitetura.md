@@ -162,6 +162,7 @@ greener/
 │       ├── integrations/
 │       │   ├── metrics-api.ts
 │       │   ├── metrics-api.schema.ts
+│       │   ├── metrics-api.mapper.ts
 │       │   ├── carbon-api.ts
 │       │   └── carbon-api.schema.ts
 │       │
@@ -181,8 +182,8 @@ greener/
 │       │   │   ├── collections.controller.ts
 │       │   │   ├── collections.service.ts
 │       │   │   ├── collections.repository.ts
-│       │   │   ├── collections.types.ts
-│       │   │   └── collections.schema.ts
+│       │   │   ├── collections.schema.ts
+│       │   │   └── types/collections.types.ts
 │       │   │
 │       │   │
 │       │   │
@@ -192,8 +193,8 @@ greener/
 │       │   │   ├── services.controller.ts
 │       │   │   ├── services.service.ts
 │       │   │   ├── services.repository.ts
-│       │   │   ├── services.types.ts
-│       │   │   └── services.schema.ts
+│       │   │   ├── services.schema.ts
+│       │   │   └── types/services.types.ts
 │       │   │
 │       │   ├── regions/
 │       │   │   ├── regions.routes.ts
@@ -206,14 +207,14 @@ greener/
 │       │   │   ├── analytics.controller.ts
 │       │   │   ├── analytics.service.ts
 │       │   │   ├── analytics.repository.ts
-│       │   │   ├── analytics.types.ts
-│       │   │   └── analytics.schema.ts
+│       │   │   ├── analytics.schema.ts
+│       │   │   └── types/analytics.types.ts
 │       │   │
 │       │   ├── monitoring/
 │       │   │   ├── monitoring.routes.ts
 │       │   │   ├── monitoring.controller.ts
 │       │   │   ├── monitoring.service.ts
-│       │   │   └── monitoring.types.ts
+│       │   │   └── types/monitoring.types.ts
 │       │   │
 │       │   └── monitoring-settings/
 │       │       ├── monitoring-settings.routes.ts
@@ -775,6 +776,14 @@ sequenceDiagram
 A API externa representa o estado atual dos serviços monitorados.
 
 O banco mantém os dados necessários para histórico e utilização pela aplicação.
+
+Os dados recebidos do Agregador são convertidos para a representação interna
+`DiscoveredService`, definida em `src/shared/types/`. Ela concentra `id`,
+`name`, `metricsPath` e `location` (código da região, país, região, cidade,
+latitude e longitude). O mapeamento é feito por `toDiscoveredService`, em
+`src/integrations/metrics-api.mapper.ts`, e a representação é utilizada pelo
+módulo `collections` ao sincronizar os serviços descobertos. Os tipos de cada
+módulo ficam em `src/modules/<módulo>/types/`.
 
 ---
 
