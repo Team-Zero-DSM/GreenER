@@ -7,10 +7,10 @@ interface ServiceListProps {
     services: ServiceSummary[];
 }
 
-const headClass = 'px-3 py-2 text-left font-medium whitespace-nowrap';
-const numHeadClass = 'px-3 py-2 text-right font-medium whitespace-nowrap';
-const cellClass = 'px-3 py-2 whitespace-nowrap';
-const numCellClass = 'px-3 py-2 text-right whitespace-nowrap tabular-nums';
+const headClass = 'px-2 py-2 first:pl-4 last:pr-4 text-left font-medium whitespace-nowrap';
+const numHeadClass = 'px-2 py-2 first:pl-4 last:pr-4 text-right font-medium whitespace-nowrap';
+const cellClass = 'px-2 py-2 first:pl-4 last:pr-4 whitespace-nowrap';
+const numCellClass = 'px-2 py-2 first:pl-4 last:pr-4 text-right whitespace-nowrap tabular-nums';
 
 export function ServiceList({ services }: ServiceListProps) {
     const navigate = useNavigate();
@@ -20,11 +20,9 @@ export function ServiceList({ services }: ServiceListProps) {
                 <caption className="sr-only">Serviços monitorados</caption>
                 <thead className="border-b text-muted-foreground">
                     <tr>
-                        <th className={headClass}>Nome</th>
+                        <th className={headClass}>Serviço</th>
                         <th className={headClass}>Estado</th>
-                        <th className={headClass}>Região</th>
-                        <th className={headClass}>País</th>
-                        <th className={headClass}>Cidade</th>
+                        <th className={headClass}>Localização</th>
                         <th className={numHeadClass}>CPU</th>
                         <th className={numHeadClass}>Memória</th>
                         <th className={numHeadClass}>Disco</th>
@@ -32,7 +30,6 @@ export function ServiceList({ services }: ServiceListProps) {
                         <th className={numHeadClass}>Energia</th>
                         <th className={numHeadClass}>CO₂e</th>
                         <th className={headClass}>Visto por último</th>
-                        <th className={headClass}>Ações</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -43,7 +40,13 @@ export function ServiceList({ services }: ServiceListProps) {
                             className="cursor-pointer hover:bg-white/5"
                         >
                             <td className={cellClass}>
-                                <strong className="font-semibold">{service.name}</strong>
+                                <RouterLink
+                                    to={`/servicos/${service.id}`}
+                                    onClick={(event) => event.stopPropagation()}
+                                    className="font-semibold hover:text-primary hover:underline"
+                                >
+                                    {service.name}
+                                </RouterLink>
                                 <div className="font-mono text-xs text-muted-foreground">
                                     {service.id}
                                 </div>
@@ -56,9 +59,20 @@ export function ServiceList({ services }: ServiceListProps) {
                                     </div>
                                 )}
                             </td>
-                            <td className={cellClass}>{service.location?.regionCode ?? '—'}</td>
-                            <td className={cellClass}>{service.location?.country ?? '—'}</td>
-                            <td className={cellClass}>{service.location?.city ?? '—'}</td>
+                            <td className={cellClass}>
+                                {service.location ? (
+                                    <>
+                                        {[service.location.city, service.location.country]
+                                            .filter(Boolean)
+                                            .join(', ')}
+                                        <div className="font-mono text-xs text-muted-foreground">
+                                            {service.location.regionCode}
+                                        </div>
+                                    </>
+                                ) : (
+                                    '—'
+                                )}
+                            </td>
                             <td className={numCellClass}>
                                 {formatNumber(service.metrics?.cpuPercent, '%')}
                             </td>
@@ -77,14 +91,9 @@ export function ServiceList({ services }: ServiceListProps) {
                             <td className={numCellClass}>
                                 {formatNumber(service.environmental?.co2eGrams, 'g', 3)}
                             </td>
-                            <td className={cellClass}>{formatDateTime(service.lastSeenAt)}</td>
-                            <td className={cellClass}>
-                                <RouterLink
-                                    to={`/servicos/${service.id}`}
-                                    className="font-medium text-primary hover:underline"
-                                >
-                                    Detalhes
-                                </RouterLink>
+                            <td className={`${cellClass} whitespace-pre-line`}>
+                                {/* Data e hora em duas linhas para a tabela caber sem rolagem. */}
+                                {formatDateTime(service.lastSeenAt).replace(', ', '\n')}
                             </td>
                         </tr>
                     ))}
