@@ -1,7 +1,7 @@
 import { NotFoundError } from '../../shared/errors/NotFoundError.js';
 import { ServiceRepository } from '../services/services.repository.js';
 import { AnalyticsRepository } from './analytics.repository.js';
-import { CollectionsAnalyticsDto } from './analytics.types.js';
+import { CollectionsAnalyticsDto } from './types/analytics.types.js';
 
 export class AnalyticsService {
     constructor(

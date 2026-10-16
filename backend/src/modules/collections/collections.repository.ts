@@ -1,13 +1,13 @@
 import { Pool } from 'pg';
+import type { DiscoveredService } from '../../shared/types/index.js';
 import {
     ActiveService,
     Collection,
     EstimateParameter,
     RegionEnergyInfo,
-    Service,
     ServiceStatus,
     type Region,
-} from './collections.types.js';
+} from './types/collections.types.js';
 
 export class CollectionsRepository {
     constructor(private readonly pool: Pool) {}
@@ -29,11 +29,11 @@ export class CollectionsRepository {
             ],
         );
     }
-    async createService(data: Service): Promise<void> {
+    async createService(data: DiscoveredService): Promise<void> {
         await this.pool.query(
             `INSERT INTO servico (external_id, nome, metrics_path, regiao_id)
      VALUES ($1, $2, $3, (SELECT id FROM regiao WHERE codigo = $4))`,
-            [data.id, data.name, data.metrics_path, data.location.region_code],
+            [data.id, data.name, data.metricsPath, data.location.regionCode],
         );
     }
 

@@ -49,7 +49,7 @@ export function ExploreSection({
         className={`relative z-10 min-w-0`}
         aria-labelledby="explore-title"
     >
-      <div className={`grid w-full content-start gap-4`}>
+      <div className="flex h-[calc(100vh-7rem)] min-h-[400px] flex-col gap-4">
         <div className={`flex items-center gap-3`}>
           <h2 id="explore-title" className="text-xl font-bold text-white md:text-2xl">
             Regiões monitoradas
@@ -126,7 +126,7 @@ export function ExploreSection({
           </button>
         </div>
         
-        <div className="mt-3 space-y-3">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
         {regions.map((region) => (
             <button
             key={region.code}
