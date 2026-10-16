@@ -44,7 +44,7 @@ describe('Processamento de métricas em coletas (CollectionsService)', () => {
 
         const service = new CollectionsService(mockRepo, mockCarbonClient, mockMetricsClient);
 
-        // 1ª Coleta: métricas iniciais
+        // Inicia coleta
         const firstMetrics: MetricsResponse = {
             collection_interval_seconds: 60,
             metrics: {
@@ -70,7 +70,6 @@ describe('Processamento de métricas em coletas (CollectionsService)', () => {
             }),
         );
 
-        // 2ª Coleta: valores diferentes retornados pela API de métricas
         const secondMetrics: MetricsResponse = {
             collection_interval_seconds: 60,
             metrics: {
@@ -96,7 +95,7 @@ describe('Processamento de métricas em coletas (CollectionsService)', () => {
             }),
         );
 
-        // Compara os dados persistidos entre a primeira e a segunda coleta
+        // Compara os dados entre as coletas
         const firstCall = vi.mocked(mockRepo.createCollection).mock.calls[0][0];
         const secondCall = vi.mocked(mockRepo.createCollection).mock.calls[1][0];
 
