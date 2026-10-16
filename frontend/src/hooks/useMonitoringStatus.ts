@@ -9,8 +9,9 @@ const RETRY_MS = 30_000;
 
 interface MonitoringState {
     status: MonitoringStatus | null;
-    // Próxima coleta convertida para o relógio do navegador.
+    // Horários convertidos para o relógio do navegador.
     nextCollectionAt: number | null;
+    lastCollectionAt: number | null;
     error: string | null;
 }
 
@@ -20,6 +21,7 @@ export function useMonitoringStatus() {
     const [state, setState] = useState<MonitoringState>({
         status: null,
         nextCollectionAt: null,
+        lastCollectionAt: null,
         error: null,
     });
 
@@ -40,7 +42,10 @@ export function useMonitoringStatus() {
                     const nextCollectionAt = status.nextCollectionAt
                         ? Date.parse(status.nextCollectionAt) - offset
                         : null;
-                    setState({ status, nextCollectionAt, error: null });
+                    const lastCollectionAt = status.lastSuccessfulCollectionAt
+                        ? Date.parse(status.lastSuccessfulCollectionAt) - offset
+                        : null;
+                    setState({ status, nextCollectionAt, lastCollectionAt, error: null });
 
                     if (nextCollectionAt !== null) {
                         schedule(nextCollectionAt - Date.now() + MARGIN_MS);
