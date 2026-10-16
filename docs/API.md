@@ -23,10 +23,10 @@ fornecê-las ao restante da aplicação.
 
 ## 2. API REST do GreenER
 
-A implementação atual oferece detalhe de serviço, histórico de coletas e
-estado do monitoramento. As demais operações abaixo são planejadas e não devem
-ser apresentadas como implementadas. A interface atual ainda usa mocks; sua
-integração com estas rotas permanece pendente.
+A implementação atual oferece detalhe de serviço, histórico de coletas,
+estado do monitoramento e os cards de região. As demais operações abaixo são
+planejadas e não devem ser apresentadas como implementadas. A interface atual
+ainda usa mocks; sua integração com estas rotas permanece pendente.
 
 ### 2.1. Operações implementadas
 
@@ -39,6 +39,7 @@ Base local: `http://localhost:3000`. As rotas de negócio usam o prefixo
 | `GET` | `/health` | Informar que o processo HTTP está disponível. | Não exige. |
 | `GET` | `/api/v1/service/:externalId` | Entregar identificação, estado, localização e última coleta válida. | Não exige. |
 | `GET` | `/api/v1/service/:externalId/collections` | Entregar pontos agrupados e totais do período. | Não exige. |
+| `GET` | `/api/v1/regions` | Entregar as regiões, dados ambientais, contadores atuais e totais do período. | Não exige. |
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
@@ -117,6 +118,45 @@ desconhecido retorna 404; falha interna retorna 500. Exemplo de erro:
 
 O estado do monitoramento está detalhado na seção 7.
 
+#### Regiões — cards e globo
+
+```http
+GET /api/v1/regions?from=2026-10-11T19:00:00Z&to=2026-10-12T19:00:00Z
+```
+
+Consulta pública, sem corpo. `from` e `to` são opcionais, mas formam um par:
+devem ser enviados juntos, com `from` anterior a `to`. Sem o par, a resposta
+traz `period: null` e `periodSummary: null`, e os cards entregam apenas o
+estado atual.
+
+| Query | Regra |
+|---|---|
+| `from` | Opcional (junto com `to`): data ISO 8601 com fuso; início exclusivo do período. |
+| `to` | Opcional (junto com `from`): data ISO 8601 com fuso; fim inclusivo do período. |
+
+Resposta 200:
+
+- `generatedAt` em UTC; `period` identifica a janela quando o par é enviado.
+- `regions[]` lista todas as regiões cadastradas, mesmo sem serviços.
+- `serviceCounts` representa o estado **atual** dos serviços da região:
+  `totalServices`; `listedServices` e `unlistedServices` por `ativo`;
+  `availableServices`, `metricsMissingServices` e `unavailableServices`
+  por `status`.
+- `periodSummary` existe apenas com o par `from`/`to` e soma as coletas
+  armazenadas no período (`basis: "sum_of_stored_samples"`). Sem amostras
+  na região: `sampleCount: 0` e somas `null`, sem métricas fabricadas.
+- `city`, `latitude` e `longitude` podem ser `null`; a região continua
+  listada — apenas o globe não cria marcador para ela.
+
+Limitação histórica: os totais do período agrupam as coletas pela região
+**atual** de `servico.regiao_id`, pois `coleta` não armazena a região da
+coleta. Após uma mudança de região do serviço, as coletas antigas passam a
+contar na nova região; os totais não representam a localização histórica
+da amostra.
+
+Regiões ausentes retornam 200 com `regions: []`. Par inválido (incompleto,
+`from >= to` ou formato incorreto) retorna 400; falha interna retorna 500.
+
 ### 2.2. Operações planejadas
 
 Os caminhos desta tabela são propostas para funcionalidades ainda não
@@ -128,7 +168,6 @@ implementadas, sem garantia de disponibilidade HTTP na versão atual.
 | `GET` | `/services` | Entregar a lista de serviços e os dados de resumo usados no dashboard. |
 | `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
 | `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
-| `GET` | `/regions` | Entregar regiões e os dados ambientais associados. |
 | `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
 | `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
 | `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |

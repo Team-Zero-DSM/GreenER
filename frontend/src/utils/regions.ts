@@ -1,4 +1,3 @@
-
 import { findServiceById } from '@/mocks/services';
 import type { ServiceDetail } from '@/types/service';
 import type { Region } from '@/types/api';
@@ -7,9 +6,9 @@ type RegionGroup = {
   code: string;
   country: string;
   region: string;
-  city: string;
-  latitude: number;
-  longitude: number;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
   services: ServiceDetail[];
 };
 
@@ -23,6 +22,8 @@ const services = [
 const groupedRegions = services.reduce<Map<string, RegionGroup>>(
   (map, service) => {
     const location = service.location;
+    if (location === null) return map;
+
     const code = location.regionCode;
 
     if (!map.has(code)) {
@@ -52,14 +53,12 @@ export const regions: Region[] = Array.from(
     );
 
     const energyKwh = withMetrics.reduce(
-      (total, service) =>
-        total + service.environmental!.energyKwh,
+      (total, service) => total + service.environmental!.energyKwh,
       0,
     );
 
     const co2eGrams = withMetrics.reduce(
-      (total, service) =>
-        total + service.environmental!.co2eGrams,
+      (total, service) => total + service.environmental!.co2eGrams,
       0,
     );
 
@@ -74,15 +73,30 @@ export const regions: Region[] = Array.from(
           ) / energyKwh
         : null;
 
+    const weightedRenewableShare = withMetrics.reduce<number | null>(
+      (total, service) => {
+        const environmental = service.environmental!;
+
+        if (environmental.energyKwh === 0) return total;
+
+        if (
+          total === null ||
+          environmental.renewableSharePercent === null
+        ) {
+          return null;
+        }
+
+        return (
+          total +
+          environmental.renewableSharePercent * environmental.energyKwh
+        );
+      },
+      0,
+    );
+
     const renewableSharePercent =
-      energyKwh > 0
-        ? withMetrics.reduce(
-            (total, service) =>
-              total +
-              service.environmental!.renewableSharePercent *
-                service.environmental!.energyKwh,
-            0,
-          ) / energyKwh
+      energyKwh > 0 && weightedRenewableShare !== null
+        ? weightedRenewableShare / energyKwh
         : null;
 
     return {

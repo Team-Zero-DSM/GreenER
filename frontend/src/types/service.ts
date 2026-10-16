@@ -37,3 +37,5 @@ export interface ServiceDetail {
     metrics: ServiceMetrics | null;
     environmental: ServiceEnvironmental | null;
 }
+
+export type ServiceSummary = ServiceDetail;
