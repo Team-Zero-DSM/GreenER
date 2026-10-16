@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { CollectionRow, ServiceRow, ServiceWithLatestRow } from './services.types.js';
+import { CollectionRow, ServiceRow, ServiceWithLatestRow } from './types/services.types.js';
 import type { ServicesFilters } from './services.schema.js';
 
 export class ServiceRepository {

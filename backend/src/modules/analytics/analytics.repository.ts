@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { CollectionPointRow, SumaryRow } from './analytics.types.js';
+import { CollectionPointRow, SumaryRow } from './types/analytics.types.js';
 
 export class AnalyticsRepository {
     constructor(private readonly pool: Pool) {}

@@ -1,13 +1,13 @@
 import { NotFoundError } from '../../shared/errors/NotFoundError.js';
 import { ServiceRepository } from './services.repository.js';
-import { ServiceOverviewDto } from './services.types.js';
+import { ServiceOverviewDto } from './types/services.types.js';
 
 import {
     ServiceRow,
     CollectionRow,
     ServicesListDto,
     ServiceWithLatestRow,
-} from './services.types.js';
+} from './types/services.types.js';
 
 import type { ServicesFilters } from './services.schema.js';
 
