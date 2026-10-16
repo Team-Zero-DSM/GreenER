@@ -8,3 +8,7 @@ export const pool = new Pool({
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
 });
+
+pool.on('error', (err) => {
+    console.error('[database] Erro em conexão ociosa do PostgreSQL:', err);
+});

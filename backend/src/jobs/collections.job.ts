@@ -1,4 +1,5 @@
 import { runCollectionRound } from '../modules/collections/collections.service.js';
+import { monitoringService } from '../modules/monitoring/monitoring.service.js';
 
 const DEFAULT_INTERVAL_SECONDS = 30;
 
@@ -15,13 +16,18 @@ function intervalMs(): number {
 async function tick(): Promise<void> {
     const currentSession = session;
     timer = undefined;
+    monitoringService.startRound(intervalMs() / 1000);
     console.log('[collection] rodada iniciada');
     try {
         const collected = await runCollectionRound();
         console.log(`[collection] rodada concluída: ${collected} serviço(s) coletado(s)`);
     } catch (err) {
+        monitoringService.recordRoundFailure();
         console.error('[collection] rodada abortada:', err);
     } finally {
+        monitoringService.finishRound(
+            started && currentSession === session ? intervalMs() / 1000 : null,
+        );
         if (started && currentSession === session) {
             timer = setTimeout(tick, intervalMs());
         }
@@ -37,6 +43,7 @@ export function startCollectionJob(): void {
 export function stopCollectionJob(): void {
     started = false;
     session += 1;
+    monitoringService.clearNextCollection();
     if (timer) {
         clearTimeout(timer);
         timer = undefined;

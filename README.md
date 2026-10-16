@@ -60,7 +60,8 @@ A plataforma relaciona o uso de recursos computacionais à eficiência energéti
 
 ## 📁 Organização de pastas
 
-Itens identificados como **planejados** representam a estrutura prevista para as próximas etapas e ainda não existem no repositório.
+Esta árvore apresenta a organização-alvo do GreenER. As arquiteturas do
+backend e do frontend detalham as responsabilidades e os fluxos de cada camada.
 
 ```bash
 greener/
@@ -68,6 +69,7 @@ greener/
 ├── README.md                         # Documentação principal do projeto
 │
 ├── backend/                          # API e regras de negócio da aplicação
+│   ├── arquitetura.md                # Arquitetura do backend
 │   ├── .dockerignore                 # Arquivos excluídos da imagem Docker
 │   ├── .env.example                  # Modelo das variáveis de ambiente do backend
 │   ├── .prettierignore               # Arquivos ignorados pelo Prettier
@@ -78,37 +80,38 @@ greener/
 │   ├── prettier.config.js            # Configuração do Prettier
 │   ├── tsconfig.json                 # Configuração do TypeScript
 │   └── src/                          # Código-fonte do backend
-│       ├── app.ts                    # Configuração da aplicação Express
-│       ├── server.ts                 # Inicialização do servidor
-│       ├── db/                       # Acesso ao banco de dados (planejado)
-│       │   └── connection.ts         # Conexão com o banco (planejado)
-│       ├── integrations/             # Integrações com APIs externas (planejado)
-│       │   ├── metrics-api.ts        # Integração com a API de métricas (planejado)
-│       │   └── carbon-api.ts         # Integração com a API de carbono (planejado)
-│       └── modules/                  # Módulos de funcionalidades (planejado)
-│           └── coletas/              # Coleta e processamento de métricas (planejado)
-│               ├── coletas.routes.ts       # Rotas de coleta (planejado)
-│               ├── coletas.controller.ts   # Controle das requisições (planejado)
-│               ├── coletas.service.ts      # Regras de negócio (planejado)
-│               └── coletas.repository.ts   # Acesso e persistência (planejado)
+│       ├── app.ts
+│       ├── server.ts
+│       ├── db/
+│       ├── integrations/
+│       ├── jobs/
+│       ├── modules/
+│       │   ├── auth/
+│       │   ├── collections/
+│       │   ├── services/
+│       │   ├── regions/
+│       │   ├── analytics/
+│       │   ├── monitoring/            # Estado da execução do job de coleta
+│       │   └── monitoring-settings/
+│       └── shared/
 │
-├── compose.yaml                      # Serviços Docker (planejado)
+├── compose.yaml                      # Serviços Docker
 │
-├── database/                         # Banco de dados (planejado)
-│   ├── README.md                     # Documentação do banco (planejado)
-│   └── schema.sql                    # Tabelas e relacionamentos (planejado)
+├── database/                         # Banco de dados
+│   ├── README.md                     # Documentação do banco
+│   └── schema.sql                    # Tabelas e relacionamentos
 │
-├── docs/                             # Documentação técnica (planejado)
-│   ├── plano-de-entregas.md          # Planejamento das entregas (planejado)
-│   ├── arquitetura.md                # Arquitetura do sistema (planejado)
-│   ├── calculos.md                   # Cálculos realizados (planejado)
-│   ├── api.md                        # APIs utilizadas (planejado)
-│   └── sprints/                      # Documentação das sprints (planejado)
-│       ├── sprint-1.md               # Sprint 1 (planejado)
-│       ├── sprint-2.md               # Sprint 2 (planejado)
-│       └── sprint-3.md               # Sprint 3 (planejado)
+├── docs/                             # Documentação técnica
+│   ├── plano-de-entregas.md          # Planejamento das entregas
+│   ├── API.md                        # Contratos e integrações das APIs
+│   ├── cálculo.md                    # Fórmulas dos cálculos ambientais
+│   └── sprints/                      # Documentação das sprints
+│       ├── sprint-1.md               # Sprint 1
+│       ├── sprint-2.md               # Sprint 2
+│       └── sprint-3.md               # Sprint 3
 │
 └── frontend/                         # Aplicação e interface do usuário
+    ├── arquitetura.md                # Arquitetura-alvo do frontend
     ├── .dockerignore                 # Arquivos excluídos da imagem Docker
     ├── .env.example                  # Modelo das variáveis de ambiente do frontend
     ├── .prettierignore               # Arquivos ignorados pelo Prettier
@@ -125,16 +128,14 @@ greener/
         ├── App.tsx                   # Componente principal da aplicação
         ├── index.css                 # Estilos globais
         ├── main.tsx                  # Ponto de entrada da aplicação
-        ├── components/               # Componentes reutilizáveis
-        │   └── ui/                   # Componentes de interface
-        │       └── card.tsx
-        ├── lib/                      # Utilitários compartilhados
-        │   └── utils.ts
-        ├── contexts/                 # Contextos para compartilhamento de estado (planejado)
-        ├── hooks/                    # Hooks personalizados (planejado)
-        ├── pages/                    # Páginas da aplicação (planejado)
-        ├── providers/                # Provedores de contexto e dependências (planejado)
-        └── services/                 # Comunicação com APIs e serviços externos (planejado)
+        ├── app/                      # Rotas e composição da aplicação
+        ├── components/               # Layout e componentes reutilizáveis
+        ├── pages/                    # Telas do produto
+        ├── services/                 # Comunicação com a API do backend
+        ├── hooks/
+        ├── contexts/
+        ├── types/
+        └── lib/
 ```
 
 ---
@@ -271,9 +272,12 @@ graph TD
 | RF10 | Histórico de coletas | O sistema deve armazenar o histórico das coletas realizadas para permitir análise temporal. |
 | RF11 | Atualização contínua | A interface deve atualizar periodicamente os dados apresentados, refletindo as alterações identificadas nas informações dos serviços monitorados. |
 | RF12 | Localização dos serviços | O sistema deve exibir país, região e, quando disponível, cidade onde o serviço está hospedado. |
-| RF13 | Visualização geográfica | O sistema deve apresentar a posição aproximada dos serviços em um mapa, utilizando latitude e longitude fornecidas pela API. |
+| RF13 | Visualização geográfica | O sistema poderá apresentar a posição aproximada dos serviços em um mapa. A ausência de coordenadas não deve impedir a visualização das demais informações. |
 | RF14 | Ranking de impacto | O sistema deve apresentar ranking dos serviços por maior consumo energético ou maior emissão de CO₂e. |
 | RF15 | Comparação entre serviços | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços. |
+
+O mapa é opcional no desafio original, mas foi incluído pela equipe no plano
+atual da Sprint 1. Essa escolha de entrega não muda a redação do requisito.
 
 </details>
 
@@ -282,6 +286,14 @@ graph TD
 <details>
 <summary><b>Requisitos Não Funcionais</b></summary>
 <br>
+
+Os códigos desta tabela são os identificadores internos usados no backlog da
+equipe e não reproduzem integralmente a numeração do PDF do desafio. No PDF,
+existem RNF01 a RNF05, e **RNF05 significa documentação técnica**, correspondente
+ao RNF08 interno abaixo. Autenticação JWT é a restrição **RP06**, persistência
+relaciona-se a **RF10/RP03** e Docker a **RP04**. Nas evidências de avaliação,
+informar essa correspondência para não confundir requisitos do desafio com
+decisões técnicas da equipe.
 
 | **Código** | **Requisito Não Funcional** | **Descrição** |
 | ---------- | --------------------------- | ------------- |
@@ -684,5 +696,3 @@ As mensagens devem referenciar o ID da Issue com `#`:
 | **`cleanup`** | Limpeza de código (remover comentários ou trechos inúteis). |
 
 </details>
-
-

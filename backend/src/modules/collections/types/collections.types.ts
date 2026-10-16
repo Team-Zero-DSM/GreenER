@@ -3,31 +3,15 @@ export interface Region {
     country: string;
     region: string;
     city?: string | null;
-    latitude: number;
-    longitude: number;
+    latitude?: number | null;
+    longitude?: number | null;
     carbon_intensity_gco2e_per_kwh: number;
     renewable_share_percent: number;
 }
 
-export interface ServiceLocation {
-    region_code: string;
-    country: string;
-    region: string;
-    city: string;
-    latitude: number;
-    longitude: number;
-}
-
-export interface Service {
-    id: string;
-    name: string;
-    location: ServiceLocation;
-    metrics_path: string;
-}
-
 export interface Collection {
-    service_id: number;
-    estimate_parameter_id: number;
+    service_id: string;
+    estimate_parameter_id: string;
     collected_at?: Date;
     metric_interval_seconds: number;
     cpu_percent: number;
@@ -45,7 +29,7 @@ export interface Collection {
 }
 
 export interface EstimateParameter {
-    id: number;
+    id: string;
     cpu_max_watts: number;
     ram_watts_per_gb: number;
     disk_watts_per_gb: number;
@@ -59,7 +43,7 @@ export interface RegionEnergyInfo {
 }
 
 export interface ActiveService {
-    id: number;
+    id: string;
     external_id: string;
     metrics_path: string;
     carbon_intensity: number;
