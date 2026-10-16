@@ -1,5 +1,5 @@
-import type { ServiceDetail } from '@/types/service';
-export type Range = '1h' | '6h' | '24h' | '7d' | '30d';
+import type { HistoryRange, ServiceDetail, ServiceHistory, ServiceOverview } from '@/types/service';
+export type Range = HistoryRange;
 const seconds: Record<Range, number> = {
     '1h': 3600,
     '6h': 21600,
@@ -9,7 +9,7 @@ const seconds: Record<Range, number> = {
 };
 // Integra uma curva fictícia por faixas temporais, sem representar as faixas como coletas reais.
 // Cada ponto é a média simulada de uma faixa; o total usa a duração dela em segundos.
-export function buildServiceHistory(service: ServiceDetail, range: Range) {
+export function buildServiceHistory(service: ServiceDetail, range: Range): ServiceHistory {
     const to = new Date(service.collectedAt ?? service.lastSeenAt).getTime();
     const duration = seconds[range];
     const from = to - duration * 1000;
@@ -31,7 +31,6 @@ export function buildServiceHistory(service: ServiceDetail, range: Range) {
         };
     });
     return {
-        serviceId: service.id,
         range,
         period: {
             from: new Date(from).toISOString(),
@@ -45,7 +44,7 @@ export function buildServiceHistory(service: ServiceDetail, range: Range) {
         points,
     };
 }
-export function mockOverview(service: ServiceDetail) {
+export function mockOverview(service: ServiceDetail): ServiceOverview {
     return {
         service: {
             ...service,
@@ -54,7 +53,8 @@ export function mockOverview(service: ServiceDetail) {
             location: service.location
                 ? {
                       ...service.location,
-                      currentCarbonIntensityGco2ePerKwh: service.environmental?.carbonIntensity,
+                      currentCarbonIntensityGco2ePerKwh:
+                          service.environmental?.carbonIntensity ?? null,
                   }
                 : null,
         },
