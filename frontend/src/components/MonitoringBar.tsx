@@ -47,8 +47,8 @@ export function MonitoringBar() {
     const connected = status !== null && error === null;
 
     return (
-        <div className="border-b border-border px-4 py-2 text-xs text-muted-foreground">
-            <div className="mx-auto max-w-7xl space-y-2">
+        <div className="border-b border-border py-2 text-xs text-muted-foreground">
+            <div className="mx-auto max-w-7xl space-y-2 px-4 sm:px-6">
                 <span
                     title={error ?? undefined}
                     className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 font-medium ${connected ? 'border-emerald-400/40 text-emerald-300' : 'border-destructive/40 text-destructive'}`}
