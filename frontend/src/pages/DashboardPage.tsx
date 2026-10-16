@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ServiceFilters } from '@/components/services/ServiceFilters';
 import { ServiceList } from '@/components/services/ServiceList';
+import { StatusLegend } from '@/components/services/StatusLegend';
 import {
     defaultFilters,
     filterServices,
@@ -71,6 +72,7 @@ export function DashboardPage() {
                     <p className="text-xs text-muted-foreground">
                         Energia e CO₂e referem-se à última coleta de cada serviço.
                     </p>
+                    <StatusLegend />
                 </>
             )}
         </main>

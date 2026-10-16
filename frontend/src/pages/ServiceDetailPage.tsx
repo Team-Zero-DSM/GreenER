@@ -7,6 +7,7 @@ import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDateTime, formatNumber } from '@/lib/format';
+import { statusInfo } from '@/lib/serviceStatus';
 import type { HistoryRange as Range } from '@/types/service';
 
 const periods: Record<Range, string> = {
@@ -16,9 +17,17 @@ const periods: Record<Range, string> = {
     '7d': 'Últimos 7 dias',
     '30d': 'Últimos 30 dias',
 };
-function InfoItem({ label, value }: { label: string; value: ReactNode }) {
+function InfoItem({
+    label,
+    value,
+    className,
+}: {
+    label: string;
+    value: ReactNode;
+    className?: string;
+}) {
     return (
-        <div>
+        <div className={className}>
             <dt className="text-xs text-muted-foreground">{label}</dt>
             <dd className="mt-1 text-sm font-semibold tabular-nums">{value}</dd>
         </div>
@@ -108,11 +117,16 @@ function ServiceDetail({ id }: { id: string }) {
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4 xl:grid-cols-7">
                                 <InfoItem
                                     label="Status"
+                                    className="col-span-2"
                                     value={
-                                        <div className="flex flex-wrap gap-1">
+                                        <div className="flex flex-col items-start gap-1">
                                             <ServiceStatusBadge status={service.status} />
-                                            <span className="text-xs text-muted-foreground">
-                                                {service.active ? 'Listado' : 'Não listado'}
+                                            <span className="text-xs font-normal text-muted-foreground">
+                                                {statusInfo[service.status].description}
+                                            </span>
+                                            <span className="text-xs font-normal text-muted-foreground">
+                                                {service.active ? 'Listado' : 'Não listado'} · desde{' '}
+                                                {formatDateTime(service.statusUpdatedAt)}
                                             </span>
                                         </div>
                                     }
