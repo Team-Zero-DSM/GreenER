@@ -4,6 +4,7 @@ export interface ServiceRow {
     nome: string;
     ativo: boolean;
     status: string;
+    status_atualizado_em: Date;
     ultima_vez_visto_em: Date;
     codigo: string | null;
     pais: string | null;
@@ -27,6 +28,12 @@ export interface CollectionRow {
     co2e_estimado_g: number;
 }
 
+export type ServiceWithLatestRow = ServiceRow & {
+    [Key in Exclude<keyof CollectionRow, 'carbon_intensity'>]: CollectionRow[Key] | null;
+} & {
+    collection_carbon_intensity: number | null;
+};
+
 export interface LocationDto {
     regionCode: string;
     country: string;
@@ -41,6 +48,7 @@ export interface ServiceDto {
     name: string;
     active: boolean;
     status: string;
+    statusUpdatedAt: string;
     lastSeenAt: string;
     location: LocationDto | null;
 }
@@ -69,4 +77,10 @@ export interface LatestCollectionDto {
 export interface ServiceOverviewDto {
     service: ServiceDto;
     latestCollection: LatestCollectionDto | null;
+}
+
+export interface ServicesListDto {
+    generatedAt: string;
+    filters: { regionCode: string | null; active: boolean | null };
+    services: (ServiceDto & { latestCollection: LatestCollectionDto | null })[];
 }
