@@ -1,5 +1,3 @@
-import { findServiceById, listServices } from '@/mocks/services';
-import { buildServiceHistory, mockOverview } from '@/mocks/serviceHistory';
 import { statusInfo } from '@/lib/serviceStatus';
 import type {
     HistoryRange,
@@ -13,8 +11,6 @@ import type {
 } from '@/types/service';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
-// A API é o padrão; os dados de exemplo só aparecem com VITE_USE_MOCKS=true.
-export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
 export class ApiError extends Error {
     constructor(
@@ -82,15 +78,6 @@ export interface ServicesQuery {
 }
 
 export async function fetchServices(query: ServicesQuery = {}): Promise<ServiceSummary[]> {
-    if (USE_MOCKS) {
-        return listServices().filter(
-            (service) =>
-                (query.regionCode === undefined ||
-                    service.location?.regionCode === query.regionCode) &&
-                (query.active === undefined || (service.active ?? true) === query.active),
-        );
-    }
-
     const params = new URLSearchParams();
     if (query.regionCode) params.set('regionCode', query.regionCode);
     if (query.active !== undefined) params.set('active', String(query.active));
@@ -101,12 +88,6 @@ export async function fetchServices(query: ServicesQuery = {}): Promise<ServiceS
 }
 
 export async function fetchServiceOverview(id: string): Promise<ServiceOverview> {
-    if (USE_MOCKS) {
-        const service = findServiceById(id);
-        if (!service) throw new ApiError('Serviço não encontrado nos dados simulados.', 404);
-        return mockOverview(service);
-    }
-
     const data = await getJson<{
         service: ServiceDto;
         latestCollection: LatestCollection | null;
@@ -121,12 +102,6 @@ export async function fetchServiceHistory(
     id: string,
     range: HistoryRange,
 ): Promise<ServiceHistory> {
-    if (USE_MOCKS) {
-        const service = findServiceById(id);
-        if (!service) throw new ApiError('Serviço não encontrado nos dados simulados.', 404);
-        return buildServiceHistory(service, range);
-    }
-
     return getJson<ServiceHistory>(
         `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=120`,
     );

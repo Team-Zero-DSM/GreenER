@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
-import { USE_MOCKS } from '@/api/services';
 import { useServiceHistory, useServiceOverview } from '@/hooks/useServiceDetail';
 import { ChartCard } from '@/components/charts/ChartCard';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
@@ -69,12 +68,6 @@ function ServiceDetail({ id }: { id: string }) {
             <Link to="/dashboard" className="text-sm text-primary hover:underline">
                 ← Serviços
             </Link>
-            {USE_MOCKS && (
-                <p className="text-xs text-amber-300">
-                    SIMULADO · curva fictícia integrada pela duração das faixas; amostra de
-                    referência de 30 s.
-                </p>
-            )}
             {error && (
                 <p role="alert" className="text-destructive">
                     {error}
@@ -204,7 +197,7 @@ function ServiceDetail({ id }: { id: string }) {
                         Última coleta: {formatDateTime(collection?.collectedAt)} · Status
                         atualizado: {formatDateTime(service.statusUpdatedAt)}
                         {history &&
-                            ` · ${history.summary.sampleCount} ${USE_MOCKS ? 'faixas simuladas' : 'coletas'} entre ${formatDateTime(history.period.from)} e ${formatDateTime(history.period.to)}`}
+                            ` · ${history.summary.sampleCount} coletas entre ${formatDateTime(history.period.from)} e ${formatDateTime(history.period.to)}`}
                     </p>
                     {!collection && (
                         <p className="text-sm text-muted-foreground">
