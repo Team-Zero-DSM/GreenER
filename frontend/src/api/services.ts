@@ -25,7 +25,7 @@ export class ApiError extends Error {
     }
 }
 
-async function getJson<T>(path: string): Promise<T> {
+export async function getJson<T>(path: string): Promise<T> {
     const response = await fetch(`${API_URL}/api/v1${path}`);
 
     if (!response.ok) {
