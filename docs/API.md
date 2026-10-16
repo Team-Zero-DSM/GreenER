@@ -25,8 +25,9 @@ fornecê-las ao restante da aplicação.
 
 A implementação atual oferece detalhe de serviço, histórico de coletas,
 estado do monitoramento e os cards de região. As demais operações abaixo são
-planejadas e não devem ser apresentadas como implementadas. A interface atual
-ainda usa mocks; sua integração com estas rotas permanece pendente.
+planejadas e não devem ser apresentadas como implementadas. O dashboard e o
+detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
+serviços; os dados de exemplo só aparecem com `VITE_USE_MOCKS=true`.
 
 ### 2.1. Operações implementadas
 
