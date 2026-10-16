@@ -1,4 +1,4 @@
-export type ServiceStatus = 'available' | 'metrics_missing' | 'unavailable';
+export type ServiceStatus = 'available' | 'unavailable' | 'metrics_missing' | 'removed' | 'unknown';
 
 export interface ServiceLocation {
     regionCode: string;
@@ -38,13 +38,4 @@ export interface ServiceDetail {
     environmental: ServiceEnvironmental | null;
 }
 
-export interface ServiceSummary {
-    active?: boolean;
-    id: string;
-    name: string;
-    status: ServiceStatus;
-    lastSeenAt: string;
-    location: ServiceLocation | null;
-    metrics: ServiceMetrics | null;
-    environmental: ServiceEnvironmental | null;
-}
+export type ServiceSummary = ServiceDetail;

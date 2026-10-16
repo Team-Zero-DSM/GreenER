@@ -16,4 +16,12 @@ export const statusInfo: Record<
     label: 'Indisponível',
     className: 'bg-red-400/15 text-red-300 ring-1 ring-red-400/40',
   },
+  removed: {
+    label: 'Removido',
+    className: 'bg-slate-400/15 text-slate-300 ring-1 ring-slate-400/40',
+  },
+  unknown: {
+    label: 'Desconhecido',
+    className: 'bg-slate-400/15 text-slate-300 ring-1 ring-slate-400/40',
+  },
 };
