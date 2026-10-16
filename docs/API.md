@@ -1,6 +1,6 @@
 # APIs e Contratos — GreenER
 
-Este documento define as fronteiras de comunicação do GreenER. O frontend
+Este documento define as fronteiras de comunicação do GreenER. Na arquitetura-alvo, o frontend
 consome exclusivamente a API interna do backend; o backend integra as APIs
 externas e disponibiliza ao frontend os dados validados e processados.
 Responsabilidades e camadas do backend estão em
@@ -119,6 +119,11 @@ O estado do monitoramento está detalhado na seção 7.
 
 ### 2.2. Operações planejadas
 
+Distribuição confirmada: listagem interna e integração na Sprint 1; rankings
+na Sprint 2; autenticação, comparação e cenários na Sprint 3. Persistência e
+histórico são da Sprint 1 e já possuem implementação no backend. A configuração
+do intervalo por endpoint fica para etapa posterior, sem sprint definida.
+
 Os caminhos desta tabela são propostas para funcionalidades ainda não
 implementadas, sem garantia de disponibilidade HTTP na versão atual.
 
@@ -170,7 +175,7 @@ métricas associa aos dados de uma coleta.
 
 ### 2.4. Respostas e falhas
 
-As respostas são JSON e representam dados preparados pelo backend para o
+As respostas dos endpoints implementados são JSON e representam dados preparados pelo backend para o
 recurso solicitado. As rotas validam `body`, `params` e `query parameters`
 antes de executar os controllers. Dados inválidos de requisição resultam em
 `400`. A resposta `401` está prevista para as futuras rotas protegidas; JWT
@@ -238,13 +243,14 @@ A operação documentada é:
 O contrato contém dados como código da região, intensidade de carbono em
 `gCO₂e/kWh` e participação renovável. `br-sudeste`, `85 gCO₂e/kWh` e `83%` são
 exemplos de referência; não são valores constantes nem garantias de dados
-atuais. A integração valida e mantém o contexto regional e temporal retornado
-pela API.
+atuais. A integração valida campos regionais e fatores. O schema atual não exige
+um timestamp de medição do fornecedor; `regiao.atualizado_em` registra a atualização
+local e não comprova que o fator corresponde ao instante físico da amostra.
 
 ## 5. Segurança e isolamento
 
 Os itens relativos a JWT e autorização descrevem o contrato planejado; não
-comprovam autenticação implementada na versão atual.
+comprovam autenticação implementada na versão atual. Sua entrega está prevista para a Sprint 3.
 
 - O navegador comunica-se somente com a API do GreenER.
 - Credenciais e segredos das integrações externas permanecem no backend.
@@ -256,11 +262,18 @@ comprovam autenticação implementada na versão atual.
 
 ## 6. Alinhamento entre contrato e implementação
 
-Rotas, schemas Zod, tipos do backend e tipos consumidos pelo frontend compõem
-um único contrato e são implementados em conjunto. Histórico, ranking,
-comparação, região e simulação são recursos do produto; suas telas consomem os
-dados disponibilizados pelos respectivos módulos do backend e não acessam
-integrações externas diretamente.
+O contrato deverá ser mantido coerente entre rotas, schemas Zod, tipos do
+backend e tipos consumidos pela interface. Essa integração ainda está pendente:
+a lista solicita `/api/v1/services`, ausente nesta versão; o detalhe usa mocks
+sem consultar as rotas de detalhe e histórico já existentes.
+
+Histórico, ranking, comparação, região e simulação são recursos do produto,
+mas não estão todos disponíveis na interface. Consulte o [plano](./plano-de-entregas.md)
+e as [rotas atuais do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
+
+Não existe handler global de rota desconhecida em JSON: um caminho não
+registrado pode retornar o 404 padrão do Express em HTML. Isso difere do 404
+de serviço desconhecido em uma rota implementada, que passa pelo errorHandler.
 
 ## 7. Estado do monitoramento — implementado
 
@@ -304,8 +317,9 @@ Exemplo de resposta HTTP 200:
   `nextCollectionAt` é `null`; depois, informa a previsão do próximo início.
   Parar o job também remove essa previsão.
 - O intervalo é lido de `COLLECTION_INTERVAL_SECONDS`, com padrão de 30
-  segundos, mantendo o funcionamento atual do job. O contador no frontend
-  é calculado com `serverTime` e `nextCollectionAt`.
+  segundos, mantendo o funcionamento atual do job. Uma futura barra integrada
+  poderá usar `serverTime` e `nextCollectionAt`; o contador atual do frontend
+  é demonstrativo e não consome essa rota.
 - `attemptedServices` conta os serviços selecionados para consultar métricas;
   `collectedServices` conta coletas válidas efetivamente gravadas;
   `failedServices` é a diferença. Uma falha anterior à seleção pode encerrar
@@ -324,4 +338,4 @@ Exemplo de resposta HTTP 200:
 - A rota retorna 200 mesmo quando o estado informa falha. Um erro interno ao
   servir a resposta passa pelo `errorHandler` e retorna 500.
 - A última coleta global não significa que todos os serviços atualizaram.
-  Para cada serviço, o frontend continua usando sua própria `collectedAt`.
+  Na integração futura, a interface deverá considerar a `collectedAt` de cada serviço; os mocks atuais não comprovam esse consumo.

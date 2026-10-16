@@ -6,15 +6,32 @@ orquestração da coleta é responsabilidade do Collection Service, conforme a
 operacionais são obtidas da Greener Metrics Aggregator API e a intensidade de
 carbono, da Greener Carbon Intensity API, por meio das integrações do backend.
 
+## Estado da implementação e limitações
+
+Referência: código desta branch e documento público do desafio, consultados em
+15/10/2026. As fórmulas seguem o modelo simplificado do
+[Greener — ABP 2º Semestre](https://docs.unilaunch.org/share/x29w8jgwdb/p/greener-abp-2-semestre-b7FiqU6UC1),
+nas seções “Modelo de Cálculo Simplificado” e “Exemplo”. Os quatro fatores
+iniciais do SQL coincidem com os valores desse exemplo.
+
+O desafio utiliza uma referência didática comum para comparar serviços e
+regiões; não exige que os resultados representem o consumo elétrico medido de
+um servidor específico. Os coeficientes não são uma calibração do hardware real.
+
+O código valida entradas numéricas com Zod e restrições SQL, consulta o conjunto
+ativo e usa a intensidade regional armazenada. Não verifica adequação ao
+hardware nem a idade máxima aceitável do fator de carbono.
+Se a Carbon API falhar, pode reutilizar regiões previamente sincronizadas.
+O horário local de atualização da região não é timestamp de medição do fornecedor.
+
 ## 1. Princípios do cálculo
 
 - Todos os valores calculados são estimativas, não medições físicas diretas da
   infraestrutura.
-- Um resultado só é calculado e apresentado quando suas entradas, unidades,
-  período e parâmetros do modelo são válidos e rastreáveis.
+- Os resultados devem identificar entradas, unidades, período e parâmetros
+  utilizados, tendo o modelo do desafio como referência.
 - CPU, memória, disco e rede não são, isoladamente, medidas de energia. Sua
-  conversão em potência exige os parâmetros de estimativa definidos neste
-  modelo e valores tecnicamente fundamentados.
+  conversão em potência utiliza os coeficientes do modelo simplificado do desafio.
 - Se energia não puder ser estimada com parâmetros válidos, o sistema não
   calcula CO₂e a partir das métricas operacionais. O indicador ambiental fica
   indisponível, em vez de ser apresentado como zero ou como resultado
@@ -33,15 +50,38 @@ O modelo recebe:
 | Uso de disco | GB | Metrics Aggregator API |
 | Tráfego de rede | GB | Metrics Aggregator API |
 | Intervalo associado às métricas | segundos | Metrics Aggregator API |
-| Potência máxima de CPU | W | Parâmetro documentado do modelo |
-| Fator de consumo da memória | W/GB | Parâmetro documentado do modelo |
-| Fator de consumo do disco | W/GB | Parâmetro documentado do modelo |
-| Fator de consumo da rede | W/GB | Parâmetro documentado do modelo |
+| Potência máxima de CPU | W | Conjunto ativo de parametro_estimativa |
+| Fator de consumo da memória | W/GB | Conjunto ativo de parametro_estimativa |
+| Fator de consumo do disco | W/GB | Conjunto ativo de parametro_estimativa |
+| Fator de consumo da rede | W/GB | Conjunto ativo de parametro_estimativa |
 | Intensidade de carbono | gCO₂e/kWh | Carbon Intensity API |
 
-Os parâmetros do modelo não são valores universais. Cada valor usado pelo
-backend deve ter fonte, unidade, justificativa e versão documentadas. Nenhum
-parâmetro ausente pode ser substituído por uma constante arbitrária.
+Os parâmetros não são valores universais. A referência dos valores iniciais é
+o exemplo do desafio; a tabela abaixo registra sua aplicação. Uma mudança do
+conjunto ativo deve registrar valores e motivo, preservando a comparação com
+o modelo de referência.
+
+### Valores iniciais utilizados
+
+O [schema](../database/schema.sql) insere um conjunto ativo; o
+[repository](../backend/src/modules/collections/collections.repository.ts)
+consulta o conjunto vigente, que pode ter sido alterado em um banco existente.
+O [serviço](../backend/src/modules/collections/collections.service.ts) aplica as fórmulas.
+
+| Campo | Valor inicial | Unidade no modelo | Fonte e justificativa |
+|---|---|---|---|
+| cpu_max_watts | 100 | W | Exemplo do desafio, `CPU_MAX_WATTS`: referência de potência multiplicada pela fração de uso da CPU. |
+| ram_watts_per_gb | 0.375 | W/GB | Exemplo do desafio, `RAM_WATTS_PER_GB`: coeficiente aplicado à memória utilizada. |
+| disk_watts_per_gb | 0.01 | W/GB | Exemplo do desafio, `DISK_WATTS_PER_GB`: coeficiente aplicado ao uso de disco. |
+| network_watts_per_gb | 0.02 | W/GB | Exemplo do desafio, `NETWORK_WATTS_PER_GB`: coeficiente aplicado ao tráfego de rede, conforme a simplificação fornecida. |
+
+Fonte dos quatro valores e das unidades: [documento do desafio, seção “Exemplo”](https://docs.unilaunch.org/share/x29w8jgwdb/p/greener-abp-2-semestre-b7FiqU6UC1),
+consultado em 15/10/2026. O valor de CPU não identifica um processador físico
+específico. O fator de rede é aplicado diretamente conforme o modelo fornecido,
+sem acrescentar conversão para taxa ou energia por GB que não exista no código.
+A intensidade de carbono é obtida regionalmente pela integração, não fixada
+nessa carga inicial. Dados de uma instalação existente podem diferir do seed;
+cada coleta guarda o identificador do conjunto utilizado.
 
 ## 3. Estimativa de potência
 
@@ -88,12 +128,11 @@ Potência Rede (W) =
     × Fator de Consumo da Rede (W/GB)
 ```
 
-As parcelas de memória, disco e rede são estimativas do modelo, não leituras
-diretas de potência. Os fatores precisam ser definidos e fundamentados antes
-que o backend use essas equações para produzir resultados ambientais. Se a
-unidade ou interpretação da métrica recebida não corresponder à unidade exigida
-pelo fator, a entrada deve ser normalizada de acordo com uma regra documentada
-ou não deve ser usada no cálculo.
+As parcelas de memória, disco e rede são estimativas do modelo do desafio,
+não leituras diretas de potência. A fórmula de rede adota a simplificação
+fornecida para `network_gb`; não representa, por si só, uma medição física de
+potência de rede. Adaptações para outro domínio ou hardware exigiriam novo
+modelo e validação, fora da simples reprodução destas equações.
 
 ## 4. Estimativa de energia
 
@@ -141,8 +180,31 @@ A intensidade de carbono e a participação renovável são fornecidas pela Carb
 Intensity API. Valores exemplificativos não devem ser usados como valores
 constantes nem como substitutos de uma resposta regional e temporal válida.
 
+### Exemplo numérico da fórmula implementada
+
+Entradas hipotéticas: CPU de 50%, memória de 2 GB, disco de 10 GB, rede de 1 GB,
+amostra de 30 segundos e intensidade regional de 85 gCO₂e/kWh.
+
+```text
+CPU = 50 / 100 × 100 = 50 W
+Memória = 2 × 0.375 = 0.75 W
+Disco = 10 × 0.01 = 0.10 W
+Rede = 1 × 0.02 = 0.02 W
+Potência = 50.87 W
+Energia = 50.87 × (30 / 3600) / 1000 ≈ 0.0004239167 kWh
+CO₂e = Energia × 85 ≈ 0.0360329167 g
+```
+
+O exemplo demonstra a matemática do código, não uma coleta real ou validação
+física dos fatores. O histórico soma as amostras armazenadas; não garante
+cobertura contínua do período. Os gráficos atuais do frontend são simulados
+e não devem ser usados para validar essas consultas reais.
+
 ## 6. Orquestração e armazenamento
 
+O fluxo abaixo descreve as responsabilidades esperadas do modelo. Na execução
+atual, as regiões são sincronizadas antes da descoberta; o serviço usa os
+fatores regionais salvos, sem consulta de carbono individual por métrica.
 Para cada serviço, o Collection Service:
 
 1. valida as métricas e o intervalo da amostra;
@@ -154,8 +216,10 @@ Para cada serviço, o Collection Service:
    necessários à consulta histórica.
 
 Uma falha ou entrada inválida em um serviço é registrada e tratada sem impedir
-o processamento dos demais. Uma coleta sem dados suficientes pode ser
-persistida como indisponível, mas não recebe valor ambiental fabricado.
+o processamento dos demais. Na implementação atual, uma falha de métricas atualiza o estado quando
+classificável e não insere uma coleta incompleta: as colunas de métricas e
+estimativas da coleta exigem valores. Não é gravada uma coleta com zeros para
+representar indisponibilidade.
 
 ## 7. Fluxo do cálculo
 
@@ -190,7 +254,8 @@ flowchart TD
 ## 8. Apresentação e interpretação
 
 O backend fornece os resultados calculados, seus valores de origem, unidades,
-período e região. O frontend identifica os indicadores como estimativas e
-preserva seu contexto ao exibir históricos, rankings e comparações. Uma
+período e região. Na integração futura, o frontend deverá identificar as estimativas e
+preservar seu contexto. Hoje detalhe e histórico da interface são simulados;
+rankings, comparação e cenários ainda são planejados. Uma
 simulação de região alternativa é identificada como cenário hipotético e
 apresenta explicitamente os parâmetros usados.

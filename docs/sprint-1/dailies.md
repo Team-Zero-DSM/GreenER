@@ -1,5 +1,11 @@
 # 📋 Registro das Dailies — Sprint 1
 
+Os registros abaixo descrevem o acompanhamento informado pela equipe em cada
+data; não substituem critérios de aceite ou evidências de integração.
+Não há daily de 15/10 registrada aqui: presença, atividades e impedimentos
+desse dia só devem ser acrescentados quando confirmados pelos participantes.
+O estado consolidado está no [registro da sprint](./sprint-1.md).
+
 Este documento reúne o registro das Dailies realizadas durante a Sprint 1, com o objetivo de acompanhar a presença dos integrantes, os principais pontos discutidos e o andamento das atividades ao longo do período.
 
 A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausentes. Os registros de cada Daily são organizados por tópicos, destacando de forma objetiva as decisões, atividades, discussões e demais acontecimentos relevantes para o acompanhamento da Sprint.
@@ -290,7 +296,7 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 - **Documentação do sistema:** Henrique finalizou os diagramas de sequência, concluindo a documentação técnica planejada para a Sprint.
 - **Frontend — página inicial:** Gabriel resolveu os impedimentos anteriores e deu continuidade à implementação da tela inicial do GreenER.
-- **Backend — novos endpoints:** Pedro disponibilizou um Pull Request com atualizações no backend, incluindo novos endpoints para permitir que o frontend acesse informações diretamente da API externa.
+- **Backend — novos endpoints:** Pedro disponibilizou um Pull Request com atualizações no backend, incluindo endpoints internos de detalhe, histórico e monitoramento. O frontend deverá consumir o backend GreenER; não acessar a API externa diretamente.
 - **Testes da coleta periódica:** Vitor preparou o Pull Request referente aos testes da coleta periódica de métricas, dando continuidade à validação da atualização dos dados.
 - **Impedimentos:** problemas de conectividade com a internet da faculdade prejudicaram o desenvolvimento dos componentes da área de detalhamento de serviços, impedindo a conclusão da tarefa por Paulo.
 
@@ -312,5 +318,5 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 - **Frontend — componentes:** Paulo concluiu a tarefa dos componentes do frontend, realizando uma entrega importante para a Sprint 1.
 - **Planejamento da Sprint:** Henrique e Pedro começaram a alinhar os ajustes finais e o planejamento do vídeo de apresentação do projeto.
-- **Frontend — página inicial:** Gabriel continuou finalizando a tela inicial e planejou as próximas entregas dos componentes para o feriado de 15/10.
+- **Frontend — página inicial:** Gabriel continuou finalizando a tela inicial e planejou as próximas entregas dos componentes para 15/10.
 - **Impedimentos:** Vitor não compareceu por estar doente. A ausência dificultou a comunicação e atrasou a conclusão de um endpoint necessário para Paulo finalizar a integração entre frontend e backend. Apesar da expectativa inicial de pouco avanço devido à aula, a equipe conseguiu concluir uma entrega importante.

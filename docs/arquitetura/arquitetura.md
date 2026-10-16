@@ -1,5 +1,10 @@
 # 🏗️ Arquitetura e Modelagem
 
+Os diagramas representam a modelagem do produto e incluem fluxos futuros.
+Não comprovam que mapa, atualização automática, autenticação ou ranking já
+estejam implementados. O estado executável está no [README](../../README.md)
+e o compromisso por sprint no [plano](../plano-de-entregas.md).
+
 Esta seção reúne os artefatos de modelagem desenvolvidos para o projeto **GreenER**.
 
 Os diagramas servem como apoio para análise, implementação e evolução da solução ao longo das sprints, permitindo visualizar os principais elementos e comportamentos da plataforma.
@@ -72,16 +77,16 @@ Representar a estrutura estática do sistema, evidenciando as principais entidad
 
 # 🔄 Diagramas de Sequência
 
-Os arquivos SVG dos diagramas de sequência devem ser adicionados à pasta `./images/diagramas-de-sequencia/`.
-
-Duplique o molde abaixo para documentar cada diagrama:
+Os diagramas de sequência disponíveis estão em `./images/diagramas-de-sequencia/`.
+Consulta com mapa e atualização representa o fluxo-alvo da Sprint 1; ranking
+é planejado para a Sprint 2. O detalhe visual existe com mocks, sem integração real.
 
 ## Consulta de serviços
 
 ### Visualização
 
 <p align="center">
-    <img src="./images/diagramas-de-sequencia/diagrama_tela_inicial_para_consulta_de_servicos_disponiveis.svg" alt="Diagrama de Sequência: Nome do Diagrama">
+    <img src="./images/diagramas-de-sequencia/diagrama_tela_inicial_para_consulta_de_servicos_disponiveis.svg" alt="Diagrama de sequência: Consulta de serviços">
 </p>
 
 ### Arquivo Original
@@ -97,7 +102,7 @@ Exibir os serviços disponíveis e seus status no mapa da tela inicial, com atua
 ### Visualização
 
 <p align="center">
-    <img src="./images/diagramas-de-sequencia/diagrama_para_detalhamento_de_servivo.svg" alt="Diagrama de Sequência: Nome do Diagrama">
+    <img src="./images/diagramas-de-sequencia/diagrama_para_detalhamento_de_servivo.svg" alt="Diagrama de sequência: Dashboard de serviço">
 </p>
 
 ### Arquivo Original
@@ -113,7 +118,7 @@ Permitir que o usuário selecione um serviço e visualize suas métricas e infor
 ### Visualização
 
 <p align="center">
-    <img src="./images/diagramas-de-sequencia/Diagrama_analise_de_ranking.svg" alt="Diagrama de Sequência: Nome do Diagrama">
+    <img src="./images/diagramas-de-sequencia/Diagrama_analise_de_ranking.svg" alt="Diagrama de sequência: Análise de ranking">
 </p>
 
 ### Arquivo Original

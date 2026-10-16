@@ -1,4 +1,7 @@
-# 🎨 Protipação
+# 🎨 Prototipação
+
+Os protótipos são referências visuais e não comprovam telas integradas.
+Consulte as [rotas e o estado da interface](../../frontend/arquitetura.md).
 
 Esta seção reúne os artefatos relacionados à prototipação das telas da aplicação **GreenER**.
 
@@ -29,9 +32,9 @@ Por meio dela são desenvolvidos os protótipos das telas utilizadas na document
 
 | Arquivo                       | Descrição                                                              |
 | ----------------------------- | ---------------------------------------------------------------------- |
-| `Greener - Protótipo Desktop` | Protótipo criado para exemplificação do design em dispositivos desktop |
-| `Greener - Protótipo Mobile`  | Protótipo criado para exemplificação do design em dispositivos mobile  |
-| `Greener - Protótipo Tablet`  | Protótipo criado para exemplificação do design em dispositivos tablet  |
+| [Greener - Protótipo Desktop](./Greener%20-%20Protótipo%20Desktop.pdf) | Protótipo criado para exemplificação do design em dispositivos desktop |
+| [Greener - Protótipo Mobile](./Greener%20-%20Protótipo%20Mobile.pdf)  | Protótipo criado para exemplificação do design em dispositivos mobile  |
+| [Greener - Protótipo Tablet](./Greener%20-%20Protótipo%20Tablet.pdf)  | Protótipo criado para exemplificação do design em dispositivos tablet  |
 
 ---
 
