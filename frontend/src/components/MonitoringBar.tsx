@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { useMonitoringStatus } from '@/hooks/useMonitoringStatus';
+import { useMonitoring } from '@/contexts/monitoring';
 import type { DependencyStatus } from '@/types/monitoring';
 
 const dependencyLabel: Record<DependencyStatus, string> = {
@@ -27,7 +27,7 @@ function Item({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export function MonitoringBar() {
-    const { status, nextCollectionAt, lastCollectionAt, error } = useMonitoringStatus();
+    const { status, nextCollectionAt, lastCollectionAt, error } = useMonitoring();
     const [now, setNow] = useState(() => Date.now());
 
     // Só atualiza os contadores na tela; não consulta a API.

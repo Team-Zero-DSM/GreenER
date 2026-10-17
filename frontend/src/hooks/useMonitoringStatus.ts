@@ -7,7 +7,7 @@ const MARGIN_MS = 1000;
 // Sem previsão de coleta ou com a API fora do ar, tenta de novo depois deste tempo.
 const RETRY_MS = 30_000;
 
-interface MonitoringState {
+export interface MonitoringState {
     status: MonitoringStatus | null;
     // Horários convertidos para o relógio do navegador.
     nextCollectionAt: number | null;
