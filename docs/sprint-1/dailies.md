@@ -320,3 +320,25 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Planejamento da Sprint:** Henrique e Pedro começaram a alinhar os ajustes finais e o planejamento do vídeo de apresentação do projeto.
 - **Frontend — página inicial:** Gabriel continuou finalizando a tela inicial e planejou as próximas entregas dos componentes para 15/10.
 - **Impedimentos:** Vitor não compareceu por estar doente. A ausência dificultou a comunicação e atrasou a conclusão de um endpoint necessário para Paulo finalizar a integração entre frontend e backend. Apesar da expectativa inicial de pouco avanço devido à aula, a equipe conseguiu concluir uma entrega importante.
+
+---
+
+## 📅 15/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---|---|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Backend — endpoints, DTO e testes:** Vitor enfrentou dificuldades para concluir os endpoints, o DTO e os testes unitários, impedindo o avanço esperado na entrega dessas tarefas.
+- **Frontend — alinhamento das telas:** Gabriel identificou divergências entre as telas desenvolvidas por ele e por Paulo, tornando necessário alinhar a estrutura e a implementação das interfaces.
+- **Reunião de alinhamento:** devido ao Dia dos Professores, não houve aula presencial, e a equipe realizou uma call pelo Teams. Todos compartilharam suas telas para esclarecer as divergências, alinhar as implementações e definir os próximos passos.
+- **CI/CD do frontend:** a equipe identificou um erro no processo de integração contínua do frontend e trabalhou para compreender o problema e encaminhar sua resolução.
+- **Impedimentos:** não houve entregas concluídas durante o dia. Entretanto, a equipe alinhou as soluções para os problemas identificados, encaminhando a resolução das dificuldades de integração do frontend e de conclusão das tarefas do backend.
