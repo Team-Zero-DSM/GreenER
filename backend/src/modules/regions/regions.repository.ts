@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import type { RegionCardRow, RegionTotalsRow } from './regions.types.js';
+import type { RegionCardRow, RegionTotalsRow } from './types/regions.types.js';
 
 export class RegionsRepository {
     constructor(private readonly pool: Pool) {}

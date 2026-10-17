@@ -30,7 +30,7 @@ export interface ServiceCountsDto {
     availableServices: number;
     metricsMissingServices: number;
     unavailableServices: number;
-    unlistedServices: number;
+    unlistedServices: number; 
 }
 
 export interface PeriodSummaryDto {
