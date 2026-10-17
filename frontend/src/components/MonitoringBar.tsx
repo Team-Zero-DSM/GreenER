@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { useMonitoringStatus } from '@/hooks/useMonitoringStatus';
+import { useMonitoring } from '@/contexts/monitoring';
+import { formatDateTimeSeconds } from '@/lib/format';
 import type { DependencyStatus } from '@/types/monitoring';
 
 const dependencyLabel: Record<DependencyStatus, string> = {
@@ -27,7 +28,7 @@ function Item({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export function MonitoringBar() {
-    const { status, nextCollectionAt, lastCollectionAt, error } = useMonitoringStatus();
+    const { status, nextCollectionAt, lastCollectionAt, error, screenUpdatedAt } = useMonitoring();
     const [now, setNow] = useState(() => Date.now());
 
     // Só atualiza os contadores na tela; não consulta a API.
@@ -71,6 +72,10 @@ export function MonitoringBar() {
                         <Item label="Próxima coleta">{nextCollection}</Item>
                         <Item label="Intervalo de coleta">
                             {status.collectionIntervalSeconds} s
+                        </Item>
+                        <Item label="Atualização da tela">a cada coleta</Item>
+                        <Item label="Tela atualizada">
+                            {formatDateTimeSeconds(screenUpdatedAt)}
                         </Item>
                         <Item label="APIs UniLaunch">
                             Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
