@@ -1,8 +1,9 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import type { GlobeViewHandle } from '../components/3d/GlobeView';
 import { ExploreSection } from '../components/landing/ExploreSection';
 import { regions } from '@/utils/regions';
 import { GlobeView } from '../components/3d/GlobeView';
+import { useServices } from '@/hooks/useServices';
 
 export function LandingPage() {
 
@@ -57,6 +58,31 @@ export function LandingPage() {
         window.removeEventListener('resize', updateGlobe);
       };
     }, []);
+
+    const { services } = useServices();
+
+    const markers = useMemo(
+      () =>
+        services.flatMap((service) => {
+          const location = service.location;
+
+          if (
+            location?.latitude == null ||
+            location.longitude == null
+          ) {
+            return [];
+          }
+
+          return [{
+            id: service.id,
+            name: service.name,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            status: service.status,
+          }];
+        }),
+      [services],
+    );
 
     const selectRegion = (code: string) => {
         setSelectedCode(code);
@@ -119,8 +145,9 @@ export function LandingPage() {
             autoRotate={autoRotate}
             progress={globeProgress}
             targetPosition={globeTarget}
+            markers={markers}
           />
-        </div>
+      </div>
 
       <div
         ref={exploreContainerRef}
@@ -144,6 +171,7 @@ export function LandingPage() {
             onSelectRegion={selectRegion}
           />
         </div>
+        
         <div ref={globeTargetRef} className="min-w-0">
         </div>
       </div>

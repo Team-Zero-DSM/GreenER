@@ -1,4 +1,4 @@
-import { findServiceById } from '@/mocks/services';
+import { listServices } from '@/mocks/services';
 import type { ServiceDetail } from '@/types/service';
 import type { Region } from '@/types/api';
 
@@ -12,12 +12,7 @@ type RegionGroup = {
   services: ServiceDetail[];
 };
 
-const services = [
-  findServiceById('svc-001'),
-  findServiceById('svc-002'),
-].filter(
-  (service): service is ServiceDetail => service !== undefined,
-);
+const services = listServices();
 
 const groupedRegions = services.reduce<Map<string, RegionGroup>>(
   (map, service) => {
