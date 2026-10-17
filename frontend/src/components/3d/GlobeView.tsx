@@ -15,6 +15,15 @@ interface GlobeViewProps {
         x: number;
         y: number;
     };
+    markers: GlobeMarker[];
+}
+
+export interface GlobeMarker {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  status: string;
 }
 
 export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
@@ -22,12 +31,14 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
         autoRotate = true,
         progress = 0,
         targetPosition,
+        markers,
     }, ref) {
 
       const containerRef = useRef<HTMLDivElement>(null);
       const progressRef = useRef(progress);
       const autoRotateRef = useRef(autoRotate);
       const targetPositionRef = useRef(targetPosition);
+      const markersGroupRef = useRef<THREE.Group | null>(null);
 
         const commandsRef = useRef({
           rotation: 0,
@@ -92,28 +103,28 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
       const globe = new THREE.Group();
       scene.add(globe);
 
+      const markersGroup = new THREE.Group();
+      globe.add(markersGroup);
+      markersGroupRef.current = markersGroup;
+
+      const earthTexture = new THREE.TextureLoader().load(
+        '/textures/earth.png',
+      );
+
+      earthTexture.colorSpace = THREE.SRGBColorSpace;
+
+      const earthMaterial = new THREE.MeshStandardMaterial({
+        map: earthTexture,
+        roughness: 0.9,
+        metalness: 0,
+      });
+
       const earth = new THREE.Mesh(
         new THREE.SphereGeometry(1, 64, 64),
-        new THREE.MeshStandardMaterial({
-          color: '#174b70',
-          roughness: 0.85,
-          metalness: 0.1,
-        }),
+        earthMaterial,
       );
 
       globe.add(earth);
-
-      const grid = new THREE.Mesh(
-        new THREE.SphereGeometry(1.008, 24, 16),
-        new THREE.MeshBasicMaterial({
-          color: '#38bdf8',
-          wireframe: true,
-          transparent: true,
-          opacity: 0.2,
-        }),
-      );
-
-      globe.add(grid);
 
       const atmosphere = new THREE.Mesh(
         new THREE.SphereGeometry(1.12, 64, 64),
@@ -281,10 +292,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
               resizeObserver.disconnect();
 
               earth.geometry.dispose();
-              (earth.material as THREE.Material).dispose();
-
-              grid.geometry.dispose();
-              (grid.material as THREE.Material).dispose();
+              earthMaterial.dispose();
+              earthTexture.dispose();
 
               atmosphere.geometry.dispose();
               (atmosphere.material as THREE.Material).dispose();
@@ -292,10 +301,62 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
               starsGeometry.dispose();
               (stars.material as THREE.Material).dispose();
 
+              markersGroupRef.current = null;
               renderer.dispose();
               renderer.domElement.remove();
           };
       }, []);
+
+    useEffect(() => {
+      const group = markersGroupRef.current;
+      if (!group) return;
+
+      group.clear();
+
+      const geometry = new THREE.SphereGeometry(0.018, 12, 12);
+
+      markers.forEach((marker) => {
+        const latitude = (marker.latitude * Math.PI) / 180;
+        const longitude = (marker.longitude * Math.PI) / 180;
+        const radius = 1.015;
+
+        const position = new THREE.Vector3(
+          radius * Math.cos(latitude) * Math.cos(longitude),
+          radius * Math.sin(latitude),
+          -radius * Math.cos(latitude) * Math.sin(longitude),
+        );
+
+        const color =
+          marker.status === 'available'
+            ? '#22c55e'
+            : marker.status === 'unavailable'
+              ? '#ef4444'
+              : '#f59e0b';
+
+        const material = new THREE.MeshBasicMaterial({ color });
+        const pin = new THREE.Mesh(geometry, material);
+
+        pin.position.copy(position);
+        pin.userData = {
+          id: marker.id,
+          name: marker.name,
+          status: marker.status,
+        };
+
+        group.add(pin);
+      });
+
+      return () => {
+        group.children.forEach((pin) => {
+          if (pin instanceof THREE.Mesh) {
+            pin.material.dispose();
+          }
+        });
+
+        group.clear();
+        geometry.dispose();
+      };
+    }, [markers]);
 
     return (
       <div
