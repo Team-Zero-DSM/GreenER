@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
-import { findServiceById } from '@/mocks/services';
-import { buildServiceHistory, mockOverview, type Range } from '@/mocks/serviceHistory';
+import { useServiceHistory, useServiceOverview } from '@/hooks/useServiceDetail';
 import { ChartCard } from '@/components/charts/ChartCard';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDateTime, formatNumber } from '@/lib/format';
+import type { HistoryRange as Range } from '@/types/service';
 
 const periods: Record<Range, string> = {
     '1h': 'Última hora',
@@ -23,14 +23,16 @@ function InfoItem({ label, value }: { label: string; value: ReactNode }) {
         </div>
     );
 }
+// A `key` recria o detalhe ao trocar de serviço, sem mostrar dados do anterior.
 export function ServiceDetailPage() {
-    const { id } = useParams();
+    const { id = '' } = useParams();
+    return <ServiceDetail key={id} id={id} />;
+}
+
+function ServiceDetail({ id }: { id: string }) {
     const [range, setRange] = useState<Range>('24h');
-    const mock = id ? findServiceById(id) : undefined;
-    const current = mock ? mockOverview(mock) : null;
-    const history = mock ? buildServiceHistory(mock, range) : null;
-    const error = mock ? null : 'Serviço não encontrado nos dados simulados.';
-    const historyError = null;
+    const { data: current, error } = useServiceOverview(id);
+    const { data: history, error: historyError } = useServiceHistory(id, range);
     const service = current?.service;
     const collection = current?.latestCollection;
     const metrics = collection?.metrics;
@@ -57,10 +59,6 @@ export function ServiceDetailPage() {
             <Link to="/dashboard" className="text-sm text-primary hover:underline">
                 ← Serviços
             </Link>
-            <p className="text-xs text-amber-300">
-                SIMULADO · curva fictícia integrada pela duração das faixas; amostra de referência
-                de 30 s.
-            </p>
             {error && (
                 <p role="alert" className="text-destructive">
                     {error}
@@ -104,11 +102,13 @@ export function ServiceDetailPage() {
                                 <InfoItem
                                     label="Status"
                                     value={
-                                        <div className="flex flex-wrap gap-1">
+                                        <div className="flex flex-col items-start gap-1">
                                             <ServiceStatusBadge status={service.status} />
-                                            <span className="text-xs text-muted-foreground">
-                                                {service.active ? 'Listado' : 'Não listado'}
-                                            </span>
+                                            {!service.active && (
+                                                <span className="text-xs font-normal text-muted-foreground">
+                                                    Não listado
+                                                </span>
+                                            )}
                                         </div>
                                     }
                                 />
@@ -184,7 +184,8 @@ export function ServiceDetailPage() {
                     <p className="text-xs text-muted-foreground">
                         Última coleta: {formatDateTime(collection?.collectedAt)} · Status
                         atualizado: {formatDateTime(service.statusUpdatedAt)}
-                        {history && ` · ${history.summary.sampleCount} faixas simuladas no período`}
+                        {history &&
+                            ` · ${history.summary.sampleCount} coletas entre ${formatDateTime(history.period.from)} e ${formatDateTime(history.period.to)}`}
                     </p>
                     {!collection && (
                         <p className="text-sm text-muted-foreground">
