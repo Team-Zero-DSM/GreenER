@@ -59,7 +59,7 @@ export function LandingPage() {
       };
     }, []);
 
-    const { services, isLoading, error } = useServices();
+    const { services, error } = useServices();
 
     const regions = useMemo(
       () => groupServicesByRegion(services),
