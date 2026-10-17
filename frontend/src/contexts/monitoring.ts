@@ -1,7 +1,11 @@
 import { createContext, useContext } from 'react';
 import type { MonitoringState } from '@/hooks/useMonitoringStatus';
 
-export type MonitoringContextValue = MonitoringState;
+export interface MonitoringContextValue extends MonitoringState {
+    // Muda toda vez que o backend termina uma rodada de coleta; as páginas usam como
+    // gatilho para buscar os dados de novo.
+    refreshKey: number;
+}
 
 export const MonitoringContext = createContext<MonitoringContextValue | null>(null);
 
