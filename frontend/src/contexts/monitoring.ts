@@ -5,6 +5,9 @@ export interface MonitoringContextValue extends MonitoringState {
     // Muda toda vez que o backend termina uma rodada de coleta; as páginas usam como
     // gatilho para buscar os dados de novo.
     refreshKey: number;
+    // Horário da última busca bem-sucedida dos dados da página aberta.
+    screenUpdatedAt: number | null;
+    markScreenUpdated: (at: number) => void;
 }
 
 export const MonitoringContext = createContext<MonitoringContextValue | null>(null);

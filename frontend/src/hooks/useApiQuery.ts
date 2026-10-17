@@ -11,14 +11,16 @@ interface QueryState<T> {
 // na tela, sem recarregar a página. `fetcher` deve vir de um useCallback.
 export function useApiQuery<T>(fetcher: () => Promise<T>) {
     const [state, setState] = useState<QueryState<T>>({ data: null, error: null });
-    const { refreshKey } = useMonitoring();
+    const { refreshKey, markScreenUpdated } = useMonitoring();
 
     useEffect(() => {
         let cancelled = false;
 
         fetcher()
             .then((data) => {
-                if (!cancelled) setState({ data, error: null });
+                if (cancelled) return;
+                setState({ data, error: null });
+                markScreenUpdated(Date.now());
             })
             .catch((err: unknown) => {
                 if (!cancelled) {
@@ -32,7 +34,7 @@ export function useApiQuery<T>(fetcher: () => Promise<T>) {
         return () => {
             cancelled = true;
         };
-    }, [fetcher, refreshKey]);
+    }, [fetcher, refreshKey, markScreenUpdated]);
 
     return {
         data: state.data,
