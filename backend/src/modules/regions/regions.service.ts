@@ -6,7 +6,7 @@ import type {
     RegionCardRow,
     RegionsResponseDto,
     RegionTotalsRow,
-} from './regions.types.js';
+} from './types/regions.types.js';
 
 const round = (value: number, decimals: number) => Number(value.toFixed(decimals));
 const toIso = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z');
