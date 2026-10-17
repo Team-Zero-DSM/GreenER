@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
 import type { GlobeViewHandle } from '../components/3d/GlobeView';
 import { ExploreSection } from '../components/landing/ExploreSection';
-import { regions } from '@/utils/regions';
+import { groupServicesByRegion } from '@/utils/regions';
 import { GlobeView } from '../components/3d/GlobeView';
 import { useServices } from '@/hooks/useServices';
 
@@ -59,7 +59,12 @@ export function LandingPage() {
       };
     }, []);
 
-    const { services } = useServices();
+    const { services, isLoading, error } = useServices();
+
+    const regions = useMemo(
+      () => groupServicesByRegion(services),
+      [services],
+    );
 
     const markers = useMemo(
       () =>
@@ -105,6 +110,13 @@ export function LandingPage() {
       globeRef.current?.zoom(factor);
     };
 
+    if (error) {
+      return (
+        <main className="p-6 text-foreground">
+          Não foi possível carregar os dados dos serviços.
+        </main>
+      );
+    }
 
   return (
     <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-20 pb-0 text-foreground">

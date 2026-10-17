@@ -1,5 +1,5 @@
-import { listServices } from '@/mocks/services';
-import type { ServiceDetail } from '@/types/service';
+
+import type { ServiceSummary } from '@/types/service';
 import type { Region } from '@/types/api';
 
 type RegionGroup = {
@@ -9,40 +9,39 @@ type RegionGroup = {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
-  services: ServiceDetail[];
+  services: ServiceSummary[];
 };
 
-const services = listServices();
+export function groupServicesByRegion(
+  services: ServiceSummary[],
+): Region[] {
+  const groupedRegions = services.reduce<Map<string, RegionGroup>>(
+    (map, service) => {
+      const location = service.location;
+      if (location === null) return map;
 
-const groupedRegions = services.reduce<Map<string, RegionGroup>>(
-  (map, service) => {
-    const location = service.location;
-    if (location === null) return map;
+      const code = location.regionCode;
 
-    const code = location.regionCode;
+      if (!map.has(code)) {
+        map.set(code, {
+          code,
+          country: location.country,
+          region: location.region,
+          city: location.city,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          services: [],
+        });
+      }
 
-    if (!map.has(code)) {
-      map.set(code, {
-        code,
-        country: location.country,
-        region: location.region,
-        city: location.city,
-        latitude: location.latitude,
-        longitude: location.longitude,
-        services: [],
-      });
-    }
+      map.get(code)!.services.push(service);
 
-    map.get(code)!.services.push(service);
+      return map;
+    },
+    new Map(),
+  );
 
-    return map;
-  },
-  new Map(),
-);
-
-export const regions: Region[] = Array.from(
-  groupedRegions.values(),
-  (region) => {
+  return Array.from(groupedRegions.values(), (region) => {
     const withMetrics = region.services.filter(
       (service) => service.environmental != null,
     );
@@ -119,5 +118,5 @@ export const regions: Region[] = Array.from(
         ).length,
       },
     };
-  },
-);
+  });
+}
