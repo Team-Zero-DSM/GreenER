@@ -2,8 +2,6 @@
 <img width="800" src="./.github/logo.png" alt="GreenER">
 </p>
 
-# <h1 align="center">GreenER</h1>
-
 <p align="center">
 <img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=for-the-badge&logo=JavaScript&logoColor=black">
   <img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=for-the-badge&logo=TypeScript&logoColor=white">
