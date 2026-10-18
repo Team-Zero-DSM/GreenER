@@ -9,7 +9,7 @@ export interface Region {
   renewableSharePercent: number | null;
   carbonSource?: string | null;
   servicesCount: number;
-  energyKwh: number;
-  co2eGrams: number;
+  energyKwh: number | null;
+  co2eGrams: number | null;
   statusCounts: { available: number; unavailable: number; metricsMissing: number };
 }
