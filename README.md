@@ -1,5 +1,5 @@
 <p align ="center">
-<img height="250" width="250" src="./.github/logo.png"/>
+<img width="800" src="./.github/logo.png" alt="GreenER">
 </p>
 
 # <h1 align="center">GreenER</h1>
@@ -204,9 +204,9 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
 
 | Sprint | Link                            | Início     | Entrega    | Status |
 | ------ | ------------------------------- | ---------- | ---------- | ------ |
-| 01     | <a href="#sprint1">Sprint 1</a> | 28/09/2026 | 19/10/2026 | 🔄     |
-| 02     | <a href="#sprint2">Sprint 2</a> | 20/10/2026 | 09/11/2026 | ❌     |
-| 03     | <a href="#sprint3">Sprint 3</a> | 10/11/2026 | 23/11/2026 | ❌     |
+| 01     | [sprint 1](./docs/sprint-1/sprint-1.md) | 28/09/2026 | 19/10/2026 | ✅     |
+| 02     | [sprint 2](./docs/sprint-1/sprint-1.md) | 20/10/2026 | 09/11/2026 | ❌     |
+| 03     | [sprint 3](./docs/sprint-1/sprint-1.md) | 10/11/2026 | 23/11/2026 | ❌     |
 
 #### Legenda
 
