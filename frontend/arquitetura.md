@@ -8,20 +8,19 @@ está em [`../docs/cálculo.md`](../docs/cálculo.md).
 
 ## Estado atual e escopo
 
-Referência de 15/10/2026: código integrado nesta branch, com base em `41808d7`.
-O restante do documento descreve a arquitetura-alvo, salvo quando identificado
-como implementação atual. Diagramas e telas futuras não comprovam funcionalidades prontas.
+O documento distingue a implementação atual das funcionalidades futuras.
 
-- `App.tsx` define as rotas; `layouts/DashboardLayout.tsx` envolve lista e detalhe.
-- `api/services.ts` contém a chamada de listagem e a opção por mocks.
-- `hooks/useServices.ts` busca uma vez ao montar; ainda não possui polling.
-- `pages/ServiceDetailPage.tsx` usa `mocks/services.ts` e `mocks/serviceHistory.ts` diretamente.
-- `components/charts/` contém gráficos SVG; a série simulada integra uma curva
-  fictícia por faixas, não uma consulta ao histórico real do backend.
-- `MonitoringBar` exibe contador demonstrativo, sem consumir o status do backend.
-- Contexts, providers de sessão, login e telas analíticas futuras não estão implementados.
-- Mapa/globo está em desenvolvimento por Gabriel para a Sprint 1; sua implementação
-  ainda não está no código integrado. Autenticação fica para a Sprint 3.
+- `App.tsx` define início, lista e detalhe dentro de `DashboardLayout`.
+- `api/services.ts`, `api/regions.ts` e `api/monitoring.ts` consultam o backend real.
+- `useApiQuery` busca ao montar, ao mudar dependências e quando `refreshKey` muda.
+- `MonitoringProvider` observa `lastRoundFinishedAt` e solicita novas consultas.
+- `ServiceDetailPage` usa detalhe e histórico persistido; os gráficos não usam mocks.
+- `MonitoringBar` apresenta estado real, previsão de coleta e horário de atualização.
+- `GlobeView` e cards regionais estão integrados; energia e emissões somam amostras
+  das últimas 24 horas. Apresentar os serviços associados ao inspecionar uma região
+  é o saldo de T15 transferido para a Sprint 2, com Gabriel.
+- JWT permanece na Sprint 3. Configuração do intervalo pela aplicação não existe.
+- Arquivos em `mocks/` não comprovam seu uso pelas telas atuais.
 
 ## 1. Objetivo do frontend
 
@@ -91,7 +90,7 @@ APIs externas e PostgreSQL
 - **Contexts e providers** compartilham somente estado que seja comum a
   diferentes áreas, como a sessão autenticada.
 
-Na integração planejada, o caminho dos dados reais será backend → frontend. Os mocks atuais são dados demonstrativos. As respostas e operações
+Na integração atual, os dados percorrem backend → frontend. Arquivos de mocks são demonstrativos e não alimentam as páginas integradas. As respostas e operações
 seguem [`../docs/API.md`](../docs/API.md); o frontend não depende dos contratos
 das APIs externas.
 
@@ -123,18 +122,15 @@ páginas não duplicam transporte HTTP nem lógica de sessão.
 ```text
 src/
 ├── App.tsx, main.tsx, index.css
-├── api/services.ts
-├── components/
-│   ├── MonitoringBar.tsx
-│   ├── charts/
-│   ├── services/
-│   └── ui/
-├── hooks/useServices.ts
-├── layouts/DashboardLayout.tsx
+├── api/                 # services.ts, regions.ts, monitoring.ts
+├── components/          # 3d, landing, charts, services, ui, MonitoringBar
+├── contexts/            # MonitoringProvider.tsx, monitoring.ts
+├── hooks/               # useApiQuery, useMonitoringStatus, useServices, useServiceDetail
+├── layouts/             # DashboardLayout.tsx
 ├── lib/
-├── mocks/
-├── pages/                # DashboardPage e ServiceDetailPage
-└── types/service.ts
+├── mocks/               # arquivos demonstrativos; não alimentam as páginas atuais
+├── pages/               # LandingPage, DashboardPage, ServiceDetailPage
+└── types/
 ```
 
 O transporte atual está em `api/`, e o layout em `layouts/`. Não há migração
@@ -230,23 +226,23 @@ A tela de detalhe identifica o serviço, sua região e estado e apresenta suas
 métricas operacionais e ambientais, além da evolução temporal. Todos os valores
 exibem unidade, período e indicação de estimativa quando aplicável.
 
-### 6.3. Histórico e ranking
+### 6.3. Histórico implementado e ranking planejado
 
 A área de histórico permite acompanhar métricas e indicadores ambientais ao
-longo do tempo, por serviço e período. O ranking apresenta classificações
+longo do tempo, por serviço e período. Na Sprint 2, o ranking deverá apresentar classificações
 comparáveis calculadas pelo backend e identifica o critério usado.
 
-### 6.4. Comparação e cenários
+### 6.4. Comparação e cenários — Sprint 3
 
-A área de comparação permite analisar serviços e regiões com o mesmo contexto
+A área planejada de comparação permitirá analisar serviços e regiões com o mesmo contexto
 temporal e critérios explícitos. A simulação apresenta hipóteses e parâmetros
 do cenário, diferenciando resultados simulados de observações históricas.
 
 ### 6.5. Regiões
 
-A visualização regional apresenta os serviços associados a cada região e os
-dados de intensidade de carbono e participação renovável fornecidos pelo
-backend. Um mapa e outras visualizações geográficas complementam listas e
+A visualização atual apresenta globo, cards e dados regionais do backend.
+Apresentar os serviços associados ao inspecionar uma região é a continuação
+de T15 na Sprint 2; ainda não está entregue. Um mapa e outras visualizações geográficas complementam listas e
 valores tabulares; a informação permanece acessível sem depender apenas da
 representação cartográfica.
 
@@ -260,26 +256,28 @@ A configuração do intervalo pela aplicação fica para etapa posterior, com sp
 
 | Rota implementada | Componente | Comportamento atual |
 |---|---|---|
-| `/` | `HomePage`, em `App.tsx` | Mensagem de ambiente pronto, sem redirecionamento para o dashboard. |
-| `/dashboard` | `DashboardPage` | Lista e filtros com mocks por padrão. |
-| `/servicos/:id` | `ServiceDetailPage` | Resumo e gráficos simulados; acessível pelos serviços listados. |
+| `/` | `LandingPage` | Globo, cards regionais e totais das últimas 24 horas. |
+| `/dashboard` | `DashboardPage` | Serviços reais, filtros, status e última coleta. |
+| `/servicos/:id` | `ServiceDetailPage` | Detalhe, gráficos e totais do histórico persistido. |
 
-As duas últimas rotas usam `DashboardLayout`. `/services/:serviceId` não é
-rota existente. As propostas `/history`, `/ranking`, `/comparison`, `/scenarios`,
-`/regions`, `/login` e `/settings` só deverão ser anunciadas como disponíveis
-depois de implementadas. Histórico hoje aparece no detalhe, com dados simulados;
-não existe página `/history`. Endpoints REST estão em [API.md](../docs/API.md).
+As três rotas usam `DashboardLayout`. `/services/:serviceId` não existe na interface.
+Histórico está no detalhe; não há página `/history`. Login, ranking, comparação,
+cenários e configurações continuam futuros. Contratos em [API.md](../docs/API.md).
 
 ## 7. Atualização e estados de interface
 
-Na implementação atual, o hook busca a lista uma vez e o detalhe lê mocks.
-O contador demonstrativo não executa consultas. A atualização periódica real
-é escopo da Sprint 1, acompanhada nas issues #36 e #37, e permanece pendente.
-Quando integrada, deverá informar o horário real da atualização; sua frequência
-é independente do Collection Job.
+`useMonitoringStatus` consulta `/api/v1/monitoring/status`. A próxima consulta é
+agendada para `nextCollectionAt` mais 1 segundo; durante uma rodada, verifica de
+novo em 1 segundo. Sem previsão ou após erro, tenta em 30 segundos.
+`MonitoringProvider` detecta nova conclusão de rodada e incrementa `refreshKey`;
+`useApiQuery` recarrega os dados da página sem navegação ou recarga manual.
+O relógio da barra é atualizado a cada segundo, mas não substitui as consultas.
+`screenUpdatedAt` indica a conclusão de uma consulta da interface; `collectedAt`
+identifica a amostra de cada serviço. Uma resposta bem-sucedida não implica que
+todos os serviços tiveram coleta recente.
 
-Os estados abaixo representam os requisitos da arquitetura-alvo, ainda sujeitos
-à implementação e validação nas telas:
+Os estados abaixo orientam a apresentação; responsividade, acessibilidade e
+cenários completos de falha ainda exigem validações próprias.
 
 Cada consulta apresenta estados distintos:
 
@@ -320,7 +318,8 @@ comunicados apenas por cor; valores incluem unidades e textos de apoio.
 
 ## 10. Configuração, segurança e qualidade
 
-`VITE_API_URL` define a origem da API do backend. `VITE_USE_MOCKS` controla somente a listagem; apenas o valor `false` a direciona ao HTTP. A rota solicitada `/api/v1/services` ainda está ausente no backend integrado; o detalhe continua simulado independentemente dessa variável. Variáveis `VITE_*` são
+`VITE_API_URL` define a origem da API do backend. As páginas atuais usam HTTP real;
+`VITE_USE_MOCKS` não controla esse fluxo. Variáveis `VITE_*` são
 incorporadas ao bundle e, portanto, contêm somente configuração pública; tokens,
 senhas e segredos não são armazenados nelas.
 
@@ -346,7 +345,7 @@ O frontend segue o [plano de entregas](../docs/plano-de-entregas.md):
 
 1. **Sprint 1:** monitoramento, persistência, histórico, dashboard, mapa/globo,
    integração real e atualização automática.
-2. **Sprint 2:** rankings de consumo energético e emissões por período.
+2. **Sprint 2:** rankings e continuação de T15: serviços associados à região inspecionada.
 3. **Sprint 3:** autenticação JWT, comparação e simulação de cenários regionais.
 
 Configuração do intervalo pela aplicação: etapa futura, com sprint ainda a definir.

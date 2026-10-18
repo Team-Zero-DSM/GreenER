@@ -1,15 +1,96 @@
 # Evidências de aplicação da Definition of Done — Sprint 1
 
-Data da verificação: **15/10/2026**, horário de Brasília. Os timestamps das APIs
-registrados abaixo estão em UTC; `16/10/2026 01:05 UTC` corresponde a
-`15/10/2026 22:05` em Brasília.
+Este registro aplica a [DoD do projeto](../../README.md) às tarefas declaradas
+concluídas, identificando escopo, procedimento, resultado e evidência. As quatro
+histórias selecionadas continuam sendo **US01, US03, US08 e US09**. A conclusão
+de uma tarefa não conclui automaticamente a história. Os timestamps das APIs
+são apresentados em UTC, salvo quando indicado o horário de Brasília.
 
-Branch: `40-documentar-readme-e-registrar-dailys`. Código-base: `41808d7`.
+## Evidências da aplicação integrada
 
-Este registro aplica a [DoD do projeto](../../README.md) às **22 tarefas
-marcadas como concluídas**, identificando escopo, procedimento, resultado e
-evidência. As quatro histórias selecionadas continuam sendo **US01, US03,
-US08 e US09**. A conclusão de uma tarefa não conclui automaticamente a história.
+O backlog declara **29 tarefas concluídas** e T15 parcialmente entregue.
+Os resultados anteriores à integração, preservados abaixo, continuam históricos:
+`/services` ausente, mocks ativos e integração pendente não descrevem a versão atual.
+As evidências atuais desta seção substituem essas limitações para a versão integrada.
+
+### Decisão de escopo de T15
+
+O globo e os cards regionais estão integrados. Por decisão da equipe, falta
+**apresentar os serviços associados ao inspecionar uma região**, transferido para
+a Sprint 2, com Gabriel. T15 não está integralmente concluída. Os 3 pontos ficam
+como saldo do compromisso original; não é registrado aceite integral da US08.
+
+### Conferência atual das 29 tarefas declaradas concluídas
+
+| Tarefa | Evidência aplicável na versão integrada | Limite / pendência |
+|---|---|---|
+| T01 | Arquiteturas e contratos reconciliados com módulos e consultas atuais. | Arquitetura-alvo continua identificada; README atualizado com escopo e funcionalidades atuais. |
+| T02 | Backend disponível; health, tipagem, lint e compilação passaram. | Sem reconstrução de imagem sem cache. |
+| T03 | Descoberta alimenta oito serviços reais na execução observada. | Quantidade varia com a API externa. |
+| T04 | Modelo e mapper integrados no PR #59; histórico V04. | Não confundir DTO com aceite da história. |
+| T05 | `/api/v1/services` retornou 200; filtros válidos retornaram dados e inválidos 400. PR #61. | Nenhum serviço é uma resposta válida com lista vazia. |
+| T06 | Coletas reais obtêm métricas externas e persistem resultados. | Sem injeção de todas as falhas externas nesta verificação. |
+| T07 | Fórmulas mantidas; reprocessamento histórico em V05. | Estimativas didáticas; não são medição física. |
+| T08 | Estado do monitoramento e horários avançaram entre rodadas. | Intervalo do job difere do intervalo energético da amostra. |
+| T09 | Detalhe e histórico reais: 200; serviço ausente 404; entradas inválidas 400. | Ausência de amostra não equivale a zero. |
+| T10 | Três testes unitários existentes; execução com 30 s passou 3/3. | Foi detectada dependência do ambiente de 10 s; teste ajustado para isolar 30 s. Após ajuste, `docker compose exec -T backend npm test` passou 3/3 no ambiente real de 10 s, sem sobrescrever a variável no comando. |
+| T11 | Layout comum às três rotas; protótipos em V09. | Sem homologação completa de dispositivos e acessibilidade. |
+| T12 | Página inicial real com cinco regiões, globo e totais de 24 h. PRs #60/#66. | Complemento regional de T15 transferido. |
+| T13 | `/servicos/billing-api` apresentou identificação, métricas, quatro gráficos e totais reais. | Inspeção de um serviço não cobre todos os estados de falha. |
+| T14 | `/dashboard` apresentou oito serviços reais e links para detalhe. | Filtros HTTP exercitados; não repetir os resultados antigos de mocks como integração atual. |
+| T16 | Status real apresentado na lista, detalhe e barra de monitoramento. PR #64. | Cenários de indisponibilidade exigem validações adicionais próprias. |
+| T17 | Navegação lista → detalhe consumiu backend e histórico persistido. | Sem teste completo em todos os navegadores. |
+| T18 | Horário da tela e totais mudaram após rodadas sem recarregamento. PR #65. | Relógio visual isolado não comprova renovação dos dados. |
+| T19 | Duas observações da página inicial: 22:14:24 → 22:14:35, com totais regionais diferentes. | Horários de Brasília de 17/10; valores são daquela execução. |
+| T20 | DDL aplicado em schema temporário vazio: seis tabelas, índices e inserts sem erro; transação revertida. | Não é migração de banco existente. |
+| T21 | PostgreSQL ativo e backend lendo e gravando coletas; volume declarado. | Retenção após reinicialização continua pendente em BD03. |
+| T22 | Backend em container; compilação passou com saída em `/tmp`. | Não comprova build Docker sem cache em clone limpo. |
+| T23 | Frontend em container; TypeScript, lint e build passaram. | Build alertou bundle maior que 500 kB; não impediu compilação. |
+| T24 | `docker compose config --quiet` passou e três serviços ativos. | Verificação no ambiente existente. |
+| T25 | Exemplos de ambiente, Compose e workflow versionados. | Não representa execução em todas as máquinas. |
+| T26 | Comandos usados na verificação funcionaram no ambiente existente. | README atualizado; reprodução em clone limpo continua não verificada. Links das sprints e referência ao logo foram preservados por decisão da equipe. |
+| T27 | Artefato de casos de uso preservado; inspeção histórica V09. | Sem novo aceite semântico da UML. |
+| T28 | Diagrama de classes preservado; inspeção histórica V09. | Modelagem pode incluir responsabilidades futuras. |
+| T29 | Diagramas de sequência preservados, texto alinhado ao fluxo real. | Fluxos futuros não são entregas executáveis. |
+| T30 | MER/DER documentados e seis tabelas criadas pelo DDL atual. | Sem homologação semântica adicional dos diagramas. |
+
+Esta tabela identifica evidência e limites; não declara aprovação formal da equipe.
+O status concluído do backlog não elimina ressalvas sobre documentação e testes.
+
+### Verificações atuais e reprodução
+
+- Tipagem e lint passaram no backend e frontend; compilação de ambos passou.
+- Bateria HTTP: 15 consultas corresponderam aos estados esperados, incluindo
+  health, lista/filtros, detalhe, alias singular, histórico, regiões e monitoramento.
+- Navegador: início, lista e detalhe com dados reais, gráficos e atualização sem recarga.
+- Histórico de `billing-api`, limites retornados pela API
+  `(2026-10-16T23:59:59Z, 2026-10-17T23:59:59Z]`: API e SQL retornaram
+  **704 amostras, 0.3832529838 kWh e 32.57650354 gCO₂e**.
+  Reprodução: usar `range=24h&to=2026-10-17T23:59:59Z&maxPoints=5` e comparar
+  o SQL com os mesmos limites de `period`, sem enviar `from` ao histórico.
+- DDL: `SET LOCAL search_path` para schema temporário vazio, script completo e
+  contagem de tabelas; `ROLLBACK` preservou o banco existente. A extensão UUID
+  já existia no banco; esta execução não testa sua instalação do zero.
+
+```powershell
+docker compose config --quiet
+docker compose exec -T backend npx tsc --noEmit
+docker compose exec -T backend npm run lint
+docker compose exec -T frontend npx tsc --noEmit
+docker compose exec -T frontend npm run lint
+docker compose exec -T backend npm test
+```
+
+O teste periódico presume 30 segundos para avançar o relógio simulado. Sua correção
+usa `vi.stubEnv` e `vi.unstubAllEnvs`, isolando essa premissa do ambiente real.
+Isso não muda o intervalo da aplicação. Os três testes existentes não representam
+uma suíte completa de integração ou cobertura de todos os cenários do job.
+
+## Verificações anteriores à integração
+
+As seções 1–3 abaixo preservam os procedimentos e resultados de quando havia
+**22 tarefas declaradas concluídas**, antes da integração real da interface.
+Esses resultados não substituem as evidências da aplicação integrada acima.
 
 ## 1. Critérios operacionais da DoD
 
@@ -55,7 +136,7 @@ atribuídos retrospectivamente a uma validação executada pelos integrantes.
 | T22 — Docker do backend | Backend executando no container com ambiente de desenvolvimento. | Processo saudável; /backend e Node v24.21.0 confirmados; health, tipagem e lint passaram. | [Dockerfile](../../backend/Dockerfile); V01/V02. | Não foi reconstruída uma imagem sem cache nesta verificação. |
 | T23 — Docker do frontend | Vite e aplicação acessíveis pelo container. | /app e Node v24.21.0 confirmados; páginas abertas no navegador; tipagem e lint passaram. | [Dockerfile](../../frontend/Dockerfile); V01/V07/V08. | Não substitui teste completo em dispositivos móveis. |
 | T24 — Docker Compose | Serviços e rede de desenvolvimento definidos e executando. | compose config --quiet aceitou a configuração; três serviços ativos, backend e banco saudáveis. | [Compose](../../docker-compose.yml); V01. | Validação nos containers existentes, não em clone limpo. |
-| T25 — Ambiente compartilhado | Configuração versionada de ambiente, Git e fluxo de branches. | Inspeção de exemplos de ambiente, Compose, workflow e histórico de branches/PRs; branch atual confirmada. | [Backend .env.example](../../backend/.env.example), [frontend .env.example](../../frontend/.env.example), [CI](../../.github/workflows/ci.yml). | Não afirma que cada computador da equipe foi individualmente testado. |
+| T25 — Ambiente compartilhado | Configuração versionada de ambiente, Git e fluxo de branches. | Inspeção de exemplos de ambiente, Compose, workflow e histórico de branches e PRs. | [Backend .env.example](../../backend/.env.example), [frontend .env.example](../../frontend/.env.example), [CI](../../.github/workflows/ci.yml). | Não afirma que cada computador da equipe foi individualmente testado. |
 | T26 — Documentação inicial de execução | Descrever instalação, ambiente, endereços e operação. | Comandos de status, configuração, tipagem e lint executados; caminhos relativos e limites da interface conferidos. | [README](../../README.md); V01/V02/V09. | Reprodução a partir de clone limpo permanece não executada. |
 | T27 — Casos de uso | Artefato de modelagem versionado e acessível na documentação. | Arquivo SVG e referências locais conferidos; XML bem formado. | [Modelagem](../arquitetura/arquitetura.md), [SVG](../arquitetura/images/caso-de-uso.svg); V09. | Inspeção estrutural não equivale a homologação de cada fluxo futuro. |
 | T28 — Classes | Modelo inicial de classes versionado. | SVG e referência documental conferidos; XML bem formado. | [SVG](../arquitetura/images/diagrama-de-classes.svg), PR #49; V09. | Modelo inicial pode incluir responsabilidades futuras já identificadas na arquitetura. |
@@ -249,14 +330,14 @@ timestamp. Os números descrevem aquela execução, não valores fixos esperados
 em consultas futuras. A reprodução deve usar os limites retornados na nova
 resposta e comparar novamente com o SQL do mesmo período.
 
-## 4. Pendências de aceite
+## 4. Pendências atuais de aceite
 
-- [ ] Sincronizar os checklists das issues com os resultados das verificações.
-- [ ] Validar a integração da interface com os dados reais do backend.
-- [ ] Validar o mapa/globo e a apresentação dos serviços por região.
-- [ ] Validar a atualização automática dos dados sem recarregamento da página.
-- [ ] Registrar os resultados necessários ao aceite das histórias selecionadas.
+- [ ] Conciliar os estados das histórias no README com seu aceite formal.
+- [ ] Registrar retenção dos dados após reinicialização controlada (BD03).
+- [ ] Entregar na Sprint 2 o saldo de T15: serviços associados à região inspecionada.
+- [ ] Registrar aceite final das quatro histórias com suas condições efetivamente atendidas.
+- [ ] Registrar review, feedback, retrospectiva e demonstração no encerramento.
 
-As verificações deste documento cobrem os escopos das tarefas concluídas.
-O aceite das histórias depende também da conclusão e validação das tarefas
-de integração e das funcionalidades ainda em desenvolvimento.
+Integração real e atualização automática foram observadas e não são mais pendências
+iguais às do snapshot anterior. O saldo transferido de T15 permanece explícito.
+Checklists remotos não foram editados; evidências locais não substituem aceite da equipe.

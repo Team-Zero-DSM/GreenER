@@ -8,8 +8,7 @@ carbono, da Greener Carbon Intensity API, por meio das integrações do backend.
 
 ## Estado da implementação e limitações
 
-Referência: código desta branch e documento público do desafio, consultados em
-15/10/2026. As fórmulas seguem o modelo simplificado do
+As fórmulas implementadas seguem o modelo simplificado do
 [Greener — ABP 2º Semestre](https://docs.unilaunch.org/share/x29w8jgwdb/p/greener-abp-2-semestre-b7FiqU6UC1),
 nas seções “Modelo de Cálculo Simplificado” e “Exemplo”. Os quatro fatores
 iniciais do SQL coincidem com os valores desse exemplo.
@@ -76,7 +75,7 @@ O [serviço](../backend/src/modules/collections/collections.service.ts) aplica a
 | network_watts_per_gb | 0.02 | W/GB | Exemplo do desafio, `NETWORK_WATTS_PER_GB`: coeficiente aplicado ao tráfego de rede, conforme a simplificação fornecida. |
 
 Fonte dos quatro valores e das unidades: [documento do desafio, seção “Exemplo”](https://docs.unilaunch.org/share/x29w8jgwdb/p/greener-abp-2-semestre-b7FiqU6UC1),
-consultado em 15/10/2026. O valor de CPU não identifica um processador físico
+nas unidades apresentadas pelo modelo. O valor de CPU não identifica um processador físico
 específico. O fator de rede é aplicado diretamente conforme o modelo fornecido,
 sem acrescentar conversão para taxa ou energia por GB que não exista no código.
 A intensidade de carbono é obtida regionalmente pela integração, não fixada

@@ -1,7 +1,5 @@
 # Plano de Entregas
 
-Revisado em 15/10/2026 na branch `40-documentar-readme-e-registrar-dailys`,
-com base no código `41808d7`, no GitHub e nas decisões confirmadas pela equipe.
 As situações abaixo descrevem evidências e pendências, não uma nota atribuída.
 
 ## Convenções e critérios da avaliação
@@ -15,7 +13,8 @@ As situações abaixo descrevem evidências e pendências, não uma nota atribu�
   responsabilidade coletiva; futuras divisões individuais continuam a definir.
 - Implementado não significa história aceita: observar aceite, DoD e evidências.
 - A autenticação foi alocada à Sprint 3. Persistência e histórico são Sprint 1.
-  Mapa/globo permanece na Sprint 1, em desenvolvimento por Gabriel.
+  Globo integrado na Sprint 1; saldo de T15 transferido para a Sprint 2:
+  apresentar os serviços associados ao inspecionar uma região, com Gabriel.
 - Configuração do intervalo pela aplicação fica para depois, com sprint e
   responsável ainda a definir. Até a entrega final, sua alocação deve ser
   conciliada com os requisitos obrigatórios de configuração do desafio.
@@ -38,8 +37,10 @@ periódica; mapa/globo com pins e inspeção regional, sob responsabilidade de G
 O escopo inclui as condições das histórias e tarefas do
 [registro da Sprint 1](./sprint-1/sprint-1.md).
 
-O backend já armazena e consulta o histórico. A interface ainda utiliza mocks;
-integração, atualização automática e mapa continuam em desenvolvimento.
+O backend armazena e consulta o histórico; lista, detalhe, histórico e atualização
+automática estão integrados à interface real. O globo está integrado. A apresentação
+dos serviços associados ao inspecionar uma região permanece pendente e foi
+transferida para a Sprint 2 como saldo de T15, sem concluir integralmente a tarefa.
 Autenticação e configuração do intervalo pela aplicação não compõem esta entrega.
 
 ### Matriz da Sprint 1
@@ -49,17 +50,17 @@ Autenticação e configuração do intervalo pela aplicação não compõem esta
 | ES01 | RNF11, RNF12 | Backlog priorizado e vinculado a requisitos | Conferir histórias e tarefas selecionadas | Henrique e equipe | [Backlog](../README.md) | Documentado; revisar cobertura |
 | ES02 | RNF12 | Objetivo, seleção, responsáveis e entregas | Conferir plano e Sprint Backlog | Henrique e equipe | [Sprint 1](./sprint-1/sprint-1.md) | Documentado; acompanhar execução |
 | ES03 | RNF11 | Critérios de aceite de US01, US03, US08 e US09 | Relacionar os critérios das quatro histórias selecionadas às evidências | Equipe | [User Stories](../README.md) | Documentado; validar por história |
-| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir links de issues e PRs da sprint | Equipe | [Rastreabilidade](./sprint-1/sprint-1.md#evidências-e-rastreabilidade) | Há vínculos; reconciliar issues abertas |
+| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir links de issues e PRs da sprint | Equipe | [Rastreabilidade](./sprint-1/sprint-1.md#evidências-e-rastreabilidade) | Vínculos restaurados; aceite formal e saldo de T15 permanecem explícitos |
 | ES05 | RNF12 | Evolução incremental | Examinar commits e merges do período | Equipe | [Commits](https://github.com/Team-Zero-DSM/GreenER/commits/develop/) | Histórico disponível |
 | ES06 | RNF12 | Review, feedback e adaptação do backlog | Conferir resultados e decisões no encerramento | Equipe | [Sprint Review](./sprint-1/sprint-1.md#-sprint-review) | Pendente de encerramento |
-| ES07 | RNF11, RNF12 | DoD aplicada às entregas concluídas | Conferir escopo, procedimento, resultado e limite por tarefa | Equipe | [DoD geral](../README.md) e [evidências de 22 tarefas](./sprint-1/evidencias-dod.md) | Aplicação registrada por tarefa; preservar pendências de integração e aceite das histórias |
-| ES08 | RNF08 | Documentação compatível com a entrega | Conferir links, comandos, contratos e limites | Henrique e equipe | [README](../README.md) e documentos vinculados | Revisada; reprodução externa a conferir |
+| ES07 | RNF11, RNF12 | DoD aplicada às entregas concluídas | Conferir escopo, procedimento, resultado e limite por tarefa | Equipe | [DoD geral](../README.md) e [evidências históricas e atuais](./sprint-1/evidencias-dod.md) | 29 tarefas declaradas concluídas; evidências atuais e ressalvas registradas, sem aceite automático das histórias |
+| ES08 | RNF08 | Documentação compatível com a entrega | Conferir links, comandos, contratos e limites | Henrique e equipe | [README](../README.md) e documentos vinculados | Documentação e README alinhados à implementação; clone limpo permanece não verificado |
 | ES09 | RNF12 | Participação verificável dos cinco integrantes | Conferir artefatos por integrante, além de commits | Todos os integrantes | [Participação](./sprint-1/sprint-1.md#participação-da-equipe) | Evidências registradas |
 | DW01 | RP01, RP02; RNF09 interno | React/TS, Node/TS e separação das partes | Conferir código e dependências usadas | Pedro, Paulo, Gabriel e equipe | [Frontend](../frontend/package.json), [backend](../backend/package.json) | Implementado |
 | DW02 | RF01, RF03; impacto ambiental | Descoberta, métricas e carbono | Observar integrações, coletas e falhas | Pedro e Vitor | [Integrações](../backend/src/integrations/), [verificações V03/V06](./sprint-1/evidencias-dod.md) | Consultas reais e recorrência verificadas; ampliar cenários de falha |
-| DW03 | RF01, RF03, RF10 | API modular, contratos e SQL nos repositories | Consultar rotas reais e validar respostas | Pedro e Vitor | [API](./API.md), [verificação V02](./sprint-1/evidencias-dod.md) | Estrutura e contratos existentes verificados; listagem interna pendente em T05 (#22) |
-| DW04 | RF09, RF10; RNF01 interno | Interface consumindo o backend | Desativar mocks e conferir chamadas e renderização | Paulo e Gabriel | [Interface](../frontend/arquitetura.md) | Parcial: integração pendente (#35) |
-| DW05 | RF11; RNF02 interno | Dashboard atualizado sem recarga | Observar consultas sucessivas e horário real | Paulo e Gabriel | [Issues #36](https://github.com/Team-Zero-DSM/GreenER/issues/36) e [#37](https://github.com/Team-Zero-DSM/GreenER/issues/37) | Pendente; contador demonstrativo |
+| DW03 | RF01, RF03, RF10 | API modular, contratos e SQL nos repositories | Consultar rotas reais e validar respostas | Pedro e Vitor | [API](./API.md), [verificação V02](./sprint-1/evidencias-dod.md) | Lista, detalhe, histórico e regiões verificados por HTTP; #22 integrada |
+| DW04 | RF09, RF10; RNF01 interno | Interface consumindo o backend | Conferir chamadas reais, navegação e renderização | Paulo e Gabriel | [Interface](../frontend/arquitetura.md) | Integração real observada em lista, detalhe e histórico |
+| DW05 | RF11; RNF02 interno | Dashboard atualizado sem recarga | Observar consultas sucessivas e horário real | Paulo e Gabriel | [Issues #36](https://github.com/Team-Zero-DSM/GreenER/issues/36) e [#37](https://github.com/Team-Zero-DSM/GreenER/issues/37) | Dados e horário de atualização avançaram sem recarga manual |
 | DW07 | RP04; RNF07 interno | Frontend, backend e banco no Compose | Iniciar serviços e conferir status | Pedro | [Compose](../docker-compose.yml), [verificação V01](./sprint-1/evidencias-dod.md) | Configuração válida e três serviços ativos; clone limpo não verificado |
 | BD01 | RF10, RP03 | Modelo, DDL e restrições | Aplicar schema em banco vazio de avaliação | Pedro e Vitor | [Schema](../database/schema.sql), [modelo](../database/arquitetura.md), [verificação V10](./sprint-1/evidencias-dod.md) | DDL executado sem erro em banco vazio descartável; seis tabelas criadas |
 | BD02 | RF10, RP03 | DML explícito e parametrizado | Conferir placeholders e operações | Pedro e Vitor | [Repositories](../backend/src/modules/) | Implementado |
@@ -70,6 +71,11 @@ Autenticação e configuração do intervalo pela aplicação não compõem esta
 | TP03 | RNF04 interno | Tratamento de falhas preservando o sistema | Verificar validações e falhas isoladas | Pedro e Vitor | [Coleta](../backend/src/modules/collections/collections.service.ts) | Implementado; ampliar evidências de falhas |
 
 ## Sprint 2 — Rankings de impacto ambiental
+
+**Continuação confirmada de T15:** ao inspecionar uma região, apresentar os
+serviços associados àquela região. Responsável: Gabriel. A decisão preserva a
+entrega parcial da Sprint 1 e não acrescenta histórias à seleção anterior.
+Detalhar o aceite e a estimativa no planejamento da Sprint 2.
 
 **20/10/2026 a 09/11/2026**
 
@@ -137,7 +143,7 @@ implementação de autenticação funcional nem evidência de Sprint 3 concluíd
 |---|---|---|
 | Autenticação | Sprint 3. | Removida da entrega da Sprint 1; continua no backlog do produto. |
 | Persistência e histórico | Entregas técnicas da Sprint 1. | Relacionados às tarefas de backend/banco e BD01–BD04; não incluem automaticamente a US10 na seleção. |
-| Mapa/globo | Sprint 1; Gabriel em desenvolvimento. | Rastreado pela página inicial (#29) e pelo escopo visual da #32. |
+| Mapa/globo | Globo integrado na Sprint 1; continuação de T15 na Sprint 2, com Gabriel. | Falta apresentar os serviços associados ao inspecionar uma região; #32 continua como referência do saldo, sem declarar a tarefa inteira concluída. |
 | Intervalo pela aplicação | Depois; sprint a definir. | Não confundir variável de ambiente, tabela existente e endpoint funcional. Alocar antes do fechamento do plano final. |
 | Parâmetros ambientais | Valores iniciais correspondem ao exemplo do modelo simplificado do desafio. | Fonte, unidades e aplicação registradas em [cálculo.md](./cálculo.md); não representam calibração de hardware real. |
 

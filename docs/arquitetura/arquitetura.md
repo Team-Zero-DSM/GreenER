@@ -79,7 +79,10 @@ Representar a estrutura estática do sistema, evidenciando as principais entidad
 
 Os diagramas de sequência disponíveis estão em `./images/diagramas-de-sequencia/`.
 Consulta com mapa e atualização representa o fluxo-alvo da Sprint 1; ranking
-é planejado para a Sprint 2. O detalhe visual existe com mocks, sem integração real.
+é planejado para a Sprint 2. Lista, detalhe e histórico já consomem o backend real.
+O globo está integrado; apresentar os serviços associados ao inspecionar uma região
+foi transferido para a Sprint 2 como continuação de T15. Diagramas permanecem
+modelos de referência e não substituem as evidências da implementação.
 
 ## Consulta de serviços
 

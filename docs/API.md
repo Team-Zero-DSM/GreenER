@@ -23,7 +23,7 @@ fornecê-las ao restante da aplicação.
 
 ## 2. API REST do GreenER
 
-A implementação atual oferece detalhe de serviço, histórico de coletas,
+A implementação atual oferece listagem e detalhe de serviços, histórico de coletas,
 estado do monitoramento e os cards de região. As demais operações abaixo são
 planejadas e não devem ser apresentadas como implementadas. O dashboard e o
 detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
@@ -37,20 +37,36 @@ monitoramento consulta `/monitoring/status` 1 segundo depois de cada
 ### 2.1. Operações implementadas
 
 Base local: `http://localhost:3000`. As rotas de negócio usam o prefixo
-`/api/v1`; o recurso atual é `/service`, no singular. Não há aliases em
-`/services` nesta versão.
+`/api/v1`. O recurso principal é `/services`; `/service` permanece como alias
+para listagem, detalhe e histórico.
 
 | Método | Caminho real | Responsabilidade | Autenticação |
 |---|---|---|---|
 | `GET` | `/health` | Informar que o processo HTTP está disponível. | Não exige. |
-| `GET` | `/api/v1/service/:externalId` | Entregar identificação, estado, localização e última coleta válida. | Não exige. |
-| `GET` | `/api/v1/service/:externalId/collections` | Entregar pontos agrupados e totais do período. | Não exige. |
+| `GET` | `/api/v1/services` | Listar serviços, localização e última coleta, com filtros opcionais. | Não exige. |
+| `GET` | `/api/v1/services/:externalId` | Entregar identificação, estado, localização e última coleta válida. | Não exige. |
+| `GET` | `/api/v1/services/:externalId/collections` | Entregar pontos agrupados e totais do período. | Não exige. |
 | `GET` | `/api/v1/regions` | Entregar as regiões, dados ambientais, contadores atuais e totais do período. | Não exige. |
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
 por exemplo `billing-api`; não é o BIGINT interno. O parâmetro aceita de 1 a
 100 caracteres, usando letras, números, ponto, sublinhado e hífen.
+
+#### Listagem de serviços
+
+```http
+GET /api/v1/services?regionCode=br-sudeste&active=true
+```
+
+Filtros opcionais: `regionCode` (string de 1 a 100 caracteres) e `active`
+(`true` ou `false`). O schema rejeita parâmetros extras, repetidos e valores
+inválidos com 400. Sem filtros, retorna todos os serviços cadastrados.
+Resposta: `{ generatedAt, filters: { regionCode, active }, services }`;
+filtros ausentes aparecem como `null`. Cada item contém `id` externo, `name`,
+`active`, `status`, `statusUpdatedAt`, `lastSeenAt`, `location` e
+`latestCollection` (ou `null` sem coleta). Lista sem resultados retorna 200
+com `services: []`. `active` indica presença na descoberta, não sucesso da coleta.
 
 #### Detalhe e última coleta
 
@@ -165,7 +181,7 @@ Regiões ausentes retornam 200 com `regions: []`. Par inválido (incompleto,
 
 ### 2.2. Operações planejadas
 
-Distribuição confirmada: listagem interna e integração na Sprint 1; rankings
+Distribuição confirmada: listagem interna e integração implementadas na Sprint 1; rankings
 na Sprint 2; autenticação, comparação e cenários na Sprint 3. Persistência e
 histórico são da Sprint 1 e já possuem implementação no backend. A configuração
 do intervalo por endpoint fica para etapa posterior, sem sprint definida.
@@ -176,7 +192,6 @@ implementadas, sem garantia de disponibilidade HTTP na versão atual.
 | Método | Caminho | Responsabilidade |
 |---|---|---|
 | `POST` | `/auth/login` | Validar as credenciais do usuário e emitir um JWT. |
-| `GET` | `/services` | Entregar a lista de serviços e os dados de resumo usados no dashboard. |
 | `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
 | `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
 | `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
@@ -307,14 +322,13 @@ comprovam autenticação implementada na versão atual. Sua entrega está previs
 
 ## 6. Alinhamento entre contrato e implementação
 
-O contrato deverá ser mantido coerente entre rotas, schemas Zod, tipos do
-backend e tipos consumidos pela interface. Essa integração ainda está pendente:
-a lista solicita `/api/v1/services`, ausente nesta versão; o detalhe usa mocks
-sem consultar as rotas de detalhe e histórico já existentes.
+Lista, detalhe, histórico e regiões são consumidos pela interface real. Rotas,
+schemas Zod e tipos devem evoluir em conjunto. Ranking, comparação, cenários,
+JWT e configuração por HTTP continuam planejados. Consultar o [plano](./plano-de-entregas.md)
+e as [rotas do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
 
-Histórico, ranking, comparação, região e simulação são recursos do produto,
-mas não estão todos disponíveis na interface. Consulte o [plano](./plano-de-entregas.md)
-e as [rotas atuais do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
+O globo e os cards estão integrados; apresentar os serviços associados ao
+inspecionar uma região é o saldo de T15 transferido para a Sprint 2.
 
 Não existe handler global de rota desconhecida em JSON: um caminho não
 registrado pode retornar o 404 padrão do Express em HTML. Isso difere do 404
@@ -362,9 +376,9 @@ Exemplo de resposta HTTP 200:
   `nextCollectionAt` é `null`; depois, informa a previsão do próximo início.
   Parar o job também remove essa previsão.
 - O intervalo é lido de `COLLECTION_INTERVAL_SECONDS`, com padrão de 30
-  segundos, mantendo o funcionamento atual do job. Uma futura barra integrada
-  poderá usar `serverTime` e `nextCollectionAt`; o contador atual do frontend
-  é demonstrativo e não consome essa rota.
+  segundos. A barra integrada usa `serverTime` e `nextCollectionAt`, ajustando
+  a diferença entre o relógio do servidor e o navegador. O valor do ambiente
+  pode ser diferente do padrão; prevalece a configuração do ambiente em execução.
 - `attemptedServices` conta os serviços selecionados para consultar métricas;
   `collectedServices` conta coletas válidas efetivamente gravadas;
   `failedServices` é a diferença. Uma falha anterior à seleção pode encerrar
@@ -383,4 +397,5 @@ Exemplo de resposta HTTP 200:
 - A rota retorna 200 mesmo quando o estado informa falha. Um erro interno ao
   servir a resposta passa pelo `errorHandler` e retorna 500.
 - A última coleta global não significa que todos os serviços atualizaram.
-  Na integração futura, a interface deverá considerar a `collectedAt` de cada serviço; os mocks atuais não comprovam esse consumo.
+  A interface exibe `collectedAt` no detalhe e na listagem; o horário de
+  atualização da tela não substitui o horário da amostra.

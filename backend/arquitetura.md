@@ -4,18 +4,17 @@ Este documento descreve a organização e as responsabilidades do backend. O
 contrato das APIs está em [docs/API.md](../docs/API.md), e as fórmulas e regras
 dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 
-## Estado da implementação em 15/10/2026
+## Estado da implementação
 
-O documento combina implementação e arquitetura-alvo. Os módulos existentes
-são `services`, `collections`, `analytics` e `monitoring`; `analytics` hoje
-fornece histórico e totais por serviço, não rankings, comparação ou cenários.
-Autenticação JWT está planejada para a Sprint 3. `auth`, `regions` como módulo
-REST e `monitoring-settings` são propostas, sem implementação nesta branch.
-
-A coleta e o histórico persistido são escopo da Sprint 1. Frontend ainda usa
-mocks; fluxos de consulta ponta a ponta, JWT e configuração ilustrados adiante
-são fluxos-alvo, não demonstrações de integração concluída.
-Comandos de execução e ambiente estão no [README](../README.md).
+Módulos existentes: `services`, `collections`, `analytics`,
+`regions` e `monitoring`. A API expõe lista, detalhe, histórico, regiões e estado
+da coleta. `/services` possui o alias `/service`. `analytics` fornece histórico
+e totais; rankings, comparação e cenários continuam futuros.
+Frontend, coleta e histórico persistido estão integrados na Sprint 1.
+JWT fica na Sprint 3; `auth` e `monitoring-settings` não estão implementados.
+O globo está integrado, mas a exibição dos serviços associados ao inspecionar
+uma região foi transferida para a Sprint 2 como saldo de T15.
+Comandos de execução estão no [README](../README.md); contratos em [API](../docs/API.md).
 
 ## 1. Visão Geral do Sistema
 
@@ -859,7 +858,7 @@ Isso permite posteriormente realizar:
 
 ---
 
-# 24. Consulta do Frontend — fluxo-alvo
+# 24. Consulta do Frontend — implementada
 
 O frontend não acessa diretamente as APIs externas.
 
@@ -944,15 +943,14 @@ para visualizar os dados já armazenados.
 
 ---
 
-# 26. Atualização do Dashboard — pendente
+# 26. Atualização do Dashboard — implementada
 
-A coleta atualiza o banco, mas a interface ainda não consulta periodicamente
-as rotas reais. `useServices` busca uma vez; `ServiceDetailPage` lê mocks;
-`MonitoringBar` exibe contador demonstrativo. A integração e atualização
-automática são escopo da Sprint 1 (issues #35, #36 e #37).
-
-O comportamento esperado é consultar a API sem recarga manual e mostrar
-o horário real da atualização. Esse intervalo deve ser independente do job.
+`MonitoringProvider` acompanha `/api/v1/monitoring/status`; quando muda
+`lastRoundFinishedAt`, `useApiQuery` solicita novamente os dados reais da página.
+Lista, detalhe, histórico e totais regionais atualizam sem recarregar a página.
+`MonitoringBar` distingue horário da coleta e atualização da tela. A consulta
+segue a previsão do backend; o contador de segundos é apenas sua apresentação.
+Ver [arquitetura do frontend](../frontend/arquitetura.md#7-atualização-e-estados-de-interface).
 
 ---
 
@@ -1330,7 +1328,7 @@ flowchart LR
 | Integrations   | Concentrar comunicação com APIs externas                  |
 | Collection Job | Iniciar periodicamente os ciclos de monitoramento         |
 | Auth (Sprint 3) | Autenticar usuários e emitir tokens JWT; ainda não implementado |
-| Regions (planejado) | Endpoint regional futuro; hoje regiões são sincronizadas por collections |
+| Regions | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
 | Analytics | Histórico e totais implementados; rankings, comparações e cenários futuros |
 | PostgreSQL     | Persistir serviços, coletas e configurações               |
 | Metrics API    | Fornecer serviços e métricas                              |
@@ -1475,7 +1473,8 @@ séries simuladas e ainda não consome esses dados persistidos.
 `COLLECTION_INTERVAL_SECONDS` controla a espera entre rodadas. O job não lê
 o campo de configuração já existente no banco. `monitoring-settings` é futuro.
 O intervalo da amostra da API é usado no cálculo energético e não agenda o job.
-A frequência futura de atualização da interface também será independente.
+A interface acompanha o estado do job e busca os dados após a conclusão das rodadas;
+o intervalo da amostra continua independente desse agendamento.
 
 Políticas de limite de concorrência e novas tentativas não estão implementadas
 como mecanismos próprios nesta versão. A falha de uma rodada é tratada e o job
