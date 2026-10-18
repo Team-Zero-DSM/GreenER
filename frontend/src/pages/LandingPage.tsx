@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
 import type { GlobeViewHandle } from '../components/3d/GlobeView';
 import { ExploreSection } from '../components/landing/ExploreSection';
-import { groupServicesByRegion } from '@/utils/regions';
+import { fetchRegionsLast24Hours } from '@/api/regions';
+import { useApiQuery } from '@/hooks/useApiQuery';
 import { GlobeView } from '../components/3d/GlobeView';
 import { useServices } from '@/hooks/useServices';
 
@@ -60,11 +61,8 @@ export function LandingPage() {
     }, []);
 
     const { services, error } = useServices();
-
-    const regions = useMemo(
-      () => groupServicesByRegion(services),
-      [services],
-    );
+    const { data: regions, error: regionsError, isLoading: regionsLoading } =
+      useApiQuery(fetchRegionsLast24Hours);
 
     const markers = useMemo(
       () =>
@@ -110,10 +108,10 @@ export function LandingPage() {
       globeRef.current?.zoom(factor);
     };
 
-    if (error) {
+    if (error || regionsError) {
       return (
         <main className="p-6 text-foreground">
-          Não foi possível carregar os dados dos serviços.
+          Não foi possível carregar os dados dos serviços ou das regiões.
         </main>
       );
     }
@@ -167,6 +165,7 @@ export function LandingPage() {
         className="scroll-mt-24 grid grid-cols-1 gap-6 px-6 pt-2 pb-0 md:grid-cols-[minmax(0,560px)_minmax(0,1fr)]"
       >
         <div className="min-w-0">
+          {regionsLoading && <p className="text-white/60">Carregando totais das últimas 24 horas...</p>}
           <ExploreSection
             exploreRef={exploreRef}
             rotateLeft={rotateLeft}
@@ -179,7 +178,7 @@ export function LandingPage() {
             setForce2D={setForce2D}
             backToGlobal={backToGlobal}
             zoom={zoom}
-            regions={regions}
+            regions={regions ?? []}
             onSelectRegion={selectRegion}
           />
         </div>
