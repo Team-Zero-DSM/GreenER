@@ -342,3 +342,22 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Reunião de alinhamento:** devido ao Dia dos Professores, não houve aula presencial, e a equipe realizou uma call pelo Teams. Todos compartilharam suas telas para esclarecer as divergências, alinhar as implementações e definir os próximos passos.
 - **CI/CD do frontend:** a equipe identificou um erro no processo de integração contínua do frontend e trabalhou para compreender o problema e encaminhar sua resolução.
 - **Impedimentos:** não houve entregas concluídas durante o dia. Entretanto, a equipe alinhou as soluções para os problemas identificados, encaminhando a resolução das dificuldades de integração do frontend e de conclusão das tarefas do backend.
+
+---
+
+## 📅 16/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---|---|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Backend — conclusão das tarefas:** Vitor finalizou todas as tarefas pendentes sob sua responsabilidade relacionadas ao backend, concluindo as entregas previstas para essa etapa.
+- **Frontend — integração com o backend:** Paulo e Gabriel iniciaram a integração entre o frontend e o backend, avançando na vinculação das telas aos endpoints e finalizando os últimos ajustes e adições necessários para essa etapa.
