@@ -56,6 +56,9 @@ export function ExploreSection({
           </h2>
           <DataSourceBadge source={dataSource} />
         </div>
+        <p className="text-sm text-white/60">
+          Energia e emissões somam as amostras registradas nas últimas 24 horas em cada região.
+        </p>
 
         <div
             className="mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto text-white"
@@ -181,7 +184,7 @@ export function ExploreSection({
 
                 <div className="rounded-lg bg-black/20 p-3">
                 <p className="text-xs text-white/60">
-                    Energia total
+                    Energia nas últimas 24 h
                 </p>
                 <p className="mt-1 font-semibold">
                     {formatEnergy(region.energyKwh)}
@@ -190,7 +193,7 @@ export function ExploreSection({
 
                 <div className="rounded-lg bg-black/20 p-3">
                 <p className="text-xs text-white/60">
-                    Emissões totais de CO₂e
+                    Emissões de CO₂e nas últimas 24 h
                 </p>
                 <p className="mt-1 font-semibold">
                     {formatCo2e(region.co2eGrams)}
