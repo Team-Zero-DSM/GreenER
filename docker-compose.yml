@@ -2,7 +2,7 @@ name: greener
 
 services:
     database:
-        image: public.ecr.aws/docker/library/postgres:17-bookworm
+        image: postgres:17-bookworm
         environment:
             POSTGRES_DB: greener
             POSTGRES_USER: postgres

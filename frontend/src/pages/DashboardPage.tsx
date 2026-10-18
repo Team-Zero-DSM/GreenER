@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ServiceFilters } from '@/components/services/ServiceFilters';
 import { ServiceList } from '@/components/services/ServiceList';
+import { StatusLegend } from '@/components/services/StatusLegend';
 import {
     defaultFilters,
     filterServices,
     listCountries,
 } from '@/components/services/filterServices';
 import { useServices } from '@/hooks/useServices';
-import { USE_MOCKS } from '@/api/services';
 
 export function DashboardPage() {
     const [regionCode, setRegionCode] = useState('');
@@ -26,8 +26,7 @@ export function DashboardPage() {
             <header>
                 <h1 className="text-3xl font-semibold">Serviços</h1>
                 <p className="text-muted-foreground">
-                    {USE_MOCKS && 'SIMULADO · '}Estado, localização, métricas e impacto estimado de
-                    cada serviço.
+                    Estado, localização, métricas e impacto estimado de cada serviço.
                 </p>
             </header>
             <div className="flex flex-wrap gap-4">
@@ -71,6 +70,7 @@ export function DashboardPage() {
                     <p className="text-xs text-muted-foreground">
                         Energia e CO₂e referem-se à última coleta de cada serviço.
                     </p>
+                    <StatusLegend />
                 </>
             )}
         </main>

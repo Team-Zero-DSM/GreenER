@@ -1,5 +1,6 @@
 import { House, Server } from 'lucide-react';
 import { MonitoringBar } from '@/components/MonitoringBar';
+import { MonitoringProvider } from '@/contexts/MonitoringProvider';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
 const navItems = [
@@ -21,48 +22,57 @@ export function DashboardLayout() {
     const { pathname } = useLocation();
 
     return (
-        <div className="dark flex min-h-screen flex-col bg-background text-foreground">
-            <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-md">
-                <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-3">
-                    <NavLink
-                        to="/"
-                        className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-xl font-extrabold text-transparent"
-                    >
-                        Green<span className="font-light">ER</span>
-                    </NavLink>
-                    <nav aria-label="Seções do dashboard" className="flex gap-1 overflow-x-auto">
-                        {navItems.map(({ to, label, icon: Icon, prefixes }) => {
-                            const isActive =
-                                pathname === to ||
-                                prefixes.some((prefix) => pathname.startsWith(prefix));
+        <MonitoringProvider>
+            <div className="dark flex min-h-screen flex-col bg-background text-foreground">
+                <div className="sticky top-0 z-50 bg-background">
+                    <header className="border-b border-border bg-background">
+                        <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-3">
+                            <NavLink
+                                to="/"
+                                className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-xl font-extrabold text-transparent"
+                            >
+                                Green<span className="font-light">ER</span>
+                            </NavLink>
 
-                            return (
-                                <NavLink
-                                    key={to}
-                                    to={to}
-                                    className={`${linkClass} ${isActive ? activeClass : idleClass}`}
-                                >
-                                    <Icon aria-hidden="true" className="size-4" />
-                                    {label}
-                                </NavLink>
-                            );
-                        })}
-                    </nav>
+                            <nav
+                                aria-label="Seções do dashboard"
+                                className="flex gap-1 overflow-x-auto"
+                            >
+                                {navItems.map(({ to, label, icon: Icon, prefixes }) => {
+                                    const isActive =
+                                        pathname === to ||
+                                        prefixes.some((prefix) => pathname.startsWith(prefix));
+
+                                    return (
+                                        <NavLink
+                                            key={to}
+                                            to={to}
+                                            className={`${linkClass} ${isActive ? activeClass : idleClass}`}
+                                        >
+                                            <Icon aria-hidden="true" className="size-4" />
+                                            {label}
+                                        </NavLink>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+                    </header>
+                    <div className="border-b border-border bg-background">
+                        <MonitoringBar />
+                    </div>
                 </div>
-            </header>
-            <MonitoringBar />
+                <div className="flex-1">
+                    <Outlet />
+                </div>
 
-            <div className="flex-1">
-                <Outlet />
+                <footer className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
+                    <p className="mx-auto max-w-7xl">
+                        Os valores apresentados são estimativas calculadas a partir das métricas
+                        disponíveis e de fatores regionais de emissão. Eles não representam uma
+                        medição elétrica direta.
+                    </p>
+                </footer>
             </div>
-
-            <footer className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
-                <p className="mx-auto max-w-7xl">
-                    Os valores apresentados são estimativas calculadas a partir das métricas
-                    disponíveis e de fatores regionais de emissão. Eles não representam uma medição
-                    elétrica direta.
-                </p>
-            </footer>
-        </div>
+        </MonitoringProvider>
     );
 }
