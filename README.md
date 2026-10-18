@@ -1,219 +1,215 @@
-# GreenER
+<p align ="center">
+<img height="250" width="250" src="./.github/logo.png"/>
+</p>
 
-Aplicação web para monitorar métricas de serviços digitais e estimar potência,
-consumo energético e emissões de CO₂e conforme a intensidade de carbono regional.
-Os resultados são estimativas de um modelo; não substituem medições físicas.
+# <h1 align="center">GreenER</h1>
 
-## Índice
+<p align="center">
+<img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=for-the-badge&logo=JavaScript&logoColor=black">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=for-the-badge&logo=TypeScript&logoColor=white">
+  <img src="https://img.shields.io/badge/React-61DAFB.svg?style=for-the-badge&logo=React&logoColor=black">
+  <img src="https://img.shields.io/badge/Vite-646CFF.svg?style=for-the-badge&logo=Vite&logoColor=white">
+  <img src="https://img.shields.io/badge/Node.js-5FA04E.svg?style=for-the-badge&logo=nodedotjs&logoColor=white">
+  <img src="https://img.shields.io/badge/Express-000000.svg?style=for-the-badge&logo=Express&logoColor=white">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=for-the-badge&logo=PostgreSQL&logoColor=white">
+  <img src="https://img.shields.io/badge/Docker-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white">
+  <img src="https://img.shields.io/badge/Docker%20Compose-2496ED.svg?style=for-the-badge&logo=Docker&logoColor=white">
+  <img src="https://img.shields.io/badge/HTML5-E34F26.svg?style=for-the-badge&logo=HTML5&logoColor=white">
+  <img src="https://img.shields.io/badge/CSS3-1572B6.svg?style=for-the-badge&logo=CSS3&logoColor=white">
+  <img src="https://img.shields.io/badge/Figma-F24E1E.svg?style=for-the-badge&logo=Figma&logoColor=white">
+  <img src="https://img.shields.io/badge/Git-F05032.svg?style=for-the-badge&logo=Git&logoColor=white">
+  <img src="https://img.shields.io/badge/GitHub-181717.svg?style=for-the-badge&logo=GitHub&logoColor=white">
+  <img src="https://img.shields.io/badge/UML-FABD14.svg?style=for-the-badge&logoColor=black">
+</p>
 
-- [Descrição do projeto](#descrição-do-projeto)
-- [Organização de pastas](#organização-de-pastas)
-- [Como executar](#como-executar)
-- [Cronograma de evolução](#cronograma-de-evolução)
-- [Funcionalidades e estado atual](#funcionalidades-e-estado-atual)
-- [Documentação técnica](#documentação-técnica)
-- [Sprints](#sprints)
+---
 
-## Descrição do projeto
+## 📋 Índice
 
-O backend descobre serviços, consulta CPU, memória, disco e rede, sincroniza
-regiões e persiste coletas com estimativas ambientais no PostgreSQL. A interface
-React apresenta lista e detalhe com dados simulados enquanto a integração é concluída.
+<details open>
+  <summary><b>Sumário do Projeto</b></summary>
 
-Tecnologias utilizadas: React, TypeScript, Vite, Tailwind CSS, React Router,
-Node.js 24, Express, Zod, driver `pg`, PostgreSQL 17 e Docker Compose.
-O acesso ao banco utiliza SQL explícito, sem ORM.
+  <ul>
+    <li>
+      <details open>
+        <summary><a href="#-descrição-do-projeto">1. Descrição do projeto</a></summary>
+        <ul>
+          <li><a href="#-relevância-do-projeto">1.1. Relevância do projeto</a></li>
+          <li><a href="#-organização-de-pastas">1.2. Organização de pastas</a></li>
+          <li><a href="#-como-iniciar-a-aplicação">1.3. Como iniciar a aplicação</a></li>
+          <li><a href="#como-executar">1.4. Como executar</a></li>
+          <li><a href="#-cronograma-de-evolução">1.5. Cronograma de evolução</a></li>
+          <li><a href="#-funcionalidades">1.6. Funcionalidades</a></li>
+          <li><a href="#-equipe">1.7. Equipe</a></li>
+          <li><a href="#sprints">1.8. Sprints</a></li>
+          <li><a href="#-especificações-do-projeto">1.9. Especificações do projeto</a></li>
+        </ul>
+      </details>
+    </li>
+  </ul>
+</details>
 
-## Organização de pastas
 
-Estrutura existente nesta branch; módulos futuros não são apresentados como arquivos implementados.
+## 📌 Descrição do Projeto
+O greenER é uma aplicação web que monitora o consumo de CPU, memória, armazenamento e rede, estimando o impacto ambiental de serviços digitais com base na intensidade de carbono da região.
 
-```text
-GreenER/
-├── README.md
-├── docker-compose.yml
-├── backend/
-│   ├── arquitetura.md
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── src/
-│       ├── app.ts, index.ts, server.ts
+## 🌱 Relevância do Projeto
+A plataforma relaciona o uso de recursos computacionais à eficiência energética e às emissões de CO₂ equivalente, apoiando análises sobre sustentabilidade e Green Computing. Os valores apresentados são estimativas para comparação entre serviços e não substituem medições físicas da infraestrutura.
+
+---
+
+## 📁 Organização de pastas
+
+Esta árvore apresenta a organização-alvo do GreenER. As arquiteturas do
+backend e do frontend detalham as responsabilidades e os fluxos de cada camada.
+
+```bash
+greener/
+├── .gitignore                        # Arquivos e pastas ignorados pelo Git
+├── README.md                         # Documentação principal do projeto
+│
+├── backend/                          # API e regras de negócio da aplicação
+│   ├── arquitetura.md                # Arquitetura do backend
+│   ├── .dockerignore                 # Arquivos excluídos da imagem Docker
+│   ├── .env.example                  # Modelo das variáveis de ambiente do backend
+│   ├── .prettierignore               # Arquivos ignorados pelo Prettier
+│   ├── Dockerfile                    # Configuração da imagem Docker do backend
+│   ├── eslint.config.js              # Configuração do ESLint
+│   ├── package.json                  # Dependências e scripts do backend
+│   ├── package-lock.json             # Versões fixadas das dependências
+│   ├── prettier.config.js            # Configuração do Prettier
+│   ├── tsconfig.json                 # Configuração do TypeScript
+│   └── src/                          # Código-fonte do backend
+│       ├── app.ts
+│       ├── server.ts
 │       ├── db/
 │       ├── integrations/
 │       ├── jobs/
-│       ├── modules/        # services, collections, analytics e monitoring
-│       ├── scripts/
+│       ├── modules/
+│       │   ├── auth/
+│       │   ├── collections/
+│       │   ├── services/
+│       │   ├── regions/
+│       │   ├── analytics/
+│       │   ├── monitoring/            # Estado da execução do job de coleta
+│       │   └── monitoring-settings/
 │       └── shared/
-├── database/
-│   ├── arquitetura.md
-│   ├── schema.sql
-│   └── images/
-├── docs/
-│   ├── plano-de-entregas.md
-│   ├── API.md
-│   ├── cálculo.md
-│   ├── arquitetura/
-│   ├── prototipo/
-│   └── sprint-1/          # sprint-1.md, dailies.md e Burndown-Sprint1.svg
-└── frontend/
-    ├── arquitetura.md
-    ├── .env.example
-    ├── Dockerfile
-    └── src/
-        ├── App.tsx, main.tsx, index.css
-        ├── api/
-        ├── components/
+│
+├── compose.yaml                      # Serviços Docker
+│
+├── database/                         # Banco de dados
+│   ├── README.md                     # Documentação do banco
+│   └── schema.sql                    # Tabelas e relacionamentos
+│
+├── docs/                             # Documentação técnica
+│   ├── plano-de-entregas.md          # Planejamento das entregas
+│   ├── API.md                        # Contratos e integrações das APIs
+│   ├── cálculo.md                    # Fórmulas dos cálculos ambientais
+│   └── sprints/                      # Documentação das sprints
+│       ├── sprint-1.md               # Sprint 1
+│       ├── sprint-2.md               # Sprint 2
+│       └── sprint-3.md               # Sprint 3
+│
+└── frontend/                         # Aplicação e interface do usuário
+    ├── arquitetura.md                # Arquitetura-alvo do frontend
+    ├── .dockerignore                 # Arquivos excluídos da imagem Docker
+    ├── .env.example                  # Modelo das variáveis de ambiente do frontend
+    ├── .prettierignore               # Arquivos ignorados pelo Prettier
+    ├── components.json               # Configuração dos componentes shadcn/ui
+    ├── Dockerfile                    # Configuração da imagem Docker do frontend
+    ├── eslint.config.js              # Configuração do ESLint
+    ├── index.html                    # Documento HTML de entrada do Vite
+    ├── package.json                  # Dependências e scripts do frontend
+    ├── package-lock.json             # Versões fixadas das dependências
+    ├── prettier.config.js            # Configuração do Prettier
+    ├── tsconfig.json                 # Configuração do TypeScript
+    ├── vite.config.ts                # Configuração do Vite
+    └── src/                          # Código-fonte do frontend
+        ├── App.tsx                   # Componente principal da aplicação
+        ├── index.css                 # Estilos globais
+        ├── main.tsx                  # Ponto de entrada da aplicação
+        ├── app/                      # Rotas e composição da aplicação
+        ├── components/               # Layout e componentes reutilizáveis
+        ├── pages/                    # Telas do produto
+        ├── services/                 # Comunicação com a API do backend
         ├── hooks/
-        ├── layouts/
-        ├── lib/
-        ├── mocks/
-        ├── pages/
-        └── types/
+        ├── contexts/
+        ├── types/
+        └── lib/
 ```
+
+---
+
+### 🚀 Como iniciar a aplicação
+
+Para executar o projeto localmente, siga os passos abaixo:
+
+#### Pré-requisitos
+
+ Antes de começar, certifique-se de ter instalado:
+
+- [Docker](https://www.docker.com/)
+- [Git](https://git-scm.com/)
 
 ## Como executar
 
-Requisitos: Git e Docker com suporte ao comando `docker compose`.
-O Compose instala as dependências Node dentro dos containers; Node local não é
-necessário para esse fluxo de desenvolvimento.
+### 1. Clone o repositório
 
-### 1. Obter o projeto
-
-```powershell
+```bash
 git clone https://github.com/Team-Zero-DSM/GreenER.git
-cd GreenER
 ```
 
-Para reproduzir a documentação de acompanhamento desta entrega, use a branch
-`40-documentar-readme-e-registrar-dailys` enquanto ela não estiver integrada à develop:
+### 2. Acesse a pasta do projeto
 
-```powershell
-git switch 40-documentar-readme-e-registrar-dailys
+```bash
+cd greenER
 ```
 
-### 2. Configurar o ambiente
+### 3. Configure as variáveis de ambiente
 
-No PowerShell, na raiz do projeto, copie os exemplos apenas na primeira configuração:
-
-```powershell
-Copy-Item backend/.env.example backend/.env
-Copy-Item frontend/.env.example frontend/.env
+Copie os arquivos .env.example para .env e ajuste os valores conforme necessário:
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-Em Bash, o equivalente é `cp backend/.env.example backend/.env` e
-`cp frontend/.env.example frontend/.env`. Preserve ajustes de arquivos `.env` já existentes.
+#### 4. Suba os containers
 
-### 3. Iniciar os serviços
-
-```powershell
+```bash
 docker compose up --build
 ```
 
-| Serviço | Endereço no host | Observação |
-|---|---|---|
-| Página inicial | http://localhost:5173/ | Mensagem de ambiente pronto; ainda não é o dashboard. |
-| Dashboard | http://localhost:5173/dashboard | Lista e filtros com mocks por padrão. |
-| Detalhe | `/servicos/:id`, no frontend | Abra pelo link de um serviço listado; `:id` é um parâmetro. |
-| Backend | http://localhost:3000/health | Health do processo HTTP; não verifica todas as dependências. |
-| PostgreSQL | `localhost:5433` | Banco `greener`, usuário e senha de desenvolvimento `postgres`. |
+### 5. Acesse a aplicação
+- Frontend: http://localhost:5173
 
-O backend acessa o banco em `database:5432` dentro da rede Compose.
-`database/schema.sql` é aplicado automaticamente somente na primeira inicialização
-de um volume vazio. Os registros ficam no volume `postgres_data`; reiniciar os
-containers não reaplica o schema nem limpa os dados. Consulte a
-[documentação do banco](./database/arquitetura.md) para os detalhes.
 
-Os arquivos do projeto são montados nos containers. Backend usa nodemon com
-legacy watch e frontend usa Vite com polling para desenvolvimento em Windows.
+---
+## ⏳ Cronograma de Evolução
 
-### 4. Conferir o ambiente
-
-```powershell
-docker compose ps
-docker compose config --quiet
-Invoke-RestMethod 'http://localhost:3000/health'
-Invoke-RestMethod 'http://localhost:3000/api/v1/monitoring/status'
-```
-
-O monitoramento depende das APIs externas configuradas em `METRICS_API_URL` e
-`CARBON_API_URL`. Uma falha de rede pode deixar o processo saudável sem produzir
-novas coletas; consulte o status e os logs com `docker compose logs --tail 50 backend`.
-
-### Variáveis de ambiente
-
-| Arquivo | Variáveis | Uso atual |
-|---|---|---|
-| `backend/.env` | `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | Conexão `pg`; o código atual não usa `DATABASE_URL` para o pool. |
-| `backend/.env` | `PORT`, `CORS_ORIGIN` | Porta HTTP e origem permitida do frontend. |
-| `backend/.env` | `METRICS_API_URL`, `CARBON_API_URL` | Bases das APIs externas. |
-| `backend/.env` | `COLLECTION_INTERVAL_SECONDS` | Espera entre rodadas, com padrão de 30 segundos para valor inválido. |
-| `backend/.env` | `JWT_SECRET` | Reservada para autenticação futura; não comprova JWT implementado. |
-| `frontend/.env` | `VITE_API_URL` | Base da API interna, padrão `http://localhost:3000`. |
-| `frontend/.env` | `VITE_USE_MOCKS` | A lista usa mocks, exceto quando o valor é exatamente `false`. O detalhe usa mocks diretamente. |
-
-O exemplo habilita mocks. Desativá-los não conclui a integração: a lista solicita
-`GET /api/v1/services`, ainda ausente no código desta branch. As variáveis `VITE_*`
-são públicas no frontend; não devem conter segredos.
-
-### Verificações de código disponíveis
-
-```powershell
-docker compose exec -T backend npx tsc --noEmit
-docker compose exec -T backend npm run lint
-docker compose exec -T frontend npx tsc --noEmit
-docker compose exec -T frontend npm run lint
-```
-
-Ambas as aplicações também possuem scripts `build` e `format:check`. O PR #55
-propõe testes unitários, mas ainda está aberto na consulta de 15/10/2026.
-Os `package.json` desta branch ainda não têm script `test`; `npm test --if-present`
-no CI não comprova que uma suíte foi executada.
-
-## Cronograma de evolução
-
-As datas, responsáveis, critérios da rubrica e evidências estão no
-[plano de entregas](./docs/plano-de-entregas.md).
+O projeto é desenvolvido em ciclos de 3 semanas, conforme o cronograma oficial.
 
 ```mermaid
 graph TD
-    S1[Sprint 1: Monitoramento, Persistência e Histórico] --> S2[Sprint 2: Rankings]
-    S2 --> S3[Sprint 3: Autenticação, Comparação e Cenários]
+    S1[Sprint 1: Fundação, Métricas e Impacto Ambiental] --> S2[Sprint 2: Persistência e Ranking]
+    S2 --> S3[Sprint 3: Comparação e Análises Avançadas]
 ```
 
-## Funcionalidades e estado atual
+---
 
-Estado conferido em 15/10/2026, com código-base `41808d7` desta branch.
+### ✨ Funcionalidades
 
-| Área | Estado do código integrado |
-|---|---|
-| Descoberta e coleta | APIs externas integradas; job periódico com tratamento de falhas por serviço. |
-| Impacto ambiental | Potência, energia e CO₂e calculados e persistidos com os fatores do exemplo do modelo simplificado do desafio, documentados em cálculo.md. |
-| Persistência e histórico | SQL, gravação, detalhe e consulta histórica por período implementados no backend; escopo da Sprint 1. |
-| Interface | Lista, filtros, badges, detalhe e gráficos implementados com dados simulados. |
-| Integração | Listagem real e consumo das rotas de detalhe/histórico pela interface permanecem pendentes. |
-| Atualização automática | Job atualiza o banco; frontend ainda não consulta periodicamente. Seu contador é demonstrativo. |
-| Mapa/globo | Sprint 1, em desenvolvimento por Gabriel; ainda ausente no código integrado. |
-| Rankings | Planejados para a Sprint 2. Ordenar a tabela simulada não comprova ranking real por período. |
-| Autenticação e análises avançadas | JWT, comparação e cenários planejados para a Sprint 3. |
-| Configuração do intervalo por aplicação | Futura, com sprint ainda a definir; hoje é lido do ambiente. |
-
-As propostas em branches e PRs abertos não são tratadas como funcionalidades
-integradas. O [registro da sprint](./docs/sprint-1/sprint-1.md) relaciona as tarefas
-e suas evidências. O [contrato da API](./docs/API.md) separa endpoints implementados e planejados.
-
-## Documentação técnica
-
-- [Plano e matriz da rubrica](./docs/plano-de-entregas.md).
-- [Arquitetura do backend](./backend/arquitetura.md).
-- [Arquitetura do frontend e rotas atuais](./frontend/arquitetura.md).
-- [Modelo e operação do PostgreSQL](./database/arquitetura.md).
-- [API interna e integrações](./docs/API.md).
-- [Fórmulas, fatores e limites ambientais](./docs/cálculo.md).
-- [Diagramas UML](./docs/arquitetura/arquitetura.md).
-- [Protótipos da interface](./docs/prototipo/prototipo.md).
+- 📊 Monitoramento de métricas dos serviços
+- 🌱 Estimativa de impacto ambiental e emissão de CO₂e
+- 🗺️ Visualização de serviços e suas regiões
+- 📈 Histórico de métricas e resultados
+- 🏆 Ranking de impacto ambiental
+- 🔄 Comparação entre serviços e regiões
+- 🔬 Simulação de execução em diferentes regiões
+---
 
 ### 👥 Equipe
 
+<body>
       <table>
          <thead>
             <th>Product Owner</th>
@@ -226,22 +222,23 @@ e suas evidências. O [contrato da API](./docs/API.md) separa endpoints implemen
             <tr>
                <th><a href="https://github.com/henri-bueno"><img src="https://github.com/henri-bueno.png" width="75px" height="75px"></a></th>
                <th><a href="https://github.com/pauloolivetti"><img src="https://github.com/pauloolivetti.png" width="75px" height="75px"/></a></th>
-               <th><a href="https://github.com/gabrielgomesfernandes"><img src="https://github.com/gabrielgomesfernandes.png" width="75px" height="75px"/></a></th>
+               <th><a href="https://github.com/gabrielgomesfernandes"><img src="https://github.com/gabrielgomesfernandes.png/" width="75px" height="75px"/></a></th>
                <th><a href="https://github.com/vitorreis-dev"><img src="https://github.com/vitorreis-dev.png" width="75px" height="75px"/></a></th>
                <th><a href="https://github.com/phjsilva"><img src="https://github.com/phjsilva.png" width="75px" height="75px"/></a></th>
             </tr>
          </tbody>
       </table>
+</body>
 
 --- 
 
 ### Sprints
 
-| Sprint | Registro | Início | Entrega | Status |
-|---|---|---|---|---|
-| 01 | [Sprint 1](./docs/sprint-1/sprint-1.md) · [Dailies](./docs/sprint-1/dailies.md) | 28/09/2026 | 19/10/2026 | 🔄 |
-| 02 | Registro a criar no início da sprint. | 20/10/2026 | 09/11/2026 | ❌ |
-| 03 | Registro a criar no início da sprint. | 10/11/2026 | 23/11/2026 | ❌ |
+| Sprint | Link                            | Início     | Entrega    | Status |
+| ------ | ------------------------------- | ---------- | ---------- | ------ |
+| 01     | <a href="#sprint1">Sprint 1</a> | 28/09/2026 | 19/10/2026 | 🔄     |
+| 02     | <a href="#sprint2">Sprint 2</a> | 20/10/2026 | 09/11/2026 | ❌     |
+| 03     | <a href="#sprint3">Sprint 3</a> | 10/11/2026 | 23/11/2026 | ❌     |
 
 #### Legenda
 
@@ -641,17 +638,6 @@ Uma User Story será considerada concluída quando:
 - A documentação for atualizada quando a alteração exigir documentação.
 - A implementação estiver disponível para validação pela equipe.
 
-Para tarefas, os mesmos princípios são aplicados ao escopo e aos critérios de
-aceite da própria tarefa. Uma tarefa visual pode ser validada com mocks
-identificados; isso não conclui uma tarefa de integração nem a história completa.
-Cada tarefa marcada como concluída deve registrar procedimento, resultado,
-evidência e limite da verificação. Testes manuais reproduzíveis podem compor
-esse registro; não se presume execução de uma suíte automatizada inexistente.
-
-Aplicação na Sprint 1: [evidências das tarefas concluídas](./docs/sprint-1/evidencias-dod.md).
-As quatro histórias selecionadas são US01, US03, US08 e US09; tarefas técnicas
-relacionadas a outras histórias não alteram essa seleção.
-
 </details>
 
 <details>
@@ -660,14 +646,14 @@ relacionadas a outras histórias não alteram essa seleção.
 
 | **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados** | **Status** |
 | ------ | -------------------------- | ---------------------------------------------- | -------------- | --------------------- | ---------- |
-| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | 🔄          |
-| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | 🔄          |
+| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | ❌          |
+| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | ❌          |
 | US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | ❌          |
 | US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | ❌          |
 | US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | ❌          |
 | US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | ❌          |
 | US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | ❌          |
-| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | 🔄          |
+| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | ❌          |
 | US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | ❌          |
 | US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | ❌          |
 | US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | ❌          |
@@ -678,19 +664,6 @@ relacionadas a outras histórias não alteram essa seleção.
 | US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                 | ❌          |
 
 <br>
-
-**Seleção da Sprint 1:** somente US01, US03, US08 e US09. Este é o Product
-Backlog completo, não a lista de histórias da sprint. As demais histórias
-permanecem no backlog; implementações técnicas relacionadas a elas não alteram
-automaticamente sua seleção ou aceite. Persistência, histórico e mapa são
-registrados como entregas técnicas da Sprint 1. US15 está planejada para a Sprint 3.
-
-🔄 indica trabalho em andamento nas histórias selecionadas, não aceite.
-US09 foi selecionada, mas a atualização automática real ainda está pendente.
-Nas histórias fora da seleção, ❌ indica que seu início formal como história
-não foi registrado, mesmo havendo código relacionado. As histórias só passam
-a ✅ após verificação dos critérios de aceite e da DoD. As situações das issues
-podem diferir até a equipe atualizar seus checklists.
 
 **Legenda**
 
