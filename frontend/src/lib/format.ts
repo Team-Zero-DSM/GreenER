@@ -24,6 +24,18 @@ export function formatDateTime(value: string | null | undefined): string {
     });
 }
 
+export function formatDateTimeSeconds(value: string | number | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+        return EMPTY;
+    }
+
+    return new Date(value).toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        dateStyle: 'short',
+        timeStyle: 'medium',
+    });
+}
+
 export function formatTime(value: string): string {
     return new Date(value).toLocaleTimeString('pt-BR', {
         timeZone: 'America/Sao_Paulo',
