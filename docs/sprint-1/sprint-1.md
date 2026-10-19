@@ -138,7 +138,7 @@ sprint permanecem pendentes até seus respectivos registros.
 
 ## 🔎 Sprint Review
 
-> A ser preenchido ao final da Sprint.
+> Nesta primeira Sprint, nosso foco foi desenvolver a base funcional do GreenER, implementando a coleta periódica de métricas, a integração entre backend e frontend e a consulta de informações dos serviços e regiões. Ao longo do desenvolvimento, conseguimos estruturar os principais componentes da aplicação e entregar uma primeira versão funcional, permitindo consultar os serviços monitorados e acompanhar estimativas de consumo energético e emissões de CO₂ equivalente. Apesar dos desafios iniciais com as tecnologias e ferramentas utilizadas, a equipe conseguiu superar os principais impedimentos e alcançar os objetivos centrais da Sprint. Para as próximas etapas, planejamos aprimorar a interface, expandir as formas de visualização dos dados e melhorar a integração e a eficiência do sistema.
 
 ---
 
