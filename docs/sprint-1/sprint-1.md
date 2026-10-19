@@ -168,7 +168,7 @@ Link da apresentação da sprint:
       src="GreenER-Thumbnail-Sprint_1.png" 
       alt="GreenER - Sprint 1"
       width="600"
-      style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);"
     />
   </a>
 </p>
