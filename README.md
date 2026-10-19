@@ -1,8 +1,6 @@
 <p align ="center">
-<img height="250" width="250" src="./.github/logo.png"/>
+<img width="800" src="./.github/logo.png" alt="GreenER">
 </p>
-
-# <h1 align="center">GreenER</h1>
 
 <p align="center">
 <img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=for-the-badge&logo=JavaScript&logoColor=black">
@@ -60,151 +58,119 @@ A plataforma relaciona o uso de recursos computacionais à eficiência energéti
 
 ## 📁 Organização de pastas
 
-Esta árvore apresenta a organização-alvo do GreenER. As arquiteturas do
-backend e do frontend detalham as responsabilidades e os fluxos de cada camada.
+A estrutura atual do projeto está organizada assim:
 
-```bash
-greener/
-├── .gitignore                        # Arquivos e pastas ignorados pelo Git
-├── README.md                         # Documentação principal do projeto
-│
-├── backend/                          # API e regras de negócio da aplicação
-│   ├── arquitetura.md                # Arquitetura do backend
-│   ├── .dockerignore                 # Arquivos excluídos da imagem Docker
-│   ├── .env.example                  # Modelo das variáveis de ambiente do backend
-│   ├── .prettierignore               # Arquivos ignorados pelo Prettier
-│   ├── Dockerfile                    # Configuração da imagem Docker do backend
-│   ├── eslint.config.js              # Configuração do ESLint
-│   ├── package.json                  # Dependências e scripts do backend
-│   ├── package-lock.json             # Versões fixadas das dependências
-│   ├── prettier.config.js            # Configuração do Prettier
-│   ├── tsconfig.json                 # Configuração do TypeScript
-│   └── src/                          # Código-fonte do backend
-│       ├── app.ts
-│       ├── server.ts
-│       ├── db/
-│       ├── integrations/
-│       ├── jobs/
-│       ├── modules/
-│       │   ├── auth/
-│       │   ├── collections/
-│       │   ├── services/
-│       │   ├── regions/
-│       │   ├── analytics/
-│       │   ├── monitoring/            # Estado da execução do job de coleta
-│       │   └── monitoring-settings/
-│       └── shared/
-│
-├── compose.yaml                      # Serviços Docker
-│
-├── database/                         # Banco de dados
-│   ├── README.md                     # Documentação do banco
-│   └── schema.sql                    # Tabelas e relacionamentos
-│
-├── docs/                             # Documentação técnica
-│   ├── plano-de-entregas.md          # Planejamento das entregas
-│   ├── API.md                        # Contratos e integrações das APIs
-│   ├── cálculo.md                    # Fórmulas dos cálculos ambientais
-│   └── sprints/                      # Documentação das sprints
-│       ├── sprint-1.md               # Sprint 1
-│       ├── sprint-2.md               # Sprint 2
-│       └── sprint-3.md               # Sprint 3
-│
-└── frontend/                         # Aplicação e interface do usuário
-    ├── arquitetura.md                # Arquitetura-alvo do frontend
-    ├── .dockerignore                 # Arquivos excluídos da imagem Docker
-    ├── .env.example                  # Modelo das variáveis de ambiente do frontend
-    ├── .prettierignore               # Arquivos ignorados pelo Prettier
-    ├── components.json               # Configuração dos componentes shadcn/ui
-    ├── Dockerfile                    # Configuração da imagem Docker do frontend
-    ├── eslint.config.js              # Configuração do ESLint
-    ├── index.html                    # Documento HTML de entrada do Vite
-    ├── package.json                  # Dependências e scripts do frontend
-    ├── package-lock.json             # Versões fixadas das dependências
-    ├── prettier.config.js            # Configuração do Prettier
-    ├── tsconfig.json                 # Configuração do TypeScript
-    ├── vite.config.ts                # Configuração do Vite
-    └── src/                          # Código-fonte do frontend
-        ├── App.tsx                   # Componente principal da aplicação
-        ├── index.css                 # Estilos globais
-        ├── main.tsx                  # Ponto de entrada da aplicação
-        ├── app/                      # Rotas e composição da aplicação
-        ├── components/               # Layout e componentes reutilizáveis
-        ├── pages/                    # Telas do produto
-        ├── services/                 # Comunicação com a API do backend
-        ├── hooks/
-        ├── contexts/
-        ├── types/
-        └── lib/
+```text
+GreenER/
+├── backend/
+│   ├── arquitetura.md
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── src/
+│   │   ├── app.ts, server.ts, index.ts
+│   │   ├── db/
+│   │   ├── integrations/
+│   │   ├── jobs/
+│   │   ├── modules/       # services, collections, analytics, regions, monitoring
+│   │   └── shared/
+│   └── tests/unit/
+├── frontend/
+│   ├── arquitetura.md
+│   ├── .env.example
+│   ├── Dockerfile
+│   └── src/
+│       ├── App.tsx, main.tsx, index.css
+│       ├── api/
+│       ├── components/
+│       ├── contexts/
+│       ├── hooks/
+│       ├── layouts/
+│       ├── pages/
+│       ├── types/
+│       └── lib/
+├── database/
+│   ├── arquitetura.md
+│   └── schema.sql
+├── docs/
+│   ├── API.md
+│   ├── cálculo.md
+│   ├── plano-de-entregas.md
+│   ├── arquitetura/
+│   ├── prototipo/
+│   └── sprint-1/         # planejamento, dailies, DoD e burndown
+├── docker-compose.yml
+└── README.md
 ```
+
+Detalhes nas arquiteturas do [backend](./backend/arquitetura.md) e do
+[frontend](./frontend/arquitetura.md), no [contrato da API](./docs/API.md) e na
+[documentação do banco](./database/arquitetura.md).
 
 ---
 
 ### 🚀 Como iniciar a aplicação
 
-Para executar o projeto localmente, siga os passos abaixo:
-
-#### Pré-requisitos
-
- Antes de começar, certifique-se de ter instalado:
-
-- [Docker](https://www.docker.com/)
-- [Git](https://git-scm.com/)
+Pré-requisitos: [Git](https://git-scm.com/) e [Docker](https://www.docker.com/) com Compose.
 
 ## Como executar
 
-### 1. Clone o repositório
+No PowerShell:
 
-```bash
+```powershell
 git clone https://github.com/Team-Zero-DSM/GreenER.git
-```
-
-### 2. Acesse a pasta do projeto
-
-```bash
-cd greenER
-```
-
-### 3. Configure as variáveis de ambiente
-
-Copie os arquivos .env.example para .env e ajuste os valores conforme necessário:
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
-
-#### 4. Suba os containers
-
-```bash
+cd GreenER
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
 docker compose up --build
 ```
 
-### 5. Acesse a aplicação
-- Frontend: http://localhost:5173
+Confira os valores dos arquivos `.env`. No Docker, o backend acessa o banco por
+`database:5432`; no computador, use `localhost:5433`.
 
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000/health
+
+Para encerrar: `docker compose down`.
 
 ---
+
 ## ⏳ Cronograma de Evolução
 
-O projeto é desenvolvido em ciclos de 3 semanas, conforme o cronograma oficial.
+As entregas seguem o calendário das sprints registrado abaixo.
 
 ```mermaid
 graph TD
-    S1[Sprint 1: Fundação, Métricas e Impacto Ambiental] --> S2[Sprint 2: Persistência e Ranking]
-    S2 --> S3[Sprint 3: Comparação e Análises Avançadas]
+    S1[Sprint 1: Monitoramento, Persistência, Histórico e Interface] --> S2[Sprint 2: Ranking e Continuação de T15]
+    S2 --> S3[Sprint 3: JWT, Comparação e Cenários]
 ```
 
 ---
 
 ### ✨ Funcionalidades
 
-- 📊 Monitoramento de métricas dos serviços
-- 🌱 Estimativa de impacto ambiental e emissão de CO₂e
-- 🗺️ Visualização de serviços e suas regiões
-- 📈 Histórico de métricas e resultados
-- 🏆 Ranking de impacto ambiental
-- 🔄 Comparação entre serviços e regiões
-- 🔬 Simulação de execução em diferentes regiões
+Disponíveis na versão integrada:
+
+- Descoberta e coleta periódica das métricas de serviços.
+- Estimativas de potência, energia e CO₂e com parâmetros documentados.
+- Persistência no PostgreSQL e histórico por serviço e período.
+- Lista, detalhe, gráficos e indicadores de status com dados reais.
+- Globo e cards regionais com totais das amostras das últimas 24 horas.
+- Atualização automática após as rodadas de coleta, sem recarregar a página.
+- Execução de frontend, backend e banco com Docker Compose.
+
+Pendências e entregas futuras:
+
+- **Sprint 2:** apresentar os serviços associados ao inspecionar uma região,
+  como continuação da T15, que permanece parcialmente entregue.
+- **Sprint 2:** ranking de impacto ambiental.
+- **Sprint 3:** autenticação JWT, comparação e simulação de cenários.
+- **Sprint a definir:** configuração do intervalo de coleta pela aplicação.
+
+Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
+Persistência, histórico e globo não acrescentam automaticamente outras histórias.
+Implementação não equivale a aceite formal; consultar as [evidências da DoD](./docs/sprint-1/evidencias-dod.md).
+Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálculo.md).
+
 ---
 
 ### 👥 Equipe
@@ -236,9 +202,9 @@ graph TD
 
 | Sprint | Link                            | Início     | Entrega    | Status |
 | ------ | ------------------------------- | ---------- | ---------- | ------ |
-| 01     | <a href="#sprint1">Sprint 1</a> | 28/09/2026 | 19/10/2026 | 🔄     |
-| 02     | <a href="#sprint2">Sprint 2</a> | 20/10/2026 | 09/11/2026 | ❌     |
-| 03     | <a href="#sprint3">Sprint 3</a> | 10/11/2026 | 23/11/2026 | ❌     |
+| 01     | [sprint 1](./docs/sprint-1/sprint-1.md) | 28/09/2026 | 19/10/2026 | ✅     |
+| 02     | [sprint 2](./docs/sprint-1/sprint-1.md) | 20/10/2026 | 09/11/2026 | ❌     |
+| 03     | [sprint 3](./docs/sprint-1/sprint-1.md) | 10/11/2026 | 23/11/2026 | ❌     |
 
 #### Legenda
 
@@ -277,7 +243,9 @@ graph TD
 | RF15 | Comparação entre serviços | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços. |
 
 O mapa é opcional no desafio original, mas foi incluído pela equipe no plano
-atual da Sprint 1. Essa escolha de entrega não muda a redação do requisito.
+atual da Sprint 1, com entrega parcial: apresentar os serviços associados ao
+inspecionar uma região ficou para a Sprint 2, como continuação de T15. Essa
+decisão não altera a redação do requisito nem representa aceite integral da US08.
 
 </details>
 
@@ -646,15 +614,15 @@ Uma User Story será considerada concluída quando:
 
 | **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados** | **Status** |
 | ------ | -------------------------- | ---------------------------------------------- | -------------- | --------------------- | ---------- |
-| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | ❌          |
-| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | ❌          |
+| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | 🔄          |
+| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | 🔄          |
 | US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | ❌          |
 | US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | ❌          |
 | US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | ❌          |
 | US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | ❌          |
 | US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | ❌          |
-| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | ❌          |
-| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | ❌          |
+| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | 🔄          |
+| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | 🔄          |
 | US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | ❌          |
 | US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | ❌          |
 | US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | ❌          |
@@ -666,6 +634,11 @@ Uma User Story será considerada concluída quando:
 <br>
 
 **Legenda**
+
+As quatro histórias selecionadas para a Sprint 1 permanecem em andamento até o
+registro do aceite formal; a US08 conserva o saldo de T15 para a Sprint 2.
+As entregas técnicas implementadas não alteram automaticamente o aceite das
+demais histórias do produto.
 
 ❌ — Não iniciado  
 🔄 — Em andamento  

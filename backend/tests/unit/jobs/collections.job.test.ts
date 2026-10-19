@@ -8,12 +8,15 @@ vi.mock('../../../src/modules/collections/collections.service.js', () => ({
 
 describe('Rotina periódica de coletas (collections.job)', () => {
     beforeEach(() => {
+        vi.stubEnv('COLLECTION_INTERVAL_SECONDS', '30');
         vi.useFakeTimers();
         vi.clearAllMocks();
     });
 
     afterEach(() => {
         stopCollectionJob();
+        vi.useRealTimers();
+        vi.unstubAllEnvs();
         vi.useRealTimers();
     });
 
@@ -47,4 +50,3 @@ describe('Rotina periódica de coletas (collections.job)', () => {
         expect(runCollectionRound).toHaveBeenCalledTimes(1);
     });
 });
-

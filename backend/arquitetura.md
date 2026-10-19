@@ -4,6 +4,18 @@ Este documento descreve a organização e as responsabilidades do backend. O
 contrato das APIs está em [docs/API.md](../docs/API.md), e as fórmulas e regras
 dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 
+## Estado da implementação
+
+Módulos existentes: `services`, `collections`, `analytics`,
+`regions` e `monitoring`. A API expõe lista, detalhe, histórico, regiões e estado
+da coleta. `/services` possui o alias `/service`. `analytics` fornece histórico
+e totais; rankings, comparação e cenários continuam futuros.
+Frontend, coleta e histórico persistido estão integrados na Sprint 1.
+JWT fica na Sprint 3; `auth` e `monitoring-settings` não estão implementados.
+O globo está integrado, mas a exibição dos serviços associados ao inspecionar
+uma região foi transferida para a Sprint 2 como saldo de T15.
+Comandos de execução estão no [README](../README.md); contratos em [API](../docs/API.md).
+
 ## 1. Visão Geral do Sistema
 
 O GreenER é uma plataforma web que monitora serviços de software, coleta
@@ -133,10 +145,10 @@ documentação em áreas separadas:
 greener/
 │
 ├── README.md
-├── .env.example
-├── compose.yaml
+├── docker-compose.yml
 │
 ├── frontend/
+│   ├── .env.example
 │   ├── Dockerfile
 │   └── src/
 │       ├── app/
@@ -240,7 +252,7 @@ O módulo `monitoring` está implementado e expõe
 horários, contadores e resultados informados pelo job e pelo serviço de coleta;
 o controller entrega esses dados em JSON. Não há arquivo `state`, repository
 ou tabela própria para esse módulo. Seus dados são reiniciados com o processo.
-Ele é separado de `monitoring-settings`, responsável pelas configurações.
+Ele é separado da proposta de `monitoring-settings`, cuja entrega será definida posteriormente.
 
 A árvore também contém a organização prevista para funcionalidades futuras;
 ela não comprova que todos os módulos e arquivos já estejam implementados.
@@ -555,7 +567,7 @@ Conceitualmente:
 ```text
 getServices()
 
-getMetrics(serviceId)
+getMetrics(metricsPath)
 ```
 
 Os endpoints e os formatos das respostas estão descritos em
@@ -658,45 +670,19 @@ Collection Service
 
 # 17. Configuração do Intervalo
 
-O intervalo utilizado para iniciar as rodadas de monitoramento é uma
-configuração persistida no PostgreSQL e administrada pelo módulo
-`monitoring-settings`.
-
-Exemplo conceitual:
+O código em `jobs/collections.job.ts` lê `COLLECTION_INTERVAL_SECONDS`.
+O valor deve ser um número positivo finito; caso contrário, o padrão é
+30 segundos. O primeiro ciclo começa quando o servidor HTTP inicia.
+Cada novo ciclo é agendado com `setTimeout` após o fim da rodada anterior.
 
 ```text
-monitoring_settings
-
-collection_interval_seconds
+Backend iniciado → rodada → fim da rodada → espera configurada → nova rodada
 ```
 
-Fluxo:
-
-```mermaid
-flowchart TD
-
-    START[Backend iniciado]
-
-    SETTINGS[Consultar configuração]
-
-    INTERVAL[Obter intervalo]
-
-    JOB[Executar ciclo de monitoramento]
-
-    WAIT[Aguardar próximo intervalo]
-
-    START --> SETTINGS
-
-    SETTINGS --> INTERVAL
-
-    INTERVAL --> JOB
-
-    JOB --> WAIT
-
-    WAIT --> SETTINGS
-```
-
-O Job consulta essa configuração para agendar as rodadas de monitoramento.
+Não há leitura de `configuracao_sistema` pelo job nem alteração do intervalo
+por endpoint. A tabela existe com padrão de 300 segundos, sem controlar o
+agendamento atual. Configuração pela aplicação está prevista para depois,
+com sprint ainda a definir.
 
 ---
 
@@ -791,67 +777,22 @@ módulo ficam em `src/modules/<módulo>/types/`.
 
 ```mermaid
 flowchart TD
-
-    A[Collection Job]
-
-    B[Consultar serviços disponíveis]
-
-    C[Validar resposta]
-
-    D[Obter serviços disponíveis]
-
-    E[Selecionar serviço]
-
-    F[Consultar métricas do serviço]
-
-    G{Resposta recebida?}
-
-    H[Validar métricas com Zod]
-
-    I[Consultar intensidade de carbono]
-
-    J[Validar resposta da Carbon API]
-
-    K[Aplicar cálculo ambiental]
-
-    L[Persistir coleta]
-
-    ERROR[Tratar falha]
-
-    MORE{Existem outros serviços?}
-
-    END[Fim da rodada]
-
-    A --> B
-    B --> C
-    C --> D
-
-    D --> E
-
+    J[Collection Job] --> R[Sincronizar regiões e fatores pela Carbon API]
+    R --> S[Sincronizar descoberta pela Metrics API]
+    S --> P[Consultar parâmetros ativos e serviços ativos no banco]
+    P --> M[Consultar e validar métricas de cada serviço]
+    M --> C[Estimar potência energia e CO2e com o fator regional armazenado]
+    C --> DB[Persistir coleta e atualizar status]
+    M --> E[Tratar falha por serviço]
+    DB --> F[Registrar resultado da rodada]
     E --> F
-
-    F --> G
-
-    G -->|Sim| H
-    G -->|Não| ERROR
-
-    H --> I
-
-    I --> J
-
-    J --> K
-
-    K --> L
-
-    L --> MORE
-    ERROR --> MORE
-
-    MORE -->|Sim| E
-
-    MORE -->|Não| END
 ```
 
-A falha na coleta de um serviço não deve impedir a coleta dos demais.
+As consultas de métricas são iniciadas com `Promise.allSettled` sobre os
+serviços selecionados. A falha isolada é registrada sem rejeitar as demais
+coletas. Não há limitador de concorrência implementado.
+Falhas externas na sincronização podem preservar dados já salvos; uma base
+vazia sem regiões disponíveis pode impedir a descoberta e a coleta.
 
 ---
 
@@ -868,9 +809,9 @@ buscar métricas
     ↓
 validar métricas
     ↓
-obter intensidade de carbono
+usar intensidade regional previamente sincronizada e lida do banco
     ↓
-validar intensidade
+combinar métricas com o conjunto ativo de parâmetros
     ↓
 aplicar o cálculo ambiental descrito em docs/cálculo.md
     ↓
@@ -917,7 +858,7 @@ Isso permite posteriormente realizar:
 
 ---
 
-# 24. Consulta do Frontend
+# 24. Consulta do Frontend — implementada
 
 O frontend não acessa diretamente as APIs externas.
 
@@ -1002,12 +943,14 @@ para visualizar os dados já armazenados.
 
 ---
 
-# 26. Atualização do Dashboard
+# 26. Atualização do Dashboard — implementada
 
-O backend disponibiliza os dados persistidos para consulta pelo dashboard. A
-interface consulta periodicamente a API do GreenER, atualiza as informações sem
-recarga manual e apresenta o horário da última atualização. A frequência de
-consulta do frontend é independente do intervalo do Job.
+`MonitoringProvider` acompanha `/api/v1/monitoring/status`; quando muda
+`lastRoundFinishedAt`, `useApiQuery` solicita novamente os dados reais da página.
+Lista, detalhe, histórico e totais regionais atualizam sem recarregar a página.
+`MonitoringBar` distingue horário da coleta e atualização da tela. A consulta
+segue a previsão do backend; o contador de segundos é apenas sua apresentação.
+Ver [arquitetura do frontend](../frontend/arquitetura.md#7-atualização-e-estados-de-interface).
 
 ---
 
@@ -1105,17 +1048,17 @@ Collection Job ───┼── Serviço B
                   └── Serviço D
 ```
 
-As coletas usam concorrência limitada para que uma requisição lenta não
-bloqueie os demais serviços nem provoque um número ilimitado de operações
-simultâneas. Filas ou sistemas distribuídos não fazem parte da arquitetura do
+As coletas usam `Promise.allSettled` para todos os serviços selecionados.
+Não há fila ou limitador de concorrência; a quantidade de operações simultâneas
+acompanha o número de serviços ativos. Um limite de concorrência é uma evolução possível, não uma garantia atual. Filas ou sistemas distribuídos não fazem parte da arquitetura do
 GreenER.
 
 ---
 
-# 30. Monitoramento Settings
+# 30. Monitoramento Settings — planejado
 
-O módulo `monitoring-settings` é responsável pelas configurações do
-monitoramento.
+O módulo `monitoring-settings` deverá administrar as configurações do
+monitoramento. Ainda não está implementado; sua sprint de entrega não foi definida.
 
 Possíveis configurações:
 
@@ -1139,15 +1082,17 @@ Repository
 PostgreSQL
 ```
 
-Os endpoints de configuração e de simulação estão descritos em
-[docs/API.md](../docs/API.md) e exigem autenticação JWT.
+Os contratos propostos de configuração e simulação estão em
+[docs/API.md](../docs/API.md). Quando implementados, deverão aplicar a proteção
+prevista para cada operação. JWT será entregue na Sprint 3.
 
 ---
 
-# 31. Autenticação
+# 31. Autenticação — Sprint 3
 
-A autenticação das operações protegidas, incluindo configurações de
-monitoramento e simulações, é realizada no backend utilizando JWT.
+A autenticação JWT das operações protegidas será implementada no backend
+na Sprint 3. Dependências, JWT_SECRET e tabela usuario já existem, mas não
+comprovam login, emissão de token ou autorização. Os diagramas abaixo são propostas.
 
 Fluxo simplificado:
 
@@ -1187,7 +1132,7 @@ flowchart TD
 
 ---
 
-# 32. Acesso às Rotas Protegidas
+# 32. Acesso às Rotas Protegidas — fluxo planejado
 
 ```mermaid
 flowchart TD
@@ -1258,8 +1203,8 @@ Conceitualmente:
 
 ```sql
 SELECT *
-FROM collections
-WHERE service_id = $1;
+FROM coleta
+WHERE servico_id = $1;
 ```
 
 Os valores são enviados separadamente através do driver PostgreSQL.
@@ -1382,13 +1327,13 @@ flowchart LR
 | Repositories   | Concentrar acesso ao PostgreSQL                           |
 | Integrations   | Concentrar comunicação com APIs externas                  |
 | Collection Job | Iniciar periodicamente os ciclos de monitoramento         |
-| Auth           | Autenticar usuários e emitir tokens JWT                   |
-| Regions        | Disponibilizar dados regionais de intensidade de carbono  |
-| Analytics      | Fornecer rankings, comparações e cenários                 |
+| Auth (Sprint 3) | Autenticar usuários e emitir tokens JWT; ainda não implementado |
+| Regions | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
+| Analytics | Histórico e totais implementados; rankings, comparações e cenários futuros |
 | PostgreSQL     | Persistir serviços, coletas e configurações               |
 | Metrics API    | Fornecer serviços e métricas                              |
 | Carbon API     | Fornecer intensidade de carbono                           |
-| JWT Middleware | Proteger endpoints que exigem autenticação                |
+| JWT Middleware (Sprint 3) | Proteção planejada, ainda ausente |
 
 ---
 
@@ -1487,10 +1432,9 @@ operação; a rodada continua processando os demais serviços.
 ## 38.8 Persistência histórica
 
 As coletas são armazenadas no PostgreSQL e sustentam consultas históricas,
-gráficos, classificações, comparações e indicadores consolidados.
-
-Os dados persistidos são consultados pela API do GreenER e apresentados pelo
-frontend conforme os critérios e períodos selecionados.
+consulta de detalhe, histórico e totais por período já disponíveis na API.
+Rankings, comparações e cenários são usos futuros. A interface atual exibe
+séries simuladas e ainda não consome esses dados persistidos.
 
 ---
 
@@ -1521,17 +1465,20 @@ frontend conforme os critérios e períodos selecionados.
 - pasta `integrations`;
 - pasta `jobs`;
 - timeout de 8 segundos;
-- armazenamento do intervalo de monitoramento no banco;
+- intervalo atual por variável de ambiente; configuração pela aplicação futura;
 - organização interna dos arquivos dos módulos.
 
 ## Parâmetros de operação
 
-O intervalo de monitoramento é configurável por meio do módulo
-`monitoring-settings` e persistido no PostgreSQL. O intervalo de atualização da
-interface é um parâmetro distinto, mantido independente do agendamento do Job.
-Políticas operacionais adicionais, como número máximo de coletas concorrentes e
-novas tentativas, devem respeitar os limites de tolerância a falhas sem
-introduzir filas ou serviços distribuídos na arquitetura inicial.
+`COLLECTION_INTERVAL_SECONDS` controla a espera entre rodadas. O job não lê
+o campo de configuração já existente no banco. `monitoring-settings` é futuro.
+O intervalo da amostra da API é usado no cálculo energético e não agenda o job.
+A interface acompanha o estado do job e busca os dados após a conclusão das rodadas;
+o intervalo da amostra continua independente desse agendamento.
+
+Políticas de limite de concorrência e novas tentativas não estão implementadas
+como mecanismos próprios nesta versão. A falha de uma rodada é tratada e o job
+agenda a seguinte enquanto estiver ativo.
 
 ---
 
