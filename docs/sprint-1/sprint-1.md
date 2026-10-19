@@ -160,4 +160,13 @@ sprint permanecem pendentes até seus respectivos registros.
 
 ## 🎥 Demonstração da Sprint
 
-Link da apresentação da sprint: [Greener - sprint 1](https://youtu.be/iHaigQ7yYZw)
+Link da apresentação da sprint: 
+
+<p align="left">
+  <a href="https://www.youtube.com/watch?v=iHaigQ7yYZw" target="_blank">
+    <img 
+      src="GreenER-Thumbnail-Sprint_1.png" 
+      alt="GreenER - Sprint 1"
+    />
+  </a>
+</p>
