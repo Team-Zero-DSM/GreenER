@@ -146,15 +146,15 @@ sprint permanecem pendentes até seus respectivos registros.
 
 ### O que funcionou?
 
-> A equipe conseguiu trabalhar de forma colaborativa, cumprir os principais prazos e superar os impedimentos encontrados, realizando a entrega do objetivo principal da Sprint. O uso do GitHub Projects, Docker e GitHub Actions também ajudou na organização, no acompanhamento das tarefas e na integração do projeto.
+> A equipe teve uma boa introdução ao projeto e conseguiu evoluir bastante durante a Sprint, trabalhando de forma colaborativa, cumprindo os principais prazos e superando os impedimentos encontrados. O GitHub Projects, o Docker e o GitHub Actions também contribuíram para a organização, a automação e a integração do trabalho, permitindo alcançar o principal objetivo planejado.
 
 ### O que não funcionou?
 
-> A divisão das tasks poderia ter sido mais detalhada, pois algumas atividades surgiram durante o desenvolvimento sem estarem previstas no planejamento. Além disso, a falta de familiaridade com tecnologias e ferramentas novas, somada à documentação e à implementação acontecendo ao mesmo tempo, gerou dificuldades e a necessidade de adaptar algumas decisões ao longo da Sprint.
+> Apesar do bom andamento geral, tivemos algumas dificuldades na divisão das tasks e na adaptação às novas tecnologias e ferramentas utilizadas. Em alguns momentos, surgiram atividades que não estavam previstas no planejamento, e a documentação nem sempre correspondia ao que precisava ser implementado na prática, exigindo ajustes ao longo do desenvolvimento.
 
 ### O que melhorar na próxima Sprint?
 
-> Aprimorar o planejamento, dividindo as tasks em atividades menores e mais claras. Também devemos aproveitar o conhecimento adquirido nesta primeira Sprint sobre as tecnologias, ferramentas e processos utilizados, aplicando o que aprendemos para padronizar o desenvolvimento, reduzir impedimentos e manter a documentação mais alinhada à implementação.
+> Manter o ritmo de trabalho e a organização que tivemos, aproveitando os conhecimentos adquiridos nesta primeira Sprint para melhorar o planejamento e dividir as tasks em atividades menores e mais claras. Com a experiência adquirida no uso das ferramentas, das classes, das APIs externas e dos processos de desenvolvimento, podemos padronizar melhor o trabalho e reaproveitar o que funcionou para evoluir as demais partes do projeto.
 
 ---
 
@@ -167,6 +167,8 @@ Link da apresentação da sprint:
     <img 
       src="GreenER-Thumbnail-Sprint_1.png" 
       alt="GreenER - Sprint 1"
+      width="600"
+      style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     />
   </a>
 </p>
