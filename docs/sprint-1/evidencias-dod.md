@@ -332,11 +332,11 @@ resposta e comparar novamente com o SQL do mesmo período.
 
 ## 4. Pendências atuais de aceite
 
-- [ ] Conciliar os estados das histórias no README com seu aceite formal.
-- [ ] Registrar retenção dos dados após reinicialização controlada (BD03).
+- [x] Conciliar os estados das histórias no README com seu aceite formal.
+- [x] Registrar retenção dos dados após reinicialização controlada (BD03).
 - [ ] Entregar na Sprint 2 o saldo de T15: serviços associados à região inspecionada.
 - [ ] Registrar aceite final das quatro histórias com suas condições efetivamente atendidas.
-- [ ] Registrar review, feedback, retrospectiva e demonstração no encerramento.
+- [x] Registrar review, feedback, retrospectiva e demonstração no encerramento.
 
 Integração real e atualização automática foram observadas e não são mais pendências
 iguais às do snapshot anterior. O saldo transferido de T15 permanece explícito.
