@@ -146,18 +146,18 @@ sprint permanecem pendentes até seus respectivos registros.
 
 ### O que funcionou?
 
-> A ser preenchido ao final da Sprint.
+> A equipe conseguiu trabalhar de forma colaborativa, cumprir os principais prazos e superar os impedimentos encontrados, realizando a entrega do objetivo principal da Sprint. O uso do GitHub Projects, Docker e GitHub Actions também ajudou na organização, no acompanhamento das tarefas e na integração do projeto.
 
 ### O que não funcionou?
 
-> A ser preenchido ao final da Sprint.
+> A divisão das tasks poderia ter sido mais detalhada, pois algumas atividades surgiram durante o desenvolvimento sem estarem previstas no planejamento. Além disso, a falta de familiaridade com tecnologias e ferramentas novas, somada à documentação e à implementação acontecendo ao mesmo tempo, gerou dificuldades e a necessidade de adaptar algumas decisões ao longo da Sprint.
 
 ### O que melhorar na próxima Sprint?
 
-> A ser preenchido ao final da Sprint.
+> Aprimorar o planejamento, dividindo as tasks em atividades menores e mais claras. Também devemos aproveitar o conhecimento adquirido nesta primeira Sprint sobre as tecnologias, ferramentas e processos utilizados, aplicando o que aprendemos para padronizar o desenvolvimento, reduzir impedimentos e manter a documentação mais alinhada à implementação.
 
 ---
 
 ## 🎥 Demonstração da Sprint
 
-Link da apresentação ou vídeo e versão demonstrada: [PREENCHER após a gravação].
+Link da apresentação da sprint: [Greener - sprint 1](https://youtu.be/iHaigQ7yYZw)
