@@ -23,20 +23,35 @@ Entregar a primeira versão funcional do GreenER, capaz de consultar serviços e
 
 ## 👥 User Stories Contempladas
 
-| ID | User Story |
-|------|------|
-| **US01** | Descoberta de serviços |
-| **US03** | Coleta periódica de métricas |
-| **US08** | Dashboard operacional |
-| **US09** | Atualização automática do dashboard |
+| ID | User Story | Relação com a sprint |
+|---|---|---|
+| **US01** | Descoberta de serviços | Selecionada no planejamento |
+| **US02** | Monitoramento dinâmico dos serviços | Cobertura identificada durante o desenvolvimento |
+| **US03** | Coleta periódica de métricas | Selecionada no planejamento |
+| **US06** | Cálculo do impacto individual | Cobertura identificada durante o desenvolvimento |
+| **US08** | Dashboard operacional | Selecionada no planejamento; parcialmente entregue |
+| **US09** | Atualização automática do dashboard | Selecionada no planejamento |
+| **US10** | Consulta do histórico de coletas | Cobertura identificada durante o desenvolvimento |
+| **US11** | Visualização da localização dos serviços | Cobertura identificada durante o desenvolvimento |
+| **US12** | Visualização geográfica dos serviços | Cobertura identificada durante o desenvolvimento |
 
-Estas são as quatro histórias selecionadas para a Sprint 1. Persistência e
-histórico foram confirmados como entregas técnicas desta sprint; sua presença
-no código não inclui automaticamente a US10 na seleção nem representa seu aceite. A
-visualização geográfica já possui globo integrado, vinculado à US08 e à issue #32.
-Por decisão da equipe, apresentar os serviços associados ao inspecionar uma região
-fica para a Sprint 2, como continuação de T15, sob responsabilidade de Gabriel. Autenticação fica na Sprint 3; configuração do
-intervalo pela aplicação terá sua sprint definida posteriormente.
+São **nove histórias contempladas pela entrega: oito com implementação presente
+e a US08 parcialmente entregue**. A seleção original do planejamento foi US01,
+US03, US08 e US09; as outras cinco histórias tiveram sua cobertura identificada
+nas funcionalidades desenvolvidas. Essa distinção preserva o planejamento
+original e não presume uma decisão formal de acréscimo de escopo.
+
+Implementação presente não equivale ao aceite da história. A US02 ainda exige
+validação completa das transições de descoberta, ausência e restabelecimento;
+as demais ressalvas e o aceite pendente estão registrados na
+[matriz de histórias e tarefas do README](../../README.md#rastreabilidade-das-oito-histórias-implementadas).
+
+Persistência e histórico foram entregas técnicas desta sprint. A visualização
+geográfica possui globo integrado, vinculado à US08 e à issue #32. Por decisão
+da equipe, apresentar os serviços associados ao inspecionar uma região fica
+para a Sprint 2, como continuação de T15, sob responsabilidade de Gabriel.
+Autenticação fica na Sprint 3; configuração do intervalo pela aplicação terá
+sua sprint definida posteriormente.
 
 ---
 
@@ -106,12 +121,26 @@ os registros diários.
 
 ## Evidências e rastreabilidade
 
+A tabela abaixo relaciona as tarefas às **nove histórias contempladas pela
+entrega da Sprint 1**: US01, US02, US03, US06, US08, US09, US10, US11 e US12.
+A US08 permanece parcialmente entregue, com o saldo de T15 na Sprint 2.
+
+A [matriz de histórias e tarefas no README](../../README.md#rastreabilidade-das-oito-histórias-implementadas)
+detalha o código, as evidências e as ressalvas das outras oito histórias, que
+possuem implementação presente. O aceite formal permanece pendente, incluindo
+a validação completa das transições da US02.
+
 | Entrega / requisitos | Tarefas | Implementação e evidências |
 |---|---|---|
 | Descoberta — US01, RF01 | T02–T05 | [Services](../../backend/src/modules/services/), [integrações](../../backend/src/integrations/); PRs [#59](https://github.com/Team-Zero-DSM/GreenER/pull/59) e [#61](https://github.com/Team-Zero-DSM/GreenER/pull/61). |
+| Monitoramento dinâmico — US02, RF02/RNF10 | T03, T08, T16–T17 | [Sincronização, status e coleta](../../backend/src/modules/collections/collections.service.ts), [persistência dos estados](../../backend/src/modules/collections/collections.repository.ts), [job](../../backend/src/jobs/collections.job.ts). Validação completa das transições pendente. |
 | Coleta e métricas — US03, RF03/RF11 | T06–T10 | [Collections](../../backend/src/modules/collections/), [job](../../backend/src/jobs/collections.job.ts); PR [#55](https://github.com/Team-Zero-DSM/GreenER/pull/55). |
+| Impacto individual — US06, RF07 | T07, T09, T13, T17 | [Cálculos ambientais](../../backend/src/modules/collections/collections.service.ts), [detalhe real](../../frontend/src/pages/ServiceDetailPage.tsx), [fórmulas](../cálculo.md); reprocessamento V05 no [registro da DoD](./evidencias-dod.md). |
 | Interface — US08, RF09 | T11–T17 | [Páginas](../../frontend/src/pages/), [globo](../../frontend/src/components/3d/GlobeView.tsx); PRs [#60](https://github.com/Team-Zero-DSM/GreenER/pull/60), [#63](https://github.com/Team-Zero-DSM/GreenER/pull/63) e [#64](https://github.com/Team-Zero-DSM/GreenER/pull/64). T15 conserva saldo para a Sprint 2. |
 | Atualização — US09, RF11 | T18–T19 | [Provider](../../frontend/src/contexts/MonitoringProvider.tsx), [consultas](../../frontend/src/hooks/useApiQuery.ts); PR [#65](https://github.com/Team-Zero-DSM/GreenER/pull/65). |
+| Histórico de coletas — US10, RF10/RNF06 | T07, T09, T13, T17, T20–T21, T30 | [Gravação](../../backend/src/modules/collections/collections.repository.ts), [analytics](../../backend/src/modules/analytics/), [gráficos e período](../../frontend/src/pages/ServiceDetailPage.tsx); conferência HTTP × SQL em V11 no [registro da DoD](./evidencias-dod.md). |
+| Localização dos serviços — US11, RF12 | T04–T05, T13–T14, T17 | [Mapper](../../backend/src/integrations/metrics-api.mapper.ts), [serviços e localização](../../backend/src/modules/services/services.repository.ts), [detalhe](../../frontend/src/pages/ServiceDetailPage.tsx). |
+| Visualização geográfica — US12, RF13 | T04–T05, T12, parcela de T15, T17 | [Marcadores com coordenadas reais](../../frontend/src/pages/LandingPage.tsx), [globo](../../frontend/src/components/3d/GlobeView.tsx). Esta parcela não conclui a inspeção regional pendente de T15. |
 | Persistência e infraestrutura — RNF06/RNF07 | T20–T25, T30 | [Schema](../../database/schema.sql), [Compose](../../docker-compose.yml), [banco](../../database/arquitetura.md). |
 | Documentação e modelagem — RNF08/RNF09 | T01, T26–T29 | [Arquitetura](../arquitetura/arquitetura.md), [protótipos](../prototipo/prototipo.md), [plano](../plano-de-entregas.md). |
 
