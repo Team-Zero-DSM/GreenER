@@ -44,12 +44,12 @@ Por meio dela são desenvolvidos os diagramas utilizados na documentação da ap
 ## Visualização
 
 <p align="center">
-    <img src="./images/caso-de-uso.svg" alt="Diagrama de Caso de Uso">
+    <img src="./images/caso_de_uso.svg" alt="Diagrama de Caso de Uso">
 </p>
 
 ## Arquivo Original
 
-🔗 Lucidchart: [Acessar diagrama](https://lucid.app/lucidchart/547778f4-32b2-4cc9-9630-ae5ce0b6e4be/view)
+🔗 Lucidchart: [Acessar diagrama](https://lucid.app/lucidchart/2dc7d558-b1a8-4b7e-976d-dcd3562191a6/view)
 
 ## Objetivo
 
