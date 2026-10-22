@@ -163,3 +163,19 @@ Permitir que o usuário crie uma conta no GreenER, fornecendo os dados necessár
 ### Objetivo
 
 Permitir que o usuário autentique-se no GreenER por meio de suas credenciais para acessar as funcionalidades disponíveis.
+
+## iniciar sessão
+
+### Visualização
+
+<p align="center">
+    <img src="./images/diagramas-de-sequencia/sequencia_comparacao.svg" alt="Diagrama de sequência: comparar servicos">
+</p>
+
+### Arquivo Original
+
+🔗 [Acessar diagrama](https://lucid.app/lucidchart/bcb4318a-2d7c-44e7-b5cc-99eee1e67e4f/view)
+
+### Objetivo
+
+Permitir a comparação entre serviços no GreenER, desde a seleção dos serviços e configuração dos parâmetros até a consulta das métricas pelo backend e a exibição dos resultados no frontend.
