@@ -164,7 +164,7 @@ Permitir que o usuário crie uma conta no GreenER, fornecendo os dados necessár
 
 Permitir que o usuário autentique-se no GreenER por meio de suas credenciais para acessar as funcionalidades disponíveis.
 
-## iniciar sessão
+## Comparação de serviços
 
 ### Visualização
 
