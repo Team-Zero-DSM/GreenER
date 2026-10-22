@@ -121,13 +121,61 @@ Permitir que o usuário selecione um serviço e visualize suas métricas e infor
 ### Visualização
 
 <p align="center">
-    <img src="./images/diagramas-de-sequencia/Diagrama_analise_de_ranking.svg" alt="Diagrama de sequência: Análise de ranking">
+    <img src="./images/diagramas-de-sequencia/sequencia-analise-de-ranking.svg" alt="Diagrama de sequência: Análise de ranking">
 </p>
 
 ### Arquivo Original
 
-🔗 [Acessar diagrama](https://lucid.app/lucidchart/0d8a9485-9648-4c4b-a320-cb80d819d560/view)
+🔗 [Acessar diagrama](https://lucid.app/lucidchart/0d8a9485-9648-4c4b-a320-cb80d819d560/edit?viewport_loc=-1452%2C-652%2C4836%2C2381%2CPaLdq~84CkD7&invitationId=inv_cefaa363-b9c6-4e1f-a7e3-b3593e8feeb7)
 
 ### Objetivo
 
 Permitir que o usuário visualize os serviços ordenados por critérios de priorização e configure critérios para gerar novas classificações.
+
+## criar conta
+
+### Visualização
+
+<p align="center">
+    <img src="./images/diagramas-de-sequencia/sequencia_criar_conta.svg" alt="Diagrama de sequência: criar conta">
+</p>
+
+### Arquivo Original
+
+🔗 [Acessar diagrama](https://lucid.app/lucidchart/2e171156-d112-442a-afd4-ee7358c03b40/view)
+
+### Objetivo
+
+Permitir que o usuário crie uma conta no GreenER, fornecendo os dados necessários para seu cadastro no sistema.
+
+## iniciar sessão
+
+### Visualização
+
+<p align="center">
+    <img src="./images/diagramas-de-sequencia/sequencia_iniciar_sessão.svg" alt="Diagrama de sequência: iniciar sessão">
+</p>
+
+### Arquivo Original
+
+🔗 [Acessar diagrama](https://lucid.app/lucidchart/b1632091-cae7-4b89-9deb-60ae0eb3a544/view)
+
+### Objetivo
+
+Permitir que o usuário autentique-se no GreenER por meio de suas credenciais para acessar as funcionalidades disponíveis.
+
+## Comparação de serviços
+
+### Visualização
+
+<p align="center">
+    <img src="./images/diagramas-de-sequencia/sequencia_comparacao.svg" alt="Diagrama de sequência: comparar servicos">
+</p>
+
+### Arquivo Original
+
+🔗 [Acessar diagrama](https://lucid.app/lucidchart/bcb4318a-2d7c-44e7-b5cc-99eee1e67e4f/view)
+
+### Objetivo
+
+Permitir a comparação entre serviços no GreenER, desde a seleção dos serviços e configuração dos parâmetros até a consulta das métricas pelo backend e a exibição dos resultados no frontend.
