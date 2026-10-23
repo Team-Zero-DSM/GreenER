@@ -9,7 +9,7 @@ Este documento reúne o registro das Dailies realizadas durante a Sprint 1, com 
 
 A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausentes. Os registros de cada Daily são organizados por tópicos, destacando de forma objetiva as decisões, atividades, discussões e demais acontecimentos relevantes para o acompanhamento da Sprint.
 
-## 📅 29/10/2026
+## 📅 20/10/2026
 
 ### 👥 Presença
 
@@ -31,7 +31,42 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 ---
 
+## 📅 21/10/2026
 
+### 👥 Presença
 
+| Membro | Presença |
+|---|---|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
 
+### 📝 Registro da Daily
 
+- **Documentação — Henrique:** concluiu e entregou os diagramas de casos de uso do projeto.
+- **Planejamento — equipe:** os integrantes continuaram organizando e preparando suas tasks, estudando a estrutura do projeto e definindo como iniciar as implementações.
+- **Adequação ao feedback do cliente:** a equipe começou a ajustar algumas tasks e o planejamento da Sprint 2 com base nas sugestões de melhoria e nas necessidades apontadas pelo cliente, buscando alinhar melhor o desenvolvimento às expectativas do projeto.
+
+---
+
+## 📅 22/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+|---|---|
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Gabriel:** continuou o desenvolvimento do frontend e concluiu a task de visualização das métricas, que havia sido transferida da Sprint 1 para a Sprint 2.
+- **Documentação — Henrique:** finalizou os diagramas de sequência do projeto, concluindo essa etapa da documentação.
+- **Frontend — Vitor:** começou a estudar a estrutura do frontend para compreender sua organização e se preparar para iniciar o desenvolvimento das tasks sob sua responsabilidade.
+- **Backend — Pedro:** começou a planejar a implementação das próximas tasks, analisando as escolhas técnicas e definindo por onde iniciaria o desenvolvimento do código.
+- **Impedimento:** devido às apresentações realizadas para o professor, a equipe teve pouco tempo disponível para trabalhar no backlog, limitando o avanço das atividades do dia.
