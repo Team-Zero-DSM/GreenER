@@ -11,6 +11,12 @@ const navItems = [
         icon: Server,
         prefixes: ['/dashboard', '/servicos'],
     },
+    {
+        to: '/comparacao',
+        label: 'Comparação',
+        icon: Server,
+        prefixes: ['/comparacao'],
+    },
 ];
 
 const linkClass =
