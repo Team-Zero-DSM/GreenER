@@ -1,4 +1,4 @@
-import { House, Server } from 'lucide-react';
+import { House, Server, ArrowLeftRight } from 'lucide-react';
 import { MonitoringBar } from '@/components/MonitoringBar';
 import { MonitoringProvider } from '@/contexts/MonitoringProvider';
 import { NavLink, Outlet, useLocation } from 'react-router';
@@ -14,7 +14,7 @@ const navItems = [
     {
         to: '/comparacao',
         label: 'Comparação',
-        icon: Server,
+        icon: ArrowLeftRight,
         prefixes: ['/comparacao'],
     },
 ];
