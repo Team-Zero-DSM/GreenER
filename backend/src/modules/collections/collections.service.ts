@@ -138,7 +138,8 @@ export class CollectionsService {
                         monitoringService.recordDependency('database', 'available');
                         await this.recordCollectionStatus({
                             service_id: service.id,
-                            descricao: 'Serviço ausente da lista retornada pela descoberta.',
+                            descricao:
+                                'A coleta não foi realizada porque o serviço não está na lista de serviços monitorados.',
                             http_status: null,
                             tipo: 'service_missing',
                         });
@@ -301,6 +302,9 @@ export class CollectionsService {
         if (err.kind === 'timeout' || err.kind === 'unavailable') {
             return 'unavailable';
         }
+
+        if (err.kind === 'service_missing') return 'unavailable';
+        if (err.kind === 'metrics_missing') return 'metrics_missing';
 
         if (err.kind !== 'bad_status') return null;
 

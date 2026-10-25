@@ -1,6 +1,6 @@
 // src/metrics-api/metrics.client.ts
 import type { ZodType } from 'zod';
-import { ExternalApiError } from '../shared/errors/external-api-error.js';
+import { ExternalApiError, externalHttpError } from '../shared/errors/external-api-error.js';
 import {
     type MetricsResponse,
     metricsResponseSchema,
@@ -24,10 +24,14 @@ export class MetricsClient {
     }
 
     getMetrics(metricsPath: string): Promise<MetricsResponse> {
-        return this.request(metricsPath, metricsResponseSchema);
+        return this.request(metricsPath, metricsResponseSchema, true);
     }
 
-    private async request<T>(path: string, schema: ZodType<T>): Promise<T> {
+    private async request<T>(
+        path: string,
+        schema: ZodType<T>,
+        isMetricsRequest = false,
+    ): Promise<T> {
         let response: Response;
         const signal = AbortSignal.timeout(this.timeoutMs);
         try {
@@ -38,26 +42,14 @@ export class MetricsClient {
             const isTimeout = err instanceof Error && err.name === 'TimeoutError';
             throw new ExternalApiError(
                 isTimeout
-                    ? `Timeout de ${this.timeoutMs}ms em ${path}`
-                    : `Metrics API indisponível em ${path}`,
+                    ? 'A coleta não foi concluída porque a plataforma de métricas demorou demais para responder.'
+                    : 'Não foi possível conectar à plataforma de métricas para realizar a coleta.',
                 isTimeout ? 'timeout' : 'unavailable',
                 { cause: err },
             );
         }
-        if (response.status === 530) {
-            throw new ExternalApiError(
-                'API auxiliar inacessível: resposta HTTP 530',
-                'bad_status',
-                { status: 530 },
-            );
-        }
-
         if (!response.ok) {
-            throw new ExternalApiError(
-                `Metrics API respondeu ${response.status} em ${path}`,
-                'bad_status',
-                { status: response.status },
-            );
+            throw externalHttpError(response.status, isMetricsRequest);
         }
 
         let json: unknown;
@@ -67,22 +59,30 @@ export class MetricsClient {
         } catch (err) {
             if (signal.aborted) {
                 throw new ExternalApiError(
-                    `Timeout de ${this.timeoutMs}ms ao ler resposta de ${path}`,
+                    'A coleta não foi concluída porque o recebimento dos dados demorou demais.',
                     'timeout',
                     { cause: err },
                 );
             }
 
-            throw new ExternalApiError(`JSON inválido em ${path}`, 'invalid_response', {
-                cause: err,
-            });
+            throw new ExternalApiError(
+                'A coleta recebeu dados que não puderam ser interpretados.',
+                'invalid_response',
+                {
+                    cause: err,
+                },
+            );
         }
 
         const parsed = schema.safeParse(json);
         if (!parsed.success) {
-            throw new ExternalApiError(`Resposta fora do contrato em ${path}`, 'invalid_response', {
-                cause: parsed.error,
-            });
+            throw new ExternalApiError(
+                'A coleta recebeu dados incompletos ou em um formato inesperado.',
+                'invalid_response',
+                {
+                    cause: parsed.error,
+                },
+            );
         }
         return parsed.data;
     }
