@@ -1,3 +1,9 @@
+import { ComparisonServiceSelector } from '@/components/comparison/ComparisonServiceSelector';
+
+
+
+
+
 export function ComparisonPage() {
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
@@ -17,32 +23,9 @@ export function ComparisonPage() {
             >
                 {/* Area de seleção de serviços */}
                 <div className="space-y-3">
-                    <div>
-                        <h2 className="text-xl font-semibold">
-                            Serviços selecionados{' '}
-                            <span className="text-sm text-muted-foreground">(máx. 5)</span>
-                        </h2>
-
-                        <p className="text-sm text-muted-foreground">
-                            Selecione os serviços que deseja comparar.
-                        </p>
-                    </div>
 
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-                        <div className="flex min-h-32 items-center justify-center rounded-lg border border-border p-4">
-                            <p className="text-sm text-muted-foreground">
-                                Área dos serviços selecionados
-                            </p>
-                        </div>
-
-                        <div className="min-h-32 rounded-lg border border-border p-4">
-                            <h3 className="font-medium">Alternar região de comparação</h3>
-
-                            <p className="mt-2 text-sm text-muted-foreground">
-                                Para simular um serviço em outra região, clique na engrenagem e
-                                selecione outra região disponível.
-                            </p>
-                        </div>
+                        <ComparisonServiceSelector />
                     </div>
                 </div>
 
