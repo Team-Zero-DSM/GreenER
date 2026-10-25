@@ -14,6 +14,7 @@ import type {
     EstimateParameter,
     ProcessedMetrics,
     ServiceStatus,
+    Status_coleta,
 } from './types/collections.types.js';
 
 export class CollectionsService {
@@ -135,6 +136,13 @@ export class CollectionsService {
                     try {
                         await this.repository.updateStatus(service.id, 'unavailable');
                         monitoringService.recordDependency('database', 'available');
+                        await this.recordCollectionStatus({
+                            service_id: service.id,
+                            descricao:
+                                'A coleta não foi realizada porque o serviço não está na lista de serviços monitorados.',
+                            http_status: null,
+                            tipo: 'service_missing',
+                        });
                         console.warn(
                             `[sync-services] ${service.external_id} ausente da descoberta -> ` +
                                 'ativo=false, status=unavailable',
@@ -215,16 +223,29 @@ export class CollectionsService {
                 estimated_co2e_g: e.co2eG,
             };
             try {
-                const collectedAt = await this.repository.createCollection(data);
+                const collection = await this.repository.createCollection(data);
                 monitoringService.recordDependency('database', 'available');
-                monitoringService.recordSuccessfulCollection(collectedAt);
+                monitoringService.recordSuccessfulCollection(collection.coletado_em);
                 await this.repository.updateStatus(service.id, 'available');
+                await this.recordCollectionStatus({
+                    service_id: service.id,
+                    coleta_id: collection.id,
+                    descricao: 'Métricas coletadas e salvas com sucesso.',
+                    http_status: null,
+                    tipo: 'success',
+                });
             } catch (err) {
                 monitoringService.recordDependency('database', 'unavailable');
                 throw err;
             }
         } catch (err) {
             const status = this.statusFromError(err);
+            await this.recordCollectionStatus({
+                service_id: service.id,
+                descricao: err instanceof Error ? err.message : String(err),
+                http_status: err instanceof ExternalApiError ? (err.status ?? null) : null,
+                tipo: err instanceof ExternalApiError ? err.kind : 'unexpected_error',
+            });
             if (status) {
                 try {
                     await this.repository.updateStatus(service.id, status);
@@ -235,6 +256,15 @@ export class CollectionsService {
                 }
             }
             throw err;
+        }
+    }
+
+    private async recordCollectionStatus(data: Status_coleta): Promise<void> {
+        try {
+            await this.repository.createStatusCollection(data);
+        } catch (err) {
+            monitoringService.recordDependency('database', 'unavailable');
+            console.error(`[collection] Falha ao registrar histórico de ${data.service_id}:`, err);
         }
     }
 
@@ -272,6 +302,9 @@ export class CollectionsService {
         if (err.kind === 'timeout' || err.kind === 'unavailable') {
             return 'unavailable';
         }
+
+        if (err.kind === 'service_missing') return 'unavailable';
+        if (err.kind === 'metrics_missing') return 'metrics_missing';
 
         if (err.kind !== 'bad_status') return null;
 
