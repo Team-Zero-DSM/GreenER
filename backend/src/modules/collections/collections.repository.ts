@@ -6,6 +6,7 @@ import {
     EstimateParameter,
     RegionEnergyInfo,
     ServiceStatus,
+    Status_coleta,
     type Region,
 } from './types/collections.types.js';
 
@@ -37,8 +38,8 @@ export class CollectionsRepository {
         );
     }
 
-    async createCollection(data: Collection): Promise<Date> {
-        const result = await this.pool.query<{ coletado_em: Date }>(
+    async createCollection(data: Collection): Promise<{ id: string; coletado_em: Date }> {
+        const result = await this.pool.query<{ id: string; coletado_em: Date }>(
             `INSERT INTO coleta
        (servico_id, parametro_estimativa_id, coletado_em, intervalo_metrica_segundos,
         cpu_percent, memory_gb, disk_gb, network_gb,
@@ -49,7 +50,7 @@ export class CollectionsRepository {
         $5, $6, $7, $8,
         $9, $10, $11, $12,
         $13, $14, $15, $16)
-     RETURNING coletado_em`,
+     RETURNING id, coletado_em`,
             [
                 data.service_id,
                 data.estimate_parameter_id,
@@ -69,7 +70,16 @@ export class CollectionsRepository {
                 data.estimated_co2e_g,
             ],
         );
-        return result.rows[0].coletado_em;
+        return result.rows[0];
+    }
+
+    async createStatusCollection(data: Status_coleta): Promise<void> {
+        await this.pool.query(
+            `INSERT INTO status_coleta
+            (servico_id, coleta_id, descricao, http_status, tipo)
+         VALUES ($1, $2, $3, $4, $5)`,
+            [data.service_id, data.coleta_id ?? null, data.descricao, data.http_status, data.tipo],
+        );
     }
 
     async existsByCode(code: string): Promise<boolean> {
