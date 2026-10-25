@@ -60,7 +60,6 @@ CREATE TABLE configuracao_sistema (
 );
 
 CREATE TABLE coleta (
-    -- Perfeito: UUID configurado corretamente com o DEFAULT
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     
     servico_id BIGINT NOT NULL REFERENCES servico(id),
@@ -84,15 +83,15 @@ CREATE TABLE coleta (
 );
 
 
-CREATE TABLE status_coleta(
-     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-     servico_id BIGINT NOT NULL REFERENCES servico(id),
-     coleta_id UUID REFERENCES coleta(id),
-     observado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
-     descricao TEXT NOT NULL
-     http_status NUMERIC NOT NULL
-     tipo TEXT NOT NULL
-)
+CREATE TABLE status_coleta (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    servico_id BIGINT NOT NULL REFERENCES servico(id),
+    coleta_id UUID REFERENCES coleta(id),
+    observado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+    descricao TEXT NOT NULL,
+    http_status NUMERIC NOT NULL,
+    tipo TEXT NOT NULL
+);
 
 CREATE INDEX idx_servico_regiao ON servico(regiao_id);
 CREATE INDEX idx_servico_ativo ON servico(ativo);
