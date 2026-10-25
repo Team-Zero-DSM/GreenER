@@ -140,8 +140,8 @@ As entregas seguem o calendário das sprints registrado abaixo.
 
 ```mermaid
 graph TD
-    S1[Sprint 1: Monitoramento, Persistência, Histórico e Interface] --> S2[Sprint 2: Ranking e Continuação de T15]
-    S2 --> S3[Sprint 3: JWT, Comparação e Cenários]
+    S1[Sprint 1: Monitoramento, Persistência, Histórico e Interface] --> S2[Sprint 2: Ranking, Comparação, Histórico de Status e Regiões]
+    S2 --> S3[Sprint 3: JWT e Cenários Avançados]
 ```
 
 ---
@@ -162,8 +162,12 @@ Pendências e entregas futuras:
 
 - **Sprint 2:** apresentar os serviços associados ao inspecionar uma região,
   como continuação da T15, que permanece parcialmente entregue.
-- **Sprint 2:** ranking de impacto ambiental.
-- **Sprint 3:** autenticação JWT, comparação e simulação de cenários.
+- **Sprint 2:** ranking de impacto ambiental, comparação entre serviços,
+  histórico de status das coletas e ampliação das visualizações regionais.
+  Escopo e acompanhamento no [registro da Sprint 2](./docs/sprint-2/sprint-2.md)
+  e no [plano de entregas](./docs/plano-de-entregas.md).
+- **Sprint 3:** autenticação JWT e simulação de cenários avançados,
+  com delimitação em relação às opções regionais previstas na comparação da Sprint 2.
 - **Sprint a definir:** configuração do intervalo de coleta pela aplicação.
 
 Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
