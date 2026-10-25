@@ -60,7 +60,6 @@ CREATE TABLE configuracao_sistema (
 );
 
 CREATE TABLE coleta (
-    -- Perfeito: UUID configurado corretamente com o DEFAULT
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     
     servico_id BIGINT NOT NULL REFERENCES servico(id),
@@ -83,10 +82,24 @@ CREATE TABLE coleta (
     UNIQUE (servico_id, coletado_em)
 );
 
+
+CREATE TABLE status_coleta (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    servico_id BIGINT NOT NULL REFERENCES servico(id),
+    coleta_id UUID REFERENCES coleta(id),
+    observado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+    descricao TEXT NOT NULL,
+    http_status SMALLINT
+        CHECK (http_status BETWEEN 100 AND 599),
+    tipo TEXT NOT NULL
+);
+
 CREATE INDEX idx_servico_regiao ON servico(regiao_id);
 CREATE INDEX idx_servico_ativo ON servico(ativo);
 CREATE INDEX idx_coleta_servico_tempo ON coleta(servico_id, coletado_em DESC);
 CREATE INDEX idx_coleta_tempo ON coleta(coletado_em DESC);
+CREATE INDEX idx_status_coleta_servico_tempo
+    ON status_coleta(servico_id, observado_em DESC);
 
 INSERT INTO parametro_estimativa (cpu_max_watts, ram_watts_per_gb, disk_watts_per_gb, network_watts_per_gb, ativo)
 VALUES (100, 0.375, 0.01, 0.02, true);
