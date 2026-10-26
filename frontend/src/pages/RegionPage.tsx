@@ -33,7 +33,7 @@ export function RegionPage(){
                         regions.map((region) => (
                             <div
                                 key={region.code}
-                                className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-left text-white transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/10"
+                                className="max-w-400 m-auto md:w-full rounded-xl border border-white/10 bg-white/5 p-4 text-left text-white transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/10"
                             >
                                 <div>
                                     <h3 className="text-lg font-semibold">{regionTitle(region)}</h3>

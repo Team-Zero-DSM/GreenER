@@ -641,8 +641,11 @@ transições de descoberta, ausência e restabelecimento. O aceite formal das
 histórias permanece pendente; esta tabela não declara cumprimento integral da DoD.
 
 US04 e US16 já possuem tratamento de falhas, mas precisam ampliar a validação.
-A US05 distingue `metrics_missing`, porém ainda precisa confirmar a disponibilidade
-do serviço antes de afirmar que somente as métricas estão ausentes. A US07 possui
+A US05 usa `metrics_missing` para HTTP 500 da consulta de métricas, que significa
+serviço indisponível ou exportador de métricas indisponível; HTTP 404 significa
+serviço removido ou métricas inexistentes e resulta em `unavailable`.
+Erros da Cloudflare, como HTTP 530, são identificados separadamente no histórico,
+preservando o status anterior do serviço. A US07 possui
 totais e contagens regionais; falta a consolidação explícita do ambiente inteiro.
 A US08 conserva o saldo de T15 para a Sprint 2.
 
