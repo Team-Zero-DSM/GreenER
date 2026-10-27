@@ -26,14 +26,14 @@ export function RegionPage(){
                 </p>
             </header>
             <section className="w-full overflow-x-auto">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(230px,1fr))]">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                     {regions.length === 0 ? (
                         <p className="text-sm text-white/60">Nenhuma região disponível.</p>
                     ) : (
                         regions.map((region) => (
                             <div
                                 key={region.code}
-                                className="max-w-400 m-auto md:w-full rounded-xl border border-white/10 bg-white/5 p-4 text-left text-white transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/10"
+                                className="mx-auto w-full max-w-[400px] rounded-xl border border-white/10 bg-white/5 p-4 text-left text-white transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/10 md:max-w-none"
                             >
                                 <div>
                                     <h3 className="text-lg font-semibold">{regionTitle(region)}</h3>
