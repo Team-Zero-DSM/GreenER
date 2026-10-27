@@ -1,10 +1,28 @@
-import { ComparisonServiceSelector } from '@/components/comparison/ComparisonServiceSelector';
-
+import { ComparisonServiceSelector } from '@/components/comparison/selector/ComparisonServiceSelector';
+import { useState } from 'react';
+import {
+    ComparisonControls,
+    type ComparisonMetric,
+} from '@/components/comparison/controls/ComparisonControls';
+import type { HistoryRange } from '@/types/service';
 
 
 
 
 export function ComparisonPage() {
+
+    const [periodo, setPeriodo] = useState<HistoryRange>('24h');
+
+const [metrica, setMetrica] =
+    useState<ComparisonMetric>('co2eGrams');
+
+function handleComparar() {
+    console.log('Configurações da comparação:', {
+        periodo,
+        metrica,
+    });
+}
+
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
             <header className="space-y-2">
@@ -22,59 +40,19 @@ export function ComparisonPage() {
                 className="space-y-6 border-t border-border pt-6"
             >
                 {/* Area de seleção de serviços */}
-                <div className="space-y-3">
-
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
                         <ComparisonServiceSelector />
-                    </div>
-                </div>
+                    
+               
 
                 {/* Local dos controles da comparação */}
-                    <div className="flex flex-col gap-4 border-t border-border pt-6 lg:flex-row lg:items-end lg:justify-between">
-                        {/* Grupo: Período */}
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">Período</h3>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">1h</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">6h</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">24h</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">7d</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">30d</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Grupo: Métrica e botão */}
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Métrica</h3>
-
-                                <div className="flex min-h-10 min-w-40 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">
-                                        Selecionar métrica
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex min-h-10 items-center justify-center rounded-md border border-dashed border-border px-6 py-2">
-                                <p className="text-sm text-muted-foreground">Botão Comparar</p>
-                            </div>
-                        </div>
-                    </div>
+                    <ComparisonControls
+    periodo={periodo}
+    metrica={metrica}
+    onPeriodoChange={setPeriodo}
+    onMetricaChange={setMetrica}
+    onComparar={handleComparar}
+/>
+                    
 
                 {/* Area de gráfico comparativo */}
                 <div className="space-y-3 border-t border-border pt-6">

@@ -21,7 +21,7 @@ const MAX_SERVICOS = 5;
 const CORES = [
     '#3B82F6',
     '#10B981',
-    '#F59E0B',
+    '#ffd900',
     '#A855F7',
     '#EC4899',
 ];
@@ -39,7 +39,6 @@ export function ComparisonServiceSelector() {
     const adicionarButtonRef = useRef<HTMLButtonElement>(null);
     const servicosPickerRef = useRef<HTMLDivElement>(null);
 
-    // Fecha o catálogo quando o clique acontece fora dele.
     useClickOutside(
         mostrarDisponiveis,
         adicionarButtonRef,
@@ -122,7 +121,8 @@ export function ComparisonServiceSelector() {
 
                 if (
                     servicoComCorEscolhida &&
-                    item.idSelecao === servicoComCorEscolhida.idSelecao
+                    item.idSelecao ===
+                        servicoComCorEscolhida.idSelecao
                 ) {
                     return {
                         ...item,
@@ -167,14 +167,16 @@ export function ComparisonServiceSelector() {
                 </p>
             </div>
 
-            {/* Cartões e botão para adicionar */}
+            {/* Grade dos serviços e botão de adicionar */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {servicosSelecionados.map((item) => {
                     const id = item.idSelecao;
 
                     const coresUsadasPorOutros =
                         servicosSelecionados
-                            .filter((outro) => outro.idSelecao !== id)
+                            .filter(
+                                (outro) => outro.idSelecao !== id,
+                            )
                             .map((outro) => outro.cor);
 
                     return (
@@ -184,7 +186,9 @@ export function ComparisonServiceSelector() {
                             principal={servicoPrincipalId === id}
                             cor={item.cor}
                             cores={CORES}
-                            coresUsadasPorOutros={coresUsadasPorOutros}
+                            coresUsadasPorOutros={
+                                coresUsadasPorOutros
+                            }
                             regioes={mockComparisonRegions}
                             regiaoSimulada={item.regiaoSimulada}
                             onDefinirPrincipal={() =>
@@ -201,46 +205,56 @@ export function ComparisonServiceSelector() {
                     );
                 })}
 
-                {/* Botão para adicionar serviço */}
-                <button
-                    ref={adicionarButtonRef}
-                    type="button"
-                    disabled={servicosSelecionados.length >= MAX_SERVICOS}
-                    aria-expanded={mostrarDisponiveis}
-                    aria-controls="servicos-disponiveis"
-                    onClick={() =>
-                        setMostrarDisponiveis((atual) => !atual)
-                    }
-                    className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border p-4 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    <Plus aria-hidden="true" className="size-7" />
-
-                    <span className="font-medium">
-                        Adicionar serviço
-                    </span>
-
-                    <span className="text-xs">
-                        {servicosSelecionados.length}/{MAX_SERVICOS} selecionados
-                    </span>
-                </button>
-            </div>
-
-            {/* Catálogo de serviços disponíveis */}
-            {mostrarDisponiveis &&
-                servicosSelecionados.length < MAX_SERVICOS && (
-                    <div
-                        ref={servicosPickerRef}
-                        id="servicos-disponiveis"
+                {/* Botão e catálogo de serviços */}
+                <div className="relative min-w-0">
+                    <button
+                        ref={adicionarButtonRef}
+                        type="button"
+                        disabled={
+                            servicosSelecionados.length >= MAX_SERVICOS
+                        }
+                        aria-expanded={mostrarDisponiveis}
+                        aria-controls="servicos-disponiveis"
+                        onClick={() =>
+                            setMostrarDisponiveis(
+                                (atual) => !atual,
+                            )
+                        }
+                        className="flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border p-4 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <AvailableServicesPicker
-                            servicos={mockComparisonServices}
-                            onAdicionar={adicionarServico}
-                            onFechar={() =>
-                                setMostrarDisponiveis(false)
-                            }
+                        <Plus
+                            aria-hidden="true"
+                            className="size-7"
                         />
-                    </div>
-                )}
+
+                        <span className="font-medium">
+                            Adicionar serviço
+                        </span>
+
+                        <span className="text-xs">
+                            {servicosSelecionados.length}/{MAX_SERVICOS}{' '}
+                            selecionados
+                        </span>
+                    </button>
+
+                    {mostrarDisponiveis &&
+                        servicosSelecionados.length < MAX_SERVICOS && (
+                            <div
+                                ref={servicosPickerRef}
+                                id="servicos-disponiveis"
+                                className="absolute left-0 top-full z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-border bg-background p-2 text-foreground shadow-2xl shadow-black/40"
+                            >
+                                <AvailableServicesPicker
+                                    servicos={mockComparisonServices}
+                                    onAdicionar={adicionarServico}
+                                    onFechar={() =>
+                                        setMostrarDisponiveis(false)
+                                    }
+                                />
+                            </div>
+                        )}
+                </div>
+            </div>
         </section>
     );
 }

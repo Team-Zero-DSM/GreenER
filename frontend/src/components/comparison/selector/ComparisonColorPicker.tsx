@@ -9,7 +9,7 @@ interface ComparisonColorPickerProps {
 const NOMES_CORES: Record<string, string> = {
     '#3B82F6': 'Azul',
     '#10B981': 'Verde',
-    '#F59E0B': 'Amarelo',
+    '#ffd900': 'Amarelo',
     '#A855F7': 'Roxo',
     '#EC4899': 'Rosa',
 };
