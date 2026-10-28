@@ -18,6 +18,14 @@ export const listServicesQuerySchema = z
 
 export type ServicesFilters = z.output<typeof listServicesQuerySchema>;
 
+export const collectionStatusHistoryParamsSchema = z.object({
+    externalId: z
+        .string()
+        .min(1)
+        .max(100)
+        .regex(/^[a-zA-Z0-9._-]+$/, 'Identificador do serviço inválido'),
+});
+
 export const getServiceParamsSchema = z.object({
     externalId: z
         .string()
