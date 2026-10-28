@@ -5,7 +5,7 @@ import { RankingTable } from '@/components/ranking/RankingTable';
 export function RankingPage() {
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <header className="space-y-2">
                     <h1 className="text-3xl font-semibold">Ranking de impacto</h1>
 

@@ -8,8 +8,8 @@ export function RankingTable() {
         >
             <h2 className="text-xl font-semibold">Classificação</h2>
 
-            <div className="rounded-lg border border-border">
-                <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full min-w-xl text-sm">
                     <thead className="border-b border-border text-muted-foreground">
                         <tr>
                             {rankingColumns.map((column) => (
