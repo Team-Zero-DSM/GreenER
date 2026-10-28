@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import type { ServiceSummary } from '@/types/service';
 
@@ -16,6 +16,18 @@ interface ServicoSelecionado {
     regiaoSimulada: string | null;
 }
 
+export interface ComparisonServiceSelection {
+    selectionId: string;
+    externalId: string;
+    simulatedRegion: string | null;
+}
+
+interface ComparisonServiceSelectorProps {
+    onSelectionsChange: (
+        selections: ComparisonServiceSelection[],
+    ) => void;
+}
+
 const MAX_SERVICOS = 5;
 
 const CORES = [
@@ -26,7 +38,9 @@ const CORES = [
     '#EC4899',
 ];
 
-export function ComparisonServiceSelector() {
+export function ComparisonServiceSelector({
+    onSelectionsChange,
+}: ComparisonServiceSelectorProps) {
     const [servicosSelecionados, setServicosSelecionados] =
         useState<ServicoSelecionado[]>([]);
 
@@ -45,6 +59,16 @@ export function ComparisonServiceSelector() {
         servicosPickerRef,
         setMostrarDisponiveis,
     );
+
+    useEffect(() => {
+    onSelectionsChange(
+        servicosSelecionados.map((item) => ({
+            selectionId: item.idSelecao,
+            externalId: item.servico.id,
+            simulatedRegion: item.regiaoSimulada,
+        })),
+    );
+}, [servicosSelecionados, onSelectionsChange]);
 
     function adicionarServico(servico: ServiceSummary) {
         if (servicosSelecionados.length >= MAX_SERVICOS) {

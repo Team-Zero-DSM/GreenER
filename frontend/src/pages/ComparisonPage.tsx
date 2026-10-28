@@ -1,5 +1,8 @@
-import { ComparisonServiceSelector } from '@/components/comparison/selector/ComparisonServiceSelector';
-import { useState } from 'react';
+import {
+    ComparisonServiceSelector,
+    type ComparisonServiceSelection,
+} from '@/components/comparison/selector/ComparisonServiceSelector';
+import { useCallback, useState } from 'react';
 import {
     ComparisonControls,
     type ComparisonMetric,
@@ -11,15 +14,26 @@ import type { HistoryRange } from '@/types/service';
 
 export function ComparisonPage() {
 
-    const [periodo, setPeriodo] = useState<HistoryRange>('24h');
+const [periodo, setPeriodo] = useState<HistoryRange>('24h');
 
 const [metrica, setMetrica] =
     useState<ComparisonMetric>('co2eGrams');
+
+const [servicosSelecionados, setServicosSelecionados] =
+    useState<ComparisonServiceSelection[]>([]);
+
+const handleSelectionsChange = useCallback(
+    (selections: ComparisonServiceSelection[]) => {
+        setServicosSelecionados(selections);
+    },
+    [],
+);
 
 function handleComparar() {
     console.log('Configurações da comparação:', {
         periodo,
         metrica,
+        servicosSelecionados,
     });
 }
 
@@ -40,7 +54,11 @@ function handleComparar() {
                 className="space-y-6 border-t border-border pt-6"
             >
                 {/* Area de seleção de serviços */}
-                        <ComparisonServiceSelector />
+                        <ComparisonServiceSelector
+    onSelectionsChange={handleSelectionsChange}
+/>
+
+
                     
                
 
