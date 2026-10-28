@@ -4,6 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ComparisonPage } from '@/pages/ComparisonPage';
+import { RankingPage } from '@/pages/RankingPage';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/servicos/:id" element={<ServiceDetailPage />} />
         <Route path="/comparacao" element={<ComparisonPage />} />
+        <Route path="/ranking" element={<RankingPage />} />
       </Route>
     </Routes>
   );
