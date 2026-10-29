@@ -5,6 +5,26 @@ import type { ServicesFilters } from './services.schema.js';
 export class ServiceRepository {
     constructor(private readonly pool: Pool) {}
 
+    async findCollectionStatusHistory(externalId: string) {
+        const result = await this.pool.query(
+            `
+        SELECT
+            sc.id,
+            sc.observado_em,
+            sc.tipo,
+            sc.descricao,
+            sc.http_status
+        FROM status_coleta sc
+        JOIN servico s ON s.id = sc.servico_id
+        WHERE s.external_id = $1
+        ORDER BY sc.observado_em DESC, sc.id DESC
+        LIMIT 100
+        `,
+            [externalId],
+        );
+
+        return result.rows;
+    }
     async findAllWithLatest(filters: ServicesFilters): Promise<ServiceWithLatestRow[]> {
         const result = await this.pool.query<ServiceWithLatestRow>(
             `SELECT s.id, s.external_id, s.nome, s.ativo, s.status, s.status_atualizado_em,

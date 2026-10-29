@@ -26,7 +26,7 @@ const navItems = [
 ];
 
 const linkClass =
-    'inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm whitespace-nowrap transition-colors';
+    'inline-flex min-h-11 items-center gap-1 rounded-lg border px-2 py-2 text-xs whitespace-nowrap transition-colors sm:gap-2 sm:px-3 sm:text-sm';
 const activeClass = 'border-emerald-400/45 bg-emerald-400/10 text-foreground';
 const idleClass = 'border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground';
 
@@ -38,7 +38,7 @@ export function DashboardLayout() {
             <div className="dark flex min-h-screen flex-col bg-background text-foreground">
                 <div className="sticky top-0 z-50 bg-background">
                     <header className="border-b border-border bg-background">
-                        <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-3">
+                        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3 sm:gap-6 sm:px-6">
                             <NavLink
                                 to="/"
                                 className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-xl font-extrabold text-transparent"
@@ -48,7 +48,7 @@ export function DashboardLayout() {
 
                             <nav
                                 aria-label="Seções do dashboard"
-                                className="flex gap-1 overflow-x-auto"
+                                className="flex w-full justify-between gap-1 sm:w-auto sm:justify-start"
                             >
                                 {navItems.map(({ to, label, icon: Icon, prefixes }) => {
                                     const isActive =
