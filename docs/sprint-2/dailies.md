@@ -113,3 +113,46 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Backend — Pedro:** alinhou com os responsáveis pelo frontend como seria a criação dos endpoints necessários para atender às novas páginas.
 - **Alinhamento da equipe:** foi realizada uma daily rápida para definir a comunicação entre frontend e backend e organizar a implementação dos endpoints.
 - **Impedimento:** uma atividade proposta pelo professor Arley reduziu o tempo disponível para o desenvolvimento das tasks ao longo do dia.
+
+---
+
+## 📅 27/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ❌ |
+| Gabriel | ❌ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Henrique:** começou a desenvolver as requisições ao backend necessárias para concluir os componentes da tela de comparação.
+- **Frontend — Vitor:** finalizou as tags de regiões na tela de regiões, restando os ajustes finais para concluir a atividade.
+- **Backend — Pedro:** continuou trabalhando nas tasks do backend, que permanecem em execução.
+- **Impedimento:** o tempo disponível para o desenvolvimento do projeto foi reduzido, limitando o avanço das atividades no dia.
+
+---
+
+## 📅 28/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ❌ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Backend — Pedro:** entregou a task relacionada ao histórico de status de coleta, permitindo a exibição dos status de coleta dos serviços.
+- **Frontend — Paulo:** entregou a estrutura da página de ranking.
+- **Frontend — Vitor:** finalizou a tela de regiões, realizando os últimos ajustes necessários para adaptá-la a dispositivos móveis e tablets.
+- **Frontend — Henrique:** alinhou com Pedro como serão disponibilizadas e consumidas as informações do backend para a página de comparação, preparando-se para concluir o componente de resumo e comparação.
+- **Impedimento:** o tempo disponível para o desenvolvimento do projeto continuou limitado.
