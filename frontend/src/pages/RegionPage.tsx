@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import type { Swiper as SwiperType } from 'swiper';
-import { Navigation } from 'swiper/modules';
+import { A11y, Navigation, Pagination } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/a11y';
 import { fetchRegionsLast24Hours } from '@/api/regions';
 import type { Region } from '@/types/api';
 import { useApiQuery } from '@/hooks/useApiQuery';
@@ -65,22 +66,27 @@ function RegionCard({ region }: { region: Region }) {
 }
 
 export function RegionPage() {
-
     const fetcher = useCallback(() => fetchRegionsLast24Hours(), []);
     const { data: regions, isLoading, error } = useApiQuery(fetcher);
 
-    const swiperRef = useRef<SwiperType | null>(null);
     const [prevEl, setPrevEl] = useState<HTMLButtonElement | null>(null);
     const [nextEl, setNextEl] = useState<HTMLButtonElement | null>(null);
+    const [paginationEl, setPaginationEl] = useState<HTMLDivElement | null>(null);
 
     if (isLoading) return <main className="mx-auto max-w-7xl p-6">Carregando regiões...</main>;
 
-    if (error) return (<main role="alert" className="mx-auto max-w-7xl p-6">{error}</main>);
+    if (error)
+        return (
+            <main role="alert" className="mx-auto max-w-7xl p-6">
+                {error}
+            </main>
+        );
 
-    if (!regions?.length) return <main className="mx-auto max-w-7xl p-6">Nenhuma região disponível.</main>;
+    if (!regions?.length)
+        return <main className="mx-auto max-w-7xl p-6">Nenhuma região disponível.</main>;
 
     return (
-        <main className="mx-auto max-w-7xl space-y-6 p-6">
+        <main className="mx-auto max-w-7xl space-y-12 p-6">
             <header className="space-y-2">
                 <h1 className="text-3xl font-semibold">Regiões</h1>
                 <p className="text-muted-foreground">
@@ -88,33 +94,34 @@ export function RegionPage() {
                 </p>
             </header>
 
-            {/* Versão mobile e tablet (grid) */}
-            <section className="xl:hidden">
-                <div className="mx-auto grid w-full max-w-[400px] grid-cols-1 gap-4 md:max-w-none md:grid-cols-2 md:gap-x-10 md:gap-y-5">
-                    {regions.map((region) => (
-                        <RegionCard key={region.code} region={region} />
-                    ))}
-                </div>
-            </section>
-
-            {/* Versão desktop (slider com navegação) */}
-            <section className="hidden xl:block">
-                <div className="region-slider relative px-12">
-                    <button ref={setPrevEl} type="button" aria-label="Região anterior" className="swiper-button-prev !left-0" onClick={() => swiperRef.current?.slidePrev()}>
+            <section>
+                <div className="region-slider relative px-0 min-[720px]:px-12">
+                    <button
+                        ref={setPrevEl}
+                        type="button"
+                        aria-label="Região anterior"
+                        className="swiper-button-prev !left-0"
+                    >
                         <ChevronLeft className="size-5" />
                     </button>
 
                     <Swiper
-                        modules={[Navigation]}
+                        modules={[A11y, Navigation, Pagination]}
                         navigation={{
                             prevEl,
                             nextEl,
                         }}
-                        onSwiper={(swiper) => {
-                            swiperRef.current = swiper;
+                        pagination={{
+                            el: paginationEl,
+                            clickable: true,
                         }}
-                        slidesPerView={4}
                         spaceBetween={16}
+                        breakpoints={{
+                            0: { slidesPerView: 1 },
+                            720: { slidesPerView: 2 },
+                            1000: { slidesPerView: 3 },
+                            1280: { slidesPerView: 4 },
+                        }}
                         className="w-full"
                     >
                         {regions.map((region) => (
@@ -124,9 +131,16 @@ export function RegionPage() {
                         ))}
                     </Swiper>
 
-                    <button ref={setNextEl} type="button" aria-label="Próxima região" className="swiper-button-next !right-0"onClick={() => swiperRef.current?.slideNext()}>
+                    <button
+                        ref={setNextEl}
+                        type="button"
+                        aria-label="Próxima região"
+                        className="swiper-button-next !right-0"
+                    >
                         <ChevronRight className="size-5" />
                     </button>
+
+                    <div ref={setPaginationEl} className="swiper-pagination" />
                 </div>
             </section>
         </main>
