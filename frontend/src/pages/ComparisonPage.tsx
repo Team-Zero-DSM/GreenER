@@ -8,9 +8,19 @@ import {
     type ComparisonMetric,
 } from '@/components/comparison/controls/ComparisonControls';
 import type { HistoryRange } from '@/types/service';
+import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
+import type {
+    ComparisonRequest,
+    ComparisonResponse,
+} from '@/types/comparison';
+import { ComparisonChart } from '@/components/comparison/results/ComparisonChart';
 
 
-
+const CODIGOS_REGIAO: Record<string, string> = {
+    'São Paulo': 'br-sudeste',
+    Toronto: 'ca-toronto',
+    Ashburn: 'us-east',
+};
 
 export function ComparisonPage() {
 
@@ -22,6 +32,9 @@ const [metrica, setMetrica] =
 const [servicosSelecionados, setServicosSelecionados] =
     useState<ComparisonServiceSelection[]>([]);
 
+const [respostaComparacao, setRespostaComparacao] =
+    useState<ComparisonResponse | null>(null);
+
 const handleSelectionsChange = useCallback(
     (selections: ComparisonServiceSelection[]) => {
         setServicosSelecionados(selections);
@@ -30,11 +43,24 @@ const handleSelectionsChange = useCallback(
 );
 
 function handleComparar() {
-    console.log('Configurações da comparação:', {
-        periodo,
-        metrica,
-        servicosSelecionados,
-    });
+    const request: ComparisonRequest = {
+        range: periodo,
+        selections: servicosSelecionados.map((item) => ({
+            selectionId: item.selectionId,
+            externalId: item.externalId,
+            simulatedRegionCode:
+                item.simulatedRegion === null
+                    ? null
+                    : CODIGOS_REGIAO[item.simulatedRegion] ?? null,
+        })),
+    };
+
+    const resposta = gerarMockComparisonResponse(request);
+
+    setRespostaComparacao(resposta);
+
+    console.log('Requisição da comparação:', request);
+    console.log('Resposta do mock:', resposta);
 }
 
     return (
@@ -73,19 +99,40 @@ function handleComparar() {
                     
 
                 {/* Area de gráfico comparativo */}
-                <div className="space-y-3 border-t border-border pt-6">
-                    <div>
-                        <h3 className="text-xl font-semibold">Gráfico comparativo</h3>
+                <div className="min-w-0 rounded-lg border border-border p-4">
+    {respostaComparacao === null ? (
+        <p className="text-sm text-muted-foreground">
+            Selecione os serviços e clique em Comparar
+            para visualizar o gráfico.
+        </p>
+    ) : (
+        <ComparisonChart
+            series={respostaComparacao.series.flatMap((serie) => {
+                const servico = servicosSelecionados.find(
+                    (item) =>
+                        item.selectionId === serie.selectionId,
+                );
 
-                        <p className="text-sm text-muted-foreground">
-                            Visualização das métricas dos serviços selecionados ao longo do período.
-                        </p>
-                    </div>
+                if (!servico) {
+                    return [];
+                }
 
-                    <div className="flex min-h-64 items-center justify-center rounded-lg border border-border p-4">
-                        <p className="text-sm text-muted-foreground">Área do gráfico</p>
-                    </div>
-                </div>
+                return [
+                    {
+                        selectionId: serie.selectionId,
+                        name: servico.name,
+                        color: servico.color,
+                        points: serie.points,
+                    },
+                ];
+            })}
+            metrica={metrica}
+            periodo={respostaComparacao.range}
+            periodoInicio={respostaComparacao.period.from}
+            periodoFim={respostaComparacao.period.to}
+        />
+    )}
+</div>
 
                 {/* Area de resumo comparativo */}
                 <div className="space-y-3 border-t border-border pt-6">

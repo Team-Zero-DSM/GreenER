@@ -19,6 +19,8 @@ interface ServicoSelecionado {
 export interface ComparisonServiceSelection {
     selectionId: string;
     externalId: string;
+    name: string;
+    color: string;
     simulatedRegion: string | null;
 }
 
@@ -65,6 +67,8 @@ export function ComparisonServiceSelector({
         servicosSelecionados.map((item) => ({
             selectionId: item.idSelecao,
             externalId: item.servico.id,
+            name: item.servico.name,
+            color: item.cor,
             simulatedRegion: item.regiaoSimulada,
         })),
     );
