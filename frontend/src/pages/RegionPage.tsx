@@ -65,6 +65,17 @@ function RegionCard({ region }: { region: Region }) {
     );
 }
 
+function GraphCard(){
+    return(
+            <section className="space-y-2">
+                <h2 className="text-2xl font-semibold">intensidade de carbono por região</h2>
+                <p className="text-muted-foreground text-sm">
+                    gCO2e por kWh gerado · quanto menor, mais limpa a matriz
+                </p>
+            </section>
+    )
+}
+
 export function RegionPage() {
     const fetcher = useCallback(() => fetchRegionsLast24Hours(), []);
     const { data: regions, isLoading, error } = useApiQuery(fetcher);
@@ -143,6 +154,8 @@ export function RegionPage() {
                     <div ref={setPaginationEl} className="swiper-pagination" />
                 </div>
             </section>
+
+            <GraphCard/>
         </main>
     );
 }
