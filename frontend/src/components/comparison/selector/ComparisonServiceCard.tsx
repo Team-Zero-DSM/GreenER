@@ -1,12 +1,7 @@
 import { useRef, useState } from 'react';
-import {
-    ChevronDown,
-    MapPin,
-    MapPinned,
-    Server,
-    Star,
-    X,
-} from 'lucide-react';
+
+import { ChevronDown, MapPin, MapPinned, Server, Star, X } from 'lucide-react';
+
 import type { ServiceSummary } from '@/types/service';
 
 import { useClickOutside } from '@/hooks/useClickOutside';
@@ -49,51 +44,34 @@ export function ComparisonServiceCard({
     const regiaoButtonRef = useRef<HTMLButtonElement>(null);
     const regiaoPickerRef = useRef<HTMLDivElement>(null);
 
-    useClickOutside(
-        mostrarCores,
-        corButtonRef,
-        corPickerRef,
-        setMostrarCores,
-    );
+    useClickOutside(mostrarCores, corButtonRef, corPickerRef, setMostrarCores);
 
-    useClickOutside(
-        mostrarRegioes,
-        regiaoButtonRef,
-        regiaoPickerRef,
-        setMostrarRegioes,
-    );
+    useClickOutside(mostrarRegioes, regiaoButtonRef, regiaoPickerRef, setMostrarRegioes);
 
-    const regiaoOriginal =
-        servico.location?.city ??
-        servico.location?.region ??
-        null;
+    const regiaoOriginal = servico.location?.city ?? servico.location?.region ?? null;
 
     const nomeRegiao = regiaoSimulada ?? regiaoOriginal;
 
     const statusTexto =
-        servico.active === undefined
-            ? 'Status desconhecido'
-            : servico.active
-              ? 'Ativo'
-              : 'Inativo';
+        servico.active === undefined ? 'Status desconhecido' : servico.active ? 'Ativo' : 'Inativo';
 
     const statusCor =
         servico.active === undefined
-            ? 'bg-muted-foreground'
+            ? 'bg-slate-500'
             : servico.active
               ? 'bg-emerald-500'
-              : 'bg-destructive';
+              : 'bg-red-500';
 
     return (
         <div className="space-y-2">
-            {/* Cartão e seletores flutuantes */}
+            {/* Cartão e seletores flutuantes. */}
             <div className="relative min-w-0">
-                {/* Cartão */}
+                {/* Cartão. */}
                 <div
-                    className={`rounded-lg border p-3 transition-colors ${
+                    className={`rounded-xl border p-3 transition-colors duration-200 ${
                         principal
-                            ? 'border-blue-500'
-                            : 'border-border'
+                            ? 'border-teal-400/80 bg-teal-400/[0.02]'
+                            : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
                     }`}
                 >
                     <div className="flex items-start gap-3">
@@ -101,14 +79,11 @@ export function ComparisonServiceCard({
                             className="flex size-11 shrink-0 items-center justify-center rounded-full"
                             style={{ backgroundColor: cor }}
                         >
-                            <Server
-                                aria-hidden="true"
-                                className="size-5 text-white"
-                            />
+                            <Server aria-hidden="true" className="size-5 text-white" />
                         </div>
 
                         <div className="min-w-0 flex-1 space-y-2">
-                            {/* Nome e serviço principal */}
+                            {/* Nome e serviço de referência. */}
                             <div className="flex items-start justify-between gap-2">
                                 <div className="flex min-w-0 items-start gap-1">
                                     <button
@@ -116,24 +91,24 @@ export function ComparisonServiceCard({
                                         onClick={onDefinirPrincipal}
                                         aria-label={
                                             principal
-                                                ? `${servico.name} é o serviço principal`
-                                                : `Definir ${servico.name} como principal`
+                                                ? `${servico.name} é o serviço de referência`
+                                                : `Definir ${servico.name} como referência`
                                         }
-                                        title="Definir serviço principal"
-                                        className="shrink-0 rounded p-0.5 hover:bg-secondary"
+                                        title="Definir serviço de referência"
+                                        className="shrink-0 rounded p-0.5 transition-colors hover:bg-slate-800"
                                     >
                                         <Star
                                             aria-hidden="true"
-                                            className={`size-4 ${
+                                            className={`size-4 transition-colors ${
                                                 principal
-                                                    ? 'fill-amber-400 text-amber-400'
-                                                    : 'text-muted-foreground'
+                                                    ? 'fill-teal-400 text-teal-400'
+                                                    : 'text-slate-400 hover:text-teal-300'
                                             }`}
                                         />
                                     </button>
 
                                     <h3
-                                        className="break-words text-sm font-semibold"
+                                        className="break-words text-sm font-semibold text-slate-100"
                                         title={servico.name}
                                     >
                                         {servico.name}
@@ -141,68 +116,63 @@ export function ComparisonServiceCard({
                                 </div>
 
                                 {principal && (
-                                    <span className="shrink-0 rounded-full border border-blue-500 px-2 py-0.5 text-xs text-blue-500">
-                                        Principal
+                                    <span className="shrink-0 rounded-full border border-teal-400/50 bg-teal-400/10 px-2 py-0.5 text-xs font-medium text-teal-300">
+                                        Referência
                                     </span>
                                 )}
                             </div>
 
-                            {/* Região atual */}
+                            {/* Região atual. */}
                             <div className="flex flex-wrap items-center gap-1.5 text-sm">
                                 <MapPin
                                     aria-hidden="true"
-                                    className="size-4 shrink-0 text-muted-foreground"
+                                    className="size-4 shrink-0 text-slate-400"
                                 />
 
                                 {nomeRegiao ? (
                                     <>
-                                        <span className="text-muted-foreground">
-                                            {nomeRegiao}
-                                        </span>
+                                        <span className="text-slate-300">{nomeRegiao}</span>
 
                                         {regiaoSimulada !== null ? (
                                             <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs text-amber-400">
                                                 Simulada
                                             </span>
                                         ) : (
-                                            <span className="text-xs text-muted-foreground">
+                                            <span className="text-xs text-slate-500">
                                                 (original)
                                             </span>
                                         )}
                                     </>
                                 ) : (
-                                    <span className="text-muted-foreground">
-                                        Região não informada
-                                    </span>
+                                    <span className="text-slate-400">Região não informada</span>
                                 )}
                             </div>
 
-                            {/* Status */}
+                            {/* Status. */}
                             <div className="flex items-center gap-2 text-sm">
                                 <span
                                     aria-hidden="true"
                                     className={`size-2.5 shrink-0 rounded-full ${statusCor}`}
                                 />
-                                <span>{statusTexto}</span>
+
+                                <span className="text-slate-300">{statusTexto}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Botões inferiores */}
-                    <div className="mt-3 border-t border-border pt-3">
+                    {/* Botões inferiores. */}
+                    <div className="mt-3 border-t border-slate-800 pt-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                            {/* Botão de cor */}
+                            {/* Botão de cor. */}
                             <button
                                 ref={corButtonRef}
                                 type="button"
-                                onClick={() =>
-                                    setMostrarCores((atual) => !atual)
-                                }
+                                onClick={() => setMostrarCores((atual) => !atual)}
                                 aria-expanded={mostrarCores}
-                                className="flex items-center gap-2 rounded-md px-1 py-1 text-sm hover:bg-secondary"
+                                className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-teal-300"
                             >
                                 <span
-                                    className="size-6 shrink-0 rounded-full border border-border"
+                                    className="size-6 shrink-0 rounded-full border border-slate-700"
                                     style={{ backgroundColor: cor }}
                                 />
 
@@ -217,43 +187,35 @@ export function ComparisonServiceCard({
                             </button>
 
                             <div className="flex flex-wrap items-center gap-1">
-                                {/* Botão de região */}
+                                {/* Botão de região. */}
                                 <button
                                     ref={regiaoButtonRef}
                                     type="button"
-                                    onClick={() =>
-                                        setMostrarRegioes((atual) => !atual)
-                                    }
+                                    onClick={() => setMostrarRegioes((atual) => !atual)}
                                     aria-expanded={mostrarRegioes}
-                                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-slate-800 hover:text-teal-300"
                                 >
-                                    <MapPinned
-                                        aria-hidden="true"
-                                        className="size-4 shrink-0"
-                                    />
+                                    <MapPinned aria-hidden="true" className="size-4 shrink-0" />
 
                                     <span>Simular região</span>
                                 </button>
 
-                                {/* Remover serviço */}
+                                {/* Remover serviço. */}
                                 <button
                                     type="button"
                                     onClick={onRemover}
                                     aria-label={`Remover ${servico.name} da comparação`}
                                     title="Remover serviço"
-                                    className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-red-400"
                                 >
-                                    <X
-                                        aria-hidden="true"
-                                        className="size-4"
-                                    />
+                                    <X aria-hidden="true" className="size-4" />
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Seletor de cores flutuante */}
+                {/* Seletor de cores flutuante. */}
                 {mostrarCores && (
                     <div
                         ref={corPickerRef}
@@ -269,7 +231,7 @@ export function ComparisonServiceCard({
                     </div>
                 )}
 
-                {/* Seletor de regiões flutuante */}
+                {/* Seletor de regiões flutuante. */}
                 {mostrarRegioes && (
                     <div
                         ref={regiaoPickerRef}

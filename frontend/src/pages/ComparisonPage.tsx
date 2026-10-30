@@ -1,21 +1,26 @@
+import { useCallback, useState } from 'react';
+
 import {
     ComparisonServiceSelector,
     type ComparisonServiceSelection,
 } from '@/components/comparison/selector/ComparisonServiceSelector';
-import { useCallback, useState } from 'react';
+
 import {
     ComparisonControls,
     type ComparisonMetric,
 } from '@/components/comparison/controls/ComparisonControls';
-import type { HistoryRange } from '@/types/service';
+
+import { ComparisonChart } from '@/components/comparison/results/ComparisonChart';
+
 import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
+
+import type { HistoryRange } from '@/types/service';
+
 import type {
     ComparisonRequest,
     ComparisonResponse,
 } from '@/types/comparison';
-import { ComparisonChart } from '@/components/comparison/results/ComparisonChart';
-
-
+import { ComparisonSummary } from '@/components/comparison/results/ComparisonSummary';
 const CODIGOS_REGIAO: Record<string, string> = {
     'São Paulo': 'br-sudeste',
     Toronto: 'ca-toronto',
@@ -23,134 +28,137 @@ const CODIGOS_REGIAO: Record<string, string> = {
 };
 
 export function ComparisonPage() {
+    // Configurações da comparação.
+    const [periodo, setPeriodo] = useState<HistoryRange>('24h');
 
-const [periodo, setPeriodo] = useState<HistoryRange>('24h');
+    const [metrica, setMetrica] =
+        useState<ComparisonMetric>('co2eGrams');
 
-const [metrica, setMetrica] =
-    useState<ComparisonMetric>('co2eGrams');
+    // Serviços escolhidos pelo usuário.
+    const [servicosSelecionados, setServicosSelecionados] =
+        useState<ComparisonServiceSelection[]>([]);
 
-const [servicosSelecionados, setServicosSelecionados] =
-    useState<ComparisonServiceSelection[]>([]);
+    // Serviço escolhido como principal referência.
+    const [servicoPrincipalId, setServicoPrincipalId] =
+        useState<string | null>(null);
 
-const [respostaComparacao, setRespostaComparacao] =
-    useState<ComparisonResponse | null>(null);
+    // Resultado da última comparação.
+    const [respostaComparacao, setRespostaComparacao] =
+        useState<ComparisonResponse | null>(null);
 
-const handleSelectionsChange = useCallback(
-    (selections: ComparisonServiceSelection[]) => {
-        setServicosSelecionados(selections);
-    },
-    [],
-);
+    // Recebe as informações enviadas pelo seletor.
+    const handleSelectionsChange = useCallback(
+        (
+            selections: ComparisonServiceSelection[],
+            principalId: string | null,
+        ) => {
+            setServicosSelecionados(selections);
+            setServicoPrincipalId(principalId);
+        },
+        [],
+    );
 
-function handleComparar() {
-    const request: ComparisonRequest = {
-        range: periodo,
-        selections: servicosSelecionados.map((item) => ({
-            selectionId: item.selectionId,
-            externalId: item.externalId,
-            simulatedRegionCode:
-                item.simulatedRegion === null
-                    ? null
-                    : CODIGOS_REGIAO[item.simulatedRegion] ?? null,
-        })),
-    };
+    // Executa a comparação utilizando o mock.
+    function handleComparar() {
+        const request: ComparisonRequest = {
+            range: periodo,
 
-    const resposta = gerarMockComparisonResponse(request);
+            selections: servicosSelecionados.map((item) => ({
+                selectionId: item.selectionId,
+                externalId: item.externalId,
+                simulatedRegionCode:
+                    item.simulatedRegion === null
+                        ? null
+                        : CODIGOS_REGIAO[item.simulatedRegion] ?? null,
+            })),
+        };
 
-    setRespostaComparacao(resposta);
+        const resposta = gerarMockComparisonResponse(request);
 
-    console.log('Requisição da comparação:', request);
-    console.log('Resposta do mock:', resposta);
-}
+        setRespostaComparacao(resposta);
+
+        console.log('Requisição da comparação:', request);
+        console.log('Resposta do mock:', resposta);
+    }
+
+    // Prepara as séries que serão entregues ao gráfico.
+    const seriesGrafico =
+        respostaComparacao?.series.flatMap((serie) => {
+            const servico = servicosSelecionados.find(
+                (item) => item.selectionId === serie.selectionId,
+            );
+
+            if (!servico) {
+                return [];
+            }
+
+            return [
+                {
+                    selectionId: serie.selectionId,
+                    name: servico.name,
+                    color: servico.color,
+                    points: serie.points,
+                },
+            ];
+        }) ?? [];
 
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
             <header className="space-y-2">
-                <h1 className="text-3xl font-semibold">Comparar serviços</h1>
+                <h1 className="text-3xl font-semibold">
+                    Comparar serviços
+                </h1>
 
                 <p className="text-muted-foreground">
-                    Selecione os serviços que deseja comparar, defina o período e analise as
-                    métricas no mesmo gráfico.
+                    Selecione os serviços que deseja comparar, defina o período
+                    e analise as métricas no mesmo gráfico.
                 </p>
             </header>
 
-            {/* Área principal do componente de comparação */}
             <section
                 aria-label="Comparação de serviços"
                 className="space-y-6 border-t border-border pt-6"
             >
-                {/* Area de seleção de serviços */}
-                        <ComparisonServiceSelector
-    onSelectionsChange={handleSelectionsChange}
-/>
+                {/* Seleção dos serviços. */}
+                <ComparisonServiceSelector
+                    onSelectionsChange={handleSelectionsChange}
+                />
 
+                {/* Configurações da comparação. */}
+                <ComparisonControls
+                    periodo={periodo}
+                    metrica={metrica}
+                    onPeriodoChange={setPeriodo}
+                    onMetricaChange={setMetrica}
+                    onComparar={handleComparar}
+                />
 
-                    
-               
-
-                {/* Local dos controles da comparação */}
-                    <ComparisonControls
-    periodo={periodo}
-    metrica={metrica}
-    onPeriodoChange={setPeriodo}
-    onMetricaChange={setMetrica}
-    onComparar={handleComparar}
-/>
-                    
-
-                {/* Area de gráfico comparativo */}
+                {/* Gráfico comparativo. */}
                 <div className="min-w-0 rounded-lg border border-border p-4">
-    {respostaComparacao === null ? (
-        <p className="text-sm text-muted-foreground">
-            Selecione os serviços e clique em Comparar
-            para visualizar o gráfico.
-        </p>
-    ) : (
-        <ComparisonChart
-            series={respostaComparacao.series.flatMap((serie) => {
-                const servico = servicosSelecionados.find(
-                    (item) =>
-                        item.selectionId === serie.selectionId,
-                );
-
-                if (!servico) {
-                    return [];
-                }
-
-                return [
-                    {
-                        selectionId: serie.selectionId,
-                        name: servico.name,
-                        color: servico.color,
-                        points: serie.points,
-                    },
-                ];
-            })}
-            metrica={metrica}
-            periodo={respostaComparacao.range}
-            periodoInicio={respostaComparacao.period.from}
-            periodoFim={respostaComparacao.period.to}
-        />
-    )}
-</div>
-
-                {/* Area de resumo comparativo */}
-                <div className="space-y-3 border-t border-border pt-6">
-                    <div>
-                        <h3 className="text-xl font-semibold">Resumo comparativo</h3>
-
+                    {respostaComparacao === null ? (
                         <p className="text-sm text-muted-foreground">
-                            Compare o serviço de referência com os demais serviços selecionados.
+                            Selecione os serviços e clique em Comparar
+                            para visualizar o gráfico.
                         </p>
-                    </div>
-
-                    <div className="min-h-40 rounded-lg border border-border p-4">
-                        <p className="text-sm text-muted-foreground">
-                            Área dos indicadores comparativos e dos valores individuais dos
-                            serviços.
-                        </p>
-                    </div>
+                    ) : (
+                        <ComparisonChart
+                            series={seriesGrafico}
+                            metrica={metrica}
+                            periodo={respostaComparacao.range}
+                            periodoInicio={respostaComparacao.period.from}
+                            periodoFim={respostaComparacao.period.to}
+                        />
+                    )}
                 </div>
+
+                {/* Resumo comparativo. */}
+                <ComparisonSummary
+    servicosSelecionados={servicosSelecionados}
+    respostaComparacao={respostaComparacao}
+    metrica={metrica}
+    servicoPrincipalId={servicoPrincipalId}
+/>
+                
             </section>
         </main>
     );
