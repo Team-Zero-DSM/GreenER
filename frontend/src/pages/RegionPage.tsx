@@ -10,6 +10,7 @@ import { fetchRegionsLast24Hours } from '@/api/regions';
 import type { Region } from '@/types/api';
 import { useApiQuery } from '@/hooks/useApiQuery';
 import { formatCo2e, formatEnergy, formatIntensity } from '@/utils/format';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 function regionTitle(region: Region): string {
     return region.city ?? region.region ?? region.code;
@@ -17,51 +18,52 @@ function regionTitle(region: Region): string {
 
 function RegionCard({ region }: { region: Region }) {
     return (
-        <div className="h-full rounded-xl border border-white/10 bg-white/5 p-4 text-left text-white transition-colors hover:bg-white/10">
-            <h3 className="text-lg font-semibold">{regionTitle(region)}</h3>
-
-            <div className="mt-1 flex gap-1 text-sm text-white/60">
-                <span>{region.code}</span>
-                <span>∙</span>
-                <span>{[region.region, region.country].filter(Boolean).join(', ')}</span>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-4">
-                <div>
-                    <p className="text-sm text-white/60">Intensidade</p>
-                    <p className="mt-1 font-semibold text-sm">
-                        {formatIntensity(region.gco2ePerKwh)}
-                    </p>
+        <Card>
+            <CardContent>
+                <CardTitle className="text-lg">{regionTitle(region)}</CardTitle>
+                <div className="mt-1 flex gap-1 text-sm text-white/60">
+                    <span>{region.code}</span>
+                    <span>∙</span>
+                    <span>{[region.region, region.country].filter(Boolean).join(', ')}</span>
                 </div>
 
-                <div className="text-right">
-                    <p className="text-sm text-white/60">Renovaveis</p>
-                    <p className="mt-1 font-semibold text-sm after:content-['%']">
-                        {region.renewableSharePercent}
-                    </p>
-                </div>
-
-                <div>
-                    <p className="text-sm text-white/60">Serviços</p>
-                    <p className="mt-1 font-semibold text-sm">{region.servicesCount}</p>
-                    {region.statusCounts.metricsMissing > 0 && (
-                        <p className="mt-1 text-xs text-amber-300">
-                            {region.statusCounts.metricsMissing} sem métricas
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="text-sm text-white/60">Intensidade</p>
+                        <p className="mt-1 font-semibold text-sm">
+                            {formatIntensity(region.gco2ePerKwh)}
                         </p>
-                    )}
-                </div>
+                    </div>
 
-                <div className="text-right">
-                    <p className="text-sm text-white/60">Energia</p>
-                    <p className="mt-1 font-semibold text-sm">{formatEnergy(region.energyKwh)}</p>
-                </div>
+                    <div className="text-right">
+                        <p className="text-sm text-white/60">Renovaveis</p>
+                        <p className="mt-1 font-semibold text-sm after:content-['%']">
+                            {region.renewableSharePercent}
+                        </p>
+                    </div>
 
-                <div>
-                    <p className="text-sm text-white/60">CO₂e</p>
-                    <p className="mt-1 font-semibold text-sm">{formatCo2e(region.co2eGrams)}</p>
+                    <div>
+                        <p className="text-sm text-white/60">Serviços</p>
+                        <p className="mt-1 font-semibold text-sm">{region.servicesCount}</p>
+                        {region.statusCounts.metricsMissing > 0 && (
+                            <p className="mt-1 text-xs text-amber-300">
+                                {region.statusCounts.metricsMissing} sem métricas
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="text-right">
+                        <p className="text-sm text-white/60">Energia</p>
+                        <p className="mt-1 font-semibold text-sm">{formatEnergy(region.energyKwh)}</p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm text-white/60">CO₂e</p>
+                        <p className="mt-1 font-semibold text-sm">{formatCo2e(region.co2eGrams)}</p>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }
 
