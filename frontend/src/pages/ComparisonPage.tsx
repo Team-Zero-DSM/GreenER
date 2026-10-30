@@ -27,6 +27,8 @@ const CODIGOS_REGIAO: Record<string, string> = {
     Ashburn: 'us-east',
 };
 
+
+
 export function ComparisonPage() {
     // Configurações da comparação.
     const [periodo, setPeriodo] = useState<HistoryRange>('24h');
@@ -38,6 +40,20 @@ export function ComparisonPage() {
     const [servicosSelecionados, setServicosSelecionados] =
         useState<ComparisonServiceSelection[]>([]);
 
+    const podeComparar = (() => {
+    if (servicosSelecionados.length < 2) {
+        return false;
+    }
+
+    const identificadores = servicosSelecionados.map((servico) =>
+        JSON.stringify([
+            servico.externalId,
+            servico.simulatedRegion,
+        ]),
+    );
+
+    return new Set(identificadores).size === identificadores.length;
+})();
     // Serviço escolhido como principal referência.
     const [servicoPrincipalId, setServicoPrincipalId] =
         useState<string | null>(null);
@@ -128,6 +144,7 @@ export function ComparisonPage() {
                 <ComparisonControls
                     periodo={periodo}
                     metrica={metrica}
+                    podeComparar={podeComparar}
                     onPeriodoChange={setPeriodo}
                     onMetricaChange={setMetrica}
                     onComparar={handleComparar}

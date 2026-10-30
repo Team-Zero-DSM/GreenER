@@ -14,6 +14,7 @@ export type ComparisonMetric = 'co2eGrams' | 'energyKwh';
 interface ComparisonControlsProps {
   periodo: HistoryRange;
   metrica: ComparisonMetric;
+  podeComparar: boolean;
   onPeriodoChange: (periodo: HistoryRange) => void;
   onMetricaChange: (metrica: ComparisonMetric) => void;
   onComparar: () => void;
@@ -33,11 +34,12 @@ const METRICAS: { valor: ComparisonMetric; label: string }[] = [
 ];
 
 export function ComparisonControls({
-  periodo,
-  metrica,
-  onPeriodoChange,
-  onMetricaChange,
-  onComparar,
+    periodo,
+    metrica,
+    onPeriodoChange,
+    onMetricaChange,
+    onComparar,
+    podeComparar,
 }: ComparisonControlsProps) {
   const [mostrarMetricas, setMostrarMetricas] = useState(false);
 
@@ -179,16 +181,21 @@ export function ComparisonControls({
         </div>
 
         <button
-          type="button"
-          onClick={onComparar}
-          className="flex min-h-14 items-center justify-center gap-3 rounded-xl bg-teal-400 px-7 text-sm font-semibold text-slate-950 transition-colors duration-200 hover:bg-teal-300 active:bg-teal-500"
-        >
-          <ArrowLeftRight
-            aria-hidden="true"
-            className="size-5"
-          />
-          <span>Comparar</span>
-        </button>
+    type="button"
+    onClick={onComparar}
+    disabled={!podeComparar}
+    className={`flex min-h-14 items-center justify-center gap-3 rounded-xl px-7 text-sm font-semibold transition-colors duration-200 ${
+        podeComparar
+            ? 'bg-teal-400 text-slate-950 hover:bg-teal-300 active:bg-teal-500'
+            : 'cursor-not-allowed bg-slate-800 text-slate-500'
+    }`}
+>
+    <ArrowLeftRight
+        aria-hidden="true"
+        className="size-5"
+    />
+    <span>Comparar</span>
+</button>
       </div>
     </div>
   );
