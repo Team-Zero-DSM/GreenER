@@ -17,6 +17,41 @@ const toIso = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z');
 export class ServicesService {
     constructor(private readonly repository: ServiceRepository) {}
 
+    async getCollectionStatusHistory(externalId: string) {
+        const serviceId = await this.repository.findIdByExternalId(externalId);
+
+        if (!serviceId) {
+            throw new NotFoundError(`Serviço ${externalId} não foi encontrado`);
+        }
+
+        const history = await this.repository.findCollectionStatusHistory(externalId);
+
+        const items = history.map((status) => {
+            let result = 'failure';
+
+            if (status.tipo === 'success') {
+                result = 'success';
+            }
+
+            return {
+                id: status.id,
+                observedAt: status.observado_em,
+                result,
+                type: status.tipo,
+                description:
+                    status.tipo === 'unexpected_error'
+                        ? 'Não foi possível concluir a coleta.'
+                        : status.descricao,
+                httpStatus: status.http_status,
+            };
+        });
+
+        return {
+            externalId,
+            items,
+        };
+    }
+
     async list(filters: ServicesFilters): Promise<ServicesListDto> {
         const rows = await this.repository.findAllWithLatest(filters);
         return {

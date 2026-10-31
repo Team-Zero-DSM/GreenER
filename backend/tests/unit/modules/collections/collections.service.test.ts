@@ -32,7 +32,11 @@ describe('Processamento de métricas em coletas (CollectionsService)', () => {
         const mockRepo = {
             findActiveEstimateParameter: vi.fn().mockResolvedValue(mockParams),
             findActiveServices: vi.fn().mockResolvedValue(mockServices),
-            createCollection: vi.fn().mockResolvedValue(new Date()),
+            createCollection: vi.fn().mockResolvedValue({
+                id: 'collection-1',
+                coletado_em: new Date(),
+            }),
+            createStatusCollection: vi.fn().mockResolvedValue(undefined),
             updateStatus: vi.fn().mockResolvedValue(true),
         } as unknown as CollectionsRepository;
 
