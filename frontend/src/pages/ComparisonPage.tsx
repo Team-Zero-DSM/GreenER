@@ -1,4 +1,168 @@
+import { useCallback, useState } from 'react';
+
+import { Info } from 'lucide-react';
+
+import {
+    ComparisonServiceSelector,
+    type ComparisonServiceSelection,
+} from '@/components/comparison/selector/ComparisonServiceSelector';
+
+import {
+    ComparisonControls,
+    type ComparisonMetric,
+} from '@/components/comparison/controls/ComparisonControls';
+
+import { ComparisonChart } from '@/components/comparison/results/ComparisonChart';
+
+import { ComparisonSummary } from '@/components/comparison/results/ComparisonSummary';
+
+import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
+
+import type { HistoryRange } from '@/types/service';
+
+import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
+
+const CODIGOS_REGIAO: Record<string, string> = {
+    'São Paulo': 'br-sudeste',
+    Toronto: 'ca-toronto',
+    Ashburn: 'us-east',
+};
+
 export function ComparisonPage() {
+    // Configurações da comparação.
+    const [periodo, setPeriodo] = useState<HistoryRange>('24h');
+
+    const [metrica, setMetrica] = useState<ComparisonMetric>('co2eGrams');
+
+    // Serviços atualmente escolhidos pelo usuário.
+    const [servicosSelecionados, setServicosSelecionados] = useState<ComparisonServiceSelection[]>(
+        [],
+    );
+
+    // Valida se a seleção permite executar uma comparação.
+    const podeComparar = (() => {
+        if (servicosSelecionados.length < 2) {
+            return false;
+        }
+
+        const identificadores = servicosSelecionados.map((servico) =>
+            JSON.stringify([servico.externalId, servico.simulatedRegion]),
+        );
+
+        return new Set(identificadores).size === identificadores.length;
+    })();
+
+    // Serviço atualmente escolhido como referência.
+    const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
+
+    // Resultado da última comparação.
+    const [respostaComparacao, setRespostaComparacao] = useState<ComparisonResponse | null>(null);
+
+    // Fotografia dos serviços utilizados na última comparação.
+    const [servicosComparados, setServicosComparados] = useState<ComparisonServiceSelection[]>([]);
+
+    // Referência utilizada na última comparação.
+    const [servicoPrincipalComparadoId, setServicoPrincipalComparadoId] = useState<string | null>(
+        null,
+    );
+
+    // Configuração que gerou a última comparação.
+    const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(null);
+
+    // Configuração que está sendo preparada atualmente.
+    const configuracaoAtual = JSON.stringify({
+        periodo,
+        servicoPrincipalId,
+        servicos: servicosSelecionados.map((servico) => ({
+            selectionId: servico.selectionId,
+            externalId: servico.externalId,
+            simulatedRegion: servico.simulatedRegion,
+        })),
+    });
+
+    // Verifica se existem alterações que exigem nova comparação.
+    const comparacaoPendente =
+        configuracaoComparada !== null && configuracaoComparada !== configuracaoAtual;
+
+    // Recebe as informações enviadas pelo seletor.
+    const handleSelectionsChange = useCallback(
+        (selections: ComparisonServiceSelection[], principalId: string | null) => {
+            setServicosSelecionados(selections);
+            setServicoPrincipalId(principalId);
+        },
+        [],
+    );
+
+    // Executa a comparação utilizando o mock.
+    function handleComparar() {
+        if (!podeComparar) return;
+
+        const request: ComparisonRequest = {
+            range: periodo,
+
+            selections: servicosSelecionados.map((item) => ({
+                selectionId: item.selectionId,
+                externalId: item.externalId,
+                simulatedRegionCode:
+                    item.simulatedRegion === null
+                        ? null
+                        : (CODIGOS_REGIAO[item.simulatedRegion] ?? null),
+            })),
+        };
+
+        const resposta = gerarMockComparisonResponse(request);
+
+        // Salva o resultado e a configuração que o gerou.
+        setRespostaComparacao(resposta);
+        setConfiguracaoComparada(configuracaoAtual);
+
+        // Registra os serviços e a referência utilizados.
+        setServicosComparados(
+            servicosSelecionados.map((servico) => ({
+                ...servico,
+            })),
+        );
+
+        setServicoPrincipalComparadoId(servicoPrincipalId);
+
+        console.log('Requisição da comparação:', request);
+        console.log('Resposta do mock:', resposta);
+    }
+
+    // Preserva os serviços da última comparação.
+    // Atualiza somente suas cores quando o usuário as altera.
+    const servicosExibidos = servicosComparados.map((servicoComparado) => {
+        const servicoAtual = servicosSelecionados.find(
+            (item) => item.selectionId === servicoComparado.selectionId,
+        );
+
+        return servicoAtual
+            ? {
+                  ...servicoComparado,
+                  color: servicoAtual.color,
+              }
+            : servicoComparado;
+    });
+
+    // Prepara as séries que serão entregues ao gráfico.
+    const seriesGrafico =
+        respostaComparacao?.series.flatMap((serie) => {
+            const servico = servicosExibidos.find((item) => item.selectionId === serie.selectionId);
+
+            if (!servico) {
+                return [];
+            }
+
+            return [
+                {
+                    selectionId: serie.selectionId,
+                    name: servico.name,
+                    color: servico.color,
+                    points: serie.points,
+                },
+            ];
+        }) ?? [];
+
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
             <header className="space-y-2">
@@ -10,121 +174,56 @@ export function ComparisonPage() {
                 </p>
             </header>
 
-            {/* Área principal do componente de comparação */}
             <section
                 aria-label="Comparação de serviços"
                 className="space-y-6 border-t border-border pt-6"
             >
-                {/* Area de seleção de serviços */}
-                <div className="space-y-3">
-                    <div>
-                        <h2 className="text-xl font-semibold">
-                            Serviços selecionados{' '}
-                            <span className="text-sm text-muted-foreground">(máx. 5)</span>
-                        </h2>
+                {/* Seleção dos serviços. */}
+                <ComparisonServiceSelector onSelectionsChange={handleSelectionsChange} />
 
-                        <p className="text-sm text-muted-foreground">
-                            Selecione os serviços que deseja comparar.
+                {/* Configurações da comparação. */}
+                <ComparisonControls
+                    periodo={periodo}
+                    metrica={metrica}
+                    podeComparar={podeComparar}
+                    onPeriodoChange={setPeriodo}
+                    onMetricaChange={setMetrica}
+                    onComparar={handleComparar}
+                />
+
+                {/* Aviso de alterações pendentes. */}
+                {comparacaoPendente && (
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+                        <Info className="mt-0.5 size-5 shrink-0 text-amber-400" />
+
+                        <p className="text-sm text-slate-300">
+                            Você alterou os serviços, o período ou a região de simulação. Os
+                            resultados exibidos ainda correspondem à última comparação. Clique em
+                            Comparar novamente para atualizar os dados.
                         </p>
                     </div>
+                )}
 
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-                        <div className="flex min-h-32 items-center justify-center rounded-lg border border-border p-4">
-                            <p className="text-sm text-muted-foreground">
-                                Área dos serviços selecionados
-                            </p>
-                        </div>
-
-                        <div className="min-h-32 rounded-lg border border-border p-4">
-                            <h3 className="font-medium">Alternar região de comparação</h3>
-
-                            <p className="mt-2 text-sm text-muted-foreground">
-                                Para simular um serviço em outra região, clique na engrenagem e
-                                selecione outra região disponível.
-                            </p>
-                        </div>
+                {/* Gráfico comparativo. */}
+                {respostaComparacao !== null && (
+                    <div className="min-w-0 rounded-lg border border-border p-4">
+                        <ComparisonChart
+                            series={seriesGrafico}
+                            metrica={metrica}
+                            periodo={respostaComparacao.range}
+                            periodoInicio={respostaComparacao.period.from}
+                            periodoFim={respostaComparacao.period.to}
+                        />
                     </div>
-                </div>
+                )}
 
-                {/* Local dos controles da comparação */}
-                    <div className="flex flex-col gap-4 border-t border-border pt-6 lg:flex-row lg:items-end lg:justify-between">
-                        {/* Grupo: Período */}
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">Período</h3>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">1h</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">6h</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">24h</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">7d</p>
-                                </div>
-
-                                <div className="flex min-h-9 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">30d</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Grupo: Métrica e botão */}
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                            <div className="space-y-2">
-                                <h3 className="text-sm font-medium">Métrica</h3>
-
-                                <div className="flex min-h-10 min-w-40 items-center rounded-md border border-dashed border-border px-3 py-2">
-                                    <p className="text-sm text-muted-foreground">
-                                        Selecionar métrica
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex min-h-10 items-center justify-center rounded-md border border-dashed border-border px-6 py-2">
-                                <p className="text-sm text-muted-foreground">Botão Comparar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                {/* Area de gráfico comparativo */}
-                <div className="space-y-3 border-t border-border pt-6">
-                    <div>
-                        <h3 className="text-xl font-semibold">Gráfico comparativo</h3>
-
-                        <p className="text-sm text-muted-foreground">
-                            Visualização das métricas dos serviços selecionados ao longo do período.
-                        </p>
-                    </div>
-
-                    <div className="flex min-h-64 items-center justify-center rounded-lg border border-border p-4">
-                        <p className="text-sm text-muted-foreground">Área do gráfico</p>
-                    </div>
-                </div>
-
-                {/* Area de resumo comparativo */}
-                <div className="space-y-3 border-t border-border pt-6">
-                    <div>
-                        <h3 className="text-xl font-semibold">Resumo comparativo</h3>
-
-                        <p className="text-sm text-muted-foreground">
-                            Compare o serviço de referência com os demais serviços selecionados.
-                        </p>
-                    </div>
-
-                    <div className="min-h-40 rounded-lg border border-border p-4">
-                        <p className="text-sm text-muted-foreground">
-                            Área dos indicadores comparativos e dos valores individuais dos
-                            serviços.
-                        </p>
-                    </div>
-                </div>
+                {/* Resumo comparativo. */}
+                <ComparisonSummary
+                    servicosSelecionados={servicosExibidos}
+                    respostaComparacao={respostaComparacao}
+                    metrica={metrica}
+                    servicoPrincipalId={servicoPrincipalComparadoId}
+                />
             </section>
         </main>
     );
