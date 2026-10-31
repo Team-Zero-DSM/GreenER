@@ -282,12 +282,48 @@ de domínio antes de armazená-los ou apresentá-los ao frontend. O
 `collection_interval_seconds` descreve o período das métricas recebidas e não
 configura o Collection Job.
 
-O código atual mapeia timeout, falha de comunicação e HTTP 404 de métricas
-para `unavailable`, e HTTP 500 para `metrics_missing`. O contrato externo
-também descreve indisponibilidade para 500, portanto essa classificação não
-comprova a causa exata. A distinção precisa ser esclarecida com o fornecedor;
-não há campo discriminador validado pelo código atual. Uma falha de banco é
-interna e não deve ser atribuída ao serviço monitorado.
+Na consulta de **métricas**, a classificação segue a regra do projeto e o
+[contrato OpenAPI do agregador](https://metrics.unilaunch.org/openapi.json),
+conferido em 25/10/2026:
+
+| Resposta / falha | Significado registrado | Status do serviço | Tipo no histórico |
+|---|---|---|---|
+| Ausente em uma lista de serviços consultada com sucesso | Coleta não realizada porque o serviço não está na lista de serviços monitorados | `unavailable` | `service_missing` (`http_status = null`) |
+| HTTP 404 de métricas | Serviço removido ou métricas inexistentes | `unavailable` | `service_missing` |
+| HTTP 500 de métricas | Serviço indisponível ou exportador de métricas indisponível | `metrics_missing` | `metrics_missing` |
+| HTTP 530 | Falha de acesso à plataforma externa (Cloudflare) | Preserva o status anterior | `cloudflare_error` |
+| HTTP 429 | Limite de consultas atingido | Preserva o status anterior | `bad_status` |
+| HTTP 502 / 503 / 504 | Falha de comunicação / plataforma temporariamente indisponível / demora na resposta | Preserva o status anterior | `bad_status` |
+| Outro HTTP de erro | Não foi possível concluir a consulta externa; código preservado no histórico | Preserva o status anterior | `bad_status` |
+| Timeout local, sem resposta HTTP | Tempo limite excedido | `unavailable` | `timeout` |
+| Falha de comunicação, sem resposta HTTP | API de métricas inacessível | `unavailable` | `unavailable` |
+| JSON inválido ou resposta fora do contrato | Resposta externa inválida | Preserva o status anterior | `invalid_response` |
+
+`404` e `500` não identificam, isoladamente, qual das duas causas do respectivo
+contrato aconteceu; a descrição conserva ambas as possibilidades. O nome
+`metrics_missing` é a classificação interna definida para o HTTP 500 dessa
+consulta e não comprova que o serviço permanece disponível.
+
+`tipo` identifica a ocorrência para apresentação no gráfico; `http_status`
+registra uma resposta HTTP de erro quando ela existe. Por isso, `service_missing`
+agrupa ausência na descoberta e HTTP 404 de métricas, mas apenas o segundo tem
+`http_status = 404`. O contrato informa que `/services` omite serviços removidos;
+não é necessário chamar suas métricas para obter um 404 e confirmar a ausência.
+`bad_status` fica reservado para os outros erros HTTP sem tipo específico.
+
+As descrições das falhas de coleta usam linguagem simples para apresentação no
+gráfico, sem caminhos internos ou termos como JSON e gateway. Por exemplo:
+“A coleta não foi concluída porque a plataforma de métricas demorou demais para
+responder.” O código HTTP fica separado em `http_status`; quando não há resposta,
+é `null`. `tipo` identifica timeout, conexão, resposta inválida ou erro HTTP.
+Falhas de descoberta ou da API de carbono ficam nos logs/monitoramento, e falhas
+de banco não são atribuídas ao serviço monitorado.
+
+Quando o serviço não aparece em uma descoberta bem-sucedida, fica com `ativo = false`
+e `unavailable`. Cada sincronização que confirmar essa ausência registra
+`service_missing` no histórico, mesmo que ele já estivesse inativo. Esse evento
+não possui código HTTP, pois a consulta de métricas não foi realizada. Quando
+o serviço reaparece na descoberta, volta à rotina normal de coleta.
 
 ## 4. Greener Carbon Intensity API
 

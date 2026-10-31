@@ -63,7 +63,7 @@ export function MonitoringBar() {
                 </span>
 
                 {status && (
-                    <div className="flex flex-wrap gap-x-5 gap-y-1">
+                    <div className="hidden flex-wrap gap-x-5 gap-y-1 sm:flex">
                         <Item label="Última coleta">
                             {lastCollectionAt === null
                                 ? '—'
@@ -82,6 +82,28 @@ export function MonitoringBar() {
                             Carbono {dependencyLabel[status.dependencies.carbon]}
                         </Item>
                     </div>
+                )}
+                {status && (
+                    <details className="sm:hidden">
+                        <summary className="min-h-11 cursor-pointer py-3">
+                            Monitoramento · coleta a cada {status.collectionIntervalSeconds} s
+                        </summary>
+                        <div className="flex flex-col gap-2 pb-2">
+                            <Item label="Última coleta">
+                                {lastCollectionAt === null
+                                    ? '—'
+                                    : formatAgo(secondsBetween(lastCollectionAt, now))}
+                            </Item>
+                            <Item label="Próxima coleta">{nextCollection}</Item>
+                            <Item label="Tela atualizada">
+                                {formatDateTimeSeconds(screenUpdatedAt)}
+                            </Item>
+                            <Item label="APIs UniLaunch">
+                                Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
+                                Carbono {dependencyLabel[status.dependencies.carbon]}
+                            </Item>
+                        </div>
+                    </details>
                 )}
             </div>
         </div>

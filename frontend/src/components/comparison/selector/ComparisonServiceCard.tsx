@@ -1,0 +1,251 @@
+import { useRef, useState } from 'react';
+
+import { ChevronDown, MapPin, MapPinned, Server, Star, X } from 'lucide-react';
+
+import type { ServiceSummary } from '@/types/service';
+
+import { useClickOutside } from '@/hooks/useClickOutside';
+import { ComparisonColorPicker } from './ComparisonColorPicker';
+import { ComparisonRegionPicker } from './ComparisonRegionPicker';
+
+interface ComparisonServiceCardProps {
+    servico: ServiceSummary;
+    principal: boolean;
+    cor: string;
+    cores: string[];
+    coresUsadasPorOutros: string[];
+    regioes: string[];
+    regiaoSimulada: string | null;
+    onDefinirPrincipal: () => void;
+    onSelecionarCor: (cor: string) => void;
+    onConfirmarRegiao: (regiao: string | null) => void;
+    onRemover: () => void;
+}
+
+export function ComparisonServiceCard({
+    servico,
+    principal,
+    cor,
+    cores,
+    coresUsadasPorOutros,
+    regioes,
+    regiaoSimulada,
+    onDefinirPrincipal,
+    onSelecionarCor,
+    onConfirmarRegiao,
+    onRemover,
+}: ComparisonServiceCardProps) {
+    const [mostrarCores, setMostrarCores] = useState(false);
+    const [mostrarRegioes, setMostrarRegioes] = useState(false);
+
+    const corButtonRef = useRef<HTMLButtonElement>(null);
+    const corPickerRef = useRef<HTMLDivElement>(null);
+
+    const regiaoButtonRef = useRef<HTMLButtonElement>(null);
+    const regiaoPickerRef = useRef<HTMLDivElement>(null);
+
+    useClickOutside(mostrarCores, corButtonRef, corPickerRef, setMostrarCores);
+
+    useClickOutside(mostrarRegioes, regiaoButtonRef, regiaoPickerRef, setMostrarRegioes);
+
+    const regiaoOriginal = servico.location?.city ?? servico.location?.region ?? null;
+
+    const nomeRegiao = regiaoSimulada ?? regiaoOriginal;
+
+    const statusTexto =
+        servico.active === undefined ? 'Status desconhecido' : servico.active ? 'Ativo' : 'Inativo';
+
+    const statusCor =
+        servico.active === undefined
+            ? 'bg-slate-500'
+            : servico.active
+              ? 'bg-emerald-500'
+              : 'bg-red-500';
+
+    return (
+        <div className="space-y-2">
+            {/* Cartão e seletores flutuantes. */}
+            <div className="relative min-w-0">
+                {/* Cartão. */}
+                <div
+                    className={`rounded-xl border p-3 transition-colors duration-200 ${
+                        principal
+                            ? 'border-teal-400/80 bg-teal-400/[0.02]'
+                            : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
+                    }`}
+                >
+                    <div className="flex items-start gap-3">
+                        <div
+                            className="flex size-11 shrink-0 items-center justify-center rounded-full"
+                            style={{ backgroundColor: cor }}
+                        >
+                            <Server aria-hidden="true" className="size-5 text-white" />
+                        </div>
+
+                        <div className="min-w-0 flex-1 space-y-2">
+                            {/* Nome e serviço de referência. */}
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="flex min-w-0 items-start gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={onDefinirPrincipal}
+                                        aria-label={
+                                            principal
+                                                ? `${servico.name} é o serviço de referência`
+                                                : `Definir ${servico.name} como referência`
+                                        }
+                                        title="Definir serviço de referência"
+                                        className="shrink-0 rounded p-0.5 transition-colors hover:bg-slate-800"
+                                    >
+                                        <Star
+                                            aria-hidden="true"
+                                            className={`size-4 transition-colors ${
+                                                principal
+                                                    ? 'fill-teal-400 text-teal-400'
+                                                    : 'text-slate-400 hover:text-teal-300'
+                                            }`}
+                                        />
+                                    </button>
+
+                                    <h3
+                                        className="break-words text-sm font-semibold text-slate-100"
+                                        title={servico.name}
+                                    >
+                                        {servico.name}
+                                    </h3>
+                                </div>
+
+                                {principal && (
+                                    <span className="shrink-0 rounded-full border border-teal-400/50 bg-teal-400/10 px-2 py-0.5 text-xs font-medium text-teal-300">
+                                        Referência
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Região atual. */}
+                            <div className="flex flex-wrap items-center gap-1.5 text-sm">
+                                <MapPin
+                                    aria-hidden="true"
+                                    className="size-4 shrink-0 text-slate-400"
+                                />
+
+                                {nomeRegiao ? (
+                                    <>
+                                        <span className="text-slate-300">{nomeRegiao}</span>
+
+                                        {regiaoSimulada !== null ? (
+                                            <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs text-amber-400">
+                                                Simulada
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-slate-500">
+                                                (original)
+                                            </span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <span className="text-slate-400">Região não informada</span>
+                                )}
+                            </div>
+
+                            {/* Status. */}
+                            <div className="flex items-center gap-2 text-sm">
+                                <span
+                                    aria-hidden="true"
+                                    className={`size-2.5 shrink-0 rounded-full ${statusCor}`}
+                                />
+
+                                <span className="text-slate-300">{statusTexto}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Botões inferiores. */}
+                    <div className="mt-3 border-t border-slate-800 pt-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            {/* Botão de cor. */}
+                            <button
+                                ref={corButtonRef}
+                                type="button"
+                                onClick={() => setMostrarCores((atual) => !atual)}
+                                aria-expanded={mostrarCores}
+                                className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-teal-300"
+                            >
+                                <span
+                                    className="size-6 shrink-0 rounded-full border border-slate-700"
+                                    style={{ backgroundColor: cor }}
+                                />
+
+                                <span>Cor</span>
+
+                                <ChevronDown
+                                    aria-hidden="true"
+                                    className={`size-4 transition-transform ${
+                                        mostrarCores ? 'rotate-180' : ''
+                                    }`}
+                                />
+                            </button>
+
+                            <div className="flex flex-wrap items-center gap-1">
+                                {/* Botão de região. */}
+                                <button
+                                    ref={regiaoButtonRef}
+                                    type="button"
+                                    onClick={() => setMostrarRegioes((atual) => !atual)}
+                                    aria-expanded={mostrarRegioes}
+                                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-slate-800 hover:text-teal-300"
+                                >
+                                    <MapPinned aria-hidden="true" className="size-4 shrink-0" />
+
+                                    <span>Simular região</span>
+                                </button>
+
+                                {/* Remover serviço. */}
+                                <button
+                                    type="button"
+                                    onClick={onRemover}
+                                    aria-label={`Remover ${servico.name} da comparação`}
+                                    title="Remover serviço"
+                                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-red-400"
+                                >
+                                    <X aria-hidden="true" className="size-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Seletor de cores flutuante. */}
+                {mostrarCores && (
+                    <div
+                        ref={corPickerRef}
+                        className="absolute left-0 top-full z-50 mt-2 w-56 max-w-[calc(100vw-2rem)] shadow-xl shadow-black/30"
+                    >
+                        <ComparisonColorPicker
+                            cores={cores}
+                            corAtual={cor}
+                            coresUsadasPorOutros={coresUsadasPorOutros}
+                            onSelecionarCor={onSelecionarCor}
+                            onFechar={() => setMostrarCores(false)}
+                        />
+                    </div>
+                )}
+
+                {/* Seletor de regiões flutuante. */}
+                {mostrarRegioes && (
+                    <div
+                        ref={regiaoPickerRef}
+                        className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] shadow-xl shadow-black/30"
+                    >
+                        <ComparisonRegionPicker
+                            regioes={regioes}
+                            regiaoAtual={regiaoSimulada}
+                            onSelecionarRegiao={onConfirmarRegiao}
+                            onFechar={() => setMostrarRegioes(false)}
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
