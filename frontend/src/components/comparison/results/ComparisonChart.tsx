@@ -36,10 +36,7 @@ interface PontoGrafico {
     [selectionId: string]: string | number | null;
 }
 
-function formatarHorario(
-    timestamp: string,
-    periodo: HistoryRange,
-): string {
+function formatarHorario(timestamp: string, periodo: HistoryRange): string {
     const data = new Date(timestamp);
 
     if (periodo === '7d' || periodo === '30d') {
@@ -58,23 +55,15 @@ function formatarHorario(
 }
 
 // Distribui igualmente as marcações entre início e fim.
-function gerarMarcacoesTempo(
-    inicioMs: number,
-    fimMs: number,
-    quantidade: number,
-): number[] {
+function gerarMarcacoesTempo(inicioMs: number, fimMs: number, quantidade: number): number[] {
     if (quantidade <= 1) {
         return [inicioMs];
     }
 
     const intervalo = (fimMs - inicioMs) / (quantidade - 1);
 
-    return Array.from(
-        { length: quantidade },
-        (_, indice) =>
-            indice === quantidade - 1
-                ? fimMs
-                : Math.round(inicioMs + intervalo * indice),
+    return Array.from({ length: quantidade }, (_, indice) =>
+        indice === quantidade - 1 ? fimMs : Math.round(inicioMs + intervalo * indice),
     );
 }
 
@@ -84,19 +73,12 @@ function formatarValor(valor: number): string {
     });
 }
 
-function formatarValorMetrica(
-    valor: unknown,
-    metrica: ComparisonMetric,
-): string {
-    if (
-        typeof valor !== 'number' ||
-        !Number.isFinite(valor)
-    ) {
+function formatarValorMetrica(valor: unknown, metrica: ComparisonMetric): string {
+    if (typeof valor !== 'number' || !Number.isFinite(valor)) {
         return 'Sem dados';
     }
 
-    const unidade =
-        metrica === 'co2eGrams' ? 'g CO₂e' : 'kWh';
+    const unidade = metrica === 'co2eGrams' ? 'g CO₂e' : 'kWh';
 
     return `${formatarValor(valor)} ${unidade}`;
 }
@@ -111,25 +93,17 @@ export function ComparisonChart({
     const [larguraGrafico, setLarguraGrafico] = useState(0);
 
     // Celular: 4; tablet: 5; computador: 7 marcações.
-    const quantidadeMarcacoes =
-        larguraGrafico < 480
-            ? 4
-            : larguraGrafico < 850
-              ? 5
-              : 7;
+    const quantidadeMarcacoes = larguraGrafico < 480 ? 4 : larguraGrafico < 850 ? 5 : 7;
 
     const dadosPorHorario = new Map<string, PontoGrafico>();
 
     // Agrupa os valores dos serviços pelo mesmo horário.
     for (const servico of series) {
         for (const ponto of servico.points) {
-            const linha: PontoGrafico =
-                dadosPorHorario.get(ponto.timestamp) ?? {
-                    timestamp: ponto.timestamp,
-                    timestampMs: new Date(
-                        ponto.timestamp,
-                    ).getTime(),
-                };
+            const linha: PontoGrafico = dadosPorHorario.get(ponto.timestamp) ?? {
+                timestamp: ponto.timestamp,
+                timestampMs: new Date(ponto.timestamp).getTime(),
+            };
 
             linha[servico.selectionId] = ponto[metrica];
 
@@ -145,10 +119,7 @@ export function ComparisonChart({
         series.some((servico) => {
             const valor = ponto[servico.selectionId];
 
-            return (
-                typeof valor === 'number' &&
-                Number.isFinite(valor)
-            );
+            return typeof valor === 'number' && Number.isFinite(valor);
         }),
     );
 
@@ -157,27 +128,19 @@ export function ComparisonChart({
             ? 'Emissões ao longo do período'
             : 'Consumo de energia ao longo do período';
 
-    const unidade =
-        metrica === 'co2eGrams'
-            ? '(gCO₂e)'
-            : '(kWh)';
+    const unidade = metrica === 'co2eGrams' ? '(gCO₂e)' : '(kWh)';
 
     if (!possuiDados) {
         return (
             <div className="w-full space-y-5">
                 <div className="space-y-2 lg:pl-[73px]">
-                    <h3 className="text-lg font-semibold">
-                        {titulo}
-                    </h3>
+                    <h3 className="text-lg font-semibold">{titulo}</h3>
 
-                    <p className="text-sm text-muted-foreground">
-                        {unidade}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{unidade}</p>
                 </div>
 
                 <div className="flex min-h-56 items-center justify-center text-sm text-muted-foreground">
-                    Não há dados para exibir nesta métrica
-                    e neste período.
+                    Não há dados para exibir nesta métrica e neste período.
                 </div>
             </div>
         );
@@ -186,24 +149,16 @@ export function ComparisonChart({
     const inicioMs = new Date(periodoInicio).getTime();
     const fimMs = new Date(periodoFim).getTime();
 
-    const marcacoesTempo = gerarMarcacoesTempo(
-        inicioMs,
-        fimMs,
-        quantidadeMarcacoes,
-    );
+    const marcacoesTempo = gerarMarcacoesTempo(inicioMs, fimMs, quantidadeMarcacoes);
 
     return (
         <div className="w-full space-y-5">
             {/* Cabeçalho e legenda. */}
             <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4 lg:pl-[73px] lg:pr-3">
                 <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">
-                        {titulo}
-                    </h3>
+                    <h3 className="text-lg font-semibold">{titulo}</h3>
 
-                    <p className="text-sm text-muted-foreground">
-                        {unidade}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{unidade}</p>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-start gap-x-6 gap-y-3 lg:justify-end">
@@ -231,9 +186,7 @@ export function ComparisonChart({
                 <ResponsiveContainer
                     width="100%"
                     height="100%"
-                    onResize={(largura) =>
-                        setLarguraGrafico(Math.round(largura))
-                    }
+                    onResize={(largura) => setLarguraGrafico(Math.round(largura))}
                 >
                     <ComposedChart
                         data={dadosGrafico}
@@ -259,12 +212,7 @@ export function ComparisonChart({
                             ticks={marcacoesTempo}
                             interval={0}
                             tickFormatter={(valor) =>
-                                formatarHorario(
-                                    new Date(
-                                        Number(valor),
-                                    ).toISOString(),
-                                    periodo,
-                                )
+                                formatarHorario(new Date(Number(valor)).toISOString(), periodo)
                             }
                             tick={{
                                 fontSize: 11,
@@ -279,14 +227,9 @@ export function ComparisonChart({
                             width={65}
                             domain={[
                                 0,
-                                (valorMaximo: number) =>
-                                    valorMaximo > 0
-                                        ? valorMaximo * 1.2
-                                        : 1,
+                                (valorMaximo: number) => (valorMaximo > 0 ? valorMaximo * 1.2 : 1),
                             ]}
-                            tickFormatter={(valor) =>
-                                formatarValor(Number(valor))
-                            }
+                            tickFormatter={(valor) => formatarValor(Number(valor))}
                             tick={{
                                 fontSize: 11,
                                 fill: 'currentColor',
@@ -297,18 +240,10 @@ export function ComparisonChart({
 
                         <Tooltip
                             labelFormatter={(valor) =>
-                                formatarHorario(
-                                    new Date(
-                                        Number(valor),
-                                    ).toISOString(),
-                                    periodo,
-                                )
+                                formatarHorario(new Date(Number(valor)).toISOString(), periodo)
                             }
                             formatter={(valor, nome) => [
-                                formatarValorMetrica(
-                                    valor,
-                                    metrica,
-                                ),
+                                formatarValorMetrica(valor, metrica),
                                 String(nome),
                             ]}
                             contentStyle={{

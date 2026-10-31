@@ -37,9 +37,7 @@ export function ComparisonColorPicker({
                                 onFechar();
                             }}
                             aria-label={`Selecionar cor ${NOMES_CORES[cor] ?? cor}${
-                                emUso
-                                    ? ', atualmente usada por outro serviço'
-                                    : ''
+                                emUso ? ', atualmente usada por outro serviço' : ''
                             }`}
                             aria-pressed={selecionada}
                             className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-secondary ${

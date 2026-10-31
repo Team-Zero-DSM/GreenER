@@ -1,11 +1,4 @@
-import {
-    ArrowUpDown,
-    Leaf,
-    Percent,
-    Server,
-    Star,
-    UsersRound,
-} from 'lucide-react';
+import { ArrowUpDown, Info, Leaf, Percent, Server, Star, UsersRound } from 'lucide-react';
 
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 import type { ComparisonServiceSelection } from '@/components/comparison/selector/ComparisonServiceSelector';
@@ -18,10 +11,7 @@ interface ComparisonSummaryProps {
     servicoPrincipalId: string | null;
 }
 
-function formatarValor(
-    valor: number | null,
-    metrica: ComparisonMetric,
-): string {
+function formatarValor(valor: number | null, metrica: ComparisonMetric): string {
     if (valor === null || !Number.isFinite(valor)) {
         return '—';
     }
@@ -37,16 +27,11 @@ export function ComparisonSummary({
     metrica,
     servicoPrincipalId,
 }: ComparisonSummaryProps) {
-    const unidade =
-        metrica === 'co2eGrams' ? 'gCO₂e' : 'kWh';
+    const unidade = metrica === 'co2eGrams' ? 'gCO₂e' : 'kWh';
 
-    const tituloMetrica =
-        metrica === 'co2eGrams' ? 'Emissões' : 'Energia';
+    const tituloMetrica = metrica === 'co2eGrams' ? 'Emissões' : 'Energia';
 
-    const tituloValor =
-        metrica === 'co2eGrams'
-            ? 'Emissões (gCO₂e)'
-            : 'Energia (kWh)';
+    const tituloValor = metrica === 'co2eGrams' ? 'Emissões (gCO₂e)' : 'Energia (kWh)';
 
     // Identifica o serviço principal.
     const servicoPrincipal = servicosSelecionados.find(
@@ -58,9 +43,7 @@ export function ComparisonSummary({
         (serie) => serie.selectionId === servicoPrincipalId,
     );
 
-    const valorPrincipal = seriePrincipal
-        ? seriePrincipal.summary[metrica]
-        : null;
+    const valorPrincipal = seriePrincipal ? seriePrincipal.summary[metrica] : null;
 
     // Obtém os totais dos demais serviços.
     const valoresDemais = servicosSelecionados.flatMap((servico) => {
@@ -74,18 +57,13 @@ export function ComparisonSummary({
 
         const valor = serie?.summary[metrica];
 
-        return typeof valor === 'number' && Number.isFinite(valor)
-            ? [valor]
-            : [];
+        return typeof valor === 'number' && Number.isFinite(valor) ? [valor] : [];
     });
 
     // Calcula a média dos demais serviços.
     const mediaDemais =
         valoresDemais.length > 0
-            ? valoresDemais.reduce(
-                  (total, valor) => total + valor,
-                  0,
-              ) / valoresDemais.length
+            ? valoresDemais.reduce((total, valor) => total + valor, 0) / valoresDemais.length
             : null;
 
     return (
@@ -93,10 +71,7 @@ export function ComparisonSummary({
             {/* Cabeçalho. */}
             <div className="flex items-center gap-3">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-teal-400/10">
-                    <Leaf
-                        className="size-5 text-teal-300"
-                        aria-hidden="true"
-                    />
+                    <Leaf className="size-5 text-teal-300" aria-hidden="true" />
                 </div>
 
                 <div className="min-w-0 space-y-1">
@@ -105,24 +80,59 @@ export function ComparisonSummary({
                     </h3>
 
                     <p className="text-xs text-slate-400 sm:text-sm">
-                        O serviço de referência é comparado com a
-                        média dos demais serviços selecionados.
+                        O serviço de referência é comparado com a média dos demais serviços
+                        selecionados.
                     </p>
                 </div>
             </div>
 
-            {/* Antes da comparação, mostra apenas a orientação. */}
+            {/* Orientação antes da primeira comparação. */}
             {!respostaComparacao ? (
-                <div className="flex min-h-40 items-center justify-center rounded-xl border border-slate-800 bg-slate-950/50 p-5">
-                    <p className="text-sm text-slate-400">
-                        Clique em Comparar para visualizar os resultados.
+                <div className="flex min-h-16 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3">
+                    <p className="text-center text-sm text-slate-400">
+                        Selecione pelo menos dois serviços e clique em Comparar para ver os
+                        resultados.
                     </p>
+
+                    <span className="group relative inline-flex shrink-0">
+                        <button
+                            type="button"
+                            aria-label="Informações sobre como comparar serviços"
+                            className="flex size-6 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-teal-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                        >
+                            <Info className="size-4" />
+                        </button>
+
+                        <span
+                            role="tooltip"
+                            className="invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-slate-700 bg-slate-900 p-3 text-left text-xs leading-relaxed text-slate-300 opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                        >
+                            <span className="mb-2 block font-semibold text-slate-100">
+                                Como fazer uma comparação
+                            </span>
+
+                            <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
+
+                            <span className="mb-2 block">
+                                2. Defina o serviço de referência, que será a base da comparação.
+                            </span>
+
+                            <span className="mb-2 block">
+                                3. Escolha o período para definir o intervalo das coletas
+                                analisadas.
+                            </span>
+
+                            <span className="block">
+                                4. Escolha uma região para simular as emissões usando o fator de
+                                carbono dela.
+                            </span>
+                        </span>
+                    </span>
                 </div>
             ) : (
                 <>
                     {/* Quatro áreas com larguras iguais. */}
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-
+                    <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-4">
                         {/* Serviço principal. */}
                         <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-teal-400/50 bg-teal-400/[0.02] p-4">
                             <div className="space-y-3">
@@ -139,14 +149,10 @@ export function ComparisonSummary({
                                     <div
                                         className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
                                         style={{
-                                            backgroundColor:
-                                                servicoPrincipal?.color ?? '#2563EB',
+                                            backgroundColor: servicoPrincipal?.color ?? '#2563EB',
                                         }}
                                     >
-                                        <Server
-                                            className="size-5"
-                                            aria-hidden="true"
-                                        />
+                                        <Server className="size-5" aria-hidden="true" />
                                     </div>
 
                                     <p className="truncate text-sm font-semibold text-slate-100">
@@ -166,9 +172,7 @@ export function ComparisonSummary({
                                     )}
                                 </p>
 
-                                <p className="text-xs text-slate-400">
-                                    Total no período
-                                </p>
+                                <p className="text-xs text-slate-400">Total no período</p>
                             </div>
                         </div>
 
@@ -195,9 +199,7 @@ export function ComparisonSummary({
                                 <p className="text-xs text-slate-400">
                                     {mediaDemais !== null
                                         ? `Média de ${valoresDemais.length} ${
-                                              valoresDemais.length === 1
-                                                  ? 'serviço'
-                                                  : 'serviços'
+                                              valoresDemais.length === 1 ? 'serviço' : 'serviços'
                                           } selecionados.`
                                         : 'Não há outros serviços com valores disponíveis.'}
                                 </p>
@@ -212,10 +214,7 @@ export function ComparisonSummary({
                                     aria-hidden="true"
                                 />
 
-                                <ArrowUpDown
-                                    className="size-5 text-slate-500"
-                                    aria-hidden="true"
-                                />
+                                <ArrowUpDown className="size-5 text-slate-500" aria-hidden="true" />
 
                                 <p className="text-3xl font-semibold text-slate-500 tabular-nums">
                                     —
@@ -223,9 +222,8 @@ export function ComparisonSummary({
                             </div>
 
                             <p className="text-sm leading-relaxed text-slate-400">
-                                A diferença percentual entre o serviço
-                                de referência e a média dos demais será
-                                apresentada aqui.
+                                A diferença percentual entre o serviço de referência e a média dos
+                                demais será apresentada aqui.
                             </p>
                         </div>
 
@@ -241,9 +239,7 @@ export function ComparisonSummary({
                                 <table className="w-full min-w-[210px] text-left text-xs">
                                     <thead>
                                         <tr className="border-b border-slate-800 text-slate-400">
-                                            <th className="pb-3 pr-2 font-medium">
-                                                Serviço
-                                            </th>
+                                            <th className="pb-3 pr-2 font-medium">Serviço</th>
 
                                             <th className="pb-3 text-right font-medium whitespace-nowrap">
                                                 {tituloValor}
@@ -253,16 +249,11 @@ export function ComparisonSummary({
 
                                     <tbody>
                                         {servicosSelecionados.map((servico) => {
-                                            const serie =
-                                                respostaComparacao.series.find(
-                                                    (item) =>
-                                                        item.selectionId ===
-                                                        servico.selectionId,
-                                                );
+                                            const serie = respostaComparacao.series.find(
+                                                (item) => item.selectionId === servico.selectionId,
+                                            );
 
-                                            const valor = serie
-                                                ? serie.summary[metrica]
-                                                : null;
+                                            const valor = serie ? serie.summary[metrica] : null;
 
                                             return (
                                                 <tr
@@ -274,8 +265,7 @@ export function ComparisonSummary({
                                                             <span
                                                                 className="size-2.5 shrink-0 rounded-full"
                                                                 style={{
-                                                                    backgroundColor:
-                                                                        servico.color,
+                                                                    backgroundColor: servico.color,
                                                                 }}
                                                                 aria-hidden="true"
                                                             />
@@ -287,10 +277,7 @@ export function ComparisonSummary({
                                                     </td>
 
                                                     <td className="py-3 text-right font-medium text-slate-200 tabular-nums whitespace-nowrap">
-                                                        {formatarValor(
-                                                            valor,
-                                                            metrica,
-                                                        )}
+                                                        {formatarValor(valor, metrica)}
                                                     </td>
                                                 </tr>
                                             );
@@ -310,16 +297,6 @@ export function ComparisonSummary({
                                 </table>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Rodapé. */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
-                        <p>
-                            Os valores representam os totais acumulados
-                            no período selecionado.
-                        </p>
-
-                        <p>Dados demonstrativos · GreenER</p>
                     </div>
                 </>
             )}

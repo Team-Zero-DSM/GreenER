@@ -25,9 +25,7 @@ export function ComparisonRegionPicker({
                         regiaoAtual === null ? 'bg-secondary' : ''
                     }`}
                 >
-                    <span className="flex-1">
-                        Usar região original
-                    </span>
+                    <span className="flex-1">Usar região original</span>
                 </button>
 
                 {regioes.map((regiao) => {
@@ -46,9 +44,7 @@ export function ComparisonRegionPicker({
                                 selecionada ? 'bg-secondary' : ''
                             }`}
                         >
-                            <span className="flex-1">
-                                {regiao}
-                            </span>
+                            <span className="flex-1">{regiao}</span>
                         </button>
                     );
                 })}

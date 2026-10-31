@@ -254,11 +254,11 @@ A configuração do intervalo pela aplicação fica para etapa posterior, com sp
 
 ### 6.7. Rotas da aplicação
 
-| Rota implementada | Componente | Comportamento atual |
-|---|---|---|
-| `/` | `LandingPage` | Globo, cards regionais e totais das últimas 24 horas. |
-| `/dashboard` | `DashboardPage` | Serviços reais, filtros, status e última coleta. |
-| `/servicos/:id` | `ServiceDetailPage` | Detalhe, gráficos e totais do histórico persistido. |
+| Rota implementada | Componente          | Comportamento atual                                   |
+| ----------------- | ------------------- | ----------------------------------------------------- |
+| `/`               | `LandingPage`       | Globo, cards regionais e totais das últimas 24 horas. |
+| `/dashboard`      | `DashboardPage`     | Serviços reais, filtros, status e última coleta.      |
+| `/servicos/:id`   | `ServiceDetailPage` | Detalhe, gráficos e totais do histórico persistido.   |
 
 As três rotas usam `DashboardLayout`. `/services/:serviceId` não existe na interface.
 Histórico está no detalhe; não há página `/history`. Login, ranking, comparação,

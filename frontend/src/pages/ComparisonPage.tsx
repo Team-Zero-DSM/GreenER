@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react';
 
+import { Info } from 'lucide-react';
+
 import {
     ComparisonServiceSelector,
     type ComparisonServiceSelection,
@@ -12,62 +14,79 @@ import {
 
 import { ComparisonChart } from '@/components/comparison/results/ComparisonChart';
 
+import { ComparisonSummary } from '@/components/comparison/results/ComparisonSummary';
+
 import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
 
 import type { HistoryRange } from '@/types/service';
 
-import type {
-    ComparisonRequest,
-    ComparisonResponse,
-} from '@/types/comparison';
-import { ComparisonSummary } from '@/components/comparison/results/ComparisonSummary';
+import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
+
 const CODIGOS_REGIAO: Record<string, string> = {
     'São Paulo': 'br-sudeste',
     Toronto: 'ca-toronto',
     Ashburn: 'us-east',
 };
 
-
-
 export function ComparisonPage() {
     // Configurações da comparação.
     const [periodo, setPeriodo] = useState<HistoryRange>('24h');
 
-    const [metrica, setMetrica] =
-        useState<ComparisonMetric>('co2eGrams');
+    const [metrica, setMetrica] = useState<ComparisonMetric>('co2eGrams');
 
-    // Serviços escolhidos pelo usuário.
-    const [servicosSelecionados, setServicosSelecionados] =
-        useState<ComparisonServiceSelection[]>([]);
-
-    const podeComparar = (() => {
-    if (servicosSelecionados.length < 2) {
-        return false;
-    }
-
-    const identificadores = servicosSelecionados.map((servico) =>
-        JSON.stringify([
-            servico.externalId,
-            servico.simulatedRegion,
-        ]),
+    // Serviços atualmente escolhidos pelo usuário.
+    const [servicosSelecionados, setServicosSelecionados] = useState<ComparisonServiceSelection[]>(
+        [],
     );
 
-    return new Set(identificadores).size === identificadores.length;
-})();
-    // Serviço escolhido como principal referência.
-    const [servicoPrincipalId, setServicoPrincipalId] =
-        useState<string | null>(null);
+    // Valida se a seleção permite executar uma comparação.
+    const podeComparar = (() => {
+        if (servicosSelecionados.length < 2) {
+            return false;
+        }
+
+        const identificadores = servicosSelecionados.map((servico) =>
+            JSON.stringify([servico.externalId, servico.simulatedRegion]),
+        );
+
+        return new Set(identificadores).size === identificadores.length;
+    })();
+
+    // Serviço atualmente escolhido como referência.
+    const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
 
     // Resultado da última comparação.
-    const [respostaComparacao, setRespostaComparacao] =
-        useState<ComparisonResponse | null>(null);
+    const [respostaComparacao, setRespostaComparacao] = useState<ComparisonResponse | null>(null);
+
+    // Fotografia dos serviços utilizados na última comparação.
+    const [servicosComparados, setServicosComparados] = useState<ComparisonServiceSelection[]>([]);
+
+    // Referência utilizada na última comparação.
+    const [servicoPrincipalComparadoId, setServicoPrincipalComparadoId] = useState<string | null>(
+        null,
+    );
+
+    // Configuração que gerou a última comparação.
+    const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(null);
+
+    // Configuração que está sendo preparada atualmente.
+    const configuracaoAtual = JSON.stringify({
+        periodo,
+        servicoPrincipalId,
+        servicos: servicosSelecionados.map((servico) => ({
+            selectionId: servico.selectionId,
+            externalId: servico.externalId,
+            simulatedRegion: servico.simulatedRegion,
+        })),
+    });
+
+    // Verifica se existem alterações que exigem nova comparação.
+    const comparacaoPendente =
+        configuracaoComparada !== null && configuracaoComparada !== configuracaoAtual;
 
     // Recebe as informações enviadas pelo seletor.
     const handleSelectionsChange = useCallback(
-        (
-            selections: ComparisonServiceSelection[],
-            principalId: string | null,
-        ) => {
+        (selections: ComparisonServiceSelection[], principalId: string | null) => {
             setServicosSelecionados(selections);
             setServicoPrincipalId(principalId);
         },
@@ -76,6 +95,8 @@ export function ComparisonPage() {
 
     // Executa a comparação utilizando o mock.
     function handleComparar() {
+        if (!podeComparar) return;
+
         const request: ComparisonRequest = {
             range: periodo,
 
@@ -85,24 +106,48 @@ export function ComparisonPage() {
                 simulatedRegionCode:
                     item.simulatedRegion === null
                         ? null
-                        : CODIGOS_REGIAO[item.simulatedRegion] ?? null,
+                        : (CODIGOS_REGIAO[item.simulatedRegion] ?? null),
             })),
         };
 
         const resposta = gerarMockComparisonResponse(request);
 
+        // Salva o resultado e a configuração que o gerou.
         setRespostaComparacao(resposta);
+        setConfiguracaoComparada(configuracaoAtual);
+
+        // Registra os serviços e a referência utilizados.
+        setServicosComparados(
+            servicosSelecionados.map((servico) => ({
+                ...servico,
+            })),
+        );
+
+        setServicoPrincipalComparadoId(servicoPrincipalId);
 
         console.log('Requisição da comparação:', request);
         console.log('Resposta do mock:', resposta);
     }
 
+    // Preserva os serviços da última comparação.
+    // Atualiza somente suas cores quando o usuário as altera.
+    const servicosExibidos = servicosComparados.map((servicoComparado) => {
+        const servicoAtual = servicosSelecionados.find(
+            (item) => item.selectionId === servicoComparado.selectionId,
+        );
+
+        return servicoAtual
+            ? {
+                  ...servicoComparado,
+                  color: servicoAtual.color,
+              }
+            : servicoComparado;
+    });
+
     // Prepara as séries que serão entregues ao gráfico.
     const seriesGrafico =
         respostaComparacao?.series.flatMap((serie) => {
-            const servico = servicosSelecionados.find(
-                (item) => item.selectionId === serie.selectionId,
-            );
+            const servico = servicosExibidos.find((item) => item.selectionId === serie.selectionId);
 
             if (!servico) {
                 return [];
@@ -121,13 +166,11 @@ export function ComparisonPage() {
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
             <header className="space-y-2">
-                <h1 className="text-3xl font-semibold">
-                    Comparar serviços
-                </h1>
+                <h1 className="text-3xl font-semibold">Comparar serviços</h1>
 
                 <p className="text-muted-foreground">
-                    Selecione os serviços que deseja comparar, defina o período
-                    e analise as métricas no mesmo gráfico.
+                    Selecione os serviços que deseja comparar, defina o período e analise as
+                    métricas no mesmo gráfico.
                 </p>
             </header>
 
@@ -136,9 +179,7 @@ export function ComparisonPage() {
                 className="space-y-6 border-t border-border pt-6"
             >
                 {/* Seleção dos serviços. */}
-                <ComparisonServiceSelector
-                    onSelectionsChange={handleSelectionsChange}
-                />
+                <ComparisonServiceSelector onSelectionsChange={handleSelectionsChange} />
 
                 {/* Configurações da comparação. */}
                 <ComparisonControls
@@ -150,14 +191,22 @@ export function ComparisonPage() {
                     onComparar={handleComparar}
                 />
 
-                {/* Gráfico comparativo. */}
-                <div className="min-w-0 rounded-lg border border-border p-4">
-                    {respostaComparacao === null ? (
-                        <p className="text-sm text-muted-foreground">
-                            Selecione os serviços e clique em Comparar
-                            para visualizar o gráfico.
+                {/* Aviso de alterações pendentes. */}
+                {comparacaoPendente && (
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+                        <Info className="mt-0.5 size-5 shrink-0 text-amber-400" />
+
+                        <p className="text-sm text-slate-300">
+                            Você alterou os serviços, o período ou a região de simulação. Os
+                            resultados exibidos ainda correspondem à última comparação. Clique em
+                            Comparar novamente para atualizar os dados.
                         </p>
-                    ) : (
+                    </div>
+                )}
+
+                {/* Gráfico comparativo. */}
+                {respostaComparacao !== null && (
+                    <div className="min-w-0 rounded-lg border border-border p-4">
                         <ComparisonChart
                             series={seriesGrafico}
                             metrica={metrica}
@@ -165,17 +214,16 @@ export function ComparisonPage() {
                             periodoInicio={respostaComparacao.period.from}
                             periodoFim={respostaComparacao.period.to}
                         />
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Resumo comparativo. */}
                 <ComparisonSummary
-    servicosSelecionados={servicosSelecionados}
-    respostaComparacao={respostaComparacao}
-    metrica={metrica}
-    servicoPrincipalId={servicoPrincipalId}
-/>
-                
+                    servicosSelecionados={servicosExibidos}
+                    respostaComparacao={respostaComparacao}
+                    metrica={metrica}
+                    servicoPrincipalId={servicoPrincipalComparadoId}
+                />
             </section>
         </main>
     );

@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 
@@ -35,25 +34,14 @@ interface ComparisonServiceSelectorProps {
 
 const MAX_SERVICOS = 5;
 
-const CORES = [
-    '#3B82F6',
-    '#10B981',
-    '#ffd900',
-    '#A855F7',
-    '#EC4899',
-];
+const CORES = ['#3B82F6', '#10B981', '#ffd900', '#A855F7', '#EC4899'];
 
-export function ComparisonServiceSelector({
-    onSelectionsChange,
-}: ComparisonServiceSelectorProps) {
-    const [servicosSelecionados, setServicosSelecionados] =
-        useState<ServicoSelecionado[]>([]);
+export function ComparisonServiceSelector({ onSelectionsChange }: ComparisonServiceSelectorProps) {
+    const [servicosSelecionados, setServicosSelecionados] = useState<ServicoSelecionado[]>([]);
 
-    const [servicoPrincipalId, setServicoPrincipalId] =
-        useState<string | null>(null);
+    const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
 
-    const [mostrarDisponiveis, setMostrarDisponiveis] =
-        useState(false);
+    const [mostrarDisponiveis, setMostrarDisponiveis] = useState(false);
 
     const adicionarButtonRef = useRef<HTMLButtonElement>(null);
     const servicosPickerRef = useRef<HTMLDivElement>(null);
@@ -78,11 +66,7 @@ export function ComparisonServiceSelector({
             })),
             servicoPrincipalId,
         );
-    }, [
-        servicosSelecionados,
-        servicoPrincipalId,
-        onSelectionsChange,
-    ]);
+    }, [servicosSelecionados, servicoPrincipalId, onSelectionsChange]);
 
     // Adiciona um serviço à comparação.
     function adicionarServico(servico: ServiceSummary) {
@@ -91,10 +75,7 @@ export function ComparisonServiceSelector({
         }
 
         const corDisponivel = CORES.find(
-            (cor) =>
-                !servicosSelecionados.some(
-                    (item) => item.cor === cor,
-                ),
+            (cor) => !servicosSelecionados.some((item) => item.cor === cor),
         );
 
         if (!corDisponivel) {
@@ -108,10 +89,7 @@ export function ComparisonServiceSelector({
             regiaoSimulada: null,
         };
 
-        setServicosSelecionados((atuais) => [
-            ...atuais,
-            novoServico,
-        ]);
+        setServicosSelecionados((atuais) => [...atuais, novoServico]);
 
         // O primeiro serviço adicionado se torna a referência.
         if (servicoPrincipalId === null) {
@@ -123,36 +101,28 @@ export function ComparisonServiceSelector({
 
     // Remove um serviço da comparação.
     function removerServico(idSelecao: string) {
-        const atualizados = servicosSelecionados.filter(
-            (item) => item.idSelecao !== idSelecao,
-        );
+        const atualizados = servicosSelecionados.filter((item) => item.idSelecao !== idSelecao);
 
         setServicosSelecionados(atualizados);
 
         // Se o serviço removido era a referência,
         // o primeiro serviço restante assume essa posição.
         if (servicoPrincipalId === idSelecao) {
-            setServicoPrincipalId(
-                atualizados[0]?.idSelecao ?? null,
-            );
+            setServicoPrincipalId(atualizados[0]?.idSelecao ?? null);
         }
     }
 
     // Altera a cor de um serviço.
     function alterarCor(idSelecao: string, novaCor: string) {
         setServicosSelecionados((atuais) => {
-            const servicoAlvo = atuais.find(
-                (item) => item.idSelecao === idSelecao,
-            );
+            const servicoAlvo = atuais.find((item) => item.idSelecao === idSelecao);
 
             if (!servicoAlvo || servicoAlvo.cor === novaCor) {
                 return atuais;
             }
 
             const servicoComCorEscolhida = atuais.find(
-                (item) =>
-                    item.idSelecao !== idSelecao &&
-                    item.cor === novaCor,
+                (item) => item.idSelecao !== idSelecao && item.cor === novaCor,
             );
 
             return atuais.map((item) => {
@@ -165,11 +135,7 @@ export function ComparisonServiceSelector({
 
                 // Troca as cores caso outro serviço já utilize
                 // a cor escolhida.
-                if (
-                    servicoComCorEscolhida &&
-                    item.idSelecao ===
-                        servicoComCorEscolhida.idSelecao
-                ) {
+                if (servicoComCorEscolhida && item.idSelecao === servicoComCorEscolhida.idSelecao) {
                     return {
                         ...item,
                         cor: servicoAlvo.cor,
@@ -182,10 +148,7 @@ export function ComparisonServiceSelector({
     }
 
     // Altera a região simulada de um serviço.
-    function alterarRegiao(
-        idSelecao: string,
-        regiao: string | null,
-    ) {
+    function alterarRegiao(idSelecao: string, regiao: string | null) {
         setServicosSelecionados((atuais) =>
             atuais.map((item) =>
                 item.idSelecao === idSelecao
@@ -219,12 +182,9 @@ export function ComparisonServiceSelector({
                 {servicosSelecionados.map((item) => {
                     const id = item.idSelecao;
 
-                    const coresUsadasPorOutros =
-                        servicosSelecionados
-                            .filter(
-                                (outro) => outro.idSelecao !== id,
-                            )
-                            .map((outro) => outro.cor);
+                    const coresUsadasPorOutros = servicosSelecionados
+                        .filter((outro) => outro.idSelecao !== id)
+                        .map((outro) => outro.cor);
 
                     return (
                         <ComparisonServiceCard
@@ -233,20 +193,12 @@ export function ComparisonServiceSelector({
                             principal={servicoPrincipalId === id}
                             cor={item.cor}
                             cores={CORES}
-                            coresUsadasPorOutros={
-                                coresUsadasPorOutros
-                            }
+                            coresUsadasPorOutros={coresUsadasPorOutros}
                             regioes={mockComparisonRegions}
                             regiaoSimulada={item.regiaoSimulada}
-                            onDefinirPrincipal={() =>
-                                setServicoPrincipalId(id)
-                            }
-                            onSelecionarCor={(cor) =>
-                                alterarCor(id, cor)
-                            }
-                            onConfirmarRegiao={(regiao) =>
-                                alterarRegiao(id, regiao)
-                            }
+                            onDefinirPrincipal={() => setServicoPrincipalId(id)}
+                            onSelecionarCor={(cor) => alterarCor(id, cor)}
+                            onConfirmarRegiao={(regiao) => alterarRegiao(id, regiao)}
                             onRemover={() => removerServico(id)}
                         />
                     );
@@ -257,50 +209,35 @@ export function ComparisonServiceSelector({
                     <button
                         ref={adicionarButtonRef}
                         type="button"
-                        disabled={
-                            servicosSelecionados.length >= MAX_SERVICOS
-                        }
+                        disabled={servicosSelecionados.length >= MAX_SERVICOS}
                         aria-expanded={mostrarDisponiveis}
                         aria-controls="servicos-disponiveis"
-                        onClick={() =>
-                            setMostrarDisponiveis(
-                                (atual) => !atual,
-                            )
-                        }
+                        onClick={() => setMostrarDisponiveis((atual) => !atual)}
                         className="flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-4 text-slate-400 transition-colors duration-200 hover:border-teal-400/60 hover:bg-slate-900 hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <Plus
-                            aria-hidden="true"
-                            className="size-7 text-teal-300"
-                        />
+                        <Plus aria-hidden="true" className="size-7 text-teal-300" />
 
-                        <span className="font-medium">
-                            Adicionar serviço
-                        </span>
+                        <span className="font-medium">Adicionar serviço</span>
 
                         <span className="text-xs text-slate-500">
-                            {servicosSelecionados.length}/{MAX_SERVICOS}{' '}
-                            selecionados
+                            {servicosSelecionados.length}/{MAX_SERVICOS} selecionados
                         </span>
                     </button>
 
                     {/* Catálogo flutuante de serviços. */}
-                    {mostrarDisponiveis &&
-                        servicosSelecionados.length < MAX_SERVICOS && (
-                            <div
-                                ref={servicosPickerRef}
-                                id="servicos-disponiveis"
-                                className="absolute left-0 top-full z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-2 text-slate-100 shadow-2xl shadow-black/40"
-                            >
-                                <AvailableServicesPicker
-                                    servicos={mockComparisonServices}
-                                    onAdicionar={adicionarServico}
-                                    onFechar={() =>
-                                        setMostrarDisponiveis(false)
-                                    }
-                                />
-                            </div>
-                        )}
+                    {mostrarDisponiveis && servicosSelecionados.length < MAX_SERVICOS && (
+                        <div
+                            ref={servicosPickerRef}
+                            id="servicos-disponiveis"
+                            className="absolute left-0 top-full z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-2 text-slate-100 shadow-2xl shadow-black/40"
+                        >
+                            <AvailableServicesPicker
+                                servicos={mockComparisonServices}
+                                onAdicionar={adicionarServico}
+                                onFechar={() => setMostrarDisponiveis(false)}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

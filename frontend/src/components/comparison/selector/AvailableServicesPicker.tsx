@@ -7,15 +7,10 @@ interface AvailableServicesPickerProps {
     onFechar: () => void;
 }
 
-export function AvailableServicesPicker({
-    servicos,
-    onAdicionar,
-}: AvailableServicesPickerProps) {
+export function AvailableServicesPicker({ servicos, onAdicionar }: AvailableServicesPickerProps) {
     return (
         <div className="w-full min-w-0 space-y-2">
-            <h3 className="px-2 py-1 text-sm font-semibold text-foreground">
-                Adicionar serviço
-            </h3>
+            <h3 className="px-2 py-1 text-sm font-semibold text-foreground">Adicionar serviço</h3>
 
             <div className="flex flex-col gap-1">
                 {servicos.map((servico) => {
@@ -32,10 +27,7 @@ export function AvailableServicesPicker({
                             className="flex w-full min-w-0 items-center gap-3 rounded-lg border border-transparent px-3 py-3 text-left transition-colors hover:border-teal-500/30 hover:bg-teal-500/10"
                         >
                             <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary">
-                                <Server
-                                    aria-hidden="true"
-                                    className="size-4 text-teal-400"
-                                />
+                                <Server aria-hidden="true" className="size-4 text-teal-400" />
                             </span>
 
                             <span className="min-w-0 flex-1">
@@ -54,9 +46,7 @@ export function AvailableServicesPicker({
                                 </span>
                             </span>
 
-                            <span className="shrink-0 text-xs text-teal-400">
-                                Adicionar
-                            </span>
+                            <span className="shrink-0 text-xs text-teal-400">Adicionar</span>
                         </button>
                     );
                 })}

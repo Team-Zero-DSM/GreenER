@@ -1,9 +1,5 @@
 import type { HistoryRange } from '@/types/service';
-import type {
-    ComparisonPoint,
-    ComparisonRequest,
-    ComparisonResponse,
-} from '@/types/comparison';
+import type { ComparisonPoint, ComparisonRequest, ComparisonResponse } from '@/types/comparison';
 
 // Configurações exclusivas deste mock.
 const MOCK_MAX_POINTS = 120;
@@ -45,10 +41,7 @@ function arredondar(valor: number): number {
 }
 
 // Descobre qual intensidade de carbono será usada.
-function obterIntensidade(
-    externalId: string,
-    simulatedRegionCode: string | null,
-): number {
+function obterIntensidade(externalId: string, simulatedRegionCode: string | null): number {
     if (simulatedRegionCode === null) {
         return MOCK_ORIGINAL_INTENSITY[externalId] ?? 200;
     }
@@ -69,92 +62,47 @@ function gerarPontos(
 
     const potenciaWatts = MOCK_POWER_WATTS[externalId] ?? 20;
 
-    const intensidade = obterIntensidade(
-        externalId,
-        simulatedRegionCode,
-    );
+    const intensidade = obterIntensidade(externalId, simulatedRegionCode);
 
     // Cria uma variação previsível para os valores do gráfico.
-    const seed = [...externalId].reduce(
-        (total, caractere) => total + caractere.charCodeAt(0),
-        0,
-    );
+    const seed = [...externalId].reduce((total, caractere) => total + caractere.charCodeAt(0), 0);
 
-    return Array.from(
-        { length: MOCK_MAX_POINTS },
-        (_, indice) => {
-            const variacao =
-                0.9 + ((seed + indice * 7) % 21) / 100;
+    return Array.from({ length: MOCK_MAX_POINTS }, (_, indice) => {
+        const variacao = 0.9 + ((seed + indice * 7) % 21) / 100;
 
-            const energiaKwh = arredondar(
-                (potenciaWatts / 1000) *
-                    (bucketSeconds / 3600) *
-                    variacao,
-            );
+        const energiaKwh = arredondar((potenciaWatts / 1000) * (bucketSeconds / 3600) * variacao);
 
-            const co2eGrams = arredondar(
-                energiaKwh * intensidade,
-            );
+        const co2eGrams = arredondar(energiaKwh * intensidade);
 
-            return {
-                timestamp: new Date(
-                    inicioMs + indice * bucketMs,
-                ).toISOString(),
+        return {
+            timestamp: new Date(inicioMs + indice * bucketMs).toISOString(),
 
-                sampleCount: Math.max(
-                    1,
-                    Math.round(
-                        bucketSeconds /
-                            MOCK_COLLECTION_INTERVAL_SECONDS,
-                    ),
-                ),
+            sampleCount: Math.max(1, Math.round(bucketSeconds / MOCK_COLLECTION_INTERVAL_SECONDS)),
 
-                // O nome do campo segue o tipo ComparisonPoint.
-                energyKwh: energiaKwh,
-                co2eGrams: co2eGrams,
-            };
-        },
-    );
+            // O nome do campo segue o tipo ComparisonPoint.
+            energyKwh: energiaKwh,
+            co2eGrams: co2eGrams,
+        };
+    });
 }
 
 // Calcula os totais dos pontos gerados.
 function gerarResumo(pontos: ComparisonPoint[]) {
     return {
-        sampleCount: pontos.reduce(
-            (total, ponto) => total + ponto.sampleCount,
-            0,
-        ),
+        sampleCount: pontos.reduce((total, ponto) => total + ponto.sampleCount, 0),
 
-        energyKwh: pontos.every(
-            (ponto) => ponto.energyKwh === null,
-        )
+        energyKwh: pontos.every((ponto) => ponto.energyKwh === null)
             ? null
-            : arredondar(
-                  pontos.reduce(
-                      (total, ponto) =>
-                          total + (ponto.energyKwh ?? 0),
-                      0,
-                  ),
-              ),
+            : arredondar(pontos.reduce((total, ponto) => total + (ponto.energyKwh ?? 0), 0)),
 
-        co2eGrams: pontos.every(
-            (ponto) => ponto.co2eGrams === null,
-        )
+        co2eGrams: pontos.every((ponto) => ponto.co2eGrams === null)
             ? null
-            : arredondar(
-                  pontos.reduce(
-                      (total, ponto) =>
-                          total + (ponto.co2eGrams ?? 0),
-                      0,
-                  ),
-              ),
+            : arredondar(pontos.reduce((total, ponto) => total + (ponto.co2eGrams ?? 0), 0)),
     };
 }
 
 // Monta a resposta fictícia da comparação.
-export function gerarMockComparisonResponse(
-    request: ComparisonRequest,
-): ComparisonResponse {
+export function gerarMockComparisonResponse(request: ComparisonRequest): ComparisonResponse {
     const periodoFinal = Date.now();
 
     const duracaoMs = RANGE_MS[request.range];

@@ -1,5 +1,1 @@
-export const mockComparisonRegions: string[] = [
-    'São Paulo',
-    'Toronto',
-    'Ashburn',
-];
+export const mockComparisonRegions: string[] = ['São Paulo', 'Toronto', 'Ashburn'];
