@@ -1,3 +1,4 @@
+
 import { useCallback, useState } from 'react';
 
 import { Info } from 'lucide-react';
@@ -35,9 +36,9 @@ export function ComparisonPage() {
     const [metrica, setMetrica] = useState<ComparisonMetric>('co2eGrams');
 
     // Serviços atualmente escolhidos pelo usuário.
-    const [servicosSelecionados, setServicosSelecionados] = useState<ComparisonServiceSelection[]>(
-        [],
-    );
+    const [servicosSelecionados, setServicosSelecionados] = useState<
+        ComparisonServiceSelection[]
+    >([]);
 
     // Valida se a seleção permite executar uma comparação.
     const podeComparar = (() => {
@@ -56,23 +57,24 @@ export function ComparisonPage() {
     const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
 
     // Resultado da última comparação.
-    const [respostaComparacao, setRespostaComparacao] = useState<ComparisonResponse | null>(null);
+    const [respostaComparacao, setRespostaComparacao] =
+        useState<ComparisonResponse | null>(null);
 
     // Fotografia dos serviços utilizados na última comparação.
-    const [servicosComparados, setServicosComparados] = useState<ComparisonServiceSelection[]>([]);
+    const [servicosComparados, setServicosComparados] = useState<
+        ComparisonServiceSelection[]
+    >([]);
 
-    // Referência utilizada na última comparação.
-    const [servicoPrincipalComparadoId, setServicoPrincipalComparadoId] = useState<string | null>(
+    // Configuração que gerou a última comparação.
+    const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(
         null,
     );
 
-    // Configuração que gerou a última comparação.
-    const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(null);
-
     // Configuração que está sendo preparada atualmente.
+    // A referência não faz parte dessa configuração, pois pode ser trocada
+    // sem precisar executar uma nova comparação.
     const configuracaoAtual = JSON.stringify({
         periodo,
-        servicoPrincipalId,
         servicos: servicosSelecionados.map((servico) => ({
             selectionId: servico.selectionId,
             externalId: servico.externalId,
@@ -116,14 +118,12 @@ export function ComparisonPage() {
         setRespostaComparacao(resposta);
         setConfiguracaoComparada(configuracaoAtual);
 
-        // Registra os serviços e a referência utilizados.
+        // Registra os serviços utilizados na última comparação.
         setServicosComparados(
             servicosSelecionados.map((servico) => ({
                 ...servico,
             })),
         );
-
-        setServicoPrincipalComparadoId(servicoPrincipalId);
 
         console.log('Requisição da comparação:', request);
         console.log('Resposta do mock:', resposta);
@@ -147,7 +147,9 @@ export function ComparisonPage() {
     // Prepara as séries que serão entregues ao gráfico.
     const seriesGrafico =
         respostaComparacao?.series.flatMap((serie) => {
-            const servico = servicosExibidos.find((item) => item.selectionId === serie.selectionId);
+            const servico = servicosExibidos.find(
+                (item) => item.selectionId === serie.selectionId,
+            );
 
             if (!servico) {
                 return [];
@@ -222,7 +224,7 @@ export function ComparisonPage() {
                     servicosSelecionados={servicosExibidos}
                     respostaComparacao={respostaComparacao}
                     metrica={metrica}
-                    servicoPrincipalId={servicoPrincipalComparadoId}
+                    servicoPrincipalId={servicoPrincipalId}
                 />
             </section>
         </main>

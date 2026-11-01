@@ -12,12 +12,6 @@ const navItems = [
         prefixes: ['/dashboard', '/servicos'],
     },
     {
-        to: '/comparacao',
-        label: 'Comparação',
-        icon: ArrowLeftRight,
-        prefixes: ['/comparacao'],
-    },
-    {
         to: '/regioes',
         label: 'Regiões',
         icon: Globe,
@@ -28,6 +22,12 @@ const navItems = [
         label: 'Ranking',
         icon: ListOrdered,
         prefixes: ['/ranking'],
+    },
+    {
+        to: '/comparacao',
+        label: 'Comparação',
+        icon: ArrowLeftRight,
+        prefixes: ['/comparacao'],
     },
 ];
 

@@ -1,4 +1,15 @@
-import { ArrowUpDown, Info, Leaf, Percent, Server, Star, UsersRound } from 'lucide-react';
+
+import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
+    Info,
+    Leaf,
+    Minus,
+    Server,
+    Star,
+    UsersRound,
+} from 'lucide-react';
 
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 import type { ComparisonServiceSelection } from '@/components/comparison/selector/ComparisonServiceSelector';
@@ -11,6 +22,8 @@ interface ComparisonSummaryProps {
     servicoPrincipalId: string | null;
 }
 
+type ClassificacaoComparacao = 'acima' | 'abaixo' | 'igual' | 'indisponivel';
+
 function formatarValor(valor: number | null, metrica: ComparisonMetric): string {
     if (valor === null || !Number.isFinite(valor)) {
         return '—';
@@ -18,6 +31,12 @@ function formatarValor(valor: number | null, metrica: ComparisonMetric): string 
 
     return valor.toLocaleString('pt-BR', {
         maximumFractionDigits: metrica === 'energyKwh' ? 4 : 2,
+    });
+}
+
+function formatarPercentual(valor: number): string {
+    return Math.abs(valor).toLocaleString('pt-BR', {
+        maximumFractionDigits: 1,
     });
 }
 
@@ -38,14 +57,21 @@ export function ComparisonSummary({
         (item) => item.selectionId === servicoPrincipalId,
     );
 
+    const nomeServicoPrincipal = servicoPrincipal?.name ?? 'Serviço de referência';
+
     // Localiza a série do serviço principal.
     const seriePrincipal = respostaComparacao?.series.find(
         (serie) => serie.selectionId === servicoPrincipalId,
     );
 
-    const valorPrincipal = seriePrincipal ? seriePrincipal.summary[metrica] : null;
+    const valorPrincipalBruto = seriePrincipal?.summary[metrica];
 
-    // Obtém os totais dos demais serviços.
+    const valorPrincipal =
+        typeof valorPrincipalBruto === 'number' && Number.isFinite(valorPrincipalBruto)
+            ? valorPrincipalBruto
+            : null;
+
+    // Obtém os valores disponíveis dos demais serviços.
     const valoresDemais = servicosSelecionados.flatMap((servico) => {
         if (servico.selectionId === servicoPrincipalId) {
             return [];
@@ -60,11 +86,50 @@ export function ComparisonSummary({
         return typeof valor === 'number' && Number.isFinite(valor) ? [valor] : [];
     });
 
-    // Calcula a média dos demais serviços.
+    // Calcula a média aritmética dos demais serviços.
     const mediaDemais =
         valoresDemais.length > 0
             ? valoresDemais.reduce((total, valor) => total + valor, 0) / valoresDemais.length
             : null;
+
+    // Calcula a diferença absoluta entre a referência e a média.
+    const diferencaAbsoluta =
+        valorPrincipal !== null && mediaDemais !== null
+            ? valorPrincipal - mediaDemais
+            : null;
+
+    // Identifica se a referência está acima, abaixo ou igual à média.
+    const classificacao: ClassificacaoComparacao =
+        diferencaAbsoluta === null
+            ? 'indisponivel'
+            : diferencaAbsoluta > 0
+              ? 'acima'
+              : diferencaAbsoluta < 0
+                ? 'abaixo'
+                : 'igual';
+
+    // Calcula a diferença percentual em relação à média.
+    const diferencaPercentual =
+        diferencaAbsoluta === null || mediaDemais === null
+            ? null
+            : mediaDemais === 0
+              ? diferencaAbsoluta === 0
+                  ? 0
+                  : null
+              : (diferencaAbsoluta / mediaDemais) * 100;
+
+    // Define a cor de acordo com o resultado.
+    const corClassificacao =
+        classificacao === 'acima'
+            ? 'text-rose-400'
+            : classificacao === 'abaixo'
+              ? 'text-emerald-400'
+              : classificacao === 'igual'
+                ? 'text-slate-200'
+                : 'text-slate-400';
+
+    // Define o verbo de acordo com a métrica selecionada.
+    const verboMetrica = metrica === 'co2eGrams' ? 'emitiu' : 'consumiu';
 
     return (
         <section className="space-y-4">
@@ -200,31 +265,100 @@ export function ComparisonSummary({
                                     {mediaDemais !== null
                                         ? `Média de ${valoresDemais.length} ${
                                               valoresDemais.length === 1 ? 'serviço' : 'serviços'
-                                          } selecionados.`
+                                          } com valores disponíveis.`
                                         : 'Não há outros serviços com valores disponíveis.'}
                                 </p>
                             </div>
                         </div>
 
-                        {/* Diferença percentual: próxima task. */}
-                        <div className="flex min-h-[190px] min-w-0 flex-col justify-center gap-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                            <div className="flex items-center gap-3">
-                                <Percent
-                                    className="size-7 shrink-0 text-slate-300"
+                        {/* Diferença percentual. */}
+                        <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                            <div className="flex items-center gap-2">
+                                <span
+                                    className="flex size-6 shrink-0 items-center justify-center text-2xl font-semibold text-slate-300"
                                     aria-hidden="true"
-                                />
+                                >
+                                    %
+                                </span>
 
-                                <ArrowUpDown className="size-5 text-slate-500" aria-hidden="true" />
-
-                                <p className="text-3xl font-semibold text-slate-500 tabular-nums">
-                                    —
-                                </p>
+                                <span className="text-sm font-medium text-slate-200">
+                                    Diferença percentual
+                                </span>
                             </div>
 
-                            <p className="text-sm leading-relaxed text-slate-400">
-                                A diferença percentual entre o serviço de referência e a média dos
-                                demais será apresentada aqui.
-                            </p>
+                            <div className="space-y-3">
+                                {/* Seta e percentual em destaque, sem texto ao lado. */}
+                                <div className="flex items-center gap-3">
+                                    {classificacao === 'acima' && (
+                                        <ArrowUp
+                                            className={`size-8 shrink-0 ${corClassificacao}`}
+                                            aria-hidden="true"
+                                        />
+                                    )}
+
+                                    {classificacao === 'abaixo' && (
+                                        <ArrowDown
+                                            className={`size-8 shrink-0 ${corClassificacao}`}
+                                            aria-hidden="true"
+                                        />
+                                    )}
+
+                                    {classificacao === 'igual' && (
+                                        <Minus
+                                            className={`size-8 shrink-0 ${corClassificacao}`}
+                                            aria-hidden="true"
+                                        />
+                                    )}
+
+                                    {classificacao === 'indisponivel' && (
+                                        <ArrowUpDown
+                                            className="size-8 shrink-0 text-slate-400"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+
+                                    <p
+                                        className={`text-3xl font-semibold tabular-nums sm:text-4xl ${corClassificacao}`}
+                                    >
+                                        {diferencaPercentual !== null
+                                            ? `${formatarPercentual(diferencaPercentual)}%`
+                                            : '—'}
+                                    </p>
+                                </div>
+
+                                {/* Descrição com informações importantes em destaque. */}
+                                <p className="text-xs leading-relaxed text-slate-400">
+                                    {diferencaAbsoluta === null ? (
+                                        'Não há valores disponíveis suficientes para realizar essa comparação.'
+                                    ) : classificacao === 'igual' ? (
+                                        <>
+                                            <strong className="font-semibold text-slate-200">
+                                                {nomeServicoPrincipal}
+                                            </strong>{' '}
+                                            apresentou o mesmo valor que a média dos demais serviços
+                                            selecionados.
+                                        </>
+                                    ) : (
+                                        <>
+                                            <strong className="font-semibold text-slate-200">
+                                                {nomeServicoPrincipal}
+                                            </strong>{' '}
+                                            {verboMetrica}{' '}
+                                            <strong className="font-semibold text-slate-200">
+                                                {formatarValor(
+                                                    Math.abs(diferencaAbsoluta),
+                                                    metrica,
+                                                )}{' '}
+                                                {unidade}
+                                            </strong>{' '}
+                                            <strong className="font-semibold text-slate-200">
+                                                {classificacao === 'acima' ? 'a mais' : 'a menos'}
+                                            </strong>{' '}
+                                            que a média dos demais serviços selecionados.
+                                        </>
+                                    )}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Valores individuais. */}
