@@ -13,6 +13,10 @@ const criteria: { value: RankingCriterion; label: string }[] = [
     { value: 'energyKwh', label: 'Energia' },
 ];
 
+const optionClass = 'rounded-md px-3 py-1.5 text-sm transition-colors';
+const selectedClass = 'bg-primary/15 font-semibold text-primary';
+const idleClass = 'text-muted-foreground hover:bg-white/5';
+
 const ranges: HistoryRange[] = ['1h', '6h', '24h', '7d', '30d'];
 
 export function RankingFilters({
@@ -36,7 +40,7 @@ export function RankingFilters({
                         type="button"
                         aria-pressed={criterion === value}
                         onClick={() => onCriterionChange(value)}
-                        className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-white/5"
+                        className={`${optionClass} ${criterion === value ? selectedClass : idleClass}`}
                     >
                         {label}
                     </button>
@@ -53,7 +57,7 @@ export function RankingFilters({
                         type="button"
                         aria-pressed={range === value}
                         onClick={() => onRangeChange(value)}
-                        className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-white/5"
+                        className={`${optionClass} ${range === value ? selectedClass : idleClass}`}
                     >
                         {value}
                     </button>
