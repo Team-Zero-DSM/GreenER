@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { RankingChart } from '@/components/ranking/RankingChart';
 import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
+import type { RankingCriterion } from '@/types/ranking';
 
 export function RankingPage() {
+    const [criterion, setCriterion] = useState<RankingCriterion>('co2eGrams');
+
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -14,7 +18,7 @@ export function RankingPage() {
                     </p>
                 </header>
 
-                <RankingFilters />
+                <RankingFilters criterion={criterion} onCriterionChange={setCriterion} />
             </div>
 
             <p className="text-sm text-muted-foreground">
