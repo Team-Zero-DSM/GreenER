@@ -24,7 +24,7 @@ fornecê-las ao restante da aplicação.
 ## 2. API REST do GreenER
 
 A implementação atual oferece listagem e detalhe de serviços, histórico de coletas,
-estado do monitoramento, os cards de região e o ranking de impacto. As demais operações abaixo são
+estado do monitoramento, os cards de região e a comparação de serviços. As demais operações abaixo são
 planejadas e não devem ser apresentadas como implementadas. O dashboard e o
 detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
 serviços, sem dados simulados. Essas telas buscam a API ao abrir, ao trocar
@@ -48,7 +48,7 @@ para listagem, detalhe e histórico.
 | `GET` | `/api/v1/services/:externalId/collections` | Entregar pontos agrupados e totais do período. | Não exige. |
 | `GET` | `/api/v1/regions` | Entregar as regiões, dados ambientais, contadores atuais e totais do período. | Não exige. |
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
-| `GET` | `/api/v1/rankings` | Classificar os serviços pelos totais de emissões ou energia no período. | Não exige. |
+| `POST` | `/api/v1/comparisons` | Comparar os totais e 120 pontos por seleção, com simulação opcional de região. | Não exige. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
 por exemplo `billing-api`; não é o BIGINT interno. O parâmetro aceita de 1 a
@@ -180,34 +180,49 @@ da amostra.
 Regiões ausentes retornam 200 com `regions: []`. Par inválido (incompleto,
 `from >= to` ou formato incorreto) retorna 400; falha interna retorna 500.
 
-#### Ranking de impacto
+#### Comparação de serviços
 
 ```http
-GET /api/v1/rankings?criterion=co2eGrams&range=24h
+POST /api/v1/comparisons
+Content-Type: application/json
 ```
 
-Filtros opcionais: `criterion` (`co2eGrams` ou `energyKwh`, padrão
-`co2eGrams`) e `range` (`1h`, `6h`, `24h`, `7d` ou `30d`, padrão `24h`).
-Parâmetros extras, repetidos ou inválidos retornam 400.
+```json
+{
+  "range": "1h",
+  "selections": [
+    { "selectionId": "original", "externalId": "billing-api", "simulatedRegionCode": null },
+    { "selectionId": "simulado", "externalId": "billing-api", "simulatedRegionCode": "br-sudeste" }
+  ]
+}
+```
 
-A resposta 200 contém `criterion`, `range`, `period: { from, to }` e `items`.
-Cada item contém `position`, `externalId`, `name`, `region: { code, city }`,
-`energyKwh`, `co2eGrams` e `sampleCount`. Os valores são as somas das
-coletas armazenadas no período; não há pontos por horário na resposta.
-A região é a localização atual do serviço.
+O body exige `range` (`1h`, `6h`, `24h`, `7d` ou `30d`) e de 2 a 5 seleções.
+Cada seleção exige `selectionId`, `externalId` e `simulatedRegionCode` (código
+da região ou `null` para usar as emissões armazenadas).
 
-A classificação usa ordem decrescente do critério escolhido, com desempate
-pelo identificador externo. Serviços sem coletas no período aparecem ao
-final, com `position: null`, `sampleCount: 0` e métricas `null`. Consumo
-medido como zero participa da classificação. Todos os serviços cadastrados
-são considerados, inclusive os que já não estão listados na descoberta.
-Sem serviços cadastrados, retorna `items: []`.
+A resposta 200 contém `range`, `period: { from, to }` e `series`. Todas as
+seleções usam o mesmo período, encerrado imediatamente após a última coleta
+disponível entre os serviços selecionados e dividido em 120 faixas iguais.
+O limite final inclui 1 milissegundo adicional para preservar coletas com
+precisão de microssegundos do PostgreSQL. Sem coletas em nenhum dos serviços,
+o período termina no momento da requisição. Sem novas coletas, os horários
+das faixas permanecem iguais entre consultas. Cada série contém
+`selectionId`, `summary` e `points`.
+O resumo contém `sampleCount`, `energyKwh` e `co2eGrams`; cada ponto também
+contém `timestamp`, que identifica o início da faixa. Uma faixa inclui
+coletas posteriores ao início e até o fim, inclusive.
 
-O período é comum a todos os serviços e termina imediatamente após a última
-coleta disponível, com 1 milissegundo adicional para incluir a precisão de
-microssegundos do PostgreSQL. Sem coletas, termina no momento da requisição.
-O intervalo inclui coletas posteriores a `from` e até `to`, inclusive.
-Falhas internas retornam 500. A integração da tela de ranking está pendente.
+Faixas sem coletas retornam quantidade zero e métricas `null`. Na simulação,
+a energia é preservada e as emissões são calculadas como energia em kWh
+vezes o fator atual da região em gCO₂e/kWh, tanto no resumo como nos pontos.
+Os totais representam as amostras disponíveis; faixas vazias não comprovam
+falhas de coleta. A tela de comparação carrega os serviços e as regiões da
+API e consulta este endpoint ao clicar em Comparar, mantendo o resultado
+anterior durante o carregamento ou em caso de falha.
+
+Body inválido retorna 400; serviço ou região simulada inexistente retorna
+404; falha interna retorna 500.
 
 ### 2.2. Operações planejadas
 
@@ -222,17 +237,17 @@ implementadas, sem garantia de disponibilidade HTTP na versão atual.
 | Método | Caminho | Responsabilidade |
 |---|---|---|
 | `POST` | `/auth/login` | Validar as credenciais do usuário e emitir um JWT. |
-| `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
+| `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
 | `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
 | `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
 | `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |
 
-Para comparação, os filtros de datas abaixo são planejados. Não
+Para ranking, os filtros de datas abaixo são planejados. Não
 substituem o contrato implementado de `range` e `to` descrito na seção 2.1.
 
 | Caminho | Parâmetros |
 |---|---|
-| `/comparisons` | `serviceIds` (lista), `from`, `to` |
+| `/rankings` | `from`, `to`, `metric` (`energy` ou `co2e`) |
 
 No contrato planejado, `POST /auth/login` recebe `username` e `password` e
 retorna um `accessToken` JWT. O token será enviado nas chamadas autenticadas pelo cabeçalho
@@ -387,8 +402,8 @@ comprovam autenticação implementada na versão atual. Sua entrega está previs
 ## 6. Alinhamento entre contrato e implementação
 
 Lista, detalhe, histórico e regiões são consumidos pela interface real. Rotas,
-schemas Zod e tipos devem evoluir em conjunto. O ranking está disponível no
-backend, com integração da tela ainda pendente. Comparação, cenários,
+schemas Zod e tipos devem evoluir em conjunto. A comparação está integrada
+à API, incluindo a simulação de região. Ranking, cenários,
 JWT e configuração por HTTP continuam planejados. Consultar o [plano](./plano-de-entregas.md)
 e as [rotas do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
 
