@@ -1,9 +1,8 @@
-import type { RankingCriterion } from '@/types/ranking';
-import type { HistoryRange } from '@/types/service';
+import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
 interface RankingChartProps {
     criterion: RankingCriterion;
-    range: HistoryRange;
+    items: RankingItem[];
 }
 
 const titles: Record<RankingCriterion, string> = {
@@ -11,7 +10,10 @@ const titles: Record<RankingCriterion, string> = {
     energyKwh: 'Consumo de energia por serviço',
 };
 
-export function RankingChart({ criterion, range }: RankingChartProps) {
+export function RankingChart({ criterion, items }: RankingChartProps) {
+    // Serviços sem dados no período ficam só na tabela.
+    const bars = items.filter((item) => item[criterion] !== null);
+
     return (
         <section aria-label="Gráfico do ranking" className="space-y-3 border-t border-border pt-6">
             <div>
@@ -22,9 +24,19 @@ export function RankingChart({ criterion, range }: RankingChartProps) {
                 </p>
             </div>
 
-            <div className="flex min-h-64 items-center justify-center rounded-lg border border-border p-4">
-                <p className="text-sm text-muted-foreground">Área do gráfico de barras ({range})</p>
-            </div>
+            <ol className="space-y-2 rounded-lg border border-border p-4">
+                {bars.map((item) => (
+                    <li key={item.externalId} className="flex items-center gap-3 text-sm">
+                        <span className="w-36 shrink-0 truncate text-muted-foreground">
+                            {item.name}
+                        </span>
+
+                        <div className="h-4 flex-1 rounded-sm bg-white/5">
+                            <div className="h-full w-full rounded-sm bg-emerald-500" />
+                        </div>
+                    </li>
+                ))}
+            </ol>
         </section>
     );
 }
