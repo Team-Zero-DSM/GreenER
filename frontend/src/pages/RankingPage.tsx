@@ -4,6 +4,7 @@ import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
 import { getRankingPeriod } from '@/components/ranking/rankingPeriod';
 import { formatDateTimeSeconds } from '@/lib/format';
+import { getRankingMock } from '@/mocks/rankingResponse.mock';
 import type { RankingCriterion } from '@/types/ranking';
 import type { HistoryRange } from '@/types/service';
 
@@ -12,6 +13,7 @@ export function RankingPage() {
     const [range, setRange] = useState<HistoryRange>('24h');
     const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString());
     const period = getRankingPeriod(range, periodEnd);
+    const ranking = getRankingMock(criterion, range, periodEnd);
 
     function handleRangeChange(value: HistoryRange) {
         setRange(value);
@@ -44,7 +46,7 @@ export function RankingPage() {
                 </span>
             </p>
 
-            <RankingChart criterion={criterion} range={range} />
+            <RankingChart criterion={criterion} items={ranking.items} />
 
             <RankingTable criterion={criterion} />
         </main>
