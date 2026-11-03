@@ -1,3 +1,4 @@
+import { formatRankingValue } from '@/components/ranking/formatRankingValue';
 import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
 interface RankingChartProps {
@@ -42,6 +43,10 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
                                     style={{ width: `${widthPercent}%` }}
                                 />
                             </div>
+
+                            <span className="w-32 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                                {formatRankingValue(criterion, item[criterion])}
+                            </span>
                         </li>
                     );
                 })}
