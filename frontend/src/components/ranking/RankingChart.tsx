@@ -13,6 +13,7 @@ const titles: Record<RankingCriterion, string> = {
 export function RankingChart({ criterion, items }: RankingChartProps) {
     // Serviços sem dados no período ficam só na tabela.
     const bars = items.filter((item) => item[criterion] !== null);
+    const maxValue = Math.max(0, ...bars.map((item) => item[criterion] ?? 0));
 
     return (
         <section aria-label="Gráfico do ranking" className="space-y-3 border-t border-border pt-6">
@@ -25,17 +26,25 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
             </div>
 
             <ol className="space-y-2 rounded-lg border border-border p-4">
-                {bars.map((item) => (
-                    <li key={item.externalId} className="flex items-center gap-3 text-sm">
-                        <span className="w-36 shrink-0 truncate text-muted-foreground">
-                            {item.name}
-                        </span>
+                {bars.map((item) => {
+                    const value = item[criterion] ?? 0;
+                    const widthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
-                        <div className="h-4 flex-1 rounded-sm bg-white/5">
-                            <div className="h-full w-full rounded-sm bg-emerald-500" />
-                        </div>
-                    </li>
-                ))}
+                    return (
+                        <li key={item.externalId} className="flex items-center gap-3 text-sm">
+                            <span className="w-36 shrink-0 truncate text-muted-foreground">
+                                {item.name}
+                            </span>
+
+                            <div className="h-4 flex-1 rounded-sm bg-white/5">
+                                <div
+                                    className="h-full rounded-sm bg-emerald-500"
+                                    style={{ width: `${widthPercent}%` }}
+                                />
+                            </div>
+                        </li>
+                    );
+                })}
             </ol>
         </section>
     );
