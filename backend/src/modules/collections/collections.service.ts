@@ -8,6 +8,7 @@ import { pool } from '../../db/connection.js';
 import { ExternalApiError } from '../../shared/errors/external-api-error.js';
 import { CollectionsRepository } from './collections.repository.js';
 import { monitoringService } from '../monitoring/monitoring.service.js';
+import type { CollectionStatusFilters } from './collections.schema.js';
 import type {
     ActiveService,
     Emissions,
@@ -23,6 +24,93 @@ export class CollectionsService {
         private readonly carbon: CarbonClient,
         private readonly metrics: MetricsClient,
     ) {}
+
+    async listCollectionStatuses(filters: CollectionStatusFilters) {
+        const services = await this.repository.findLatestCollectionStatuses();
+
+        const search = filters.search?.toLowerCase() ?? '';
+
+        const matchingServices = services.filter((service) => {
+            const name = service.nome.toLowerCase();
+            const externalId = service.external_id.toLowerCase();
+
+            return name.includes(search) || externalId.includes(search);
+        });
+
+        const statuses = matchingServices.map((service) => {
+            let result = 'pending';
+
+            if (service.tipo === 'success') {
+                result = 'success';
+            } else if (service.tipo !== null) {
+                result = 'failure';
+            }
+
+            return {
+                externalId: service.external_id,
+                name: service.nome,
+                location: {
+                    regionCode: service.region_code,
+                    city: service.cidade,
+                    country: service.pais,
+                },
+                lastSuccessfulCollectionAt: service.ultima_coleta_sucesso,
+                result,
+                latestAttempt:
+                    service.tipo === null
+                        ? null
+                        : {
+                              observedAt: service.observado_em,
+                              type: service.tipo,
+                              description: service.descricao,
+                              httpStatus: service.http_status,
+                          },
+            };
+        });
+
+        const summary = {
+            totalServices: statuses.length,
+
+            successfulServices: statuses.filter((status) => {
+                return status.result === 'success';
+            }).length,
+
+            failedServices: statuses.filter((status) => {
+                return status.result === 'failure';
+            }).length,
+
+            pendingServices: statuses.filter((status) => {
+                return status.result === 'pending';
+            }).length,
+        };
+
+        // Começa com todos os serviços encontrados na busca.
+        let items = statuses;
+
+        // Se houver filtro de resultado, aplica somente à lista.
+        if (filters.result) {
+            items = statuses.filter((status) => {
+                return status.result === filters.result;
+            });
+        }
+
+        const total = items.length;
+
+        const start = (filters.page - 1) * filters.limit;
+
+        const paginatedItems = items.slice(start, start + filters.limit);
+
+        return {
+            summary,
+            items: paginatedItems,
+            pagination: {
+                page: filters.page,
+                limit: filters.limit,
+                total,
+                totalPages: Math.ceil(total / filters.limit),
+            },
+        };
+    }
 
     async syncRegions(): Promise<void> {
         let response: RegionsResponse;
@@ -315,7 +403,7 @@ export class CollectionsService {
     }
 }
 
-function createDefaultCollectionsService(): CollectionsService {
+export function createDefaultCollectionsService(): CollectionsService {
     const carbonUrl = process.env.CARBON_API_URL ?? process.env['CARBON_API_URL '];
     const metricsUrl = process.env.METRICS_API_URL;
 

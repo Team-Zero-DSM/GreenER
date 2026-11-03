@@ -191,4 +191,41 @@ export class CollectionsRepository {
         );
         return result.rows;
     }
+
+    async findLatestCollectionStatuses() {
+        const result = await this.pool.query(`
+        SELECT
+            s.external_id,
+            s.nome,
+            r.codigo AS region_code,
+            r.cidade,
+            r.pais,
+            (
+                SELECT c.coletado_em
+                FROM coleta c
+                WHERE c.servico_id = s.id
+                ORDER BY c.coletado_em DESC
+                LIMIT 1
+            ) AS ultima_coleta_sucesso,
+            sc.observado_em,
+            sc.tipo,
+            sc.descricao,
+            sc.http_status
+        FROM servico s
+        JOIN regiao r ON r.id = s.regiao_id
+        LEFT JOIN status_coleta sc
+            ON sc.id = (
+                SELECT historico.id
+                FROM status_coleta historico
+                WHERE historico.servico_id = s.id
+                ORDER BY
+                    historico.observado_em DESC,
+                    historico.id DESC
+                LIMIT 1
+            )
+        ORDER BY s.nome
+    `);
+
+        return result.rows;
+    }
 }
