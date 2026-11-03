@@ -1,6 +1,19 @@
-const rankingColumns = ['#', 'Serviço', 'Região', 'Energia', 'CO₂e', 'Coletas'];
+import type { RankingCriterion } from '@/types/ranking';
 
-export function RankingTable() {
+interface RankingTableProps {
+    criterion: RankingCriterion;
+}
+
+const rankingColumns: { label: string; criterion?: RankingCriterion }[] = [
+    { label: '#' },
+    { label: 'Serviço' },
+    { label: 'Região' },
+    { label: 'Energia', criterion: 'energyKwh' },
+    { label: 'CO₂e', criterion: 'co2eGrams' },
+    { label: 'Coletas' },
+];
+
+export function RankingTable({ criterion }: RankingTableProps) {
     return (
         <section
             aria-label="Tabela de classificação"
@@ -12,15 +25,20 @@ export function RankingTable() {
                 <table className="w-full min-w-xl text-sm">
                     <thead className="border-b border-border text-muted-foreground">
                         <tr>
-                            {rankingColumns.map((column) => (
-                                <th
-                                    key={column}
-                                    scope="col"
-                                    className="px-4 py-3 text-left font-medium"
-                                >
-                                    {column}
-                                </th>
-                            ))}
+                            {rankingColumns.map((column) => {
+                                const isSorted = column.criterion === criterion;
+
+                                return (
+                                    <th
+                                        key={column.label}
+                                        scope="col"
+                                        aria-sort={isSorted ? 'descending' : undefined}
+                                        className={`px-4 py-3 text-left font-medium ${isSorted ? 'text-foreground' : ''}`}
+                                    >
+                                        {column.label}
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
 

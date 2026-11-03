@@ -44,9 +44,9 @@ export function RankingPage() {
                 </span>
             </p>
 
-            <RankingChart />
+            <RankingChart criterion={criterion} range={range} />
 
-            <RankingTable />
+            <RankingTable criterion={criterion} />
         </main>
     );
 }
