@@ -55,7 +55,11 @@ export function RegionCard({ region }: RegionCardProps) {
                         </p>
                     )}
                 </div>
-                <RegionMetric label="Energia no período" value={formatEnergy(region.energyKwh)} align="right" />
+                <RegionMetric
+                    label="Energia no período"
+                    value={formatEnergy(region.energyKwh)}
+                    align="right"
+                />
                 <RegionMetric label="CO₂e no período" value={formatCo2e(region.co2eGrams)} />
             </CardContent>
         </Card>

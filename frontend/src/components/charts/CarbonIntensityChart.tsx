@@ -13,28 +13,40 @@ function regionName(region: Region): string {
 
 export function CarbonIntensityChart({ regions }: CarbonIntensityChartProps) {
     const rows = regions
-        .filter((region) => region.gco2ePerKwh != null)
-        .toSorted((a, b) => (b.gco2ePerKwh ?? 0) - (a.gco2ePerKwh ?? 0));
+        .filter(
+            (region): region is Region & { gco2ePerKwh: number } =>
+                region.gco2ePerKwh != null && Number.isFinite(region.gco2ePerKwh),
+        )
+        .toSorted((a, b) => b.gco2ePerKwh - a.gco2ePerKwh);
 
     if (rows.length === 0) {
-        return <p className="text-sm text-muted-foreground">Sem dados de intensidade de carbono.</p>;
+        return (
+            <p className="text-sm text-muted-foreground">Sem dados de intensidade de carbono.</p>
+        );
     }
 
-    const maxValue = Math.max(...rows.map((region) => region.gco2ePerKwh ?? 0));
+    const maxValue = Math.max(...rows.map((region) => region.gco2ePerKwh));
 
     return (
-        <div className="mb-2 mt-6 space-y-4" role="list" aria-label="Intensidade de carbono por região">
+        <div
+            className="mb-2 mt-4 space-y-4"
+            role="list"
+            aria-label="Intensidade de carbono por região"
+        >
             {rows.map((region, index) => {
-                const value = region.gco2ePerKwh ?? 0;
+                const value = region.gco2ePerKwh;
                 const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
                 return (
                     <div
                         key={region.code}
                         role="listitem"
-                        className="grid grid-cols-[minmax(5rem,7rem)_minmax(0,1fr)_minmax(5.5rem,auto)] items-center gap-3"
+                        className="grid grid-cols-[minmax(4rem,5rem)_minmax(0,1fr)_minmax(5.5rem,auto)] items-center gap-3"
                     >
-                        <span className="truncate text-sm text-muted-foreground" title={regionName(region)}>
+                        <span
+                            className="truncate text-sm text-muted-foreground pl-0 ml-0"
+                            title={regionName(region)}
+                        >
                             {regionName(region)}
                         </span>
                         <div

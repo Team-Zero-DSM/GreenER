@@ -32,14 +32,17 @@ export function RegionPage() {
                         <RegionsCarousel regions={regions} />
                     </section>
 
-                    <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        <ChartCard
-                            title="Intensidade de carbono por região"
-                            subtitle="gCO₂e por kWh · quanto menor o valor, menor a intensidade de carbono"
-                        >
-                            <CarbonIntensityChart regions={regions} />
-                        </ChartCard>
-                    </section>
+                    <article className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        <figure>
+                            <ChartCard
+                                title="Intensidade de carbono por região"
+                                subtitle="gCO₂e por kWh · quanto menor o valor, menor a intensidade de carbono"
+                            >
+                                <CarbonIntensityChart regions={regions} />
+                            </ChartCard>
+                        </figure>
+                        <figure></figure>
+                    </article>
                 </>
             ) : (
                 <p className="text-muted-foreground">Nenhuma região disponível.</p>
