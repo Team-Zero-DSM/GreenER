@@ -4,6 +4,7 @@ import analyticsRouter from './modules/analytics/analytics.routes.js';
 import monitoringRouter from './modules/monitoring/monitoring.routes.js';
 import { regionsRouter } from './modules/regions/regions.routes.js';
 import { collectionsRouter } from './modules/collections/collections.routes.js';
+import { comparisonsRouter } from './modules/comparisons/comparisons.routes.js';
 
 const router = Router();
 router.use('/services', servicesRouter);
@@ -13,4 +14,5 @@ router.use('/service', analyticsRouter);
 router.use('/regions', regionsRouter);
 router.use('/monitoring', monitoringRouter);
 router.use('/collections', collectionsRouter);
+router.use('/comparisons', comparisonsRouter);
 export default router;
