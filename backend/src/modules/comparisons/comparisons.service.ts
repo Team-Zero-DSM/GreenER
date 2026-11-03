@@ -19,12 +19,7 @@ export class ComparisonsService {
             '30d': 30 * 24,
         };
 
-        const to = new Date();
-        const durationSeconds = rangeHours[input.range] * 60 * 60;
-        const from = new Date(to.getTime() - durationSeconds * 1000);
-        const bucketSeconds = durationSeconds / 120;
-        const series: ComparisonSeriesDto[] = [];
-
+        const selections = [];
         for (const selection of input.selections) {
             const serviceId = await this.serviceRepository.findIdByExternalId(selection.externalId);
 
@@ -32,6 +27,20 @@ export class ComparisonsService {
                 throw new NotFoundError(`Serviço ${selection.externalId} não foi encontrado`);
             }
 
+            selections.push({ ...selection, serviceId });
+        }
+
+        const latestAt = await this.repository.findLatestCollectionAtByServiceIds(
+            selections.map((selection) => selection.serviceId),
+        );
+        // Inclui a última coleta mesmo quando o PostgreSQL armazena microssegundos.
+        const to = latestAt === null ? new Date() : new Date(latestAt.getTime() + 1);
+        const durationSeconds = rangeHours[input.range] * 60 * 60;
+        const from = new Date(to.getTime() - durationSeconds * 1000);
+        const bucketSeconds = durationSeconds / 120;
+        const series: ComparisonSeriesDto[] = [];
+
+        for (const selection of selections) {
             let carbonIntensity: number | null = null;
 
             if (selection.simulatedRegionCode !== null) {
@@ -48,9 +57,13 @@ export class ComparisonsService {
                 carbonIntensity = region.carbon_intensity;
             }
 
-            const summary = await this.repository.findSummaryByServiceId(serviceId, from, to);
+            const summary = await this.repository.findSummaryByServiceId(
+                selection.serviceId,
+                from,
+                to,
+            );
             const points = await this.repository.findPointsByServiceId(
-                serviceId,
+                selection.serviceId,
                 from,
                 to,
                 bucketSeconds,

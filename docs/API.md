@@ -202,8 +202,13 @@ Cada seleção exige `selectionId`, `externalId` e `simulatedRegionCode` (códig
 da região ou `null` para usar as emissões armazenadas).
 
 A resposta 200 contém `range`, `period: { from, to }` e `series`. Todas as
-seleções usam o mesmo período, encerrado no momento da requisição, dividido
-em 120 faixas iguais. Cada série contém `selectionId`, `summary` e `points`.
+seleções usam o mesmo período, encerrado imediatamente após a última coleta
+disponível entre os serviços selecionados e dividido em 120 faixas iguais.
+O limite final inclui 1 milissegundo adicional para preservar coletas com
+precisão de microssegundos do PostgreSQL. Sem coletas em nenhum dos serviços,
+o período termina no momento da requisição. Sem novas coletas, os horários
+das faixas permanecem iguais entre consultas. Cada série contém
+`selectionId`, `summary` e `points`.
 O resumo contém `sampleCount`, `energyKwh` e `co2eGrams`; cada ponto também
 contém `timestamp`, que identifica o início da faixa. Uma faixa inclui
 coletas posteriores ao início e até o fim, inclusive.
@@ -212,7 +217,9 @@ Faixas sem coletas retornam quantidade zero e métricas `null`. Na simulação,
 a energia é preservada e as emissões são calculadas como energia em kWh
 vezes o fator atual da região em gCO₂e/kWh, tanto no resumo como nos pontos.
 Os totais representam as amostras disponíveis; faixas vazias não comprovam
-falhas de coleta. A tela de comparação ainda utiliza mocks.
+falhas de coleta. A tela de comparação carrega os serviços e as regiões da
+API e consulta este endpoint ao clicar em Comparar, mantendo o resultado
+anterior durante o carregamento ou em caso de falha.
 
 Body inválido retorna 400; serviço ou região simulada inexistente retorna
 404; falha interna retorna 500.
@@ -395,8 +402,8 @@ comprovam autenticação implementada na versão atual. Sua entrega está previs
 ## 6. Alinhamento entre contrato e implementação
 
 Lista, detalhe, histórico e regiões são consumidos pela interface real. Rotas,
-schemas Zod e tipos devem evoluir em conjunto. A comparação está disponível
-no backend, com integração da tela ainda pendente. Ranking, cenários,
+schemas Zod e tipos devem evoluir em conjunto. A comparação está integrada
+à API, incluindo a simulação de região. Ranking, cenários,
 JWT e configuração por HTTP continuam planejados. Consultar o [plano](./plano-de-entregas.md)
 e as [rotas do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
 

@@ -4,6 +4,19 @@ import { CollectionPointRow, CollectionSummaryRow, RegionRow } from './types/com
 export class ComparisonsRepository {
     constructor(private readonly pool: Pool) {}
 
+    async findLatestCollectionAtByServiceIds(serviceIds: string[]): Promise<Date | null> {
+        const result = await this.pool.query<{ latest_at: Date | null }>(
+            `
+            SELECT MAX(coletado_em) AS latest_at
+            FROM coleta
+            WHERE servico_id = ANY($1::bigint[])
+            `,
+            [serviceIds],
+        );
+
+        return result.rows[0]?.latest_at ?? null;
+    }
+
     async findSummaryByServiceId(
         serviceId: string,
         from: Date,
