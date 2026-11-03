@@ -41,16 +41,16 @@ export function CarbonIntensityChart({ regions }: CarbonIntensityChartProps) {
                     <div
                         key={region.code}
                         role="listitem"
-                        className="grid grid-cols-[minmax(4rem,5rem)_minmax(0,1fr)_minmax(5.5rem,auto)] items-center gap-3"
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[minmax(5rem,6rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-y-0"
                     >
                         <span
-                            className="truncate text-sm text-muted-foreground pl-0 ml-0"
+                            className="col-start-1 row-start-1 min-w-0 truncate text-sm font-medium text-foreground sm:font-normal sm:text-muted-foreground"
                             title={regionName(region)}
                         >
                             {regionName(region)}
                         </span>
                         <div
-                            className="h-3 overflow-hidden rounded-full bg-secondary"
+                            className="col-span-2 col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-secondary/80 ring-1 ring-white/5 sm:col-span-1 sm:col-start-2 sm:row-start-1"
                             role="meter"
                             aria-label={`Intensidade de carbono de ${regionName(region)}`}
                             aria-valuemin={0}
@@ -62,10 +62,11 @@ export function CarbonIntensityChart({ regions }: CarbonIntensityChartProps) {
                                 style={{
                                     width: `${percentage}%`,
                                     backgroundColor: BAR_COLORS[index % BAR_COLORS.length],
+                                    boxShadow: `0 0 12px ${BAR_COLORS[index % BAR_COLORS.length]}66`,
                                 }}
                             />
                         </div>
-                        <span className="text-right text-xs tabular-nums text-muted-foreground sm:text-sm">
+                        <span className="col-start-2 row-start-1 whitespace-nowrap text-right text-xs font-medium tabular-nums text-muted-foreground sm:col-start-3 sm:text-sm">
                             {formatIntensity(value)}
                         </span>
                     </div>
