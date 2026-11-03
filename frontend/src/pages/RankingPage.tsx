@@ -3,9 +3,11 @@ import { RankingChart } from '@/components/ranking/RankingChart';
 import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
 import type { RankingCriterion } from '@/types/ranking';
+import type { HistoryRange } from '@/types/service';
 
 export function RankingPage() {
     const [criterion, setCriterion] = useState<RankingCriterion>('co2eGrams');
+    const [range, setRange] = useState<HistoryRange>('24h');
 
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
@@ -18,7 +20,12 @@ export function RankingPage() {
                     </p>
                 </header>
 
-                <RankingFilters criterion={criterion} onCriterionChange={setCriterion} />
+                <RankingFilters
+                    criterion={criterion}
+                    range={range}
+                    onCriterionChange={setCriterion}
+                    onRangeChange={setRange}
+                />
             </div>
 
             <p className="text-sm text-muted-foreground">
