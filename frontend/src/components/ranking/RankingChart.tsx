@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { formatRankingValue } from '@/components/ranking/formatRankingValue';
 import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
@@ -32,21 +33,27 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
                     const widthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
                     return (
-                        <li key={item.externalId} className="flex items-center gap-3 text-sm">
-                            <span className="w-36 shrink-0 truncate text-muted-foreground">
-                                {item.name}
-                            </span>
+                        <li key={item.externalId}>
+                            <Link
+                                to={`/servicos/${item.externalId}`}
+                                aria-label={`Ver ${item.name}: ${formatRankingValue(criterion, item[criterion])}`}
+                                className="group flex items-center gap-3 rounded-md px-2 py-1 text-sm transition-colors hover:bg-white/5"
+                            >
+                                <span className="w-36 shrink-0 truncate text-muted-foreground group-hover:text-foreground">
+                                    {item.name}
+                                </span>
 
-                            <div className="h-4 flex-1 rounded-sm bg-white/5">
-                                <div
-                                    className="h-full rounded-sm bg-emerald-500"
-                                    style={{ width: `${widthPercent}%` }}
-                                />
-                            </div>
+                                <div className="h-4 flex-1 rounded-sm bg-white/5">
+                                    <div
+                                        className="h-full rounded-sm bg-emerald-500 transition-colors group-hover:bg-emerald-400"
+                                        style={{ width: `${widthPercent}%` }}
+                                    />
+                                </div>
 
-                            <span className="w-32 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-                                {formatRankingValue(criterion, item[criterion])}
-                            </span>
+                                <span className="w-32 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                                    {formatRankingValue(criterion, item[criterion])}
+                                </span>
+                            </Link>
                         </li>
                     );
                 })}
