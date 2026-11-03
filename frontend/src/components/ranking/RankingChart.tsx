@@ -37,20 +37,20 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
                             <Link
                                 to={`/servicos/${item.externalId}`}
                                 aria-label={`Ver ${item.name}: ${formatRankingValue(criterion, item[criterion])}`}
-                                className="group flex items-center gap-3 rounded-md px-2 py-1 text-sm transition-colors hover:bg-white/5"
+                                className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-md px-2 py-1 text-sm transition-colors hover:bg-white/5 sm:flex"
                             >
-                                <span className="w-36 shrink-0 truncate text-muted-foreground group-hover:text-foreground">
+                                <span className="truncate sm:w-36 sm:shrink-0 text-muted-foreground group-hover:text-foreground">
                                     {item.name}
                                 </span>
 
-                                <div className="h-4 flex-1 rounded-sm bg-white/5">
+                                <div className="order-last col-span-2 h-4 rounded-sm bg-white/5 sm:order-none sm:flex-1">
                                     <div
                                         className="h-full rounded-sm bg-emerald-500 transition-colors group-hover:bg-emerald-400"
                                         style={{ width: `${widthPercent}%` }}
                                     />
                                 </div>
 
-                                <span className="w-32 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                                <span className="text-right sm:w-32 sm:shrink-0 text-xs tabular-nums text-muted-foreground">
                                     {formatRankingValue(criterion, item[criterion])}
                                 </span>
                             </Link>
