@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import type { GlobeViewHandle } from '../components/3d/GlobeView';
+import type { GlobeViewHandle } from '../components/globe/GlobeView';
 import { ExploreSection } from '../components/landing/ExploreSection';
 import { fetchRegionsLast24Hours } from '@/api/regions';
 import { useApiQuery } from '@/hooks/useApiQuery';
-import { GlobeView } from '../components/3d/GlobeView';
+import { GlobeView } from '../components/globe/GlobeView';
+import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { useServices } from '@/hooks/useServices';
 
 export function LandingPage() {
@@ -128,6 +129,11 @@ export function LandingPage() {
         );
     }
 
+    const focusTarget =
+    selectedRegion?.latitude != null && selectedRegion.longitude != null
+        ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
+        : null;
+
     return (
         <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-20 pb-0 text-foreground">
             <section
@@ -161,21 +167,25 @@ export function LandingPage() {
                 ref={globeLayerRef}
                 className="pointer-events-none fixed inset-x-0 top-24 bottom-0 z-0"
             >
-                <GlobeView
-                    ref={globeRef}
-                    autoRotate={autoRotate}
-                    progress={globeProgress}
-                    targetPosition={globeTarget}
-                    markers={markers}
-                    focusTarget={
-                        selectedRegion?.latitude != null && selectedRegion.longitude != null
-                            ? {
-                                latitude: selectedRegion.latitude,
-                                longitude: selectedRegion.longitude,
-                            }
-                            : null
-                    }
-                />
+                {force2D ? (
+                    <GlobeMap2D
+                        ref={globeRef}
+                        autoRotate={autoRotate}
+                        progress={globeProgress}
+                        targetPosition={globeTarget}
+                        markers={markers}
+                        focusTarget={focusTarget}
+                    />
+                ) : (
+                    <GlobeView
+                        ref={globeRef}
+                        autoRotate={autoRotate}
+                        progress={globeProgress}
+                        targetPosition={globeTarget}
+                        markers={markers}
+                        focusTarget={focusTarget}
+                    />
+                )}
             </div>
 
             <div
