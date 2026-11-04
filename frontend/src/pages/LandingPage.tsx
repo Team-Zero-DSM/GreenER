@@ -138,20 +138,19 @@ export function LandingPage() {
         <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
             <section
                 id="sobre"
-                className="relative z-10 flex min-h-svh flex-col justify-center px-6 pt-[var(--header-h,4rem)] pb-8 md:px-12"
+                className="relative z-10 flex min-h-svh flex-col justify-center px-6 pt-[var(--header-h,4rem)] pb-32 md:px-12"
             >
                 <div className="mx-auto w-full max-w-6xl">
-                    <span className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-                        Sobre o GreenER
-                    </span>
-
-                    <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white md:text-6xl">
-                        Dados ambientais para decisões mais sustentáveis.
+                    <h1 className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-6xl font-extrabold text-transparent md:text-8xl">
+                         Green<span className="font-light">ER</span>
                     </h1>
 
-                    <p className="mt-6 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
-                        Uma plataforma para explorar indicadores ambientais, acompanhar o consumo de
-                        energia e visualizar informações relacionadas às emissões de CO₂ por região.
+                    <p className="mt-6 max-w-2xl text-xl font-semibold leading-snug text-white md:text-3xl">
+                        Do consumo computacional ao impacto ambiental
+                    </p>
+
+                    <p className="mt-4 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
+                         Monitore aplicações, estime o consumo energético e compreenda as emissões de CO₂e da sua infraestrutura.
                     </p>
 
                     <a
