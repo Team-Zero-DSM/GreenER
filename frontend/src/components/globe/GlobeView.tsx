@@ -222,8 +222,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
                 commands.resetPosition = false;
             }
 
-
-
             if (Math.abs(commands.rotation) < 0.001) {
                 commands.rotation = 0;
             }
@@ -237,8 +235,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
                 commands.zoomFactor = 1;
             }
 
-            const desiredCameraZ =
-                (focusTargetRef.current ? 3.0 : 4.5) / zoomLevelRef.current;
+            const desiredCameraZ = (focusTargetRef.current ? 3.0 : 4.5) / zoomLevelRef.current;
 
             camera.position.z = THREE.MathUtils.lerp(
                 camera.position.z,
@@ -278,10 +275,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             if (isFocused && focusQuaternionRef.current) {
                 wasFocusedRef.current = true;
 
-                globe.quaternion.slerp(
-                    focusQuaternionRef.current,
-                    Math.min(delta * 2.5, 1),
-                );
+                globe.quaternion.slerp(focusQuaternionRef.current, Math.min(delta * 2.5, 1));
 
                 commands.rotation = 0;
             } else if (wasFocusedRef.current) {

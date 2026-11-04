@@ -130,15 +130,15 @@ export function LandingPage() {
     }
 
     const focusTarget =
-    selectedRegion?.latitude != null && selectedRegion.longitude != null
-        ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
-        : null;
+        selectedRegion?.latitude != null && selectedRegion.longitude != null
+            ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
+            : null;
 
     return (
-        <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-20 pb-0 text-foreground">
+        <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
             <section
                 id="sobre"
-                className="relative z-10 flex min-h-[calc(100svh-6rem)] flex-col justify-center px-6 py-8 md:px-12"
+                className="relative z-10 flex min-h-svh flex-col justify-center px-6 pt-[var(--header-h,4rem)] pb-8 md:px-12"
             >
                 <div className="mx-auto w-full max-w-6xl">
                     <span className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
@@ -165,7 +165,7 @@ export function LandingPage() {
 
             <div
                 ref={globeLayerRef}
-                className="pointer-events-none fixed inset-x-0 top-24 bottom-0 z-0"
+                className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-h,4rem)] z-0"
             >
                 {force2D ? (
                     <GlobeMap2D

@@ -49,62 +49,60 @@ export function MonitoringBar() {
 
     return (
         <div className="border-b border-border py-2 text-xs text-muted-foreground">
-            <div className="mx-auto max-w-7xl space-y-2 px-4 sm:px-6">
-                <span
-                    title={error ?? undefined}
-                    className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 font-medium ${connected ? 'border-emerald-400/40 text-emerald-300' : 'border-destructive/40 text-destructive'}`}
-                >
-                    <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
-                    {connected
-                        ? 'Conectado'
-                        : status === null && !error
-                          ? 'Conectando...'
-                          : 'Sem conexão'}
-                </span>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                    <span
+                        title={error ?? undefined}
+                        className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 font-medium ${connected ? 'border-emerald-400/40 text-emerald-300' : 'border-destructive/40 text-destructive'}`}
+                    >
+                        <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+                        {connected
+                            ? 'Conectado'
+                            : status === null && !error
+                            ? 'Conectando...'
+                            : 'Sem conexão'}
+                    </span>
 
-                {status && (
-                    <div className="hidden flex-wrap gap-x-5 gap-y-1 sm:flex">
-                        <Item label="Última coleta">
-                            {lastCollectionAt === null
-                                ? '—'
-                                : formatAgo(secondsBetween(lastCollectionAt, now))}
-                        </Item>
-                        <Item label="Próxima coleta">{nextCollection}</Item>
-                        <Item label="Intervalo de coleta">
-                            {status.collectionIntervalSeconds} s
-                        </Item>
-                        <Item label="Atualização da tela">a cada coleta</Item>
-                        <Item label="Tela atualizada">
-                            {formatDateTimeSeconds(screenUpdatedAt)}
-                        </Item>
-                        <Item label="APIs UniLaunch">
-                            Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
-                            Carbono {dependencyLabel[status.dependencies.carbon]}
-                        </Item>
-                    </div>
-                )}
-                {status && (
-                    <details className="sm:hidden">
-                        <summary className="min-h-11 cursor-pointer py-3">
-                            Monitoramento · coleta a cada {status.collectionIntervalSeconds} s
-                        </summary>
-                        <div className="flex flex-col gap-2 pb-2">
-                            <Item label="Última coleta">
-                                {lastCollectionAt === null
-                                    ? '—'
-                                    : formatAgo(secondsBetween(lastCollectionAt, now))}
-                            </Item>
-                            <Item label="Próxima coleta">{nextCollection}</Item>
-                            <Item label="Tela atualizada">
-                                {formatDateTimeSeconds(screenUpdatedAt)}
-                            </Item>
-                            <Item label="APIs UniLaunch">
-                                Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
-                                Carbono {dependencyLabel[status.dependencies.carbon]}
-                            </Item>
-                        </div>
-                    </details>
-                )}
+                    {status && (
+                        <>
+                            <div className="hidden sm:contents">
+                                <Item label="Próxima coleta">{nextCollection}</Item>
+                                <Item label="Intervalo de coleta">
+                                    {status.collectionIntervalSeconds} s
+                                </Item>
+                                <Item label="Atualização da tela">a cada coleta</Item>
+                                <Item label="Tela atualizada">
+                                    {formatDateTimeSeconds(screenUpdatedAt)}
+                                </Item>
+                                <Item label="APIs UniLaunch">
+                                    Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
+                                    Carbono {dependencyLabel[status.dependencies.carbon]}
+                                </Item>
+                            </div>
+
+                            <details className="w-full sm:hidden">
+                                <summary className="min-h-11 cursor-pointer py-3">
+                                    Monitoramento · coleta a cada {status.collectionIntervalSeconds} s
+                                </summary>
+                                <div className="flex flex-col gap-2 pb-2">
+                                    <Item label="Última coleta">
+                                        {lastCollectionAt === null
+                                            ? '—'
+                                            : formatAgo(secondsBetween(lastCollectionAt, now))}
+                                    </Item>
+                                    <Item label="Próxima coleta">{nextCollection}</Item>
+                                    <Item label="Tela atualizada">
+                                        {formatDateTimeSeconds(screenUpdatedAt)}
+                                    </Item>
+                                    <Item label="APIs UniLaunch">
+                                        Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
+                                        Carbono {dependencyLabel[status.dependencies.carbon]}
+                                    </Item>
+                                </div>
+                            </details>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

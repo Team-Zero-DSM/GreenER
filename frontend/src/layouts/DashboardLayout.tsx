@@ -1,6 +1,7 @@
 import { House, Server, ArrowLeftRight, Globe, ListOrdered } from 'lucide-react';
 import { MonitoringBar } from '@/components/MonitoringBar';
 import { MonitoringProvider } from '@/contexts/MonitoringProvider';
+import { useLayoutEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
 const navItems = [
@@ -28,7 +29,7 @@ const navItems = [
         label: 'Ranking',
         icon: ListOrdered,
         prefixes: ['/ranking'],
-    }
+    },
 ];
 
 const linkClass =
@@ -38,12 +39,30 @@ const idleClass = 'border-transparent text-muted-foreground hover:bg-white/5 hov
 
 export function DashboardLayout() {
     const { pathname } = useLocation();
+    const isLandingPage = pathname === '/';
+    const headerRef = useRef<HTMLElement>(null);
+
+    useLayoutEffect(() => {
+        const header = headerRef.current;
+        if (!header) return;
+
+        const update = () =>
+            document.documentElement.style.setProperty(
+                '--header-h',
+                `${header.offsetHeight}px`,
+            );
+
+        update();
+        const observer = new ResizeObserver(update);
+        observer.observe(header);
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <MonitoringProvider>
             <div className="dark flex min-h-screen flex-col bg-background text-foreground">
-                <div className="sticky top-0 z-50 bg-background">
-                    <header className="border-b border-border bg-background">
+                <div className="group sticky top-0 z-50 bg-background">
+                    <header ref={headerRef} className="border-b border-border bg-background">
                         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3 sm:gap-6 sm:px-6">
                             <NavLink
                                 to="/"
@@ -75,21 +94,25 @@ export function DashboardLayout() {
                             </nav>
                         </div>
                     </header>
-                    <div className="border-b border-border bg-background">
-                        <MonitoringBar />
+                    <div className="sm:pointer-events-none sm:absolute sm:inset-x-0 sm:top-full sm:overflow-hidden sm:group-hover:pointer-events-auto sm:group-focus-within:pointer-events-auto">
+                        <div className="border-b border-border bg-background sm:invisible sm:-translate-y-full sm:transition-[translate,visibility] sm:duration-300 sm:ease-out sm:group-hover:visible sm:group-hover:translate-y-0 sm:group-focus-within:visible sm:group-focus-within:translate-y-0 motion-reduce:transition-none">
+                            <MonitoringBar />
+                        </div>
                     </div>
                 </div>
                 <div className="flex-1">
                     <Outlet />
                 </div>
 
-                <footer className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
-                    <p className="mx-auto max-w-7xl">
-                        Os valores apresentados são estimativas calculadas a partir das métricas
-                        disponíveis e de fatores regionais de emissão. Eles não representam uma
-                        medição elétrica direta.
-                    </p>
-                </footer>
+                {!isLandingPage && (
+                    <footer className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
+                        <p className="mx-auto max-w-7xl">
+                            Os valores apresentados são estimativas calculadas a partir das métricas
+                            disponíveis e de fatores regionais de emissão. Eles não representam uma
+                            medição elétrica direta.
+                        </p>
+                    </footer>
+                )}
             </div>
         </MonitoringProvider>
     );

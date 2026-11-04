@@ -55,7 +55,6 @@ export function ExploreSection({
     regions,
     services,
     onSelectRegion,
-
 }: ExploreSectionProps) {
     const selectedRegion = regions.find((region) => region.code === selectedCode);
 
@@ -188,14 +187,18 @@ export function ExploreSection({
 
                                 <div className="mt-4 grid grid-cols-2 gap-3">
                                     <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Intensidade de carbono</p>
+                                        <p className="text-xs text-white/60">
+                                            Intensidade de carbono
+                                        </p>
                                         <p className="mt-1 font-semibold">
                                             {formatIntensity(region.gco2ePerKwh)}
                                         </p>
                                     </div>
 
                                     <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Serviços monitorados</p>
+                                        <p className="text-xs text-white/60">
+                                            Serviços monitorados
+                                        </p>
                                         <p className="mt-1 font-semibold">{region.servicesCount}</p>
                                         <p className="mt-1 text-xs text-white/60">
                                             {region.statusCounts.available} disponíveis
@@ -228,7 +231,7 @@ export function ExploreSection({
                                     </div>
                                 </div>
                             </button>
-                    ))}
+                        ))}
 
                     {showingServices &&
                         regionServices.map((service) => (
@@ -239,7 +242,9 @@ export function ExploreSection({
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                        <h3 className="break-words text-lg font-semibold">{service.name}</h3>
+                                        <h3 className="break-words text-lg font-semibold">
+                                            {service.name}
+                                        </h3>
 
                                         <p className="mt-1 text-sm text-white/60">
                                             {[
@@ -257,8 +262,8 @@ export function ExploreSection({
                                             service.status === 'available'
                                                 ? 'bg-emerald-400/15 text-emerald-300'
                                                 : service.status === 'unavailable'
-                                                ? 'bg-red-400/15 text-red-300'
-                                                : 'bg-amber-400/15 text-amber-300'
+                                                  ? 'bg-red-400/15 text-red-300'
+                                                  : 'bg-amber-400/15 text-amber-300'
                                         }`}
                                     >
                                         {serviceStatus(service.status)}
@@ -267,28 +272,38 @@ export function ExploreSection({
 
                                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                                     <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Intensidade de carbono</p>
+                                        <p className="text-xs text-white/60">
+                                            Intensidade de carbono
+                                        </p>
                                         <p className="mt-1 font-semibold">
-                                            {formatIntensity(service.environmental?.carbonIntensity ?? null)}
+                                            {formatIntensity(
+                                                service.environmental?.carbonIntensity ?? null,
+                                            )}
                                         </p>
                                     </div>
 
                                     <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Energia nas últimas 24 h</p>
+                                        <p className="text-xs text-white/60">
+                                            Energia nas últimas 24 h
+                                        </p>
                                         <p className="mt-1 font-semibold">
                                             {formatEnergy(service.environmental?.energyKwh ?? null)}
                                         </p>
                                     </div>
 
                                     <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">CO₂e nas últimas 24 h</p>
+                                        <p className="text-xs text-white/60">
+                                            CO₂e nas últimas 24 h
+                                        </p>
                                         <p className="mt-1 font-semibold">
                                             {formatCo2e(service.environmental?.co2eGrams ?? null)}
                                         </p>
                                     </div>
                                 </div>
 
-                                <p className="mt-3 text-xs text-emerald-300">Ver detalhes do serviço →</p>
+                                <p className="mt-3 text-xs text-emerald-300">
+                                    Ver detalhes do serviço →
+                                </p>
                             </Link>
                         ))}
 
