@@ -61,27 +61,42 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                     </thead>
 
                     <tbody>
-                        {items.map((item) => (
-                            <tr
-                                key={item.externalId}
-                                className="border-b border-border last:border-b-0"
-                            >
-                                <td className="px-4 py-3 tabular-nums">{item.position}</td>
-                                <td className="px-4 py-3 font-medium">{item.name}</td>
-                                <td className="px-4 py-3 text-muted-foreground">
-                                    {item.region.code}
-                                </td>
-                                <td className={valueClass(criterion === 'energyKwh')}>
-                                    {formatEnergy(item.energyKwh)}
-                                </td>
-                                <td className={valueClass(criterion === 'co2eGrams')}>
-                                    {formatCo2e(item.co2eGrams)}
-                                </td>
-                                <td className="px-4 py-3 tabular-nums">
-                                    {item.sampleCount.toLocaleString('pt-BR')}
-                                </td>
-                            </tr>
-                        ))}
+                        {items.map((item) => {
+                            // Sem coletas no período o backend devolve position null e métricas null.
+                            const hasData = item.sampleCount > 0;
+
+                            return (
+                                <tr
+                                    key={item.externalId}
+                                    className={`border-b border-border last:border-b-0 ${hasData ? '' : 'opacity-60'}`}
+                                >
+                                    <td className="px-4 py-3 tabular-nums">
+                                        {item.position ?? '—'}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className="font-medium">{item.name}</span>
+
+                                        {!hasData && (
+                                            <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                                                Sem dados no período
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3 text-muted-foreground">
+                                        {item.region.code}
+                                    </td>
+                                    <td className={valueClass(criterion === 'energyKwh')}>
+                                        {formatEnergy(item.energyKwh)}
+                                    </td>
+                                    <td className={valueClass(criterion === 'co2eGrams')}>
+                                        {formatCo2e(item.co2eGrams)}
+                                    </td>
+                                    <td className="px-4 py-3 tabular-nums">
+                                        {item.sampleCount.toLocaleString('pt-BR')}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
