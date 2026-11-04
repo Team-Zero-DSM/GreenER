@@ -14,13 +14,28 @@ const rankingColumns: { label: string; criterion?: RankingCriterion }[] = [
     { label: 'Coletas' },
 ];
 
+const sortLabels: Record<RankingCriterion, string> = {
+    co2eGrams: 'emissão de CO₂e',
+    energyKwh: 'consumo de energia',
+};
+
+function valueClass(isSorted: boolean) {
+    return `px-4 py-3 tabular-nums ${isSorted ? 'font-semibold text-foreground' : 'text-muted-foreground'}`;
+}
+
 export function RankingTable({ criterion, items }: RankingTableProps) {
     return (
         <section
             aria-label="Tabela de classificação"
             className="space-y-3 border-t border-border pt-6"
         >
-            <h2 className="text-xl font-semibold">Classificação</h2>
+            <div>
+                <h2 className="text-xl font-semibold">Classificação</h2>
+
+                <p className="text-sm text-muted-foreground">
+                    Ordenada por {sortLabels[criterion]}, do maior para o menor.
+                </p>
+            </div>
 
             <div className="overflow-x-auto rounded-lg border border-border">
                 <table className="w-full min-w-xl text-sm">
@@ -54,8 +69,12 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                 <td className="px-4 py-3 text-muted-foreground">
                                     {item.region.code}
                                 </td>
-                                <td className="px-4 py-3 tabular-nums">{item.energyKwh}</td>
-                                <td className="px-4 py-3 tabular-nums">{item.co2eGrams}</td>
+                                <td className={valueClass(criterion === 'energyKwh')}>
+                                    {item.energyKwh}
+                                </td>
+                                <td className={valueClass(criterion === 'co2eGrams')}>
+                                    {item.co2eGrams}
+                                </td>
                                 <td className="px-4 py-3 tabular-nums">{item.sampleCount}</td>
                             </tr>
                         ))}
