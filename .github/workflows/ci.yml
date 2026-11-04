@@ -67,6 +67,9 @@ jobs:
             - name: Verificar lint
               run: npm run lint --if-present
 
+            - name: Verificar formato
+              run: npm run format:check
+
             - name: Verificar tipos
               run: npx tsc --noEmit
 
