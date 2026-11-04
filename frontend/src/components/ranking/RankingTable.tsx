@@ -1,7 +1,8 @@
-import type { RankingCriterion } from '@/types/ranking';
+import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
 interface RankingTableProps {
     criterion: RankingCriterion;
+    items: RankingItem[];
 }
 
 const rankingColumns: { label: string; criterion?: RankingCriterion }[] = [
@@ -13,7 +14,7 @@ const rankingColumns: { label: string; criterion?: RankingCriterion }[] = [
     { label: 'Coletas' },
 ];
 
-export function RankingTable({ criterion }: RankingTableProps) {
+export function RankingTable({ criterion, items }: RankingTableProps) {
     return (
         <section
             aria-label="Tabela de classificação"
@@ -43,14 +44,21 @@ export function RankingTable({ criterion }: RankingTableProps) {
                     </thead>
 
                     <tbody>
-                        <tr>
-                            <td
-                                colSpan={rankingColumns.length}
-                                className="px-4 py-10 text-center text-muted-foreground"
+                        {items.map((item) => (
+                            <tr
+                                key={item.externalId}
+                                className="border-b border-border last:border-b-0"
                             >
-                                Área das linhas da classificação
-                            </td>
-                        </tr>
+                                <td className="px-4 py-3 tabular-nums">{item.position}</td>
+                                <td className="px-4 py-3 font-medium">{item.name}</td>
+                                <td className="px-4 py-3 text-muted-foreground">
+                                    {item.region.code}
+                                </td>
+                                <td className="px-4 py-3 tabular-nums">{item.energyKwh}</td>
+                                <td className="px-4 py-3 tabular-nums">{item.co2eGrams}</td>
+                                <td className="px-4 py-3 tabular-nums">{item.sampleCount}</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>

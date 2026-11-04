@@ -48,7 +48,7 @@ export function RankingPage() {
 
             <RankingChart criterion={criterion} items={ranking.items} />
 
-            <RankingTable criterion={criterion} />
+            <RankingTable criterion={criterion} items={ranking.items} />
         </main>
     );
 }
