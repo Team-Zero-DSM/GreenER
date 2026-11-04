@@ -6,15 +6,15 @@ dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 
 ## Estado da implementação
 
-| Módulo | Responsabilidade atual |
-|---|---|
-| `services` | Lista e detalha serviços, consulta a última amostra e o histórico de tentativas. |
+| Módulo        | Responsabilidade atual                                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `services`    | Lista e detalha serviços, consulta a última amostra e o histórico de tentativas.                                                  |
 | `collections` | Sincroniza regiões e serviços, coleta métricas, grava amostras e observações e lista o resultado da última tentativa por serviço. |
-| `analytics` | Consulta as amostras de um serviço, agrupadas por período, com pontos e totais. |
-| `regions` | Consulta regiões, fatores de carbono, contadores de serviços e totais por período. |
-| `monitoring` | Expõe os horários, contadores e dependências da rodada mantidos em memória. |
-| `comparisons` | Compara amostras em um período comum e simula emissões com o fator atual de outra região. |
-| `rankings` | Calcula a classificação por energia ou CO₂e. O roteador principal ainda não publica a rota. |
+| `analytics`   | Consulta as amostras de um serviço, agrupadas por período, com pontos e totais.                                                   |
+| `regions`     | Consulta regiões, fatores de carbono, contadores de serviços e totais por período.                                                |
+| `monitoring`  | Expõe os horários, contadores e dependências da rodada mantidos em memória.                                                       |
+| `comparisons` | Compara amostras em um período comum e simula emissões com o fator atual de outra região.                                         |
+| `rankings`    | Calcula a classificação por energia ou CO₂e. O roteador principal ainda não publica a rota.                                       |
 
 `app.ts` configura o Express e monta `/api/v1`. `index.ts` registra os
 roteadores, incluindo `/service` como alias de `/services`. `server.ts`
@@ -1281,25 +1281,25 @@ flowchart LR
 
 # 37. Resumo das Responsabilidades
 
-| Componente     | Responsabilidade                                          |
-| -------------- | --------------------------------------------------------- |
-| Frontend       | Apresentar informações e permitir interação com o usuário |
-| Routes         | Definir endpoints HTTP                                    |
-| Zod            | Validar entradas e dados externos em runtime              |
-| Controllers    | Receber requisições e produzir respostas HTTP             |
-| Services       | Implementar e coordenar regras de negócio                 |
-| Repositories   | Concentrar acesso ao PostgreSQL                           |
-| Integrations   | Concentrar comunicação com APIs externas                  |
-| Collection Job | Iniciar periodicamente os ciclos de monitoramento         |
-| Auth (Sprint 3) | Autenticar usuários e emitir tokens JWT; ainda não implementado |
-| Regions | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
-| Analytics | Consulta histórico e totais das amostras por serviço. |
-| Comparisons | Compara serviços e simula emissões em outra região. |
-| Collections e Services | Consultam a última tentativa e o histórico de observações por serviço. |
-| PostgreSQL | Persiste serviços, regiões, parâmetros, amostras e observações. |
-| Metrics API    | Fornecer serviços e métricas                              |
-| Carbon API     | Fornecer intensidade de carbono                           |
-| JWT Middleware (Sprint 3) | Proteção planejada, ainda ausente |
+| Componente                | Responsabilidade                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Frontend                  | Apresentar informações e permitir interação com o usuário                                                      |
+| Routes                    | Definir endpoints HTTP                                                                                         |
+| Zod                       | Validar entradas e dados externos em runtime                                                                   |
+| Controllers               | Receber requisições e produzir respostas HTTP                                                                  |
+| Services                  | Implementar e coordenar regras de negócio                                                                      |
+| Repositories              | Concentrar acesso ao PostgreSQL                                                                                |
+| Integrations              | Concentrar comunicação com APIs externas                                                                       |
+| Collection Job            | Iniciar periodicamente os ciclos de monitoramento                                                              |
+| Auth (Sprint 3)           | Autenticar usuários e emitir tokens JWT; ainda não implementado                                                |
+| Regions                   | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
+| Analytics                 | Consulta histórico e totais das amostras por serviço.                                                          |
+| Comparisons               | Compara serviços e simula emissões em outra região.                                                            |
+| Collections e Services    | Consultam a última tentativa e o histórico de observações por serviço.                                         |
+| PostgreSQL                | Persiste serviços, regiões, parâmetros, amostras e observações.                                                |
+| Metrics API               | Fornecer serviços e métricas                                                                                   |
+| Carbon API                | Fornecer intensidade de carbono                                                                                |
+| JWT Middleware (Sprint 3) | Proteção planejada, ainda ausente                                                                              |
 
 ---
 
