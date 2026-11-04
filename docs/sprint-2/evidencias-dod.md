@@ -2,6 +2,7 @@
 
 **Período:** 20/10/2026 a 09/11/2026.
 **Conferência do GitHub:** 25/10/2026.
+**Integrações conferidas:** histórico de `develop` até `9119f46` (03/11/2026).
 **Fonte:** [milestone Sprint 2, incluindo fechadas](https://github.com/Team-Zero-DSM/GreenER/milestone/2?closed=1).
 
 O objetivo é ampliar a análise ambiental com rankings e comparação entre
@@ -34,44 +35,47 @@ anterior à Sprint 3. Autenticação continua na Sprint 3.
 
 ## Sprint Backlog
 
-**34 issues: 6 histórias e 28 tarefas.** As histórias acima estão abertas;
-a tabela abaixo reúne **24 tarefas abertas e 4 fechadas**. PRs não entram na
-contagem. Responsáveis seguem as atribuições atuais das issues; onde não há
-atribuição, consta “A definir”. As relações com histórias reproduzem os vínculos
-dos corpos das issues; “Documentação” não cria uma história adicional.
+**34 issues no levantamento de 25/10, sendo 6 histórias e 28 tarefas.** Naquela
+data, as histórias estavam abertas e a tabela reunia 24 tarefas abertas e 4
+fechadas. Os responsáveis refletem as atribuições da consulta. As estimativas
+vieram da tabela anterior de planejamento. `—` indica ausência de estimativa
+no registro. Os 3 pontos da #32 são o saldo da T15 da Sprint 1 e aparecem uma
+vez. As evidências posteriores de integração estão na seção seguinte.
 
-| Issue | Tarefa | História / natureza | Responsável | Estado no GitHub / observação |
-|---|---|---|---|---|
-| [#32](https://github.com/Team-Zero-DSM/GreenER/issues/32) | Criar componente de visualização das métricas | US08 | Gabriel | Aberta; inspeção regional desmarcada; saldo de T15 |
-| [#40](https://github.com/Team-Zero-DSM/GreenER/issues/40) | Documentar README e registrar Dailys | Documentação | Henrique | Fechada em 19/10, antes desta sprint; manutenção documental continua |
-| [#77](https://github.com/Team-Zero-DSM/GreenER/issues/77) | Atualizar diagrama de casos de uso | Documentação | Henrique | Fechada; PR #87 integrado |
-| [#78](https://github.com/Team-Zero-DSM/GreenER/issues/78) | Elaborar diagramas de sequência | Documentação | Henrique | Fechada; PR #88 integrado |
-| [#79](https://github.com/Team-Zero-DSM/GreenER/issues/79) | Implementação das funcionalidades do globo | US08 | Gabriel | Aberta |
-| [#80](https://github.com/Team-Zero-DSM/GreenER/issues/80) | Implementação da listagem de serviços e integração com o globo na landing page | US08 | Gabriel | Aberta; 3 de 5 critérios marcados |
-| [#81](https://github.com/Team-Zero-DSM/GreenER/issues/81) | Atualização da Header do projeto | US08 | Gabriel | Aberta |
-| [#82](https://github.com/Team-Zero-DSM/GreenER/issues/82) | Criar estrutura da tela de comparação | US14 | Henrique | Fechada; PR #100 integrado; estrutura inicial |
-| [#83](https://github.com/Team-Zero-DSM/GreenER/issues/83) | Implementar componentes e interações da comparação | US14 | Henrique | Aberta |
-| [#84](https://github.com/Team-Zero-DSM/GreenER/issues/84) | Integrar a tela de comparação ao backend | US14 | Henrique | Aberta |
-| [#85](https://github.com/Team-Zero-DSM/GreenER/issues/85) | Implementar a visualização dos resultados comparativos | US14 | Henrique | Aberta |
-| [#86](https://github.com/Team-Zero-DSM/GreenER/issues/86) | Implementar cálculos e resumo comparativo | US14 | Henrique | Aberta |
-| [#89](https://github.com/Team-Zero-DSM/GreenER/issues/89) | Criar tabela de histórico de status das coletas | US04, US05 | Pedro | Aberta; checklist completo; PR #101 aberto |
-| [#90](https://github.com/Team-Zero-DSM/GreenER/issues/90) | Implementar registro do histórico de status das coletas | US04, US05 | Pedro | Aberta |
-| [#91](https://github.com/Team-Zero-DSM/GreenER/issues/91) | Criar endpoint para consultar o histórico de status das coletas | US04, US05 | Pedro | Aberta |
-| [#92](https://github.com/Team-Zero-DSM/GreenER/issues/92) | Criar endpoints para a tela de ranking | US13 | A definir | Aberta |
-| [#93](https://github.com/Team-Zero-DSM/GreenER/issues/93) | Criar endpoints para a tela de comparação entre serviços | US14 | A definir | Aberta |
-| [#94](https://github.com/Team-Zero-DSM/GreenER/issues/94) | Validar endpoint de serviços por região | US08 | A definir | Aberta |
-| [#95](https://github.com/Team-Zero-DSM/GreenER/issues/95) | Realizar testes das funcionalidades do backend | US04, US05, US08, US13, US14 | A definir | Aberta |
-| [#96](https://github.com/Team-Zero-DSM/GreenER/issues/96) | Atualizar documentação do backend e do banco de dados | US04, US05, US08, US13, US14 | A definir | Aberta |
-| [#97](https://github.com/Team-Zero-DSM/GreenER/issues/97) | Criar componente para exibição das regiões | US08 | Vitor | Aberta |
-| [#98](https://github.com/Team-Zero-DSM/GreenER/issues/98) | Criar componente para exibição de carbono por região | US08 | A definir | Aberta |
-| [#99](https://github.com/Team-Zero-DSM/GreenER/issues/99) | Criar componente para exibição do mapa 2D com as regiões | US08 | A definir | Aberta |
-| [#102](https://github.com/Team-Zero-DSM/GreenER/issues/102) | Criar estrutura da tela de ranking | US13 | Paulo | Aberta |
-| [#103](https://github.com/Team-Zero-DSM/GreenER/issues/103) | Implementar filtros de critério e período do ranking | US13 | Paulo | Aberta |
-| [#104](https://github.com/Team-Zero-DSM/GreenER/issues/104) | Integrar a tela de ranking ao backend | US13 | Paulo | Aberta |
-| [#105](https://github.com/Team-Zero-DSM/GreenER/issues/105) | Implementar gráfico de barras do ranking | US13 | Paulo | Aberta |
-| [#106](https://github.com/Team-Zero-DSM/GreenER/issues/106) | Implementar tabela de classificação do ranking | US13 | Paulo | Aberta |
+| Issue | Tarefa | História / natureza | Responsável em 25/10 | Situação em 25/10 | Pontos |
+|---|---|---|---|---|---:|
+| [#32](https://github.com/Team-Zero-DSM/GreenER/issues/32) | Criar componente de visualização das métricas | US08 | Gabriel | Aberta; inspeção regional desmarcada; saldo de T15 | 3 |
+| [#40](https://github.com/Team-Zero-DSM/GreenER/issues/40) | Documentar README e registrar Dailys | Documentação | Henrique | Fechada em 19/10, antes desta sprint; manutenção documental continua | — |
+| [#77](https://github.com/Team-Zero-DSM/GreenER/issues/77) | Atualizar diagrama de casos de uso | Documentação | Henrique | Fechada; PR #87 integrado | 2 |
+| [#78](https://github.com/Team-Zero-DSM/GreenER/issues/78) | Elaborar diagramas de sequência | Documentação | Henrique | Fechada; PR #88 integrado | 5 |
+| [#79](https://github.com/Team-Zero-DSM/GreenER/issues/79) | Implementação das funcionalidades do globo | US08 | Gabriel | Aberta | — |
+| [#80](https://github.com/Team-Zero-DSM/GreenER/issues/80) | Implementação da listagem de serviços e integração com o globo na landing page | US08 | Gabriel | Aberta; 3 de 5 critérios marcados | 8 |
+| [#81](https://github.com/Team-Zero-DSM/GreenER/issues/81) | Atualização da Header do projeto | US08 | Gabriel | Aberta | — |
+| [#82](https://github.com/Team-Zero-DSM/GreenER/issues/82) | Criar estrutura da tela de comparação | US14 | Henrique | Fechada; PR #100 integrado; estrutura inicial | 2 |
+| [#83](https://github.com/Team-Zero-DSM/GreenER/issues/83) | Implementar componentes e interações da comparação | US14 | Henrique | Aberta | 8 |
+| [#84](https://github.com/Team-Zero-DSM/GreenER/issues/84) | Integrar a tela de comparação ao backend | US14 | Henrique | Aberta | — |
+| [#85](https://github.com/Team-Zero-DSM/GreenER/issues/85) | Implementar a visualização dos resultados comparativos | US14 | Henrique | Aberta | — |
+| [#86](https://github.com/Team-Zero-DSM/GreenER/issues/86) | Implementar cálculos e resumo comparativo | US14 | Henrique | Aberta | — |
+| [#89](https://github.com/Team-Zero-DSM/GreenER/issues/89) | Criar tabela de histórico de status das coletas | US04, US05 | Pedro | Aberta; checklist completo; PR #101 aberto | 3 |
+| [#90](https://github.com/Team-Zero-DSM/GreenER/issues/90) | Implementar registro do histórico de status das coletas | US04, US05 | Pedro | Aberta | 3 |
+| [#91](https://github.com/Team-Zero-DSM/GreenER/issues/91) | Criar endpoint para consultar o histórico de status das coletas | US04, US05 | Pedro | Aberta | — |
+| [#92](https://github.com/Team-Zero-DSM/GreenER/issues/92) | Criar endpoints para a tela de ranking | US13 | A definir | Aberta | — |
+| [#93](https://github.com/Team-Zero-DSM/GreenER/issues/93) | Criar endpoints para a tela de comparação entre serviços | US14 | A definir | Aberta | — |
+| [#94](https://github.com/Team-Zero-DSM/GreenER/issues/94) | Validar endpoint de serviços por região | US08 | A definir | Aberta | — |
+| [#95](https://github.com/Team-Zero-DSM/GreenER/issues/95) | Realizar testes das funcionalidades do backend | US04, US05, US08, US13, US14 | A definir | Aberta | — |
+| [#96](https://github.com/Team-Zero-DSM/GreenER/issues/96) | Atualizar documentação do backend e do banco de dados | US04, US05, US08, US13, US14 | A definir | Aberta | — |
+| [#97](https://github.com/Team-Zero-DSM/GreenER/issues/97) | Criar componente para exibição das regiões | US08 | Vitor | Aberta | 3 |
+| [#98](https://github.com/Team-Zero-DSM/GreenER/issues/98) | Criar componente para exibição de carbono por região | US08 | A definir | Aberta | 3 |
+| [#99](https://github.com/Team-Zero-DSM/GreenER/issues/99) | Criar componente para exibição do mapa 2D com as regiões | US08 | A definir | Aberta | 8 |
+| [#102](https://github.com/Team-Zero-DSM/GreenER/issues/102) | Criar estrutura da tela de ranking | US13 | Paulo | Aberta | 3 |
+| [#103](https://github.com/Team-Zero-DSM/GreenER/issues/103) | Implementar filtros de critério e período do ranking | US13 | Paulo | Aberta | 3 |
+| [#104](https://github.com/Team-Zero-DSM/GreenER/issues/104) | Integrar a tela de ranking ao backend | US13 | Paulo | Aberta | 5 |
+| [#105](https://github.com/Team-Zero-DSM/GreenER/issues/105) | Implementar gráfico de barras do ranking | US13 | Paulo | Aberta | 5 |
+| [#106](https://github.com/Team-Zero-DSM/GreenER/issues/106) | Implementar tabela de classificação do ranking | US13 | Paulo | Aberta | 3 |
 
 ## Evidências e limites de conclusão
+
+### Conferência de 25/10
 
 | Item | Evidência consultada | Interpretação para a entrega |
 |---|---|---|
@@ -82,6 +86,19 @@ dos corpos das issues; “Documentação” não cria uma história adicional.
 | #40 — README e dailies | Issue fechada em 19/10; [dailies desta sprint](./dailies.md) em 20, 21 e 22/10 | Não contabilizar o fechamento antigo como nova entrega; manutenção documental permanece necessária. |
 | #32 — Inspeção regional | Critério desmarcado na issue; daily de 22/10 relata conclusão da visualização das métricas | Conciliar relato, critérios e integração; manter saldo da Sprint 1 pendente de validação. |
 | #3 — Dashboard | Checklist completo, mas issue aberta e #32 com critério pendente | Não declarar US08 formalmente aceita pelo checklist isolado. |
+
+### Integrações posteriores à conferência
+
+O histórico local de `develop` até `9119f46`, de 03/11, confirma os merges
+abaixo. O quadro registra integração no repositório. As verificações da #95,
+o estado das issues após 25/10 e o aceite por história têm registros próprios.
+
+| Entrega | Issues | PRs integrados | Limite da evidência |
+|---|---|---|---|
+| Histórico de status | #89–#91 | [#101](https://github.com/Team-Zero-DSM/GreenER/pull/101), [#107](https://github.com/Team-Zero-DSM/GreenER/pull/107), [#108](https://github.com/Team-Zero-DSM/GreenER/pull/108) | Tabela, gravação e consulta integradas. A daily de 28/10 registra a entrega. |
+| Inspeção e visualização regional | #32, #80, #97, #98 | [#110](https://github.com/Team-Zero-DSM/GreenER/pull/110), [#115](https://github.com/Team-Zero-DSM/GreenER/pull/115), [#118](https://github.com/Team-Zero-DSM/GreenER/pull/118) | A daily de 22/10 relata a visualização das métricas. O PR #118 registra listagem e foco por região e serve como evidência para conferir o saldo da #32. |
+| Ranking | #92, #102, #103, #105 | [#109](https://github.com/Team-Zero-DSM/GreenER/pull/109), [#112](https://github.com/Team-Zero-DSM/GreenER/pull/112), [#114](https://github.com/Team-Zero-DSM/GreenER/pull/114), [#116](https://github.com/Team-Zero-DSM/GreenER/pull/116) | Estrutura, filtros, módulo do backend e gráfico integrados ao repositório. A conexão da tela com a API corresponde à #104. |
+| Comparação | #83, #93 | [#111](https://github.com/Team-Zero-DSM/GreenER/pull/111), [#113](https://github.com/Team-Zero-DSM/GreenER/pull/113) | Componentes, interações e endpoint integrados ao repositório. O consumo do endpoint pela tela corresponde à #84. |
 
 ## Dependências e pendências para o encerramento
 
@@ -114,7 +131,7 @@ dos corpos das issues; “Documentação” não cria uma história adicional.
 
 ## Acompanhamento
 
-As [dailies](./dailies.md) registram planejamento em 20/10, ajustes a partir do
-feedback do cliente em 21/10 e atividades/impedimentos em 22/10. Esses relatos
-são preservados com seus limites de evidência. Este registro consolida a consulta
-do GitHub em 25/10 e deve ser atualizado conforme novas integrações e validações.
+As [dailies](./dailies.md) registram o planejamento em 20/10, os ajustes a
+partir do feedback do cliente em 21/10 e as atividades e impedimentos até
+28/10. A [página da Sprint 2](./sprint-2.md#participação-da-equipe) reúne
+presença e contribuições relatadas nesse período.
