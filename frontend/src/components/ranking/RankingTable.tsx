@@ -6,10 +6,10 @@ interface RankingTableProps {
     items: RankingItem[];
 }
 
-const rankingColumns: { label: string; criterion?: RankingCriterion }[] = [
+const rankingColumns: { label: string; criterion?: RankingCriterion; className?: string }[] = [
     { label: '#' },
     { label: 'Serviço' },
-    { label: 'Região' },
+    { label: 'Região', className: 'hidden sm:table-cell' },
     { label: 'Energia', criterion: 'energyKwh' },
     { label: 'CO₂e', criterion: 'co2eGrams' },
     { label: 'Coletas' },
@@ -21,7 +21,7 @@ const sortLabels: Record<RankingCriterion, string> = {
 };
 
 function valueClass(isSorted: boolean) {
-    return `px-4 py-3 tabular-nums ${isSorted ? 'font-semibold text-foreground' : 'text-muted-foreground'}`;
+    return `px-4 py-3 whitespace-nowrap tabular-nums ${isSorted ? 'font-semibold text-foreground' : 'text-muted-foreground'}`;
 }
 
 export function RankingTable({ criterion, items }: RankingTableProps) {
@@ -40,7 +40,7 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
             </div>
 
             <div className="overflow-x-auto rounded-lg border border-border">
-                <table className="w-full min-w-xl text-sm">
+                <table className="w-full min-w-lg text-sm sm:min-w-xl">
                     <thead className="border-b border-border text-muted-foreground">
                         <tr>
                             {rankingColumns.map((column) => {
@@ -51,7 +51,7 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                         key={column.label}
                                         scope="col"
                                         aria-sort={isSorted ? 'descending' : undefined}
-                                        className={`px-4 py-3 text-left font-medium ${isSorted ? 'text-foreground' : ''}`}
+                                        className={`px-4 py-3 text-left font-medium ${column.className ?? ''} ${isSorted ? 'text-foreground' : ''}`}
                                     >
                                         {column.label}
                                     </th>
@@ -76,13 +76,17 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                     <td className="px-4 py-3">
                                         <span className="font-medium">{item.name}</span>
 
+                                        <span className="block text-xs text-muted-foreground sm:hidden">
+                                            {item.region.code}
+                                        </span>
+
                                         {!hasData && (
-                                            <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                                            <span className="mt-1 inline-block whitespace-nowrap rounded-full sm:mt-0 sm:ml-2 border border-border px-2 py-0.5 text-xs text-muted-foreground">
                                                 Sem dados no período
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-4 py-3 text-muted-foreground">
+                                    <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
                                         {item.region.code}
                                     </td>
                                     <td className={valueClass(criterion === 'energyKwh')}>
