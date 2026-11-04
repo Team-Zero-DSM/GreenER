@@ -13,7 +13,7 @@ export function RankingPage() {
     // A requisição leva o critério e o período escolhidos. Gráfico e tabela usam o critério
     // devolvido pelo backend, para não misturar a ordem antiga com o destaque novo
     // enquanto a próxima resposta não chega.
-    const { data: ranking } = useRanking(criterion, range);
+    const { data: ranking, error, isLoading } = useRanking(criterion, range);
 
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
@@ -34,7 +34,21 @@ export function RankingPage() {
                 />
             </div>
 
-            {ranking && (
+            {isLoading && <p className="text-muted-foreground">Carregando ranking...</p>}
+
+            {error && (
+                <p role="alert" className="text-destructive">
+                    {ranking
+                        ? `Não foi possível atualizar o ranking: ${error}. Exibindo os últimos dados recebidos.`
+                        : `Não foi possível carregar o ranking: ${error}`}
+                </p>
+            )}
+
+            {ranking && ranking.items.length === 0 && (
+                <p className="text-muted-foreground">Nenhum serviço cadastrado para classificar.</p>
+            )}
+
+            {ranking && ranking.items.length > 0 && (
                 <>
                     <p className="text-sm text-muted-foreground">
                         Período considerado:{' '}

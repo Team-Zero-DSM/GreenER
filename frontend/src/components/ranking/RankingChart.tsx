@@ -27,37 +27,43 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
                 </p>
             </div>
 
-            <ol className="space-y-2 rounded-lg border border-border p-4">
-                {bars.map((item) => {
-                    const value = item[criterion] ?? 0;
-                    const widthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
+            {bars.length === 0 ? (
+                <p className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+                    Nenhum serviço com coletas no período.
+                </p>
+            ) : (
+                <ol className="space-y-2 rounded-lg border border-border p-4">
+                    {bars.map((item) => {
+                        const value = item[criterion] ?? 0;
+                        const widthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
-                    return (
-                        <li key={item.externalId}>
-                            <Link
-                                to={`/servicos/${item.externalId}`}
-                                aria-label={`Ver ${item.name}: ${formatRankingValue(criterion, item[criterion])}`}
-                                className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-md px-2 py-1 text-sm transition-colors hover:bg-white/5 sm:flex"
-                            >
-                                <span className="truncate sm:w-36 sm:shrink-0 text-muted-foreground group-hover:text-foreground">
-                                    {item.name}
-                                </span>
+                        return (
+                            <li key={item.externalId}>
+                                <Link
+                                    to={`/servicos/${item.externalId}`}
+                                    aria-label={`Ver ${item.name}: ${formatRankingValue(criterion, item[criterion])}`}
+                                    className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-md px-2 py-1 text-sm transition-colors hover:bg-white/5 sm:flex"
+                                >
+                                    <span className="truncate sm:w-36 sm:shrink-0 text-muted-foreground group-hover:text-foreground">
+                                        {item.name}
+                                    </span>
 
-                                <div className="order-last col-span-2 h-4 rounded-sm bg-white/5 sm:order-none sm:flex-1">
-                                    <div
-                                        className="h-full rounded-sm bg-emerald-500 transition-colors group-hover:bg-emerald-400"
-                                        style={{ width: `${widthPercent}%` }}
-                                    />
-                                </div>
+                                    <div className="order-last col-span-2 h-4 rounded-sm bg-white/5 sm:order-none sm:flex-1">
+                                        <div
+                                            className="h-full rounded-sm bg-emerald-500 transition-colors group-hover:bg-emerald-400"
+                                            style={{ width: `${widthPercent}%` }}
+                                        />
+                                    </div>
 
-                                <span className="text-right sm:w-32 sm:shrink-0 text-xs tabular-nums text-muted-foreground">
-                                    {formatRankingValue(criterion, item[criterion])}
-                                </span>
-                            </Link>
-                        </li>
-                    );
-                })}
-            </ol>
+                                    <span className="text-right sm:w-32 sm:shrink-0 text-xs tabular-nums text-muted-foreground">
+                                        {formatRankingValue(criterion, item[criterion])}
+                                    </span>
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ol>
+            )}
         </section>
     );
 }
