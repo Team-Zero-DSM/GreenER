@@ -1,3 +1,4 @@
+import { formatCo2e, formatEnergy } from '@/components/ranking/formatRankingValue';
 import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
 interface RankingTableProps {
@@ -71,12 +72,14 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                     {item.region.code}
                                 </td>
                                 <td className={valueClass(criterion === 'energyKwh')}>
-                                    {item.energyKwh}
+                                    {formatEnergy(item.energyKwh)}
                                 </td>
                                 <td className={valueClass(criterion === 'co2eGrams')}>
-                                    {item.co2eGrams}
+                                    {formatCo2e(item.co2eGrams)}
                                 </td>
-                                <td className="px-4 py-3 tabular-nums">{item.sampleCount}</td>
+                                <td className="px-4 py-3 tabular-nums">
+                                    {item.sampleCount.toLocaleString('pt-BR')}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
