@@ -28,7 +28,7 @@ const navItems = [
         label: 'Ranking',
         icon: ListOrdered,
         prefixes: ['/ranking'],
-    },
+    }
 ];
 
 const linkClass =
