@@ -71,7 +71,8 @@ GreenER/
 │   │   ├── db/
 │   │   ├── integrations/
 │   │   ├── jobs/
-│   │   ├── modules/       # services, collections, analytics, regions, monitoring
+│   │   ├── modules/       # services, collections, analytics, regions, monitoring, comparisons, rankings
+│   │   ├── scripts/
 │   │   └── shared/
 │   └── tests/unit/
 ├── frontend/
@@ -152,18 +153,17 @@ Disponíveis na versão integrada:
 
 - Descoberta e coleta periódica das métricas de serviços.
 - Estimativas de potência, energia e CO₂e com parâmetros documentados.
-- Persistência no PostgreSQL e histórico por serviço e período.
+- Persistência no PostgreSQL, histórico de métricas por período e histórico de tentativas por serviço.
 - Lista, detalhe, gráficos e indicadores de status com dados reais.
-- Globo e cards regionais com totais das amostras das últimas 24 horas.
+- Globo, serviços por região e cards com totais das amostras das últimas 24 horas.
+- Comparação de serviços com simulação de emissões em outra região.
 - Atualização automática após as rodadas de coleta, sem recarregar a página.
 - Execução de frontend, backend e banco com Docker Compose.
 
 Pendências e entregas futuras:
 
-- **Sprint 2:** apresentar os serviços associados ao inspecionar uma região,
-  como continuação da T15, que permanece parcialmente entregue.
-- **Sprint 2:** ranking de impacto ambiental.
-- **Sprint 3:** autenticação JWT, comparação e simulação de cenários.
+- **Sprint 2:** publicação da rota de ranking de impacto ambiental e integração com a interface.
+- **Sprint 3:** autenticação JWT e rota dedicada a cenários.
 - **Sprint a definir:** configuração do intervalo de coleta pela aplicação.
 
 Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
@@ -242,10 +242,9 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
 | RF14 | Ranking de impacto | O sistema deve apresentar ranking dos serviços por maior consumo energético ou maior emissão de CO₂e. |
 | RF15 | Comparação entre serviços | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços. |
 
-O mapa é opcional no desafio original, mas foi incluído pela equipe no plano
-atual da Sprint 1, com entrega parcial: apresentar os serviços associados ao
-inspecionar uma região ficou para a Sprint 2, como continuação de T15. Essa
-decisão não altera a redação do requisito nem representa aceite integral da US08.
+O mapa é opcional no desafio original. A Sprint 1 entregou a primeira versão
+do globo. A lista de serviços ao inspecionar uma região entrou na Sprint 2,
+como continuação de T15. O aceite integral da US08 tem avaliação própria.
 
 </details>
 
@@ -621,13 +620,13 @@ Uma User Story será considerada concluída quando:
 | US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | 🛠️ Implementada no código; validar transições |
 | US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | 🛠️ Implementada |
 | US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | 🔄 Parcial |
-| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | 🔄 Parcial; saldo de T15 |
+| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | 🛠️ Implementada com aceite pendente |
 | US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | 🛠️ Implementada |
 | US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | 🛠️ Implementada |
 | US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | 🛠️ Implementada |
 | US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | 🛠️ Implementada |
-| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | ❌          |
-| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | ❌          |
+| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | 🔄 Módulo disponível, integração pendente |
+| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | 🛠️ Implementada |
 | US15   | Acesso e Segurança         | Autenticação de usuários                       | Alta           | RNF05                 | ❌          |
 | US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                 | 🔄 Base implementada; ampliar validação |
 
@@ -647,7 +646,6 @@ serviço removido ou métricas inexistentes e resulta em `unavailable`.
 Erros da Cloudflare, como HTTP 530, são identificados separadamente no histórico,
 preservando o status anterior do serviço. A US07 possui
 totais e contagens regionais; falta a consolidação explícita do ambiente inteiro.
-A US08 conserva o saldo de T15 para a Sprint 2.
 
 - ❌ — Não iniciada
 - 🔄 — Parcialmente implementada ou com validação de falhas pendente

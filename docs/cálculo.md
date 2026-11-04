@@ -201,9 +201,8 @@ e não devem ser usados para validar essas consultas reais.
 
 ## 6. Orquestração e armazenamento
 
-O fluxo abaixo descreve as responsabilidades esperadas do modelo. Na execução
-atual, as regiões são sincronizadas antes da descoberta; o serviço usa os
-fatores regionais salvos, sem consulta de carbono individual por métrica.
+As regiões são sincronizadas antes da descoberta. O serviço usa os fatores
+regionais salvos para calcular as estimativas.
 Para cada serviço, o Collection Service:
 
 1. valida as métricas e o intervalo da amostra;
@@ -211,8 +210,8 @@ Para cada serviço, o Collection Service:
 3. verifica a disponibilidade e a validade dos parâmetros do modelo;
 4. estima potência e energia;
 5. calcula CO₂e quando as entradas necessárias forem válidas;
-6. persiste a coleta e os resultados com serviço, período, região e contexto
-   necessários à consulta histórica.
+6. persiste a coleta com o serviço, o horário, o intervalo da métrica, os
+   parâmetros e o fator de carbono usado.
 
 Uma falha ou entrada inválida em um serviço é registrada e tratada sem impedir
 o processamento dos demais. Na implementação atual, uma falha de métricas atualiza o estado quando
@@ -234,7 +233,7 @@ flowchart TD
     G[Obter intensidade de carbono da região]
     H{Energia e intensidade válidas?}
     I[Calcular CO₂e]
-    J[Registrar indicador indisponível]
+    J[Registrar observação de falha]
     K[Persistir coleta e contexto]
 
     A --> B
@@ -252,9 +251,8 @@ flowchart TD
 
 ## 8. Apresentação e interpretação
 
-O backend fornece os resultados calculados, seus valores de origem, unidades,
-período e região. Na integração futura, o frontend deverá identificar as estimativas e
-preservar seu contexto. Hoje detalhe e histórico da interface são simulados;
-rankings, comparação e cenários ainda são planejados. Uma
-simulação de região alternativa é identificada como cenário hipotético e
-apresenta explicitamente os parâmetros usados.
+O detalhe e o histórico usam as amostras armazenadas. A comparação agrega as
+amostras em um período comum. Para uma seleção com região simulada, mantém a
+energia e recalcula as emissões com o fator atual da região selecionada. Para
+uma seleção original, usa as emissões armazenadas. Faixas sem amostras têm
+energia e CO₂e iguais a `null`. Consulte o [contrato de comparação](./API.md#comparação-de-serviços).

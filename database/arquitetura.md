@@ -1,8 +1,41 @@
 # 🏗️ Arquitetura e Modelagem
 
-O schema e a persistência são entregas da Sprint 1. A estrutura inclui também
-tabelas para funcionalidades futuras; sua existência não comprova endpoints
-de autenticação ou configuração implementados.
+O [schema.sql](./schema.sql) define o esquema PostgreSQL usado pelo GreenER.
+O [DER atual](#diagrama-entidade-relacionamento-der) inclui o histórico de
+tentativas em `status_coleta`. `usuario` e `configuracao_sistema` preparam a
+estrutura para autenticação e configuração de monitoramento.
+
+## Histórico de tentativas (`status_coleta`)
+
+| Coluna | Tipo | Uso |
+|---|---|---|
+| `id` | `UUID` | Chave primária gerada por `uuid_generate_v4()`. |
+| `servico_id` | `BIGINT` | FK obrigatória para `servico.id`. |
+| `coleta_id` | `UUID` | FK opcional para `coleta.id`, preenchida pelo backend nas observações de sucesso. |
+| `observado_em` | `TIMESTAMPTZ` | Horário do registro da observação, com padrão `now()`. |
+| `descricao` | `TEXT` | Mensagem obrigatória associada à observação. |
+| `http_status` | `SMALLINT` | Código HTTP de erro quando disponível, com `CHECK` entre 100 e 599. O backend grava `NULL` em sucessos e falhas sem código. |
+| `tipo` | `TEXT` | Classificação obrigatória definida pelo backend, como `success`, `service_missing` ou `timeout`. |
+
+`idx_status_coleta_servico_tempo` indexa `(servico_id, observado_em DESC)`.
+As consultas ordenam pelo horário e usam o UUID como desempate. A listagem
+de status usa a observação mais recente de cada serviço e consulta a última
+amostra salva separadamente. O histórico por serviço retorna até 100 registros.
+Consulte o [contrato da API](../docs/API.md#status-das-coletas-por-serviço).
+
+| Informação | Fonte | Significado |
+|---|---|---|
+| `servico.ativo` | Descoberta de serviços | Indica se o serviço está listado no agregador. |
+| `servico.status` | Estado operacional atual | `available`, `metrics_missing` ou `unavailable`. |
+| `coleta` | Amostras válidas | Métricas, estimativas e contexto usados nas consultas históricas. |
+| `status_coleta` | Observações persistidas | Registra sucessos, falhas e ausências confirmadas na descoberta. |
+
+As gravações da amostra, do estado atual e da observação são comandos separados.
+Uma amostra pode existir mesmo quando o registro da observação falha.
+
+Cada observação pertence a um serviço. O vínculo com a amostra é opcional,
+e `coleta_id` pode aparecer em mais de uma observação segundo as restrições
+do SQL. Na rotina de coleta, o backend associa a amostra ao registrar sucesso.
 
 Esta seção reúne os artefatos de modelagem de dados desenvolvidos para o projeto **GreenER**.
 
@@ -28,7 +61,10 @@ Por meio dela são desenvolvidos os diagramas utilizados na documentação da ap
 
 ---
 
-## 📋 Diagramas Disponíveis
+## 📋 Diagramas originais
+
+Os arquivos Lucidchart e os SVGs originais registram o modelo inicial. O DER
+atual acompanha o SQL e inclui `status_coleta`.
 
 | Diagrama | Descrição                                                                                                  |
 | -------- | ---------------------------------------------------------------------------------------------------------- |
@@ -81,17 +117,18 @@ Representar, em nível conceitual, as entidades do domínio da plataforma GreenE
 
 ---
 
-# 🗄️ Diagrama Entidade-Relacionamento (DER)
+# Diagrama Entidade-Relacionamento (DER)
 
 ## Visualização
 
-<p align="center">
-    <img src="./images/DiagramaDER.svg" alt="Diagrama Entidade-Relacionamento (DER)">
-</p>
+![DER atual do GreenER, com as sete tabelas, chaves e cardinalidades](./images/DiagramaDERAtual.svg)
 
-## Arquivo Original
+[Abrir o DER atual em tamanho completo](./images/DiagramaDERAtual.svg)
 
-🔗 Lucidchart: [Acessar diagrama](https://lucid.app/lucidchart/a428841e-d545-4f2d-b834-a19170ff7bd1/view)
+## Modelo original
+
+O diagrama inicial está disponível em [SVG](./images/DiagramaDER.svg) e no
+[Lucidchart](https://lucid.app/lucidchart/a428841e-d545-4f2d-b834-a19170ff7bd1/view).
 
 ## Objetivo
 
@@ -99,12 +136,14 @@ Representar o modelo lógico do banco de dados PostgreSQL da plataforma GreenER,
 
 ## Relacionamentos
 
-| Tabela origem          | Tabela destino         | Chave estrangeira         | Cardinalidade |
-| ---------------------- | ---------------------- | ------------------------- | ------------- |
-| `regiao`               | `servico`              | `regiao_id`               | 1:N           |
-| `servico`              | `coleta`               | `servico_id`              | 1:N           |
-| `parametro_estimativa` | `coleta`               | `parametro_estimativa_id` | 1:N           |
-| `usuario`              | `configuracao_sistema` | `atualizado_por`          | 0..1:N        |
+| Tabela referenciada | Tabela com a FK | Chave estrangeira | Cardinalidade |
+| --- | --- | --- | --- |
+| `regiao` | `servico` | `regiao_id` | 1 para 0..N |
+| `servico` | `coleta` | `servico_id` | 1 para 0..N |
+| `parametro_estimativa` | `coleta` | `parametro_estimativa_id` | 1 para 0..N |
+| `servico` | `status_coleta` | `servico_id` | 1 para 0..N |
+| `coleta` | `status_coleta` | `coleta_id` | 0..1 para 0..N |
+| `usuario` | `configuracao_sistema` | `atualizado_por` | 0..1 para 0..1 |
 
 ## Regras de Negócio no Banco
 
@@ -115,10 +154,11 @@ Algumas regras são garantidas pelo próprio banco e não aparecem graficamente 
 - **Coleta única por instante:** `UNIQUE (servico_id, coletado_em)` impede duas coletas do mesmo serviço no mesmo instante.
 - **Valores controlados:** `usuario.papel` aceita `admin` ou `visualizador`, e `servico.status` aceita `available`, `metrics_missing` ou `unavailable`.
 - **Valores válidos:** `CHECK` impede valores negativos nas métricas e nos cálculos, limita percentuais entre 0 e 100 e limita o intervalo de configuração armazenado entre 10 e 3600 segundos. Esse CHECK não valida a variável de ambiente que agenda o job.
-- **Snapshot de carbono:** `coleta.carbon_intensity` guarda a intensidade de carbono da região no momento da medição, preservando o histórico caso `regiao.carbon_intensity` seja atualizada depois.
+- **Fator de carbono da coleta.** `coleta.carbon_intensity` guarda o fator regional usado no cálculo. Atualizações posteriores de `regiao.carbon_intensity` preservam as estimativas armazenadas. A coleta não guarda uma FK para a região original. Por isso, os totais regionais agrupam as amostras pela região atual do serviço.
+
 ## Operação do banco e persistência
 
-Fonte da estrutura: [schema.sql](./schema.sql). O script cria seis tabelas,
+O [schema.sql](./schema.sql) cria sete tabelas,
 chaves, restrições, índices e a extensão `uuid-ossp`, em uma transação.
 O seed insere um conjunto ativo de parâmetros e uma linha de configuração.
 Serviços, regiões e coletas são obtidos durante a execução; não são seed estático.
@@ -129,10 +169,12 @@ Serviços, regiões e coletas são obtidos durante a execução; não são seed 
 | servico | Descoberta, estado e consultas por external_id. |
 | parametro_estimativa | Conjunto ativo para as estimativas. |
 | coleta | Gravação e consulta de detalhe, histórico e totais. |
+| status_coleta | Gravação das observações e consulta da última tentativa e do histórico por serviço. |
 | usuario | Estrutura disponível; autenticação prevista para a Sprint 3. |
 | configuracao_sistema | Linha inicial disponível; ainda não controla o job. |
 
-O Compose publica PostgreSQL em `localhost:5433`; o backend usa `database:5432`.
+O Compose usa PostgreSQL 17 e publica a porta `localhost:5433`. O backend
+executado no Compose usa `database:5432`.
 Banco, usuário e senha de desenvolvimento estão no Compose e nos exemplos.
 O volume nomeado `postgres_data` preserva os registros ao recriar containers.
 O entrypoint aplica o script somente ao inicializar um volume vazio.
@@ -152,6 +194,19 @@ raiz do repositório e requer cliente psql instalado no host. O fluxo usual com
 Compose já aplica o script automaticamente na primeira inicialização.
 Uma alteração posterior no arquivo não migra volumes existentes.
 
+### Conferir um volume existente
+
+```powershell
+docker compose exec -T database psql -U postgres -d greener -c "SELECT to_regclass('public.status_coleta') AS tabela, to_regclass('public.idx_status_coleta_servico_tempo') AS indice;"
+```
+
+Se algum resultado vier vazio, a estrutura daquele volume está incompleta.
+Para preservar as coletas de um volume anterior à mudança, faça backup e
+aplique uma migração com o DDL faltante de `status_coleta` e do índice,
+conforme o [schema.sql](./schema.sql). O script completo é destinado à
+inicialização de bancos vazios. Registros anteriores à inclusão da tabela
+podem ter amostras em `coleta` sem observações de tentativa correspondentes.
+
 ### Consultar a estrutura e as coletas existentes
 
 Na raiz do projeto, com os containers ativos:
@@ -159,6 +214,7 @@ Na raiz do projeto, com os containers ativos:
 ```powershell
 docker compose exec -T database psql -U postgres -d greener -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;"
 docker compose exec -T database psql -U postgres -d greener -c "SELECT count(*) AS coletas, max(coletado_em) AS ultima_coleta FROM coleta;"
+docker compose exec -T database psql -U postgres -d greener -c "SELECT s.external_id, sc.observado_em, sc.tipo, sc.http_status, sc.coleta_id FROM status_coleta sc JOIN servico s ON s.id = sc.servico_id ORDER BY sc.observado_em DESC, sc.id DESC LIMIT 10;"
 ```
 
 Para validar retenção, registrar contagens e uma coleta identificável antes e
@@ -167,9 +223,11 @@ Compose com uma verificação de retenção já executada.
 
 ### SQL utilizado pela aplicação
 
-- [CollectionsRepository](../backend/src/modules/collections/collections.repository.ts): sincronização, gravação de coletas e atualização de estado.
-- [ServiceRepository](../backend/src/modules/services/services.repository.ts): detalhe e última coleta.
-- [AnalyticsRepository](../backend/src/modules/analytics/analytics.repository.ts): filtros de período, agregações, agrupamento temporal e totais.
+- `CollectionsRepository` sincroniza serviços e regiões, grava amostras e observações e consulta a última tentativa de cada serviço. [Código](../backend/src/modules/collections/collections.repository.ts)
+- `ServiceRepository` consulta listagem, detalhe, última amostra e histórico de tentativas por serviço. [Código](../backend/src/modules/services/services.repository.ts)
+- `AnalyticsRepository` filtra por período e agrupa amostras em faixas de tempo para pontos e totais. [Código](../backend/src/modules/analytics/analytics.repository.ts)
+- `RegionsRepository` consulta as regiões, os contadores de serviços e os totais por período. [Código](../backend/src/modules/regions/regions.repository.ts)
+- `ComparisonsRepository` consulta o período comum, os totais, os pontos por faixa e o fator da região simulada. [Código](../backend/src/modules/comparisons/comparisons.repository.ts)
 
 As consultas usam placeholders do pg, com valores separados do texto SQL.
 Os fatores ambientais iniciais e suas limitações estão em [cálculo.md](../docs/cálculo.md).
