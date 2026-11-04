@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
-import type { GlobeViewHandle } from '../components/3d/GlobeView';
+import type { GlobeViewHandle } from '../components/globe/GlobeView';
 import { ExploreSection } from '../components/landing/ExploreSection';
 import { fetchRegionsLast24Hours } from '@/api/regions';
 import { useApiQuery } from '@/hooks/useApiQuery';
-import { GlobeView } from '../components/3d/GlobeView';
+import { GlobeView } from '../components/globe/GlobeView';
+import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { useServices } from '@/hooks/useServices';
 
 export function LandingPage() {
@@ -12,6 +13,7 @@ export function LandingPage() {
     const exploreContainerRef = useRef<HTMLDivElement>(null);
     const globeTargetRef = useRef<HTMLDivElement>(null);
     const globeLayerRef = useRef<HTMLDivElement>(null);
+    const prevProgressRef = useRef(0);
 
     const [globeProgress, setGlobeProgress] = useState(0);
     const [globeTarget, setGlobeTarget] = useState({ x: 0, y: 0 });
@@ -35,6 +37,11 @@ export function LandingPage() {
                 0,
                 Math.min(1, (window.innerHeight - sectionRect.top) / (window.innerHeight * 0.7)),
             );
+
+            if (prevProgressRef.current === 0 && progress > 0) {
+                globeRef.current?.resetPosition();
+            }
+            prevProgressRef.current = progress;
 
             setGlobeProgress(progress);
 
@@ -84,6 +91,11 @@ export function LandingPage() {
         [services],
     );
 
+    const selectedRegion = useMemo(
+        () => regions?.find((region) => region.code === selectedCode) ?? null,
+        [regions, selectedCode],
+    );
+
     const selectRegion = (code: string) => {
         setSelectedCode(code);
     };
@@ -101,6 +113,10 @@ export function LandingPage() {
         globeRef.current?.resetView();
     };
 
+    const backToRegions = () => {
+        setSelectedCode(null);
+    };
+
     const zoom = (factor: number) => {
         globeRef.current?.zoom(factor);
     };
@@ -112,6 +128,11 @@ export function LandingPage() {
             </main>
         );
     }
+
+    const focusTarget =
+    selectedRegion?.latitude != null && selectedRegion.longitude != null
+        ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
+        : null;
 
     return (
         <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-20 pb-0 text-foreground">
@@ -146,13 +167,25 @@ export function LandingPage() {
                 ref={globeLayerRef}
                 className="pointer-events-none fixed inset-x-0 top-24 bottom-0 z-0"
             >
-                <GlobeView
-                    ref={globeRef}
-                    autoRotate={autoRotate}
-                    progress={globeProgress}
-                    targetPosition={globeTarget}
-                    markers={markers}
-                />
+                {force2D ? (
+                    <GlobeMap2D
+                        ref={globeRef}
+                        autoRotate={autoRotate}
+                        progress={globeProgress}
+                        targetPosition={globeTarget}
+                        markers={markers}
+                        focusTarget={focusTarget}
+                    />
+                ) : (
+                    <GlobeView
+                        ref={globeRef}
+                        autoRotate={autoRotate}
+                        progress={globeProgress}
+                        targetPosition={globeTarget}
+                        markers={markers}
+                        focusTarget={focusTarget}
+                    />
+                )}
             </div>
 
             <div
@@ -175,8 +208,10 @@ export function LandingPage() {
                         force2D={force2D}
                         setForce2D={setForce2D}
                         backToGlobal={backToGlobal}
+                        backToRegions={backToRegions}
                         zoom={zoom}
                         regions={regions ?? []}
+                        services={services}
                         onSelectRegion={selectRegion}
                     />
                 </div>

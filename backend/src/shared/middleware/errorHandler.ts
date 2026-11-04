@@ -16,6 +16,16 @@ export function errorHandler(err: unknown, _req: Request, res: Response, next: N
         return;
     }
 
+    if (err instanceof SyntaxError && 'type' in err && err.type === 'entity.parse.failed') {
+        res.status(400).json({
+            error: {
+                message: 'Dados inválidos',
+                details: [{ field: 'body', message: 'O body deve conter um objeto JSON válido' }],
+            },
+        });
+        return;
+    }
+
     if (err instanceof ZodError) {
         res.status(400).json({
             error: {

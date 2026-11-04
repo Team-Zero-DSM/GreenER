@@ -6,6 +6,7 @@ export interface GlobeViewHandle {
     rotateRight: () => void;
     zoom: (factor: number) => void;
     resetView: () => void;
+    resetPosition: () => void;
 }
 
 interface GlobeViewProps {
@@ -15,6 +16,10 @@ interface GlobeViewProps {
         x: number;
         y: number;
     };
+    focusTarget: {
+        latitude: number;
+        longitude: number;
+    } | null;
     markers: GlobeMarker[];
 }
 
@@ -27,7 +32,7 @@ export interface GlobeMarker {
 }
 
 export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function GlobeView(
-    { autoRotate = true, progress = 0, targetPosition, markers },
+    { autoRotate = true, progress = 0, targetPosition, focusTarget, markers },
     ref,
 ) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -35,11 +40,16 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
     const autoRotateRef = useRef(autoRotate);
     const targetPositionRef = useRef(targetPosition);
     const markersGroupRef = useRef<THREE.Group | null>(null);
+    const focusQuaternionRef = useRef<THREE.Quaternion | null>(null);
+    const focusTargetRef = useRef(focusTarget);
+    const zoomLevelRef = useRef(1);
+    const wasFocusedRef = useRef(false);
 
     const commandsRef = useRef({
         rotation: 0,
         zoomFactor: 1,
         reset: false,
+        resetPosition: false,
     });
     useImperativeHandle(
         ref,
@@ -57,6 +67,9 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             },
             resetView: () => {
                 commandsRef.current.reset = true;
+            },
+            resetPosition: () => {
+                commandsRef.current.resetPosition = true;
             },
         }),
         [],
@@ -191,31 +204,47 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             const commands = commandsRef.current;
 
             if (commands.reset) {
-                globe.rotation.set(0, 0, 0);
                 camera.position.z = 4.5;
                 commands.rotation = 0;
                 commands.zoomFactor = 1;
+                zoomLevelRef.current = 1;
                 commands.reset = false;
             }
 
-            const rotationStep = commands.rotation * Math.min(delta * 6, 1);
+            if (commands.resetPosition) {
+                globe.position.set(0, 0, 0);
+                globe.quaternion.identity();
+                camera.position.z = 4.5;
+                commands.rotation = 0;
+                commands.zoomFactor = 1;
+                zoomLevelRef.current = 1;
+                wasFocusedRef.current = false;
+                commands.resetPosition = false;
+            }
 
-            globe.rotation.y += rotationStep;
-            commands.rotation -= rotationStep;
+
 
             if (Math.abs(commands.rotation) < 0.001) {
                 commands.rotation = 0;
             }
 
             if (commands.zoomFactor !== 1) {
-                camera.position.z = THREE.MathUtils.clamp(
-                    camera.position.z / commands.zoomFactor,
-                    2.5,
-                    8,
+                zoomLevelRef.current = THREE.MathUtils.clamp(
+                    zoomLevelRef.current / commands.zoomFactor,
+                    0.6,
+                    2,
                 );
-
                 commands.zoomFactor = 1;
             }
+
+            const desiredCameraZ =
+                (focusTargetRef.current ? 3.0 : 4.5) / zoomLevelRef.current;
+
+            camera.position.z = THREE.MathUtils.lerp(
+                camera.position.z,
+                desiredCameraZ,
+                Math.min(delta * 3, 1),
+            );
 
             const p = progressRef.current;
             const smooth = p * p * (3 - 2 * p);
@@ -243,11 +272,41 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
             globe.position.y = THREE.MathUtils.lerp(0, targetY, smooth);
 
-            if (autoRotateRef.current) {
-                globe.rotation.y += delta * 0.2;
-            }
+            const isFocused =
+                focusTargetRef.current !== null && focusQuaternionRef.current !== null;
 
-            stars.rotation.y += delta * 0.004;
+            if (isFocused && focusQuaternionRef.current) {
+                wasFocusedRef.current = true;
+
+                globe.quaternion.slerp(
+                    focusQuaternionRef.current,
+                    Math.min(delta * 2.5, 1),
+                );
+
+                commands.rotation = 0;
+            } else if (wasFocusedRef.current) {
+                const normalOrientation = new THREE.Quaternion();
+
+                globe.quaternion.slerp(normalOrientation, Math.min(delta * 2, 1));
+
+                if (globe.quaternion.angleTo(normalOrientation) < 0.01) {
+                    globe.quaternion.identity();
+                    wasFocusedRef.current = false;
+                }
+            } else {
+                const rotationStep = commands.rotation * Math.min(delta * 6, 1);
+
+                globe.rotateY(rotationStep);
+                commands.rotation -= rotationStep;
+
+                if (Math.abs(commands.rotation) < 0.001) {
+                    commands.rotation = 0;
+                }
+
+                if (autoRotateRef.current) {
+                    globe.rotateY(delta * 0.2);
+                }
+            }
 
             renderer.render(scene, camera);
         };
@@ -324,6 +383,30 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             geometry.dispose();
         };
     }, [markers]);
+
+    useEffect(() => {
+        focusTargetRef.current = focusTarget;
+
+        if (!focusTarget) {
+            focusQuaternionRef.current = null;
+            return;
+        }
+
+        const latitude = THREE.MathUtils.degToRad(focusTarget.latitude);
+        const longitude = THREE.MathUtils.degToRad(focusTarget.longitude);
+
+        const yRotation = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            -Math.PI / 2 - longitude,
+        );
+
+        const xRotation = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(1, 0, 0),
+            latitude,
+        );
+
+        focusQuaternionRef.current = xRotation.multiply(yRotation);
+    }, [focusTarget]);
 
     return (
         <div

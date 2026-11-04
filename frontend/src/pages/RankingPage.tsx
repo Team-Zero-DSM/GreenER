@@ -1,8 +1,25 @@
+import { useState } from 'react';
 import { RankingChart } from '@/components/ranking/RankingChart';
 import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
+import { getRankingPeriod } from '@/components/ranking/rankingPeriod';
+import { formatDateTimeSeconds } from '@/lib/format';
+import { getRankingMock } from '@/mocks/rankingResponse.mock';
+import type { RankingCriterion } from '@/types/ranking';
+import type { HistoryRange } from '@/types/service';
 
 export function RankingPage() {
+    const [criterion, setCriterion] = useState<RankingCriterion>('co2eGrams');
+    const [range, setRange] = useState<HistoryRange>('24h');
+    const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString());
+    const period = getRankingPeriod(range, periodEnd);
+    const ranking = getRankingMock(criterion, range, periodEnd);
+
+    function handleRangeChange(value: HistoryRange) {
+        setRange(value);
+        setPeriodEnd(new Date().toISOString());
+    }
+
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -14,17 +31,24 @@ export function RankingPage() {
                     </p>
                 </header>
 
-                <RankingFilters />
+                <RankingFilters
+                    criterion={criterion}
+                    range={range}
+                    onCriterionChange={setCriterion}
+                    onRangeChange={handleRangeChange}
+                />
             </div>
 
             <p className="text-sm text-muted-foreground">
                 Período considerado:{' '}
-                <span className="font-medium text-foreground">início e fim do período</span>
+                <span className="font-medium text-foreground tabular-nums">
+                    {formatDateTimeSeconds(period.from)} até {formatDateTimeSeconds(period.to)}
+                </span>
             </p>
 
-            <RankingChart />
+            <RankingChart criterion={criterion} items={ranking.items} />
 
-            <RankingTable />
+            <RankingTable criterion={criterion} />
         </main>
     );
 }

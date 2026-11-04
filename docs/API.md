@@ -24,7 +24,7 @@ fornecê-las ao restante da aplicação.
 ## 2. API REST do GreenER
 
 A implementação atual oferece listagem e detalhe de serviços, histórico de coletas,
-estado do monitoramento e os cards de região. As demais operações abaixo são
+estado do monitoramento, os cards de região e a comparação de serviços. As demais operações abaixo são
 planejadas e não devem ser apresentadas como implementadas. O dashboard e o
 detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
 serviços, sem dados simulados. Essas telas buscam a API ao abrir, ao trocar
@@ -48,6 +48,7 @@ para listagem, detalhe e histórico.
 | `GET` | `/api/v1/services/:externalId/collections` | Entregar pontos agrupados e totais do período. | Não exige. |
 | `GET` | `/api/v1/regions` | Entregar as regiões, dados ambientais, contadores atuais e totais do período. | Não exige. |
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
+| `POST` | `/api/v1/comparisons` | Comparar os totais e 120 pontos por seleção, com simulação opcional de região. | Não exige. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
 por exemplo `billing-api`; não é o BIGINT interno. O parâmetro aceita de 1 a
@@ -179,6 +180,50 @@ da amostra.
 Regiões ausentes retornam 200 com `regions: []`. Par inválido (incompleto,
 `from >= to` ou formato incorreto) retorna 400; falha interna retorna 500.
 
+#### Comparação de serviços
+
+```http
+POST /api/v1/comparisons
+Content-Type: application/json
+```
+
+```json
+{
+  "range": "1h",
+  "selections": [
+    { "selectionId": "original", "externalId": "billing-api", "simulatedRegionCode": null },
+    { "selectionId": "simulado", "externalId": "billing-api", "simulatedRegionCode": "br-sudeste" }
+  ]
+}
+```
+
+O body exige `range` (`1h`, `6h`, `24h`, `7d` ou `30d`) e de 2 a 5 seleções.
+Cada seleção exige `selectionId`, `externalId` e `simulatedRegionCode` (código
+da região ou `null` para usar as emissões armazenadas).
+
+A resposta 200 contém `range`, `period: { from, to }` e `series`. Todas as
+seleções usam o mesmo período, encerrado imediatamente após a última coleta
+disponível entre os serviços selecionados e dividido em 120 faixas iguais.
+O limite final inclui 1 milissegundo adicional para preservar coletas com
+precisão de microssegundos do PostgreSQL. Sem coletas em nenhum dos serviços,
+o período termina no momento da requisição. Sem novas coletas, os horários
+das faixas permanecem iguais entre consultas. Cada série contém
+`selectionId`, `summary` e `points`.
+O resumo contém `sampleCount`, `energyKwh` e `co2eGrams`; cada ponto também
+contém `timestamp`, que identifica o início da faixa. Uma faixa inclui
+coletas posteriores ao início e até o fim, inclusive.
+
+Faixas sem coletas retornam quantidade zero e métricas `null`. Na simulação,
+a energia é preservada e as emissões são calculadas como energia em kWh
+vezes o fator atual da região em gCO₂e/kWh, tanto no resumo como nos pontos.
+Os totais representam as amostras disponíveis; faixas vazias não comprovam
+falhas de coleta. A tela de comparação carrega os serviços e as regiões da
+API e consulta este endpoint ao clicar em Comparar, mantendo o resultado
+anterior durante o carregamento ou em caso de falha.
+
+Body inválido retorna 400; serviço ou região simulada inexistente retorna
+404; falha interna retorna 500.
+
 ### 2.2. Operações planejadas
 
 Distribuição confirmada: listagem interna e integração implementadas na Sprint 1; rankings
@@ -193,18 +238,16 @@ implementadas, sem garantia de disponibilidade HTTP na versão atual.
 |---|---|---|
 | `POST` | `/auth/login` | Validar as credenciais do usuário e emitir um JWT. |
 | `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
-| `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
 | `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
 | `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
 | `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |
 
-Para ranking e comparação, os filtros de datas abaixo são planejados. Não
+Para ranking, os filtros de datas abaixo são planejados. Não
 substituem o contrato implementado de `range` e `to` descrito na seção 2.1.
 
 | Caminho | Parâmetros |
 |---|---|
 | `/rankings` | `from`, `to`, `metric` (`energy` ou `co2e`) |
-| `/comparisons` | `serviceIds` (lista), `from`, `to` |
 
 No contrato planejado, `POST /auth/login` recebe `username` e `password` e
 retorna um `accessToken` JWT. O token será enviado nas chamadas autenticadas pelo cabeçalho
@@ -359,7 +402,8 @@ comprovam autenticação implementada na versão atual. Sua entrega está previs
 ## 6. Alinhamento entre contrato e implementação
 
 Lista, detalhe, histórico e regiões são consumidos pela interface real. Rotas,
-schemas Zod e tipos devem evoluir em conjunto. Ranking, comparação, cenários,
+schemas Zod e tipos devem evoluir em conjunto. A comparação está integrada
+à API, incluindo a simulação de região. Ranking, cenários,
 JWT e configuração por HTTP continuam planejados. Consultar o [plano](./plano-de-entregas.md)
 e as [rotas do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
 
