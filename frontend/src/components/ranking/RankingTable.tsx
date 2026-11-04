@@ -33,7 +33,8 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                 <h2 className="text-xl font-semibold">Classificação</h2>
 
                 <p className="text-sm text-muted-foreground">
-                    Ordenada por {sortLabels[criterion]}, do maior para o menor.
+                    Totais somados no período considerado, ordenados por {sortLabels[criterion]}, do
+                    maior para o menor.
                 </p>
             </div>
 

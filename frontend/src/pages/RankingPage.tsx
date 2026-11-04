@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { RankingChart } from '@/components/ranking/RankingChart';
 import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
-import { getRankingPeriod } from '@/components/ranking/rankingPeriod';
 import { formatDateTimeSeconds } from '@/lib/format';
 import { getRankingMock } from '@/mocks/rankingResponse.mock';
 import type { RankingCriterion } from '@/types/ranking';
@@ -12,8 +11,8 @@ export function RankingPage() {
     const [criterion, setCriterion] = useState<RankingCriterion>('co2eGrams');
     const [range, setRange] = useState<HistoryRange>('24h');
     const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString());
-    const period = getRankingPeriod(range, periodEnd);
     const ranking = getRankingMock(criterion, range, periodEnd);
+    const { period } = ranking;
 
     function handleRangeChange(value: HistoryRange) {
         setRange(value);
