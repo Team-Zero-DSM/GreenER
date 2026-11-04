@@ -3,21 +3,14 @@ import { RankingChart } from '@/components/ranking/RankingChart';
 import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
 import { formatDateTimeSeconds } from '@/lib/format';
-import { getRankingMock } from '@/mocks/rankingResponse.mock';
+import { useRanking } from '@/hooks/useRanking';
 import type { RankingCriterion } from '@/types/ranking';
 import type { HistoryRange } from '@/types/service';
 
 export function RankingPage() {
     const [criterion, setCriterion] = useState<RankingCriterion>('co2eGrams');
     const [range, setRange] = useState<HistoryRange>('24h');
-    const [periodEnd, setPeriodEnd] = useState(() => new Date().toISOString());
-    const ranking = getRankingMock(criterion, range, periodEnd);
-    const { period } = ranking;
-
-    function handleRangeChange(value: HistoryRange) {
-        setRange(value);
-        setPeriodEnd(new Date().toISOString());
-    }
+    const { data: ranking } = useRanking(criterion, range);
 
     return (
         <main className="mx-auto max-w-7xl space-y-6 p-6">
@@ -34,20 +27,25 @@ export function RankingPage() {
                     criterion={criterion}
                     range={range}
                     onCriterionChange={setCriterion}
-                    onRangeChange={handleRangeChange}
+                    onRangeChange={setRange}
                 />
             </div>
 
-            <p className="text-sm text-muted-foreground">
-                Período considerado:{' '}
-                <span className="font-medium text-foreground tabular-nums">
-                    {formatDateTimeSeconds(period.from)} até {formatDateTimeSeconds(period.to)}
-                </span>
-            </p>
+            {ranking && (
+                <>
+                    <p className="text-sm text-muted-foreground">
+                        Período considerado:{' '}
+                        <span className="font-medium text-foreground tabular-nums">
+                            {formatDateTimeSeconds(ranking.period.from)} até{' '}
+                            {formatDateTimeSeconds(ranking.period.to)}
+                        </span>
+                    </p>
 
-            <RankingChart criterion={criterion} items={ranking.items} />
+                    <RankingChart criterion={criterion} items={ranking.items} />
 
-            <RankingTable criterion={criterion} items={ranking.items} />
+                    <RankingTable criterion={criterion} items={ranking.items} />
+                </>
+            )}
         </main>
     );
 }
