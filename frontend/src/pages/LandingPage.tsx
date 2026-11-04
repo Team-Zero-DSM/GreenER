@@ -12,6 +12,7 @@ export function LandingPage() {
     const exploreContainerRef = useRef<HTMLDivElement>(null);
     const globeTargetRef = useRef<HTMLDivElement>(null);
     const globeLayerRef = useRef<HTMLDivElement>(null);
+    const prevProgressRef = useRef(0);
 
     const [globeProgress, setGlobeProgress] = useState(0);
     const [globeTarget, setGlobeTarget] = useState({ x: 0, y: 0 });
@@ -35,6 +36,11 @@ export function LandingPage() {
                 0,
                 Math.min(1, (window.innerHeight - sectionRect.top) / (window.innerHeight * 0.7)),
             );
+
+            if (prevProgressRef.current === 0 && progress > 0) {
+                globeRef.current?.resetPosition();
+            }
+            prevProgressRef.current = progress;
 
             setGlobeProgress(progress);
 
@@ -84,6 +90,11 @@ export function LandingPage() {
         [services],
     );
 
+    const selectedRegion = useMemo(
+        () => regions?.find((region) => region.code === selectedCode) ?? null,
+        [regions, selectedCode],
+    );
+
     const selectRegion = (code: string) => {
         setSelectedCode(code);
     };
@@ -99,6 +110,10 @@ export function LandingPage() {
     const backToGlobal = () => {
         setSelectedCode(null);
         globeRef.current?.resetView();
+    };
+
+    const backToRegions = () => {
+        setSelectedCode(null);
     };
 
     const zoom = (factor: number) => {
@@ -152,6 +167,14 @@ export function LandingPage() {
                     progress={globeProgress}
                     targetPosition={globeTarget}
                     markers={markers}
+                    focusTarget={
+                        selectedRegion?.latitude != null && selectedRegion.longitude != null
+                            ? {
+                                latitude: selectedRegion.latitude,
+                                longitude: selectedRegion.longitude,
+                            }
+                            : null
+                    }
                 />
             </div>
 
@@ -175,8 +198,10 @@ export function LandingPage() {
                         force2D={force2D}
                         setForce2D={setForce2D}
                         backToGlobal={backToGlobal}
+                        backToRegions={backToRegions}
                         zoom={zoom}
                         regions={regions ?? []}
+                        services={services}
                         onSelectRegion={selectRegion}
                     />
                 </div>
