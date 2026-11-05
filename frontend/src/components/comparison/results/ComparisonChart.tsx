@@ -317,7 +317,9 @@ export function ComparisonChart({
                                 dot={false}
                                 activeDot={false}
                                 connectNulls={false}
-                                isAnimationActive={false}
+                                isAnimationActive="auto"
+                                animationDuration={700}
+                                animationEasing="ease-out"
                                 legendType="none"
                                 tooltipType="none"
                             />
@@ -335,7 +337,9 @@ export function ComparisonChart({
                                 dot={false}
                                 activeDot={{ r: 4 }}
                                 connectNulls={false}
-                                isAnimationActive={false}
+                                isAnimationActive="auto"
+                                animationDuration={700}
+                                animationEasing="ease-out"
                             />
                         ))}
 
@@ -404,7 +408,9 @@ export function ComparisonChart({
                                         }}
                                         activeDot={false}
                                         connectNulls={false}
-                                        isAnimationActive={false}
+                                        isAnimationActive="auto"
+                                        animationDuration={700}
+                                        animationEasing="ease-out"
                                         legendType="none"
                                         tooltipType="none"
                                     />

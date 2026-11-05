@@ -275,23 +275,46 @@ export function ComparisonSummary({
                   : null
               : (diferencaAbsoluta / mediaDemais) * 100;
 
-    const descricaoDiferenca =
-        diferencaAbsoluta === null
-            ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
-            : classificacao === 'igual'
-              ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
-              : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
-                    metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
-                } ${formatarValor(
-                    Math.abs(diferencaAbsoluta),
-                    metrica,
-                )} ${unidade} ${
-                    classificacao === 'acima' ? 'a mais' : 'a menos'
-                } que a média dos demais.${
-                    diferencaPercentual === null
-                        ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
-                        : ''
-                }`;
+    
+const descricaoDiferenca =
+    diferencaAbsoluta === null
+        ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
+        : classificacao === 'igual'
+          ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
+          : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+                metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+            } ${formatarValor(
+                Math.abs(diferencaAbsoluta),
+                metrica,
+            )} ${unidade} ${
+                classificacao === 'acima' ? 'a mais' : 'a menos'
+            } que a média dos demais.${
+                diferencaPercentual === null
+                    ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+                    : ''
+            }`;
+
+
+const descricaoAntes =
+    `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+        metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+    } `;
+
+const valorDestaque =
+    diferencaAbsoluta !== null && classificacao !== 'igual'
+        ? `${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade}`
+        : null;
+
+const descricaoDepois =
+    ` ${
+        classificacao === 'acima' ? 'a mais' : 'a menos'
+    } que a média dos demais.${
+        diferencaPercentual === null
+            ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+            : ''
+    }`;
+
+
 
     return (
         <section className="space-y-4">
@@ -452,11 +475,13 @@ export function ComparisonSummary({
     </div>
 
     <ComparisonDifferenceChart
-        percentual={diferencaPercentual}
-        classificacao={classificacao}
-        metrica={metrica}
-        descricao={descricaoDiferenca}
-    />
+    percentual={diferencaPercentual}
+    classificacao={classificacao}
+    descricao={descricaoDiferenca}
+    descricaoAntes={descricaoAntes}
+    valorDestaque={valorDestaque}
+    descricaoDepois={descricaoDepois}
+/>
 
 </div>
            {/* Valores individuais */}

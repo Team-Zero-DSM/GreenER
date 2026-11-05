@@ -8,13 +8,10 @@ import {
 
 import {
     PolarAngleAxis,
-    PolarRadiusAxis,
     RadialBar,
     RadialBarChart,
     ResponsiveContainer,
 } from 'recharts';
-
-import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 
 type ClassificacaoComparacao =
     | 'acima'
@@ -25,8 +22,10 @@ type ClassificacaoComparacao =
 interface ComparisonDifferenceChartProps {
     percentual: number | null;
     classificacao: ClassificacaoComparacao;
-    metrica: ComparisonMetric;
     descricao: string;
+    descricaoAntes?: string;
+    valorDestaque?: string | null;
+    descricaoDepois?: string;
 }
 
 function formatarPercentual(valor: number): string {
@@ -38,43 +37,42 @@ function formatarPercentual(valor: number): string {
 export function ComparisonDifferenceChart({
     percentual,
     classificacao,
-    metrica,
     descricao,
+    descricaoAntes,
+    valorDestaque,
+    descricaoDepois,
 }: ComparisonDifferenceChartProps) {
     const percentualValido =
         percentual !== null && Number.isFinite(percentual);
 
-    // Limita apenas o preenchimento visual do gráfico.
     const magnitude =
         percentualValido && classificacao !== 'indisponivel'
             ? Math.min(Math.abs(percentual), 100)
             : 0;
 
-    // Distribui a diferença para o lado correspondente.
-    const antes =
-        classificacao === 'abaixo'
-            ? 100 - magnitude
-            : 100;
-
-    const depois =
+    const diferencaComSinal =
         classificacao === 'acima'
-            ? 100 - magnitude
-            : 100;
+            ? magnitude
+            : classificacao === 'abaixo'
+              ? -magnitude
+              : 0;
+
+    const proporcaoReferencia = 50 + diferencaComSinal / 2;
+    const proporcaoMedia = 100 - proporcaoReferencia;
 
     const dadosGrafico = [
         {
-            antes,
-            diferenca: magnitude,
-            depois,
+            referencia: proporcaoReferencia,
+            media: proporcaoMedia,
         },
     ];
 
-    const corDiferenca =
-        classificacao === 'acima'
-            ? '#FB7185'
-            : classificacao === 'abaixo'
-              ? '#34D399'
-              : '#94A3B8';
+    const corReferencia =
+        classificacao === 'indisponivel'
+            ? '#64748B'
+            : '#2DD4BF';
+
+    const corMedia = '#475569';
 
     const corTexto =
         classificacao === 'acima'
@@ -94,108 +92,107 @@ export function ComparisonDifferenceChart({
                 ? Minus
                 : ArrowUpDown;
 
-    const acao =
-        metrica === 'co2eGrams'
-            ? 'Emitiu'
-            : 'Consumiu';
-
-    const percentualFormatado =
-    percentualValido && percentual !== null
-        ? formatarPercentual(percentual)
-        : null;
-
-const textoDirecao =
-    classificacao === 'acima'
-        ? `${acao} ${
-              percentualFormatado !== null
-                  ? `${percentualFormatado}% a mais`
-                  : 'mais'
-          } que a média`
-        : classificacao === 'abaixo'
-          ? `${acao} ${
-                percentualFormatado !== null
-                    ? `${percentualFormatado}% a menos`
-                    : 'menos'
-            } que a média`
-          : classificacao === 'igual'
-            ? 'Mesmo valor da média'
-            : 'Comparação indisponível';
+    const textoDirecao =
+        classificacao === 'acima'
+            ? 'Acima da média'
+            : classificacao === 'abaixo'
+              ? 'Abaixo da média'
+              : classificacao === 'igual'
+                ? 'Igual à média'
+                : 'Comparação indisponível';
 
     return (
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex w-full flex-col items-center gap-2 text-center">
 
-            {/* Gráfico radial */}
-            <div className="h-[105px] w-full max-w-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <RadialBarChart
-                        data={dadosGrafico}
-                        startAngle={180}
-                        endAngle={0}
-                        innerRadius="68%"
-                        outerRadius="88%"
-                    >
-                        <PolarAngleAxis
-                            type="number"
-                            domain={[0, 200]}
-                            tick={false}
-                        />
+            {/* Medidor radial */}
+            <div className="relative mx-auto aspect-[2/1] w-full max-w-[280px] overflow-hidden">
+                <div className="aspect-square w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart
+                            data={dadosGrafico}
+                            startAngle={180}
+                            endAngle={0}
+                            innerRadius="62%"
+                            outerRadius="96%"
+                        >
+                            <PolarAngleAxis
+                                type="number"
+                                domain={[0, 100]}
+                                tick={false}
+                            />
 
-                        <PolarRadiusAxis
-                            tick={false}
-                            tickLine={false}
-                            axisLine={false}
-                        />
+                            {/* Serviço de referência */}
+                            <RadialBar
+                                dataKey="referencia"
+                                stackId="comparacao"
+                                fill={corReferencia}
+                                cornerRadius={0}
+                            />
 
-                        <RadialBar
-                            dataKey="antes"
-                            stackId="comparacao"
-                            fill="#334155"
-                            cornerRadius={0}
-                        />
+                            {/* Média dos demais serviços */}
+                            <RadialBar
+                                dataKey="media"
+                                stackId="comparacao"
+                                fill={corMedia}
+                                cornerRadius={0}
+                            />
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                </div>
 
-                        <RadialBar
-                            dataKey="diferenca"
-                            stackId="comparacao"
-                            fill={corDiferenca}
-                            cornerRadius={5}
-                        />
-
-                        <RadialBar
-                            dataKey="depois"
-                            stackId="comparacao"
-                            fill="#334155"
-                            cornerRadius={0}
-                        />
-                    </RadialBarChart>
-                </ResponsiveContainer>
+                {/* Indicador central de 0% */}
+                <svg
+                    className="pointer-events-none absolute inset-0 h-full w-full"
+                    viewBox="0 0 100 50"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                >
+                    <line
+                        x1="50"
+                        y1="19"
+                        x2="50"
+                        y2="49"
+                        stroke="#94A3B8"
+                        strokeWidth="0.45"
+                        strokeDasharray="1.5 1.8"
+                        opacity="0.65"
+                    />
+                </svg>
             </div>
 
-            {/* Identificação da escala */}
-            <div className="flex w-full max-w-[210px] justify-between text-[10px] text-slate-500">
-                <span>Abaixo</span>
-                <span>0%</span>
-                <span>Acima</span>
-            </div>
-
-            {/* Percentual */}
-            <p className={`text-2xl font-semibold tabular-nums ${corTexto}`}>
-                {percentualValido
+            {/* Percentual em destaque */}
+            <p
+                className={`w-full text-center text-4xl font-semibold leading-none tabular-nums ${corTexto}`}
+            >
+                {percentualValido && percentual !== null
                     ? `${formatarPercentual(percentual)}%`
                     : '—'}
             </p>
 
-            {/* Direção */}
-            <div className={`flex items-center gap-2 text-sm font-medium ${corTexto}`}>
+            {/* Classificação centralizada */}
+            <div
+                className={`flex w-full items-center justify-center gap-2 text-sm font-semibold ${corTexto}`}
+            >
                 <IconeDirecao className="size-4 shrink-0" />
 
-                <span>
-                    {textoDirecao}
-                </span>
+                <span>{textoDirecao}</span>
             </div>
 
-            {/* Descrição */}
-            <p className="text-center text-xs leading-relaxed text-slate-400">
-                {descricao}
+            {/* Descrição com valor destacado */}
+            <p className="w-full text-center text-xs leading-relaxed text-slate-400">
+                {valorDestaque !== null && valorDestaque !== undefined ? (
+                    <>
+                        {descricaoAntes}
+
+                        <strong className="font-bold text-slate-200">
+                            {valorDestaque}
+                        </strong>
+
+                        {descricaoDepois}
+                    </>
+                ) : (
+                    descricao
+                )}
             </p>
         </div>
     );
