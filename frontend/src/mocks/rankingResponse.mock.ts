@@ -79,6 +79,14 @@ const MOCK_SERVICES: Omit<RankingItem, 'position'>[] = [
         co2eGrams: 17.68,
         sampleCount: 2880,
     },
+    {
+        externalId: 'legacy-importer',
+        name: 'Legacy Importer',
+        region: { code: 'eu-west', city: 'Dublin' },
+        energyKwh: null,
+        co2eGrams: null,
+        sampleCount: 0,
+    },
 ];
 
 function scale(value: number | null, factor: number): number | null {
