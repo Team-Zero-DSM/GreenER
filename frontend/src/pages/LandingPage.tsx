@@ -6,6 +6,7 @@ import { useApiQuery } from '@/hooks/useApiQuery';
 import { GlobeView } from '../components/globe/GlobeView';
 import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { useServices } from '@/hooks/useServices';
+import { StarsBackground } from '../components/globe/StarsBackground';
 
 export function LandingPage() {
     const globeRef = useRef<GlobeViewHandle>(null);
@@ -108,11 +109,6 @@ export function LandingPage() {
         globeRef.current?.rotateRight();
     };
 
-    const backToGlobal = () => {
-        setSelectedCode(null);
-        globeRef.current?.resetView();
-    };
-
     const backToRegions = () => {
         setSelectedCode(null);
     };
@@ -167,14 +163,19 @@ export function LandingPage() {
                 className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-h,4rem)] z-0"
             >
                 {force2D ? (
-                    <GlobeMap2D
-                        ref={globeRef}
-                        autoRotate={autoRotate}
-                        progress={globeProgress}
-                        targetPosition={globeTarget}
-                        markers={markers}
-                        focusTarget={focusTarget}
-                    />
+                    <div className="relative h-full w-full">''
+                        <StarsBackground />
+                        <div className="relative h-full w-full">
+                            <GlobeMap2D
+                                ref={globeRef}
+                                autoRotate={autoRotate}
+                                progress={globeProgress}
+                                targetPosition={globeTarget}
+                                markers={markers}
+                                focusTarget={focusTarget}
+                            />
+                        </div>
+                    </div>
                 ) : (
                     <GlobeView
                         ref={globeRef}
@@ -206,7 +207,6 @@ export function LandingPage() {
                         setAutoRotate={setAutoRotate}
                         force2D={force2D}
                         setForce2D={setForce2D}
-                        backToGlobal={backToGlobal}
                         backToRegions={backToRegions}
                         zoom={zoom}
                         regions={regions ?? []}

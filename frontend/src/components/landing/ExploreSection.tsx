@@ -20,7 +20,6 @@ type ExploreSectionProps = {
     force2D: boolean;
     setForce2D: Dispatch<SetStateAction<boolean>>;
 
-    backToGlobal: () => void;
     backToRegions: () => void;
     zoom: (factor: number) => void;
 
@@ -49,7 +48,6 @@ export function ExploreSection({
     setAutoRotate,
     force2D,
     setForce2D,
-    backToGlobal,
     backToRegions,
     zoom,
     regions,
@@ -66,7 +64,6 @@ export function ExploreSection({
 
     return (
         <section
-            id="explorar"
             ref={exploreRef}
             className={`relative z-10 min-w-0`}
             aria-labelledby="explore-title"
@@ -93,27 +90,27 @@ export function ExploreSection({
                 >
                     <button
                         type="button"
-                        onClick={backToGlobal}
-                        disabled={!selectedCode}
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        Visão global
-                    </button>
-
-                    <button
-                        type="button"
                         aria-pressed={autoRotate}
                         onClick={() => setAutoRotate((value) => !value)}
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1 whitespace-nowrap rounded-md border border-gray-500 bg-slate-950/60 min-h-11 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Rotação automática
                     </button>
 
                     <button
                         type="button"
+                        aria-pressed={force2D}
+                        onClick={() => setForce2D((value) => !value)}
+                        className="flex-1 whitespace-nowrap rounded-md border border-gray-500 bg-slate-950/60 min-h-11 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        Visualização 2D
+                    </button>
+
+                    <button
+                        type="button"
                         onClick={rotateLeft}
                         aria-label="Girar para a esquerda"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="shrink-0 rounded-md border border-gray-500 bg-slate-950/60 min-h-11 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         ←
                     </button>
@@ -122,7 +119,7 @@ export function ExploreSection({
                         type="button"
                         onClick={rotateRight}
                         aria-label="Girar para a direita"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="shrink-0 rounded-md border border-gray-500 bg-slate-950/60 min-h-11 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         →
                     </button>
@@ -131,7 +128,7 @@ export function ExploreSection({
                         type="button"
                         onClick={() => zoom(1.15)}
                         aria-label="Aproximar"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="shrink-0 rounded-md border border-gray-500 bg-slate-950/60 min-h-11 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         +
                     </button>
@@ -140,18 +137,9 @@ export function ExploreSection({
                         type="button"
                         onClick={() => zoom(1 / 1.15)}
                         aria-label="Afastar"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="shrink-0 rounded-md border border-gray-500 bg-slate-950/60 min-h-11 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         −
-                    </button>
-
-                    <button
-                        type="button"
-                        aria-pressed={force2D}
-                        onClick={() => setForce2D((value) => !value)}
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        Modo 2D
                     </button>
                 </div>
 
@@ -159,7 +147,7 @@ export function ExploreSection({
                     <button
                         type="button"
                         onClick={backToRegions}
-                        className="flex w-fit items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white transition-colors hover:bg-white/10"
+                        className="flex w-fit items-center gap-2 rounded-lg border border-white/15 bg-white/5 min-h-11 px-4 py-2 text-base text-white transition-colors hover:bg-white/10"
                     >
                         <span aria-hidden="true">←</span>
                         Voltar para regiões
