@@ -14,6 +14,7 @@ export interface GlobeViewHandle {
 export interface GlobeState {
     progress: number;
     target: { x: number; y: number };
+    lon: number;
 }
 
 interface GlobeViewProps {
@@ -104,6 +105,11 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
         const globe = new THREE.Group();
         scene.add(globe);
 
+        globe.quaternion.setFromAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            -Math.PI / 2 - THREE.MathUtils.degToRad(stateRef.current.lon),
+        );
+
         const markersGroup = new THREE.Group();
         globe.add(markersGroup);
         markersGroupRef.current = markersGroup;
@@ -189,7 +195,9 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
         let animationId = 0;
         let previousTime = 0;
 
-        const normalOrientation = new THREE.Quaternion();
+        const restQuaternion = new THREE.Quaternion();
+        const inverse = new THREE.Quaternion();
+        const localFront = new THREE.Vector3();
         const forward = new THREE.Vector3(0, 0, 1);
         const viewDirection = new THREE.Vector3();
         const aim = new THREE.Quaternion();
@@ -264,6 +272,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             globe.position.y = THREE.MathUtils.lerp(0, targetY, smooth);
 
             if (focusQuaternionRef.current) {
+                if (!wasFocusedRef.current) restQuaternion.copy(globe.quaternion);
                 wasFocusedRef.current = true;
 
                 viewDirection.copy(camera.position).sub(globe.position).normalize();
@@ -274,10 +283,10 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
                 commands.rotation = 0;
             } else if (wasFocusedRef.current) {
-                globe.quaternion.slerp(normalOrientation, Math.min(delta * 2, 1));
+                globe.quaternion.slerp(restQuaternion, Math.min(delta * 2, 1));
 
-                if (globe.quaternion.angleTo(normalOrientation) < 0.01) {
-                    globe.quaternion.identity();
+                if (globe.quaternion.angleTo(restQuaternion) < 0.01) {
+                    globe.quaternion.copy(restQuaternion);
                     wasFocusedRef.current = false;
                 }
             } else {
@@ -294,6 +303,10 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
                     globe.rotateY(delta * 0.2);
                 }
             }
+
+            inverse.copy(globe.quaternion).invert();
+            localFront.copy(forward).applyQuaternion(inverse);
+            stateRef.current.lon = THREE.MathUtils.radToDeg(Math.atan2(-localFront.z, localFront.x));
 
             renderer.render(scene, camera);
         };

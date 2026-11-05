@@ -128,8 +128,8 @@ export function ExploreSection({
 
                     <button
                         type="button"
-                        onClick={() => zoom(1.15)}
-                        aria-label="Aproximar"
+                        onClick={() => zoom(1 / 1.15)}
+                        aria-label="Afastar"
                         className={`${controlButton} shrink-0`}
                     >
                         +
@@ -137,11 +137,11 @@ export function ExploreSection({
 
                     <button
                         type="button"
-                        onClick={() => zoom(1 / 1.15)}
-                        aria-label="Afastar"
+                        onClick={() => zoom(1.15)}
+                        aria-label="Aproximar"
                         className={`${controlButton} shrink-0`}
                     >
-                        −
+                        -
                     </button>
                 </div>
 

@@ -16,8 +16,7 @@ export function LandingPage() {
     const globeTargetRef = useRef<HTMLDivElement>(null);
     const globeLayerRef = useRef<HTMLDivElement>(null);
     const prevProgressRef = useRef(0);
-    const globeState = useRef({ progress: 0, target: { x: 0, y: 0 } });
-    const selectedCodeRef = useRef<string | null>(null);
+    const globeState = useRef({ progress: 0, target: { x: 0, y: 0 }, lon: -90 });
     const force2DRef = useRef(false);
 
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
@@ -25,9 +24,8 @@ export function LandingPage() {
     const [force2D, setForce2D] = useState(false);
 
     useEffect(() => {
-        selectedCodeRef.current = selectedCode;
         force2DRef.current = force2D;
-    }, [selectedCode, force2D]);
+    }, [force2D]);
 
     useEffect(() => {
         const updateGlobe = () => {
@@ -49,18 +47,13 @@ export function LandingPage() {
             const previous = prevProgressRef.current;
 
             globeState.current.progress = progress;
-            const hasFocus = selectedCodeRef.current !== null;
-
-            if (previous === 0 && progress > 0) {
-                globeRef.current?.resetPosition();
-            }
 
             if ( force2DRef.current && progress < previous) {
                 setForce2D(false);
                 setSelectedCode(null);
             }
 
-            if (hasFocus && previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
+            if ( previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
                 setSelectedCode(null);
                 globeRef.current?.resetView();
             }
