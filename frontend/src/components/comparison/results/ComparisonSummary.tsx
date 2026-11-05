@@ -3,12 +3,8 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
-    ArrowDown,
-    ArrowUp,
-    ArrowUpDown,
     Info,
     Leaf,
-    Minus,
     Percent,
     Server,
     Star,
@@ -22,6 +18,8 @@ import type {
     PreparedComparisonResponse,
     PreparedComparisonSeries,
 } from '@/utils/comparison';
+
+import { ComparisonDifferenceChart } from './ComparisonDifferenceChart';
 
 interface ComparisonSummaryProps {
     servicosSelecionados: ComparisonServiceSelection[];
@@ -51,12 +49,6 @@ function formatarValor(
 
     return valor.toLocaleString('pt-BR', {
         maximumFractionDigits: metrica === 'energyKwh' ? 4 : 2,
-    });
-}
-
-function formatarPercentual(valor: number): string {
-    return Math.abs(valor).toLocaleString('pt-BR', {
-        maximumFractionDigits: 1,
     });
 }
 
@@ -283,41 +275,46 @@ export function ComparisonSummary({
                   : null
               : (diferencaAbsoluta / mediaDemais) * 100;
 
-    const corClassificacao =
-        classificacao === 'acima'
-            ? 'text-rose-400'
-            : classificacao === 'abaixo'
-              ? 'text-emerald-400'
-              : classificacao === 'igual'
-                ? 'text-slate-200'
-                : 'text-slate-400';
+    
+const descricaoDiferenca =
+    diferencaAbsoluta === null
+        ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
+        : classificacao === 'igual'
+          ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
+          : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+                metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+            } ${formatarValor(
+                Math.abs(diferencaAbsoluta),
+                metrica,
+            )} ${unidade} ${
+                classificacao === 'acima' ? 'a mais' : 'a menos'
+            } que a média dos demais.${
+                diferencaPercentual === null
+                    ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+                    : ''
+            }`;
 
-    const textoClassificacao =
-        classificacao === 'acima'
-            ? 'Acima da média'
-            : classificacao === 'abaixo'
-              ? 'Abaixo da média'
-              : classificacao === 'igual'
-                ? 'Igual à média'
-                : 'Comparação indisponível';
 
-    const descricaoDiferenca =
-        diferencaAbsoluta === null
-            ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
-            : classificacao === 'igual'
-              ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
-              : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
-                    metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
-                } ${formatarValor(
-                    Math.abs(diferencaAbsoluta),
-                    metrica,
-                )} ${unidade} ${
-                    classificacao === 'acima' ? 'a mais' : 'a menos'
-                } que a média dos demais.${
-                    diferencaPercentual === null
-                        ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
-                        : ''
-                }`;
+const descricaoAntes =
+    `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+        metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+    } `;
+
+const valorDestaque =
+    diferencaAbsoluta !== null && classificacao !== 'igual'
+        ? `${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade}`
+        : null;
+
+const descricaoDepois =
+    ` ${
+        classificacao === 'acima' ? 'a mais' : 'a menos'
+    } que a média dos demais.${
+        diferencaPercentual === null
+            ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+            : ''
+    }`;
+
+
 
     return (
         <section className="space-y-4">
@@ -465,51 +462,29 @@ export function ComparisonSummary({
                     </div>
 
                     {/* Diferença percentual */}
-                    <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-slate-200">
-                                Diferença percentual
-                            </span>
+                    
+{/* Diferença percentual */}
+<div className="flex min-h-[190px] min-w-0 flex-col gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
 
-                            <Percent className="size-6 text-slate-300" />
-                        </div>
+    <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-slate-200">
+            Diferença percentual
+        </span>
 
-                        <div className="space-y-2">
-                            <p className={`text-3xl font-semibold tabular-nums sm:text-4xl ${corClassificacao}`}>
-                                {diferencaPercentual !== null
-                                    ? `${formatarPercentual(diferencaPercentual)}%`
-                                    : '—'}
-                            </p>
+        <Percent className="size-6 text-slate-300" />
+    </div>
 
-                            <div className="flex items-center gap-2">
-                                {classificacao === 'acima' && (
-                                    <ArrowUp className="size-4 text-rose-400" />
-                                )}
+    <ComparisonDifferenceChart
+    percentual={diferencaPercentual}
+    classificacao={classificacao}
+    descricao={descricaoDiferenca}
+    descricaoAntes={descricaoAntes}
+    valorDestaque={valorDestaque}
+    descricaoDepois={descricaoDepois}
+/>
 
-                                {classificacao === 'abaixo' && (
-                                    <ArrowDown className="size-4 text-emerald-400" />
-                                )}
-
-                                {classificacao === 'igual' && (
-                                    <Minus className="size-4 text-slate-200" />
-                                )}
-
-                                {classificacao === 'indisponivel' && (
-                                    <ArrowUpDown className="size-4 text-slate-400" />
-                                )}
-
-                                <p className={`text-sm font-medium ${corClassificacao}`}>
-                                    {textoClassificacao}
-                                </p>
-                            </div>
-
-                            <p className="text-xs leading-relaxed text-slate-400">
-                                {descricaoDiferenca}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Valores individuais */}
+</div>
+           {/* Valores individuais */}
                     <div className="min-w-0 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
                         <div className="mb-4">
                             <h4 className="text-sm font-semibold text-slate-100">
