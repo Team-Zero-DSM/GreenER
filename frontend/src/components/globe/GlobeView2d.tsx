@@ -1,13 +1,10 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import type { GlobeMarker, GlobeViewHandle } from './GlobeView';
+import { forwardRef, useEffect, useImperativeHandle, useRef, type RefObject } from 'react';
+import type { GlobeMarker, GlobeViewHandle, GlobeState } from './GlobeView';
+import { statusStyle } from '@/utils/statusStyle';
 
 interface GlobeMap2DProps {
     autoRotate?: boolean;
-    progress?: number;
-    targetPosition: {
-        x: number;
-        y: number;
-    };
+    stateRef: RefObject<GlobeState>;
     focusTarget: {
         latitude: number;
         longitude: number;
@@ -24,12 +21,6 @@ const MAX_ZOOM = 6;
 const ROTATION_STEP_DEG = 30;
 const AUTO_ROTATE_DEG_PER_SECOND = 11.5;
 
-function markerColor(status: string): string {
-    if (status === 'available') return '#22c55e';
-    if (status === 'unavailable') return '#ef4444';
-    return '#f59e0b';
-}
-
 function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
 }
@@ -43,16 +34,14 @@ function wrapLongitude(longitude: number): number {
 }
 
 export const GlobeMap2D = forwardRef<GlobeViewHandle, GlobeMap2DProps>(function GlobeMap2D(
-    { autoRotate = true, progress = 0, targetPosition, focusTarget, markers },
+    { autoRotate = true, stateRef, focusTarget, markers },
     ref,
 ) {
     const containerRef = useRef<HTMLDivElement>(null);
     const frameRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<HTMLDivElement>(null);
 
-    const progressRef = useRef(progress);
     const autoRotateRef = useRef(autoRotate);
-    const targetPositionRef = useRef(targetPosition);
     const focusTargetRef = useRef(focusTarget);
 
     const commandsRef = useRef({
@@ -91,14 +80,6 @@ export const GlobeMap2D = forwardRef<GlobeViewHandle, GlobeMap2DProps>(function 
     );
 
     useEffect(() => {
-        targetPositionRef.current = targetPosition;
-    }, [targetPosition]);
-
-    useEffect(() => {
-        progressRef.current = clamp(progress, 0, 1);
-    }, [progress]);
-
-    useEffect(() => {
         autoRotateRef.current = autoRotate;
     }, [autoRotate]);
 
@@ -111,6 +92,15 @@ export const GlobeMap2D = forwardRef<GlobeViewHandle, GlobeMap2DProps>(function 
         const frame = frameRef.current;
         const map = mapRef.current;
         if (!container || !frame || !map) return;
+
+        const size = { w: container.clientWidth, h: container.clientHeight };
+
+        const resizeObserver = new ResizeObserver(() => {
+            size.w = container.clientWidth;
+            size.h = container.clientHeight;
+        });
+
+        resizeObserver.observe(container);
 
         let animationId = 0;
         let previousTime = 0;
@@ -182,14 +172,12 @@ export const GlobeMap2D = forwardRef<GlobeViewHandle, GlobeMap2DProps>(function 
             const maxLatitude = 90 - 90 / view.zoom;
             view.lat = clamp(view.lat, -maxLatitude, maxLatitude);
 
-            // Tamanho e posição da moldura, acompanhando o scroll como o globo faz.
-            const containerWidth = container.clientWidth;
-            const containerHeight = container.clientHeight;
+            const { w: containerWidth, h: containerHeight } = size;
             if (!containerWidth || !containerHeight) return;
 
-            const p = progressRef.current;
+            const { progress, target } = stateRef.current;
+            const p = clamp(progress, 0, 1);
             const smooth = p * p * (3 - 2 * p);
-            const target = targetPositionRef.current;
 
             const fitWidth = Math.min(containerWidth, containerHeight * 2) * 0.9;
             const targetX = target.x > 0 ? target.x : containerWidth / 2;
@@ -227,8 +215,9 @@ export const GlobeMap2D = forwardRef<GlobeViewHandle, GlobeMap2DProps>(function 
 
         return () => {
             cancelAnimationFrame(animationId);
+            resizeObserver.disconnect();
         };
-    }, []);
+    }, [stateRef]);
 
     return (
         <div
@@ -259,7 +248,7 @@ export const GlobeMap2D = forwardRef<GlobeViewHandle, GlobeMap2DProps>(function 
                                 style={{
                                     left: `${(((marker.longitude + 180) / 360 + tile + 1) / 3) * 100}%`,
                                     top: `${((90 - marker.latitude) / 180) * 100}%`,
-                                    backgroundColor: markerColor(marker.status),
+                                    backgroundColor: statusStyle(marker.status).color,
                                     transform:
                                         'translate(-50%, -50%) scale(var(--inverse-zoom, 1))',
                                 }}

@@ -10,14 +10,12 @@ import { StarsBackground } from '../components/globe/StarsBackground';
 
 export function LandingPage() {
     const globeRef = useRef<GlobeViewHandle>(null);
-    const exploreRef = useRef<HTMLElement>(null);
     const exploreContainerRef = useRef<HTMLDivElement>(null);
     const globeTargetRef = useRef<HTMLDivElement>(null);
     const globeLayerRef = useRef<HTMLDivElement>(null);
     const prevProgressRef = useRef(0);
+    const globeState = useRef({ progress: 0, target: { x: 0, y: 0 } });
 
-    const [globeProgress, setGlobeProgress] = useState(0);
-    const [globeTarget, setGlobeTarget] = useState({ x: 0, y: 0 });
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
     const [autoRotate, setAutoRotate] = useState(true);
     const [force2D, setForce2D] = useState(false);
@@ -44,12 +42,12 @@ export function LandingPage() {
             }
             prevProgressRef.current = progress;
 
-            setGlobeProgress(progress);
+            globeState.current.progress = progress;
 
-            setGlobeTarget({
+            globeState.current.target = {
                 x: targetRect.left + targetRect.width / 2 - layerRect.left,
                 y: targetRect.top + targetRect.height / 2 - layerRect.top,
-            });
+            };
         };
 
         updateGlobe();
@@ -96,10 +94,6 @@ export function LandingPage() {
         () => regions?.find((region) => region.code === selectedCode) ?? null,
         [regions, selectedCode],
     );
-
-    const selectRegion = (code: string) => {
-        setSelectedCode(code);
-    };
 
     const rotateLeft = () => {
         globeRef.current?.rotateLeft();
@@ -163,14 +157,13 @@ export function LandingPage() {
                 className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-h,4rem)] z-0"
             >
                 {force2D ? (
-                    <div className="relative h-full w-full">''
+                    <div className="relative h-full w-full">
                         <StarsBackground />
                         <div className="relative h-full w-full">
                             <GlobeMap2D
                                 ref={globeRef}
                                 autoRotate={autoRotate}
-                                progress={globeProgress}
-                                targetPosition={globeTarget}
+                                stateRef={globeState}
                                 markers={markers}
                                 focusTarget={focusTarget}
                             />
@@ -180,8 +173,7 @@ export function LandingPage() {
                     <GlobeView
                         ref={globeRef}
                         autoRotate={autoRotate}
-                        progress={globeProgress}
-                        targetPosition={globeTarget}
+                        stateRef={globeState}
                         markers={markers}
                         focusTarget={focusTarget}
                     />
@@ -198,7 +190,6 @@ export function LandingPage() {
                         <p className="text-white/60">Carregando totais das últimas 24 horas...</p>
                     )}
                     <ExploreSection
-                        exploreRef={exploreRef}
                         rotateLeft={rotateLeft}
                         rotateRight={rotateRight}
                         dataSource="internal"
@@ -211,7 +202,7 @@ export function LandingPage() {
                         zoom={zoom}
                         regions={regions ?? []}
                         services={services}
-                        onSelectRegion={selectRegion}
+                        onSelectRegion={setSelectedCode}
                     />
                 </div>
 

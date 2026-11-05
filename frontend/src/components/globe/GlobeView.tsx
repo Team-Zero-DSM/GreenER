@@ -1,5 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
+import type { RefObject } from 'react';
+import { statusStyle } from '@/utils/statusStyle';
 
 export interface GlobeViewHandle {
     rotateLeft: () => void;
@@ -9,13 +11,14 @@ export interface GlobeViewHandle {
     resetPosition: () => void;
 }
 
+export interface GlobeState {
+    progress: number;
+    target: { x: number; y: number };
+}
+
 interface GlobeViewProps {
     autoRotate?: boolean;
-    progress?: number;
-    targetPosition: {
-        x: number;
-        y: number;
-    };
+    stateRef: RefObject<GlobeState>;
     focusTarget: {
         latitude: number;
         longitude: number;
@@ -32,13 +35,11 @@ export interface GlobeMarker {
 }
 
 export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function GlobeView(
-    { autoRotate = true, progress = 0, targetPosition, focusTarget, markers },
+    { autoRotate = true, stateRef, focusTarget, markers },
     ref,
 ) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const progressRef = useRef(progress);
     const autoRotateRef = useRef(autoRotate);
-    const targetPositionRef = useRef(targetPosition);
     const markersGroupRef = useRef<THREE.Group | null>(null);
     const focusQuaternionRef = useRef<THREE.Quaternion | null>(null);
     const focusTargetRef = useRef(focusTarget);
@@ -74,14 +75,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
         }),
         [],
     );
-
-    useEffect(() => {
-        targetPositionRef.current = targetPosition;
-    }, [targetPosition]);
-
-    useEffect(() => {
-        progressRef.current = Math.max(0, Math.min(1, progress));
-    }, [progress]);
 
     useEffect(() => {
         autoRotateRef.current = autoRotate;
@@ -178,21 +171,25 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
         scene.add(stars);
 
+        const size = { w: container.clientWidth, h: container.clientHeight };
+
         const resizeObserver = new ResizeObserver(() => {
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+            size.w = container.clientWidth;
+            size.h = container.clientHeight;
 
-            if (!width || !height) return;
+            if (!size.w || !size.h) return;
 
-            camera.aspect = width / height;
+            camera.aspect = size.w / size.h;
             camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
+            renderer.setSize(size.w, size.h);
         });
 
         resizeObserver.observe(container);
 
         let animationId = 0;
         let previousTime = 0;
+
+        const normalOrientation = new THREE.Quaternion();
 
         const animate = (time: number) => {
             animationId = requestAnimationFrame(animate);
@@ -222,10 +219,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
                 commands.resetPosition = false;
             }
 
-            if (Math.abs(commands.rotation) < 0.001) {
-                commands.rotation = 0;
-            }
-
             if (commands.zoomFactor !== 1) {
                 zoomLevelRef.current = THREE.MathUtils.clamp(
                     zoomLevelRef.current / commands.zoomFactor,
@@ -243,11 +236,11 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
                 Math.min(delta * 3, 1),
             );
 
-            const p = progressRef.current;
+            const { progress, target } = stateRef.current;
+            const p = THREE.MathUtils.clamp(progress, 0, 1);
             const smooth = p * p * (3 - 2 * p);
 
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+            const { w: width, h: height } = size;
 
             const startScale = 1.65;
             const endScale = 1.45;
@@ -256,8 +249,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
             const visibleHeight =
                 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
-
-            const target = targetPositionRef.current;
 
             const horizontalOffset = 60;
 
@@ -269,18 +260,13 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
             globe.position.y = THREE.MathUtils.lerp(0, targetY, smooth);
 
-            const isFocused =
-                focusTargetRef.current !== null && focusQuaternionRef.current !== null;
-
-            if (isFocused && focusQuaternionRef.current) {
+            if (focusQuaternionRef.current) {
                 wasFocusedRef.current = true;
 
                 globe.quaternion.slerp(focusQuaternionRef.current, Math.min(delta * 2.5, 1));
 
                 commands.rotation = 0;
             } else if (wasFocusedRef.current) {
-                const normalOrientation = new THREE.Quaternion();
-
                 globe.quaternion.slerp(normalOrientation, Math.min(delta * 2, 1));
 
                 if (globe.quaternion.angleTo(normalOrientation) < 0.01) {
@@ -325,7 +311,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             renderer.dispose();
             renderer.domElement.remove();
         };
-    }, []);
+    }, [stateRef]);
 
     useEffect(() => {
         const group = markersGroupRef.current;
@@ -346,14 +332,9 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
                 -radius * Math.cos(latitude) * Math.sin(longitude),
             );
 
-            const color =
-                marker.status === 'available'
-                    ? '#22c55e'
-                    : marker.status === 'unavailable'
-                      ? '#ef4444'
-                      : '#f59e0b';
-
-            const material = new THREE.MeshBasicMaterial({ color });
+            const material = new THREE.MeshBasicMaterial({
+                color: statusStyle(marker.status).color,
+           });
             const pin = new THREE.Mesh(geometry, material);
 
             pin.position.copy(position);
