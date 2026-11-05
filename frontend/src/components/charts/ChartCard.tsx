@@ -5,16 +5,24 @@ interface ChartCardProps {
     title: string;
     subtitle: string;
     children: ReactNode;
+    contentClassName?: string;
+    titleClassName?: string;
 }
 
-export function ChartCard({ title, subtitle, children }: ChartCardProps) {
+export function ChartCard({
+    title,
+    subtitle,
+    children,
+    contentClassName,
+    titleClassName,
+}: ChartCardProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className={titleClassName}>{title}</CardTitle>
                 <CardDescription>{subtitle}</CardDescription>
             </CardHeader>
-            <CardContent>{children}</CardContent>
+            <CardContent className={contentClassName}>{children}</CardContent>
         </Card>
     );
 }
