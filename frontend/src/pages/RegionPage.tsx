@@ -47,8 +47,12 @@ export function RegionPage() {
                         <ChartCard
                             title="Intensidade de carbono por região"
                             subtitle="gCO₂e por kWh · quanto menor o valor, menor a intensidade de carbono"
+                            contentClassName="flex flex-1 items-center"
+                            titleClassName="lg:text-lg"
                         >
-                            <CarbonIntensityChart regions={regions} />
+                            <div className="w-full">
+                                <CarbonIntensityChart regions={regions} />
+                            </div>
                         </ChartCard>
                         <ChartCard
                             title="Mapa das regiões"
