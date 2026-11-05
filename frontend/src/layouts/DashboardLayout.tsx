@@ -47,10 +47,7 @@ export function DashboardLayout() {
         if (!header) return;
 
         const update = () =>
-            document.documentElement.style.setProperty(
-                '--header-h',
-                `${header.offsetHeight}px`,
-            );
+            document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
 
         update();
         const observer = new ResizeObserver(update);

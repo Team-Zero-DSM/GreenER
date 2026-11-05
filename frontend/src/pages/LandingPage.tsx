@@ -48,12 +48,12 @@ export function LandingPage() {
 
             globeState.current.progress = progress;
 
-            if ( force2DRef.current && progress < previous) {
+            if (force2DRef.current && progress < previous) {
                 setForce2D(false);
                 setSelectedCode(null);
             }
 
-            if ( previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
+            if (previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
                 setSelectedCode(null);
                 globeRef.current?.resetView();
             }
@@ -148,7 +148,7 @@ export function LandingPage() {
             >
                 <div className="mx-auto w-full max-w-6xl">
                     <h1 className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-6xl font-extrabold text-transparent md:text-8xl">
-                         Green<span className="font-light">ER</span>
+                        Green<span className="font-light">ER</span>
                     </h1>
 
                     <p className="mt-6 max-w-2xl text-xl font-semibold leading-snug text-white md:text-3xl">
@@ -156,7 +156,8 @@ export function LandingPage() {
                     </p>
 
                     <p className="mt-4 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
-                         Monitore aplicações, estime o consumo energético e compreenda as emissões de CO₂e da sua infraestrutura.
+                        Monitore aplicações, estime o consumo energético e compreenda as emissões de
+                        CO₂e da sua infraestrutura.
                     </p>
 
                     <a

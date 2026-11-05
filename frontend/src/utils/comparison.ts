@@ -1,20 +1,11 @@
-
-import type {
-    ComparisonPoint,
-    ComparisonResponse,
-    ComparisonSeries,
-} from '@/types/comparison';
+import type { ComparisonPoint, ComparisonResponse, ComparisonSeries } from '@/types/comparison';
 
 // Intervalo entre as coletas do GreenER.
 const INTERVALO_COLETA_MS = 30_000;
 
 type ComparisonMetricKey = 'energyKwh' | 'co2eGrams';
 
-export type ComparisonMetricStatus =
-    | 'available'
-    | 'estimated'
-    | 'incomplete'
-    | 'unavailable';
+export type ComparisonMetricStatus = 'available' | 'estimated' | 'incomplete' | 'unavailable';
 
 // Identifica quais métricas de um ponto foram estimadas.
 export interface PreparedComparisonPoint extends ComparisonPoint {
@@ -90,26 +81,18 @@ function calcularAmostrasEsperadas(
 
 // Obtém a quantidade de coletas registradas no ponto.
 // Não permite que ultrapasse a quantidade esperada.
-function obterQuantidadeAmostras(
-    ponto: ComparisonPoint,
-    amostrasEsperadas: number | null,
-): number {
+function obterQuantidadeAmostras(ponto: ComparisonPoint, amostrasEsperadas: number | null): number {
     if (!Number.isFinite(ponto.sampleCount) || ponto.sampleCount <= 0) {
         return 0;
     }
 
     const quantidade = Math.floor(ponto.sampleCount);
 
-    return amostrasEsperadas === null
-        ? quantidade
-        : Math.min(quantidade, amostrasEsperadas);
+    return amostrasEsperadas === null ? quantidade : Math.min(quantidade, amostrasEsperadas);
 }
 
 // Marca uma métrica como estimada sem duplicar sua identificação.
-function marcarComoEstimado(
-    ponto: PreparedComparisonPoint,
-    metrica: ComparisonMetricKey,
-): void {
+function marcarComoEstimado(ponto: PreparedComparisonPoint, metrica: ComparisonMetricKey): void {
     const metricasEstimadas = new Set(ponto.estimatedMetrics ?? []);
 
     metricasEstimadas.add(metrica);
@@ -136,8 +119,7 @@ function interpolarTaxa(
     const proporcao = Math.max(0, Math.min(1, proporcaoTempo));
 
     return (
-        anterior.taxaPorAmostra +
-        (posterior.taxaPorAmostra - anterior.taxaPorAmostra) * proporcao
+        anterior.taxaPorAmostra + (posterior.taxaPorAmostra - anterior.taxaPorAmostra) * proporcao
     );
 }
 
@@ -149,10 +131,7 @@ function prepararMetrica(
 ): ResultadoPreparacao {
     // Ordena os pontos cronologicamente e prepara a identificação das estimativas.
     const points: PreparedComparisonPoint[] = [...pontos]
-        .sort(
-            (a, b) =>
-                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        )
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
         .map((ponto) => ({
             ...ponto,
             estimatedMetrics: [],
@@ -164,10 +143,7 @@ function prepararMetrica(
     points.forEach((ponto, indice) => {
         const valor = ponto[metrica];
 
-        const quantidadeAmostras = obterQuantidadeAmostras(
-            ponto,
-            amostrasEsperadas,
-        );
+        const quantidadeAmostras = obterQuantidadeAmostras(ponto, amostrasEsperadas);
 
         if (!valorValido(valor) || quantidadeAmostras === 0) {
             ponto[metrica] = null;
@@ -190,9 +166,7 @@ function prepararMetrica(
             coverage: {
                 status: 'unavailable',
                 expectedSampleCount:
-                    amostrasEsperadas === null
-                        ? null
-                        : amostrasEsperadas * points.length,
+                    amostrasEsperadas === null ? null : amostrasEsperadas * points.length,
                 collectedSampleCount: 0,
                 estimatedSampleCount: 0,
                 historyStart: null,
@@ -211,16 +185,11 @@ function prepararMetrica(
     // Não estimamos valores anteriores à primeira coleta válida.
     const possuiHistoricoParcial =
         primeiraAncora.indice > 0 ||
-        (amostrasEsperadas !== null &&
-            primeiraAncora.quantidadeAmostras < amostrasEsperadas);
+        (amostrasEsperadas !== null && primeiraAncora.quantidadeAmostras < amostrasEsperadas);
 
     // INTERPOLAÇÃO:
     // Recupera ausências localizadas entre duas coletas válidas.
-    for (
-        let indice = primeiraAncora.indice + 1;
-        indice < ultimaAncora.indice;
-        indice++
-    ) {
+    for (let indice = primeiraAncora.indice + 1; indice < ultimaAncora.indice; indice++) {
         const ponto = points[indice];
 
         const valorAtual = ponto[metrica];
@@ -233,42 +202,28 @@ function prepararMetrica(
             continue;
         }
 
-        const amostrasAusentes = Math.max(
-            0,
-            amostrasEsperadas - quantidadeAtual,
-        );
+        const amostrasAusentes = Math.max(0, amostrasEsperadas - quantidadeAtual);
 
         if (amostrasAusentes === 0) {
             continue;
         }
 
         // Procura a coleta válida imediatamente anterior.
-        const anterior = [...ancoras]
-            .reverse()
-            .find((ancora) => ancora.indice < indice);
+        const anterior = [...ancoras].reverse().find((ancora) => ancora.indice < indice);
 
         // Procura a coleta válida imediatamente posterior.
-        const posterior = ancoras.find(
-            (ancora) => ancora.indice > indice,
-        );
+        const posterior = ancoras.find((ancora) => ancora.indice > indice);
 
         if (!anterior || !posterior) {
             continue;
         }
 
         // Estima a média por coleta entre os dois pontos válidos.
-        const taxaEstimada = interpolarTaxa(
-            ponto,
-            indice,
-            anterior,
-            posterior,
-        );
+        const taxaEstimada = interpolarTaxa(ponto, indice, anterior, posterior);
 
         const valorExistente = valorValido(valorAtual) ? valorAtual : 0;
 
-        ponto[metrica] = arredondar(
-            valorExistente + taxaEstimada * amostrasAusentes,
-        );
+        ponto[metrica] = arredondar(valorExistente + taxaEstimada * amostrasAusentes);
 
         marcarComoEstimado(ponto, metrica);
 
@@ -290,8 +245,7 @@ function prepararMetrica(
         // Completa somente as coletas ausentes do último agrupamento.
         if (amostrasAusentesNoUltimo > 0) {
             pontoUltimo[metrica] = arredondar(
-                valorUltimo +
-                    ultimaAncora.taxaPorAmostra * amostrasAusentesNoUltimo,
+                valorUltimo + ultimaAncora.taxaPorAmostra * amostrasAusentesNoUltimo,
             );
 
             marcarComoEstimado(pontoUltimo, metrica);
@@ -300,16 +254,10 @@ function prepararMetrica(
         }
 
         // Preenche os agrupamentos posteriores à última coleta válida.
-        for (
-            let indice = ultimaAncora.indice + 1;
-            indice < points.length;
-            indice++
-        ) {
+        for (let indice = ultimaAncora.indice + 1; indice < points.length; indice++) {
             const ponto = points[indice];
 
-            ponto[metrica] = arredondar(
-                ultimaAncora.taxaPorAmostra * amostrasEsperadas,
-            );
+            ponto[metrica] = arredondar(ultimaAncora.taxaPorAmostra * amostrasEsperadas);
 
             marcarComoEstimado(ponto, metrica);
 
@@ -318,15 +266,10 @@ function prepararMetrica(
     }
 
     // Conta quantas coletas reais foram utilizadas.
-    const coletasReais = ancoras.reduce(
-        (total, ancora) => total + ancora.quantidadeAmostras,
-        0,
-    );
+    const coletasReais = ancoras.reduce((total, ancora) => total + ancora.quantidadeAmostras, 0);
 
     // Verifica se ainda existem pontos sem informação.
-    const possuiPontosAusentes = points.some(
-        (ponto) => !valorValido(ponto[metrica]),
-    );
+    const possuiPontosAusentes = points.some((ponto) => !valorValido(ponto[metrica]));
 
     // Define o estado final da métrica.
     let status: ComparisonMetricStatus;
@@ -345,9 +288,7 @@ function prepararMetrica(
         coverage: {
             status,
             expectedSampleCount:
-                amostrasEsperadas === null
-                    ? null
-                    : amostrasEsperadas * points.length,
+                amostrasEsperadas === null ? null : amostrasEsperadas * points.length,
             collectedSampleCount: coletasReais,
             estimatedSampleCount: estimativasRealizadas,
             historyStart: points[primeiraAncora.indice].timestamp,
@@ -363,26 +304,19 @@ function calcularTotal(
     pontos: PreparedComparisonPoint[],
     metrica: ComparisonMetricKey,
 ): number | null {
-    const valoresDisponiveis = pontos
-        .map((ponto) => ponto[metrica])
-        .filter(valorValido);
+    const valoresDisponiveis = pontos.map((ponto) => ponto[metrica]).filter(valorValido);
 
     if (valoresDisponiveis.length === 0) {
         return null;
     }
 
-    const total = valoresDisponiveis.reduce(
-        (soma, valor) => soma + valor,
-        0,
-    );
+    const total = valoresDisponiveis.reduce((soma, valor) => soma + valor, 0);
 
     return arredondar(total);
 }
 
 // Prepara todas as séries antes de enviá-las ao gráfico e ao resumo.
-export function prepararDadosComparacao(
-    resposta: ComparisonResponse,
-): PreparedComparisonResponse {
+export function prepararDadosComparacao(resposta: ComparisonResponse): PreparedComparisonResponse {
     return {
         ...resposta,
 
@@ -429,23 +363,12 @@ export function prepararDadosComparacao(
                 };
             }
 
-            const amostrasEsperadas = calcularAmostrasEsperadas(
-                resposta,
-                serie.points.length,
-            );
+            const amostrasEsperadas = calcularAmostrasEsperadas(resposta, serie.points.length);
 
             // Processa energia e emissões separadamente.
-            const energia = prepararMetrica(
-                serie.points,
-                'energyKwh',
-                amostrasEsperadas,
-            );
+            const energia = prepararMetrica(serie.points, 'energyKwh', amostrasEsperadas);
 
-            const emissoes = prepararMetrica(
-                serie.points,
-                'co2eGrams',
-                amostrasEsperadas,
-            );
+            const emissoes = prepararMetrica(serie.points, 'co2eGrams', amostrasEsperadas);
 
             // Combina os pontos preparados das duas métricas.
             const points = energia.points.map((ponto, indice) => {
@@ -460,9 +383,7 @@ export function prepararDadosComparacao(
                     ...ponto,
                     co2eGrams: pontoEmissoes.co2eGrams,
                     estimatedMetrics:
-                        metricasEstimadas.size > 0
-                            ? [...metricasEstimadas]
-                            : undefined,
+                        metricasEstimadas.size > 0 ? [...metricasEstimadas] : undefined,
                 };
             });
 

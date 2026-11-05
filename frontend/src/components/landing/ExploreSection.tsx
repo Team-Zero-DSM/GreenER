@@ -176,13 +176,15 @@ export function ExploreSection({
                                 </p>
 
                                 <div className="mt-4 grid grid-cols-2 gap-3">
-                                    <Metric label="Intensidade de carbono">{formatIntensity(region.gco2ePerKwh)}</Metric>
+                                    <Metric label="Intensidade de carbono">
+                                        {formatIntensity(region.gco2ePerKwh)}
+                                    </Metric>
 
                                     <Metric label="Serviços monitorados">
                                         {region.servicesCount}
                                         <p className="mt-1 text-xs font-normal text-white/60">
-                                            {region.statusCounts.available} disponíveis · {region.statusCounts.unavailable}{' '}
-                                            indisponíveis
+                                            {region.statusCounts.available} disponíveis ·{' '}
+                                            {region.statusCounts.unavailable} indisponíveis
                                         </p>
                                         {region.statusCounts.metricsMissing > 0 && (
                                             <p className="mt-1 text-xs font-normal text-amber-300">
@@ -191,8 +193,12 @@ export function ExploreSection({
                                         )}
                                     </Metric>
 
-                                    <Metric label="Energia nas últimas 24 h">{formatEnergy(region.energyKwh)}</Metric>
-                                    <Metric label="Emissões de CO₂e nas últimas 24 h">{formatCo2e(region.co2eGrams)}</Metric>
+                                    <Metric label="Energia nas últimas 24 h">
+                                        {formatEnergy(region.energyKwh)}
+                                    </Metric>
+                                    <Metric label="Emissões de CO₂e nas últimas 24 h">
+                                        {formatCo2e(region.co2eGrams)}
+                                    </Metric>
                                 </div>
                             </button>
                         ))}
@@ -230,7 +236,9 @@ export function ExploreSection({
 
                                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                                     <Metric label="Intensidade de carbono">
-                                        {formatIntensity(service.environmental?.carbonIntensity ?? null)}
+                                        {formatIntensity(
+                                            service.environmental?.carbonIntensity ?? null,
+                                        )}
                                     </Metric>
                                     <Metric label="Energia nas últimas 24 h">
                                         {formatEnergy(service.environmental?.energyKwh ?? null)}

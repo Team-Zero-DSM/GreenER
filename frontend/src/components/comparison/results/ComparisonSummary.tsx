@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -18,10 +17,7 @@ import {
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 import type { ComparisonServiceSelection } from '@/components/comparison/selector/ComparisonServiceSelector';
 
-import type {
-    PreparedComparisonResponse,
-    PreparedComparisonSeries,
-} from '@/utils/comparison';
+import type { PreparedComparisonResponse, PreparedComparisonSeries } from '@/utils/comparison';
 
 interface ComparisonSummaryProps {
     servicosSelecionados: ComparisonServiceSelection[];
@@ -30,21 +26,14 @@ interface ComparisonSummaryProps {
     servicoPrincipalId: string | null;
 }
 
-type ClassificacaoComparacao =
-    | 'acima'
-    | 'abaixo'
-    | 'igual'
-    | 'indisponivel';
+type ClassificacaoComparacao = 'acima' | 'abaixo' | 'igual' | 'indisponivel';
 
 interface PosicaoTooltip {
     x: number;
     y: number;
 }
 
-function formatarValor(
-    valor: number | null,
-    metrica: ComparisonMetric,
-): string {
+function formatarValor(valor: number | null, metrica: ComparisonMetric): string {
     if (valor === null || !Number.isFinite(valor)) {
         return '—';
     }
@@ -61,10 +50,7 @@ function formatarPercentual(valor: number): string {
 }
 
 // Obtém a quantidade de coletas reais, estimadas e sem métricas.
-function obterEstatisticas(
-    serie: PreparedComparisonSeries | undefined,
-    metrica: ComparisonMetric,
-) {
+function obterEstatisticas(serie: PreparedComparisonSeries | undefined, metrica: ComparisonMetric) {
     if (!serie) {
         return {
             reais: 0,
@@ -80,10 +66,7 @@ function obterEstatisticas(
 
     const semMetricas =
         cobertura.expectedSampleCount !== null
-            ? Math.max(
-                  0,
-                  cobertura.expectedSampleCount - reais - estimadas,
-              )
+            ? Math.max(0, cobertura.expectedSampleCount - reais - estimadas)
             : 0;
 
     return {
@@ -112,14 +95,8 @@ function TooltipColetas({
         const alturaTooltip = 155;
 
         setPosicao({
-            x: Math.max(
-                8,
-                Math.min(x + 12, window.innerWidth - larguraTooltip - 8),
-            ),
-            y: Math.max(
-                8,
-                Math.min(y + 12, window.innerHeight - alturaTooltip - 8),
-            ),
+            x: Math.max(8, Math.min(x + 12, window.innerWidth - larguraTooltip - 8)),
+            y: Math.max(8, Math.min(y + 12, window.innerHeight - alturaTooltip - 8)),
         });
     }
 
@@ -129,20 +106,13 @@ function TooltipColetas({
                 className="truncate font-medium"
                 tabIndex={0}
                 aria-label={`${nomeServico}. Consulte o detalhamento das coletas.`}
-                onMouseEnter={(evento) =>
-                    atualizarPosicao(evento.clientX, evento.clientY)
-                }
-                onMouseMove={(evento) =>
-                    atualizarPosicao(evento.clientX, evento.clientY)
-                }
+                onMouseEnter={(evento) => atualizarPosicao(evento.clientX, evento.clientY)}
+                onMouseMove={(evento) => atualizarPosicao(evento.clientX, evento.clientY)}
                 onMouseLeave={() => setPosicao(null)}
                 onFocus={(evento) => {
                     const rect = evento.currentTarget.getBoundingClientRect();
 
-                    atualizarPosicao(
-                        rect.left + rect.width / 2,
-                        rect.top,
-                    );
+                    atualizarPosicao(rect.left + rect.width / 2, rect.top);
                 }}
                 onBlur={() => setPosicao(null)}
             >
@@ -169,9 +139,7 @@ function TooltipColetas({
                                 Reais
                             </span>
 
-                            <strong className="text-slate-100">
-                                {estatisticas.reais}
-                            </strong>
+                            <strong className="text-slate-100">{estatisticas.reais}</strong>
                         </div>
 
                         <div className="flex items-center justify-between gap-3 py-1">
@@ -180,9 +148,7 @@ function TooltipColetas({
                                 Estimadas
                             </span>
 
-                            <strong className="text-slate-100">
-                                {estatisticas.estimadas}
-                            </strong>
+                            <strong className="text-slate-100">{estatisticas.estimadas}</strong>
                         </div>
 
                         <div className="flex items-center justify-between gap-3 py-1">
@@ -191,9 +157,7 @@ function TooltipColetas({
                                 Sem métricas
                             </span>
 
-                            <strong className="text-slate-100">
-                                {estatisticas.semMetricas}
-                            </strong>
+                            <strong className="text-slate-100">{estatisticas.semMetricas}</strong>
                         </div>
                     </div>,
                     document.body,
@@ -210,13 +174,9 @@ export function ComparisonSummary({
 }: ComparisonSummaryProps) {
     const unidade = metrica === 'co2eGrams' ? 'gCO₂e' : 'kWh';
 
-    const tituloMetrica =
-        metrica === 'co2eGrams' ? 'Emissões' : 'Energia';
+    const tituloMetrica = metrica === 'co2eGrams' ? 'Emissões' : 'Energia';
 
-    const tituloValor =
-        metrica === 'co2eGrams'
-            ? 'Emissões (gCO₂e)'
-            : 'Energia (kWh)';
+    const tituloValor = metrica === 'co2eGrams' ? 'Emissões (gCO₂e)' : 'Energia (kWh)';
 
     const series = respostaComparacao?.series ?? [];
 
@@ -224,15 +184,12 @@ export function ComparisonSummary({
         (item) => item.selectionId === servicoPrincipalId,
     );
 
-    const seriePrincipal = series.find(
-        (serie) => serie.selectionId === servicoPrincipalId,
-    );
+    const seriePrincipal = series.find((serie) => serie.selectionId === servicoPrincipalId);
 
     const valorPrincipalBruto = seriePrincipal?.summary[metrica];
 
     const valorPrincipal =
-        typeof valorPrincipalBruto === 'number' &&
-        Number.isFinite(valorPrincipalBruto)
+        typeof valorPrincipalBruto === 'number' && Number.isFinite(valorPrincipalBruto)
             ? valorPrincipalBruto
             : null;
 
@@ -242,28 +199,21 @@ export function ComparisonSummary({
             return [];
         }
 
-        const serie = series.find(
-            (item) => item.selectionId === servico.selectionId,
-        );
+        const serie = series.find((item) => item.selectionId === servico.selectionId);
 
         const valor = serie?.summary[metrica];
 
-        return typeof valor === 'number' && Number.isFinite(valor)
-            ? [valor]
-            : [];
+        return typeof valor === 'number' && Number.isFinite(valor) ? [valor] : [];
     });
 
     // Média aritmética dos serviços com valores disponíveis.
     const mediaDemais =
         valoresDemais.length > 0
-            ? valoresDemais.reduce((total, valor) => total + valor, 0) /
-              valoresDemais.length
+            ? valoresDemais.reduce((total, valor) => total + valor, 0) / valoresDemais.length
             : null;
 
     const diferencaAbsoluta =
-        valorPrincipal !== null && mediaDemais !== null
-            ? valorPrincipal - mediaDemais
-            : null;
+        valorPrincipal !== null && mediaDemais !== null ? valorPrincipal - mediaDemais : null;
 
     const classificacao: ClassificacaoComparacao =
         diferencaAbsoluta === null
@@ -308,10 +258,7 @@ export function ComparisonSummary({
               ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
               : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
                     metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
-                } ${formatarValor(
-                    Math.abs(diferencaAbsoluta),
-                    metrica,
-                )} ${unidade} ${
+                } ${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade} ${
                     classificacao === 'acima' ? 'a mais' : 'a menos'
                 } que a média dos demais.${
                     diferencaPercentual === null
@@ -324,10 +271,7 @@ export function ComparisonSummary({
             {/* Cabeçalho */}
             <div className="flex items-center gap-3">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-teal-400/10">
-                    <Leaf
-                        className="size-5 text-teal-300"
-                        aria-hidden="true"
-                    />
+                    <Leaf className="size-5 text-teal-300" aria-hidden="true" />
                 </div>
 
                 <div className="min-w-0 space-y-1">
@@ -336,8 +280,8 @@ export function ComparisonSummary({
                     </h3>
 
                     <p className="text-xs text-slate-400 sm:text-sm">
-                        O serviço de referência é comparado com a média dos
-                        demais serviços selecionados.
+                        O serviço de referência é comparado com a média dos demais serviços
+                        selecionados.
                     </p>
                 </div>
             </div>
@@ -345,8 +289,8 @@ export function ComparisonSummary({
             {!respostaComparacao ? (
                 <div className="flex min-h-16 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3">
                     <p className="text-center text-sm text-slate-400">
-                        Selecione pelo menos dois serviços e clique em
-                        Comparar para ver os resultados.
+                        Selecione pelo menos dois serviços e clique em Comparar para ver os
+                        resultados.
                     </p>
 
                     <span className="group relative inline-flex shrink-0">
@@ -366,17 +310,11 @@ export function ComparisonSummary({
                                 Como fazer uma comparação
                             </strong>
 
-                            <span className="mb-2 block">
-                                1. Selecione de 2 a 5 serviços.
-                            </span>
+                            <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
 
-                            <span className="mb-2 block">
-                                2. Defina o serviço de referência.
-                            </span>
+                            <span className="mb-2 block">2. Defina o serviço de referência.</span>
 
-                            <span className="mb-2 block">
-                                3. Escolha o período analisado.
-                            </span>
+                            <span className="mb-2 block">3. Escolha o período analisado.</span>
 
                             <span className="block">
                                 4. Escolha uma região para simular as emissões.
@@ -386,7 +324,6 @@ export function ComparisonSummary({
                 </div>
             ) : (
                 <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-4">
-
                     {/* Serviço de referência */}
                     <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-teal-400/50 bg-teal-400/[0.02] p-4">
                         <div className="space-y-3">
@@ -402,8 +339,7 @@ export function ComparisonSummary({
                                 <div
                                     className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
                                     style={{
-                                        backgroundColor:
-                                            servicoPrincipal?.color ?? '#2563EB',
+                                        backgroundColor: servicoPrincipal?.color ?? '#2563EB',
                                     }}
                                 >
                                     <Server className="size-5" />
@@ -427,9 +363,7 @@ export function ComparisonSummary({
                             </p>
 
                             <p className="text-xs text-slate-400">
-                                {valorPrincipal !== null
-                                    ? 'Total no período'
-                                    : 'Sem métricas'}
+                                {valorPrincipal !== null ? 'Total no período' : 'Sem métricas'}
                             </p>
                         </div>
                     </div>
@@ -455,9 +389,7 @@ export function ComparisonSummary({
                             <p className="text-xs text-slate-400">
                                 {mediaDemais !== null
                                     ? `Média de ${valoresDemais.length} ${
-                                          valoresDemais.length === 1
-                                              ? 'serviço'
-                                              : 'serviços'
+                                          valoresDemais.length === 1 ? 'serviço' : 'serviços'
                                       } com valores disponíveis.`
                                     : 'Não há outros serviços com valores disponíveis.'}
                             </p>
@@ -475,7 +407,9 @@ export function ComparisonSummary({
                         </div>
 
                         <div className="space-y-2">
-                            <p className={`text-3xl font-semibold tabular-nums sm:text-4xl ${corClassificacao}`}>
+                            <p
+                                className={`text-3xl font-semibold tabular-nums sm:text-4xl ${corClassificacao}`}
+                            >
                                 {diferencaPercentual !== null
                                     ? `${formatarPercentual(diferencaPercentual)}%`
                                     : '—'}
@@ -521,9 +455,7 @@ export function ComparisonSummary({
                             <table className="w-full min-w-[210px] text-left text-xs">
                                 <thead>
                                     <tr className="border-b border-slate-800 text-slate-400">
-                                        <th className="pb-3 pr-2 font-medium">
-                                            Serviço
-                                        </th>
+                                        <th className="pb-3 pr-2 font-medium">Serviço</th>
 
                                         <th className="pb-3 text-right font-medium whitespace-nowrap">
                                             {tituloValor}
@@ -534,13 +466,10 @@ export function ComparisonSummary({
                                 <tbody>
                                     {servicosSelecionados.map((servico) => {
                                         const serie = series.find(
-                                            (item) =>
-                                                item.selectionId ===
-                                                servico.selectionId,
+                                            (item) => item.selectionId === servico.selectionId,
                                         );
 
-                                        const valorBruto =
-                                            serie?.summary[metrica];
+                                        const valorBruto = serie?.summary[metrica];
 
                                         const valor =
                                             typeof valorBruto === 'number' &&
@@ -558,8 +487,7 @@ export function ComparisonSummary({
                                                         <span
                                                             className="size-2.5 shrink-0 rounded-full"
                                                             style={{
-                                                                backgroundColor:
-                                                                    servico.color,
+                                                                backgroundColor: servico.color,
                                                             }}
                                                             aria-hidden="true"
                                                         />
@@ -573,16 +501,13 @@ export function ComparisonSummary({
                                                 </td>
 
                                                 <td className="py-3 text-right font-medium text-slate-200 tabular-nums whitespace-nowrap">
-                                                    {valor !== null
-                                                        ? formatarValor(
-                                                              valor,
-                                                              metrica,
-                                                          )
-                                                        : (
-                                                            <span className="text-slate-500">
-                                                                Sem métricas
-                                                            </span>
-                                                        )}
+                                                    {valor !== null ? (
+                                                        formatarValor(valor, metrica)
+                                                    ) : (
+                                                        <span className="text-slate-500">
+                                                            Sem métricas
+                                                        </span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         );

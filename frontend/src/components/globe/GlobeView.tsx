@@ -306,7 +306,9 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
             inverse.copy(globe.quaternion).invert();
             localFront.copy(forward).applyQuaternion(inverse);
-            stateRef.current.lon = THREE.MathUtils.radToDeg(Math.atan2(-localFront.z, localFront.x));
+            stateRef.current.lon = THREE.MathUtils.radToDeg(
+                Math.atan2(-localFront.z, localFront.x),
+            );
 
             renderer.render(scene, camera);
         };
@@ -354,7 +356,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
 
             const material = new THREE.MeshBasicMaterial({
                 color: statusStyle(marker.status).color,
-           });
+            });
             const pin = new THREE.Mesh(geometry, material);
 
             pin.position.copy(position);

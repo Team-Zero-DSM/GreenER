@@ -49,11 +49,5 @@ export function StarsBackground() {
         return () => observer.disconnect();
     }, [stars]);
 
-    return (
-        <canvas
-            ref={canvasRef}
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full"
-        />
-    );
+    return <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />;
 }

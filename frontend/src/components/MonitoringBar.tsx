@@ -59,8 +59,8 @@ export function MonitoringBar() {
                         {connected
                             ? 'Conectado'
                             : status === null && !error
-                            ? 'Conectando...'
-                            : 'Sem conexão'}
+                              ? 'Conectando...'
+                              : 'Sem conexão'}
                     </span>
 
                     {status && (
@@ -75,14 +75,15 @@ export function MonitoringBar() {
                                     {formatDateTimeSeconds(screenUpdatedAt)}
                                 </Item>
                                 <Item label="APIs UniLaunch">
-                                    Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
-                                    Carbono {dependencyLabel[status.dependencies.carbon]}
+                                    Métricas {dependencyLabel[status.dependencies.metricsDiscovery]}{' '}
+                                    · Carbono {dependencyLabel[status.dependencies.carbon]}
                                 </Item>
                             </div>
 
                             <details className="w-full sm:hidden">
                                 <summary className="min-h-11 cursor-pointer py-3">
-                                    Monitoramento · coleta a cada {status.collectionIntervalSeconds} s
+                                    Monitoramento · coleta a cada {status.collectionIntervalSeconds}{' '}
+                                    s
                                 </summary>
                                 <div className="flex flex-col gap-2 pb-2">
                                     <Item label="Última coleta">
@@ -95,7 +96,8 @@ export function MonitoringBar() {
                                         {formatDateTimeSeconds(screenUpdatedAt)}
                                     </Item>
                                     <Item label="APIs UniLaunch">
-                                        Métricas {dependencyLabel[status.dependencies.metricsDiscovery]} ·
+                                        Métricas{' '}
+                                        {dependencyLabel[status.dependencies.metricsDiscovery]} ·
                                         Carbono {dependencyLabel[status.dependencies.carbon]}
                                     </Item>
                                 </div>

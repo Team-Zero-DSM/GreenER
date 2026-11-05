@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 import {
@@ -56,11 +55,7 @@ function formatarHorario(timestamp: string, periodo: HistoryRange): string {
 }
 
 // Distribui igualmente as marcações entre início e fim.
-function gerarMarcacoesTempo(
-    inicioMs: number,
-    fimMs: number,
-    quantidade: number,
-): number[] {
+function gerarMarcacoesTempo(inicioMs: number, fimMs: number, quantidade: number): number[] {
     if (quantidade <= 1) {
         return [inicioMs];
     }
@@ -263,8 +258,7 @@ export function ComparisonChart({
                             width={65}
                             domain={[
                                 0,
-                                (valorMaximo: number) =>
-                                    valorMaximo > 0 ? valorMaximo * 1.2 : 1,
+                                (valorMaximo: number) => (valorMaximo > 0 ? valorMaximo * 1.2 : 1),
                             ]}
                             tickFormatter={(valor) => formatarValor(Number(valor))}
                             tick={{
@@ -283,15 +277,12 @@ export function ComparisonChart({
                                 const ponto = item.payload as PontoGrafico | undefined;
                                 const chaveEstimativa = `${String(item.dataKey)}__estimado`;
 
-                                const estimado =
-                                    typeof ponto?.[chaveEstimativa] === 'number';
+                                const estimado = typeof ponto?.[chaveEstimativa] === 'number';
 
                                 const valorFormatado = formatarValorMetrica(valor, metrica);
 
                                 return [
-                                    estimado
-                                        ? `${valorFormatado} (Estimado)`
-                                        : valorFormatado,
+                                    estimado ? `${valorFormatado} (Estimado)` : valorFormatado,
                                     String(nome),
                                 ];
                             }}
@@ -383,8 +374,7 @@ export function ComparisonChart({
                                             const inicioEstimativa =
                                                 typeof valorAnterior !== 'number';
 
-                                            const fimEstimativa =
-                                                typeof proximoValor !== 'number';
+                                            const fimEstimativa = typeof proximoValor !== 'number';
 
                                             // Mostra somente o início e o fim de cada região estimada.
                                             if (!inicioEstimativa && !fimEstimativa) {
