@@ -6,20 +6,26 @@ import { useApiQuery } from '@/hooks/useApiQuery';
 import { GlobeView } from '../components/globe/GlobeView';
 import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { useServices } from '@/hooks/useServices';
+import { StarsBackground } from '../components/globe/StarsBackground';
+
+const RESET_THRESHOLD = 0.02;
 
 export function LandingPage() {
     const globeRef = useRef<GlobeViewHandle>(null);
-    const exploreRef = useRef<HTMLElement>(null);
     const exploreContainerRef = useRef<HTMLDivElement>(null);
     const globeTargetRef = useRef<HTMLDivElement>(null);
     const globeLayerRef = useRef<HTMLDivElement>(null);
     const prevProgressRef = useRef(0);
+    const globeState = useRef({ progress: 0, target: { x: 0, y: 0 }, lon: -90 });
+    const force2DRef = useRef(false);
 
-    const [globeProgress, setGlobeProgress] = useState(0);
-    const [globeTarget, setGlobeTarget] = useState({ x: 0, y: 0 });
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
     const [autoRotate, setAutoRotate] = useState(true);
     const [force2D, setForce2D] = useState(false);
+
+    useEffect(() => {
+        force2DRef.current = force2D;
+    }, [force2D]);
 
     useEffect(() => {
         const updateGlobe = () => {
@@ -38,17 +44,26 @@ export function LandingPage() {
                 Math.min(1, (window.innerHeight - sectionRect.top) / (window.innerHeight * 0.7)),
             );
 
-            if (prevProgressRef.current === 0 && progress > 0) {
-                globeRef.current?.resetPosition();
+            const previous = prevProgressRef.current;
+
+            globeState.current.progress = progress;
+
+            if (force2DRef.current && progress < previous) {
+                setForce2D(false);
+                setSelectedCode(null);
             }
+
+            if (previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
+                setSelectedCode(null);
+                globeRef.current?.resetView();
+            }
+
             prevProgressRef.current = progress;
 
-            setGlobeProgress(progress);
-
-            setGlobeTarget({
+            globeState.current.target = {
                 x: targetRect.left + targetRect.width / 2 - layerRect.left,
                 y: targetRect.top + targetRect.height / 2 - layerRect.top,
-            });
+            };
         };
 
         updateGlobe();
@@ -96,21 +111,12 @@ export function LandingPage() {
         [regions, selectedCode],
     );
 
-    const selectRegion = (code: string) => {
-        setSelectedCode(code);
-    };
-
     const rotateLeft = () => {
         globeRef.current?.rotateLeft();
     };
 
     const rotateRight = () => {
         globeRef.current?.rotateRight();
-    };
-
-    const backToGlobal = () => {
-        setSelectedCode(null);
-        globeRef.current?.resetView();
     };
 
     const backToRegions = () => {
@@ -130,28 +136,28 @@ export function LandingPage() {
     }
 
     const focusTarget =
-    selectedRegion?.latitude != null && selectedRegion.longitude != null
-        ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
-        : null;
+        selectedRegion?.latitude != null && selectedRegion.longitude != null
+            ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
+            : null;
 
     return (
-        <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-20 pb-0 text-foreground">
+        <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
             <section
                 id="sobre"
-                className="relative z-10 flex min-h-[calc(100svh-6rem)] flex-col justify-center px-6 py-8 md:px-12"
+                className="relative z-10 flex min-h-svh flex-col justify-center px-6 pt-[var(--header-h,4rem)] pb-32 md:px-12"
             >
                 <div className="mx-auto w-full max-w-6xl">
-                    <span className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-                        Sobre o GreenER
-                    </span>
-
-                    <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white md:text-6xl">
-                        Dados ambientais para decisões mais sustentáveis.
+                    <h1 className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-6xl font-extrabold text-transparent md:text-8xl">
+                        Green<span className="font-light">ER</span>
                     </h1>
 
-                    <p className="mt-6 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
-                        Uma plataforma para explorar indicadores ambientais, acompanhar o consumo de
-                        energia e visualizar informações relacionadas às emissões de CO₂ por região.
+                    <p className="mt-6 max-w-2xl text-xl font-semibold leading-snug text-white md:text-3xl">
+                        Do consumo computacional ao impacto ambiental
+                    </p>
+
+                    <p className="mt-4 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
+                        Monitore aplicações, estime o consumo energético e compreenda as emissões de
+                        CO₂e da sua infraestrutura.
                     </p>
 
                     <a
@@ -165,23 +171,26 @@ export function LandingPage() {
 
             <div
                 ref={globeLayerRef}
-                className="pointer-events-none fixed inset-x-0 top-24 bottom-0 z-0"
+                className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-h,4rem)] z-0"
             >
                 {force2D ? (
-                    <GlobeMap2D
-                        ref={globeRef}
-                        autoRotate={autoRotate}
-                        progress={globeProgress}
-                        targetPosition={globeTarget}
-                        markers={markers}
-                        focusTarget={focusTarget}
-                    />
+                    <div className="relative h-full w-full">
+                        <StarsBackground />
+                        <div className="relative h-full w-full">
+                            <GlobeMap2D
+                                ref={globeRef}
+                                autoRotate={autoRotate}
+                                stateRef={globeState}
+                                markers={markers}
+                                focusTarget={focusTarget}
+                            />
+                        </div>
+                    </div>
                 ) : (
                     <GlobeView
                         ref={globeRef}
                         autoRotate={autoRotate}
-                        progress={globeProgress}
-                        targetPosition={globeTarget}
+                        stateRef={globeState}
                         markers={markers}
                         focusTarget={focusTarget}
                     />
@@ -198,7 +207,6 @@ export function LandingPage() {
                         <p className="text-white/60">Carregando totais das últimas 24 horas...</p>
                     )}
                     <ExploreSection
-                        exploreRef={exploreRef}
                         rotateLeft={rotateLeft}
                         rotateRight={rotateRight}
                         dataSource="internal"
@@ -207,12 +215,11 @@ export function LandingPage() {
                         setAutoRotate={setAutoRotate}
                         force2D={force2D}
                         setForce2D={setForce2D}
-                        backToGlobal={backToGlobal}
                         backToRegions={backToRegions}
                         zoom={zoom}
                         regions={regions ?? []}
                         services={services}
-                        onSelectRegion={selectRegion}
+                        onSelectRegion={setSelectedCode}
                     />
                 </div>
 

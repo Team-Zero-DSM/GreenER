@@ -1,10 +1,5 @@
-
 import type { HistoryRange } from '@/types/service';
-import type {
-    ComparisonPoint,
-    ComparisonRequest,
-    ComparisonResponse,
-} from '@/types/comparison';
+import type { ComparisonPoint, ComparisonRequest, ComparisonResponse } from '@/types/comparison';
 
 // Quantidade de pontos recentes sem métricas no Checkout.
 const MOCK_PONTOS_RECENTES_SEM_METRICAS_CHECKOUT = 5;
@@ -60,10 +55,7 @@ function arredondar(valor: number): number {
 }
 
 // Descobre qual intensidade de carbono será usada.
-function obterIntensidade(
-    externalId: string,
-    simulatedRegionCode: string | null,
-): number {
+function obterIntensidade(externalId: string, simulatedRegionCode: string | null): number {
     if (simulatedRegionCode === null) {
         return MOCK_ORIGINAL_INTENSITY[externalId] ?? 200;
     }
@@ -91,22 +83,13 @@ function simularColetaAusente(ponto: ComparisonPoint): ComparisonPoint {
     return {
         ...ponto,
         sampleCount: amostrasValidas,
-        energyKwh:
-            ponto.energyKwh === null
-                ? null
-                : arredondar(ponto.energyKwh * proporcaoValida),
-        co2eGrams:
-            ponto.co2eGrams === null
-                ? null
-                : arredondar(ponto.co2eGrams * proporcaoValida),
+        energyKwh: ponto.energyKwh === null ? null : arredondar(ponto.energyKwh * proporcaoValida),
+        co2eGrams: ponto.co2eGrams === null ? null : arredondar(ponto.co2eGrams * proporcaoValida),
     };
 }
 
 // Prepara pontos com falhas para testar o tratamento de dados.
-function simularFalhasDeTeste(
-    pontos: ComparisonPoint[],
-    externalId: string,
-): ComparisonPoint[] {
+function simularFalhasDeTeste(pontos: ComparisonPoint[], externalId: string): ComparisonPoint[] {
     if (!MOCK_SIMULAR_FALHAS) {
         return pontos;
     }
@@ -114,55 +97,45 @@ function simularFalhasDeTeste(
     const pontosComFalhas = pontos.map((ponto) => ({ ...ponto }));
 
     // Cenário 1: Checkout Worker possui histórico parcial,
-// uma falha isolada e uma indisponibilidade recente.
-if (externalId === 'checkout-worker') {
-    // Primeira metade do período sem histórico.
-    for (
-        let indice = 0;
-        indice < MOCK_PONTOS_SEM_HISTORICO_CHECKOUT;
-        indice++
-    ) {
-        pontosComFalhas[indice] = {
-            ...pontosComFalhas[indice],
-            sampleCount: 0,
-            energyKwh: null,
-            co2eGrams: null,
-        };
-    }
+    // uma falha isolada e uma indisponibilidade recente.
+    if (externalId === 'checkout-worker') {
+        // Primeira metade do período sem histórico.
+        for (let indice = 0; indice < MOCK_PONTOS_SEM_HISTORICO_CHECKOUT; indice++) {
+            pontosComFalhas[indice] = {
+                ...pontosComFalhas[indice],
+                sampleCount: 0,
+                energyKwh: null,
+                co2eGrams: null,
+            };
+        }
 
-    // Falha isolada dentro do histórico disponível.
-    pontosComFalhas[MOCK_PONTO_FALHA_ISOLADA_CHECKOUT] =
-        simularColetaAusente(
+        // Falha isolada dentro do histórico disponível.
+        pontosComFalhas[MOCK_PONTO_FALHA_ISOLADA_CHECKOUT] = simularColetaAusente(
             pontosComFalhas[MOCK_PONTO_FALHA_ISOLADA_CHECKOUT],
         );
 
-    // Últimos cinco pontos sem métricas.
-    const inicioFalhaRecente = Math.max(
-        0,
-        pontosComFalhas.length - MOCK_PONTOS_RECENTES_SEM_METRICAS_CHECKOUT,
-    );
+        // Últimos cinco pontos sem métricas.
+        const inicioFalhaRecente = Math.max(
+            0,
+            pontosComFalhas.length - MOCK_PONTOS_RECENTES_SEM_METRICAS_CHECKOUT,
+        );
 
-    for (
-        let indice = inicioFalhaRecente;
-        indice < pontosComFalhas.length;
-        indice++
-    ) {
-        pontosComFalhas[indice] = {
-            ...pontosComFalhas[indice],
-            sampleCount: 0,
-            energyKwh: null,
-            co2eGrams: null,
-        };
+        for (let indice = inicioFalhaRecente; indice < pontosComFalhas.length; indice++) {
+            pontosComFalhas[indice] = {
+                ...pontosComFalhas[indice],
+                sampleCount: 0,
+                energyKwh: null,
+                co2eGrams: null,
+            };
+        }
     }
-}
 
     // Cenário 2: Auth API possui cinco agrupamentos consecutivos
     // sem métricas, permitindo testar a interpolação.
     if (externalId === 'auth-api') {
         for (
             let indice = MOCK_INICIO_FALHAS_CONSECUTIVAS;
-            indice <
-            MOCK_INICIO_FALHAS_CONSECUTIVAS + MOCK_QUANTIDADE_PONTOS_ESTIMADOS;
+            indice < MOCK_INICIO_FALHAS_CONSECUTIVAS + MOCK_QUANTIDADE_PONTOS_ESTIMADOS;
             indice++
         ) {
             pontosComFalhas[indice] = {
@@ -203,27 +176,19 @@ function gerarPontos(
     const intensidade = obterIntensidade(externalId, simulatedRegionCode);
 
     // Cria uma variação previsível para os valores do gráfico.
-    const seed = [...externalId].reduce(
-        (total, caractere) => total + caractere.charCodeAt(0),
-        0,
-    );
+    const seed = [...externalId].reduce((total, caractere) => total + caractere.charCodeAt(0), 0);
 
     const pontos = Array.from({ length: MOCK_MAX_POINTS }, (_, indice) => {
         const variacao = 0.9 + ((seed + indice * 7) % 21) / 100;
 
-        const energiaKwh = arredondar(
-            (potenciaWatts / 1000) * (bucketSeconds / 3600) * variacao,
-        );
+        const energiaKwh = arredondar((potenciaWatts / 1000) * (bucketSeconds / 3600) * variacao);
 
         const co2eGrams = arredondar(energiaKwh * intensidade);
 
         return {
             timestamp: new Date(inicioMs + indice * bucketMs).toISOString(),
 
-            sampleCount: Math.max(
-                1,
-                Math.round(bucketSeconds / MOCK_COLLECTION_INTERVAL_SECONDS),
-            ),
+            sampleCount: Math.max(1, Math.round(bucketSeconds / MOCK_COLLECTION_INTERVAL_SECONDS)),
 
             energyKwh: energiaKwh,
             co2eGrams,
@@ -236,35 +201,20 @@ function gerarPontos(
 // Calcula os totais dos pontos gerados.
 function gerarResumo(pontos: ComparisonPoint[]) {
     return {
-        sampleCount: pontos.reduce(
-            (total, ponto) => total + ponto.sampleCount,
-            0,
-        ),
+        sampleCount: pontos.reduce((total, ponto) => total + ponto.sampleCount, 0),
 
         energyKwh: pontos.every((ponto) => ponto.energyKwh === null)
             ? null
-            : arredondar(
-                  pontos.reduce(
-                      (total, ponto) => total + (ponto.energyKwh ?? 0),
-                      0,
-                  ),
-              ),
+            : arredondar(pontos.reduce((total, ponto) => total + (ponto.energyKwh ?? 0), 0)),
 
         co2eGrams: pontos.every((ponto) => ponto.co2eGrams === null)
             ? null
-            : arredondar(
-                  pontos.reduce(
-                      (total, ponto) => total + (ponto.co2eGrams ?? 0),
-                      0,
-                  ),
-              ),
+            : arredondar(pontos.reduce((total, ponto) => total + (ponto.co2eGrams ?? 0), 0)),
     };
 }
 
 // Monta a resposta fictícia da comparação.
-export function gerarMockComparisonResponse(
-    request: ComparisonRequest,
-): ComparisonResponse {
+export function gerarMockComparisonResponse(request: ComparisonRequest): ComparisonResponse {
     const periodoFinal = Date.now();
 
     const duracaoMs = RANGE_MS[request.range];

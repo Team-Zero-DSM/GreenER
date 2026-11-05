@@ -1,4 +1,3 @@
-
 import { useCallback, useMemo, useState } from 'react';
 
 import { Info } from 'lucide-react';
@@ -17,10 +16,7 @@ import { ComparisonChart } from '@/components/comparison/results/ComparisonChart
 
 import { ComparisonSummary } from '@/components/comparison/results/ComparisonSummary';
 
-import {
-    prepararDadosComparacao,
-    type PreparedComparisonResponse,
-} from '@/utils/comparison';
+import { prepararDadosComparacao, type PreparedComparisonResponse } from '@/utils/comparison';
 
 import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
 
@@ -41,9 +37,9 @@ export function ComparisonPage() {
     const [metrica, setMetrica] = useState<ComparisonMetric>('co2eGrams');
 
     // Serviços atualmente escolhidos pelo usuário.
-    const [servicosSelecionados, setServicosSelecionados] = useState<
-        ComparisonServiceSelection[]
-    >([]);
+    const [servicosSelecionados, setServicosSelecionados] = useState<ComparisonServiceSelection[]>(
+        [],
+    );
 
     // Valida se a seleção permite executar uma comparação.
     const podeComparar = (() => {
@@ -62,18 +58,13 @@ export function ComparisonPage() {
     const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
 
     // Resultado original da última comparação.
-    const [respostaComparacao, setRespostaComparacao] =
-        useState<ComparisonResponse | null>(null);
+    const [respostaComparacao, setRespostaComparacao] = useState<ComparisonResponse | null>(null);
 
     // Fotografia dos serviços utilizados na última comparação.
-    const [servicosComparados, setServicosComparados] = useState<
-        ComparisonServiceSelection[]
-    >([]);
+    const [servicosComparados, setServicosComparados] = useState<ComparisonServiceSelection[]>([]);
 
     // Configuração que gerou a última comparação.
-    const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(
-        null,
-    );
+    const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(null);
 
     // Configuração que está sendo preparada atualmente.
     // A referência não faz parte dessa configuração, pois pode ser trocada
@@ -137,12 +128,12 @@ export function ComparisonPage() {
     // Prepara os dados recebidos antes de enviá-los aos componentes visuais.
     // O useMemo evita repetir o processamento enquanto a resposta não mudar.
     const respostaPreparada = useMemo<PreparedComparisonResponse | null>(() => {
-    if (respostaComparacao === null) {
-        return null;
-    }
+        if (respostaComparacao === null) {
+            return null;
+        }
 
-    return prepararDadosComparacao(respostaComparacao);
-}, [respostaComparacao]);
+        return prepararDadosComparacao(respostaComparacao);
+    }, [respostaComparacao]);
 
     // Preserva os serviços da última comparação.
     // Atualiza somente suas cores quando o usuário as altera.
@@ -162,9 +153,7 @@ export function ComparisonPage() {
     // Prepara as séries que serão entregues ao gráfico.
     const seriesGrafico =
         respostaPreparada?.series.flatMap((serie) => {
-            const servico = servicosExibidos.find(
-                (item) => item.selectionId === serie.selectionId,
-            );
+            const servico = servicosExibidos.find((item) => item.selectionId === serie.selectionId);
 
             if (!servico) {
                 return [];
