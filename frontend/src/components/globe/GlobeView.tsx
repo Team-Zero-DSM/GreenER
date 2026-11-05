@@ -190,6 +190,10 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
         let previousTime = 0;
 
         const normalOrientation = new THREE.Quaternion();
+        const forward = new THREE.Vector3(0, 0, 1);
+        const viewDirection = new THREE.Vector3();
+        const aim = new THREE.Quaternion();
+        const desired = new THREE.Quaternion();
 
         const animate = (time: number) => {
             animationId = requestAnimationFrame(animate);
@@ -201,7 +205,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             const commands = commandsRef.current;
 
             if (commands.reset) {
-                camera.position.z = 4.5;
                 commands.rotation = 0;
                 commands.zoomFactor = 1;
                 zoomLevelRef.current = 1;
@@ -263,7 +266,11 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(function Gl
             if (focusQuaternionRef.current) {
                 wasFocusedRef.current = true;
 
-                globe.quaternion.slerp(focusQuaternionRef.current, Math.min(delta * 2.5, 1));
+                viewDirection.copy(camera.position).sub(globe.position).normalize();
+                aim.setFromUnitVectors(forward, viewDirection);
+                desired.copy(aim).multiply(focusQuaternionRef.current);
+
+                globe.quaternion.slerp(desired, Math.min(delta * 2.5, 1));
 
                 commands.rotation = 0;
             } else if (wasFocusedRef.current) {

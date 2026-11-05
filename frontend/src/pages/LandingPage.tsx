@@ -8,6 +8,8 @@ import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { useServices } from '@/hooks/useServices';
 import { StarsBackground } from '../components/globe/StarsBackground';
 
+const RESET_THRESHOLD = 0.02;
+
 export function LandingPage() {
     const globeRef = useRef<GlobeViewHandle>(null);
     const exploreContainerRef = useRef<HTMLDivElement>(null);
@@ -15,10 +17,17 @@ export function LandingPage() {
     const globeLayerRef = useRef<HTMLDivElement>(null);
     const prevProgressRef = useRef(0);
     const globeState = useRef({ progress: 0, target: { x: 0, y: 0 } });
+    const selectedCodeRef = useRef<string | null>(null);
+    const force2DRef = useRef(false);
 
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
     const [autoRotate, setAutoRotate] = useState(true);
     const [force2D, setForce2D] = useState(false);
+
+    useEffect(() => {
+        selectedCodeRef.current = selectedCode;
+        force2DRef.current = force2D;
+    }, [selectedCode, force2D]);
 
     useEffect(() => {
         const updateGlobe = () => {
@@ -37,12 +46,26 @@ export function LandingPage() {
                 Math.min(1, (window.innerHeight - sectionRect.top) / (window.innerHeight * 0.7)),
             );
 
-            if (prevProgressRef.current === 0 && progress > 0) {
-                globeRef.current?.resetPosition();
-            }
-            prevProgressRef.current = progress;
+            const previous = prevProgressRef.current;
 
             globeState.current.progress = progress;
+            const hasFocus = selectedCodeRef.current !== null;
+
+            if (previous === 0 && progress > 0) {
+                globeRef.current?.resetPosition();
+            }
+
+            if ( force2DRef.current && progress < previous) {
+                setForce2D(false);
+                setSelectedCode(null);
+            }
+
+            if (hasFocus && previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
+                setSelectedCode(null);
+                globeRef.current?.resetView();
+            }
+
+            prevProgressRef.current = progress;
 
             globeState.current.target = {
                 x: targetRect.left + targetRect.width / 2 - layerRect.left,
