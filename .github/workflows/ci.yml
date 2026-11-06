@@ -39,6 +39,7 @@ jobs:
 
         env:
             DATABASE_URL: postgresql://test:test@localhost:5432/greener_test
+            TEST_DATABASE_URL: postgresql://test:test@localhost:5432/greener_test
             JWT_SECRET: segredo-so-para-ci
             NODE_ENV: test
 
