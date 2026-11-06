@@ -7,6 +7,7 @@ import type { ServiceSummary } from '@/types/service';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { ComparisonColorPicker } from './ComparisonColorPicker';
 import { ComparisonRegionPicker } from './ComparisonRegionPicker';
+import type { Region } from '@/types/api';
 
 interface ComparisonServiceCardProps {
     servico: ServiceSummary;
@@ -14,7 +15,9 @@ interface ComparisonServiceCardProps {
     cor: string;
     cores: string[];
     coresUsadasPorOutros: string[];
-    regioes: string[];
+    regioes: Region[];
+    regioesCarregando: boolean;
+    erroRegioes: string | null;
     regiaoSimulada: string | null;
     onDefinirPrincipal: () => void;
     onSelecionarCor: (cor: string) => void;
@@ -29,6 +32,8 @@ export function ComparisonServiceCard({
     cores,
     coresUsadasPorOutros,
     regioes,
+    regioesCarregando,
+    erroRegioes,
     regiaoSimulada,
     onDefinirPrincipal,
     onSelecionarCor,
@@ -50,7 +55,16 @@ export function ComparisonServiceCard({
 
     const regiaoOriginal = servico.location?.city ?? servico.location?.region ?? null;
 
-    const nomeRegiao = regiaoSimulada ?? regiaoOriginal;
+    const regiaoSelecionada = regioes.find(
+    (regiao) => regiao.code === regiaoSimulada,
+);
+
+const nomeRegiao =
+    regiaoSimulada === null
+        ? regiaoOriginal
+        : regiaoSelecionada?.city ??
+          regiaoSelecionada?.region ??
+          'Região não encontrada';
 
     const statusTexto =
         servico.active === undefined ? 'Status desconhecido' : servico.active ? 'Ativo' : 'Inativo';
@@ -238,11 +252,13 @@ export function ComparisonServiceCard({
                         className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] shadow-xl shadow-black/30"
                     >
                         <ComparisonRegionPicker
-                            regioes={regioes}
-                            regiaoAtual={regiaoSimulada}
-                            onSelecionarRegiao={onConfirmarRegiao}
-                            onFechar={() => setMostrarRegioes(false)}
-                        />
+    regioes={regioes}
+    regiaoAtual={regiaoSimulada}
+    regioesCarregando={regioesCarregando}
+    erroRegioes={erroRegioes}
+    onSelecionarRegiao={onConfirmarRegiao}
+    onFechar={() => setMostrarRegioes(false)}
+/>
                     </div>
                 )}
             </div>

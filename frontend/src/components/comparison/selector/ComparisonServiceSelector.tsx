@@ -6,7 +6,7 @@ import type { ServiceSummary } from '@/types/service';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useServices } from '@/hooks/useServices';
 
-import { mockComparisonRegions } from '@/mocks/comparisonRegions.mock';
+import { useRegions } from '@/hooks/useRegions';
 
 import { AvailableServicesPicker } from './AvailableServicesPicker';
 import { ComparisonServiceCard } from './ComparisonServiceCard';
@@ -49,11 +49,12 @@ export function ComparisonServiceSelector({ onSelectionsChange }: ComparisonServ
 
     const { services, isLoading, error } = useServices();
 
-const servicosComDadosComparaveis = services.filter(
-    (servico) =>
-        servico.environmental?.energyKwh != null ||
-        servico.environmental?.co2eGrams != null,
-);
+    const { regions, isLoading: regioesCarregando, error: erroRegioes } = useRegions();
+
+    const servicosComDadosComparaveis = services.filter(
+        (servico) =>
+            servico.environmental?.energyKwh != null || servico.environmental?.co2eGrams != null,
+    );
 
     useClickOutside(
         mostrarDisponiveis,
@@ -195,6 +196,10 @@ const servicosComDadosComparaveis = services.filter(
                         .filter((outro) => outro.idSelecao !== id)
                         .map((outro) => outro.cor);
 
+                    const regioesDisponiveis = regions.filter(
+                        (regiao) => regiao.code !== item.servico.location?.regionCode,
+                    );
+
                     return (
                         <ComparisonServiceCard
                             key={id}
@@ -203,7 +208,9 @@ const servicosComDadosComparaveis = services.filter(
                             cor={item.cor}
                             cores={CORES}
                             coresUsadasPorOutros={coresUsadasPorOutros}
-                            regioes={mockComparisonRegions}
+                            regioes={regioesDisponiveis}
+                            regioesCarregando={regioesCarregando}
+                            erroRegioes={erroRegioes}
                             regiaoSimulada={item.regiaoSimulada}
                             onDefinirPrincipal={() => setServicoPrincipalId(id)}
                             onSelecionarCor={(cor) => alterarCor(id, cor)}
@@ -241,20 +248,20 @@ const servicosComDadosComparaveis = services.filter(
                             className="absolute left-0 top-full z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-2 text-slate-100 shadow-2xl shadow-black/40"
                         >
                             {isLoading ? (
-    <p className="px-3 py-4 text-sm text-muted-foreground">
-        Carregando serviços...
-    </p>
-) : error && services.length === 0 ? (
-    <p className="px-3 py-4 text-sm text-red-400">
-        Não foi possível carregar os serviços: {error}
-    </p>
-) : (
-    <AvailableServicesPicker
-        servicos={servicosComDadosComparaveis}
-        onAdicionar={adicionarServico}
-        onFechar={() => setMostrarDisponiveis(false)}
-    />
-)}
+                                <p className="px-3 py-4 text-sm text-muted-foreground">
+                                    Carregando serviços...
+                                </p>
+                            ) : error && services.length === 0 ? (
+                                <p className="px-3 py-4 text-sm text-red-400">
+                                    Não foi possível carregar os serviços: {error}
+                                </p>
+                            ) : (
+                                <AvailableServicesPicker
+                                    servicos={servicosComDadosComparaveis}
+                                    onAdicionar={adicionarServico}
+                                    onFechar={() => setMostrarDisponiveis(false)}
+                                />
+                            )}
                         </div>
                     )}
                 </div>

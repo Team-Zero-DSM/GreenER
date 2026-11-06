@@ -18,17 +18,11 @@ import { ComparisonSummary } from '@/components/comparison/results/ComparisonSum
 
 import { prepararDadosComparacao, type PreparedComparisonResponse } from '@/utils/comparison';
 
-import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
+import { compareServices } from '@/api/comparisons';
 
 import type { HistoryRange } from '@/types/service';
 
 import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
-
-const CODIGOS_REGIAO: Record<string, string> = {
-    'São Paulo': 'br-sudeste',
-    Toronto: 'ca-toronto',
-    Ashburn: 'us-east',
-};
 
 export function ComparisonPage() {
     // Configurações da comparação.
@@ -91,9 +85,13 @@ export function ComparisonPage() {
         [],
     );
 
-    // Executa a comparação utilizando o mock.
-    function handleComparar() {
-        if (!podeComparar) return;
+    const [comparacaoCarregando, setComparacaoCarregando] = useState(false);
+
+    const [erroComparacao, setErroComparacao] = useState<string | null>(null);
+
+    // Executa a comparação utilizando o backend.
+    async function handleComparar() {
+        if (!podeComparar || comparacaoCarregando) return;
 
         const request: ComparisonRequest = {
             range: periodo,
@@ -101,30 +99,34 @@ export function ComparisonPage() {
             selections: servicosSelecionados.map((item) => ({
                 selectionId: item.selectionId,
                 externalId: item.externalId,
-                simulatedRegionCode:
-                    item.simulatedRegion === null
-                        ? null
-                        : (CODIGOS_REGIAO[item.simulatedRegion] ?? null),
+                simulatedRegionCode: item.simulatedRegion,
             })),
         };
 
-        const resposta = gerarMockComparisonResponse(request);
+        setComparacaoCarregando(true);
+        setErroComparacao(null);
 
-        // Salva o resultado original e a configuração que o gerou.
-        setRespostaComparacao(resposta);
-        setConfiguracaoComparada(configuracaoAtual);
+        try {
+            const resposta = await compareServices(request);
 
-        // Registra os serviços utilizados na última comparação.
-        setServicosComparados(
-            servicosSelecionados.map((servico) => ({
-                ...servico,
-            })),
-        );
+            // Salva o resultado original e a configuração que o gerou.
+            setRespostaComparacao(resposta);
+            setConfiguracaoComparada(configuracaoAtual);
 
-        console.log('Requisição da comparação:', request);
-        console.log('Resposta original do mock:', resposta);
+            // Registra os serviços utilizados na última comparação.
+            setServicosComparados(
+                servicosSelecionados.map((servico) => ({
+                    ...servico,
+                })),
+            );
+        } catch (error) {
+            setErroComparacao(
+                error instanceof Error ? error.message : 'Não foi possível executar a comparação.',
+            );
+        } finally {
+            setComparacaoCarregando(false);
+        }
     }
-
     // Prepara os dados recebidos antes de enviá-los aos componentes visuais.
     // O useMemo evita repetir o processamento enquanto a resposta não mudar.
     const respostaPreparada = useMemo<PreparedComparisonResponse | null>(() => {
@@ -191,11 +193,23 @@ export function ComparisonPage() {
                 <ComparisonControls
                     periodo={periodo}
                     metrica={metrica}
-                    podeComparar={podeComparar}
+                    podeComparar={podeComparar && !comparacaoCarregando}
                     onPeriodoChange={setPeriodo}
                     onMetricaChange={setMetrica}
                     onComparar={handleComparar}
                 />
+
+                {comparacaoCarregando && (
+                    <p className="text-sm text-muted-foreground" role="status">
+                        Executando comparação...
+                    </p>
+                )}
+
+                {erroComparacao && (
+                    <p className="text-sm text-red-400" role="alert">
+                        Erro ao executar comparação: {erroComparacao}
+                    </p>
+                )}
 
                 {/* Aviso de alterações pendentes. */}
                 {comparacaoPendente && (
