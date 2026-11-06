@@ -6,15 +6,23 @@ dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 
 ## Estado da implementação
 
-Módulos existentes: `services`, `collections`, `analytics`,
-`regions` e `monitoring`. A API expõe lista, detalhe, histórico, regiões e estado
-da coleta. `/services` possui o alias `/service`. `analytics` fornece histórico
-e totais; rankings, comparação e cenários continuam futuros.
-Frontend, coleta e histórico persistido estão integrados na Sprint 1.
-JWT fica na Sprint 3; `auth` e `monitoring-settings` não estão implementados.
-O globo está integrado, mas a exibição dos serviços associados ao inspecionar
-uma região foi transferida para a Sprint 2 como saldo de T15.
-Comandos de execução estão no [README](../README.md); contratos em [API](../docs/API.md).
+| Módulo        | Responsabilidade atual                                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `services`    | Lista e detalha serviços, consulta a última amostra e o histórico de tentativas.                                                  |
+| `collections` | Sincroniza regiões e serviços, coleta métricas, grava amostras e observações e lista o resultado da última tentativa por serviço. |
+| `analytics`   | Consulta as amostras de um serviço, agrupadas por período, com pontos e totais.                                                   |
+| `regions`     | Consulta regiões, fatores de carbono, contadores de serviços e totais por período.                                                |
+| `monitoring`  | Expõe os horários, contadores e dependências da rodada mantidos em memória.                                                       |
+| `comparisons` | Compara amostras em um período comum e simula emissões com o fator atual de outra região.                                         |
+| `rankings`    | Publica GET /api/v1/rankings com classificação por energia ou CO₂e e período configurável.                                        |
+
+`app.ts` configura o Express e monta `/api/v1`. `index.ts` registra os
+roteadores, incluindo `/service` como alias de `/services`. `server.ts`
+inicia o servidor HTTP e o job de coleta. Autenticação JWT, configuração do
+job por HTTP e uma rota separada de cenários são propostas futuras.
+
+Consulte os [comandos de execução](../README.md#como-executar), o
+[contrato da API](../docs/API.md) e o [modelo do banco](../database/arquitetura.md).
 
 ## 1. Visão Geral do Sistema
 
@@ -60,15 +68,13 @@ O frontend não acessa diretamente as APIs externas.
 
 ## Backend
 
-- Node.js;
+- Node.js 24;
 - TypeScript;
 - Express;
 - Zod;
 - `pg`;
 - CORS;
-- dotenv;
-- bcrypt;
-- JSON Web Token — JWT.
+- dotenv.
 
 ## Banco de Dados
 
@@ -136,130 +142,48 @@ APIs externas.
 
 ---
 
-# 4. Organização Geral do Projeto
-
-A estrutura do projeto organiza frontend, backend, banco de dados e
-documentação em áreas separadas:
+# 4. Estrutura do Backend
 
 ```text
-greener/
-│
-├── README.md
-├── docker-compose.yml
-│
-├── frontend/
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── src/
-│       ├── app/
-│       ├── components/
-│       ├── pages/
-│       ├── services/
-│       ├── hooks/
-│       ├── contexts/
-│       ├── types/
-│       └── lib/
-│
-├── backend/
-│   ├── arquitetura.md
-│   ├── Dockerfile
-│   └── src/
-│       ├── app.ts
-│       ├── server.ts
-│       ├── index.ts
-│       │
-│       ├── db/
-│       │   └── connection.ts
-│       │
-│       ├── integrations/
-│       │   ├── metrics-api.ts
-│       │   ├── metrics-api.schema.ts
-│       │   ├── metrics-api.mapper.ts
-│       │   ├── carbon-api.ts
-│       │   └── carbon-api.schema.ts
-│       │
-│       ├── jobs/
-│       │   └── collections.job.ts
-│       │
-│       ├── modules/
-│       │   │
-│       │   ├── auth/
-│       │   │   ├── auth.routes.ts
-│       │   │   ├── auth.controller.ts
-│       │   │   ├── auth.service.ts
-│       │   │   └── auth.schema.ts
-│       │   │
-│       │   ├── collections/
-│       │   │   ├── collections.routes.ts
-│       │   │   ├── collections.controller.ts
-│       │   │   ├── collections.service.ts
-│       │   │   ├── collections.repository.ts
-│       │   │   ├── collections.schema.ts
-│       │   │   └── types/collections.types.ts
-│       │   │
-│       │   │
-│       │   │
-│       │   │
-│       │   ├── services/
-│       │   │   ├── services.routes.ts
-│       │   │   ├── services.controller.ts
-│       │   │   ├── services.service.ts
-│       │   │   ├── services.repository.ts
-│       │   │   ├── services.schema.ts
-│       │   │   └── types/services.types.ts
-│       │   │
-│       │   ├── regions/
-│       │   │   ├── regions.routes.ts
-│       │   │   ├── regions.controller.ts
-│       │   │   ├── regions.service.ts
-│       │   │   └── regions.schema.ts
-│       │   │
-│       │   ├── analytics/
-│       │   │   ├── analytics.routes.ts
-│       │   │   ├── analytics.controller.ts
-│       │   │   ├── analytics.service.ts
-│       │   │   ├── analytics.repository.ts
-│       │   │   ├── analytics.schema.ts
-│       │   │   └── types/analytics.types.ts
-│       │   │
-│       │   ├── monitoring/
-│       │   │   ├── monitoring.routes.ts
-│       │   │   ├── monitoring.controller.ts
-│       │   │   ├── monitoring.service.ts
-│       │   │   └── types/monitoring.types.ts
-│       │   │
-│       │   └── monitoring-settings/
-│       │       ├── monitoring-settings.routes.ts
-│       │       ├── monitoring-settings.controller.ts
-│       │       ├── monitoring-settings.service.ts
-│       │       ├── monitoring-settings.repository.ts
-│       │       └── monitoring-settings.schema.ts
-│       │
-│       └── shared/
-│           ├── errors/
-│           ├── middlewares/
-│           └── types/
-│
-└── docs/
-    ├── API.md
-    ├── cálculo.md
-    ├── plano-de-entregas.md
-    └── sprints/
+backend/
+├── .env.example
+├── Dockerfile
+├── package.json
+├── src/
+│   ├── app.ts
+│   ├── index.ts
+│   ├── server.ts
+│   ├── db/
+│   │   └── connection.ts
+│   ├── integrations/
+│   │   ├── carbon-api.ts
+│   │   ├── carbon-api.schema.ts
+│   │   ├── metrics-api.ts
+│   │   ├── metrics-api.schema.ts
+│   │   └── metrics-api.mapper.ts
+│   ├── jobs/
+│   │   └── collections.job.ts
+│   ├── modules/
+│   │   ├── analytics/
+│   │   ├── collections/
+│   │   ├── comparisons/
+│   │   ├── monitoring/
+│   │   ├── rankings/
+│   │   ├── regions/
+│   │   └── services/
+│   ├── scripts/
+│   │   └── sync-regions.ts
+│   └── shared/
+│       ├── errors/
+│       ├── middleware/
+│       └── types/
+└── tests/unit/
 ```
 
-O módulo `monitoring` está implementado e expõe
-`GET /api/v1/monitoring/status`. O `monitoring.service.ts` guarda em memória os
-horários, contadores e resultados informados pelo job e pelo serviço de coleta;
-o controller entrega esses dados em JSON. Não há arquivo `state`, repository
-ou tabela própria para esse módulo. Seus dados são reiniciados com o processo.
-Ele é separado da proposta de `monitoring-settings`, cuja entrega será definida posteriormente.
-
-A árvore também contém a organização prevista para funcionalidades futuras;
-ela não comprova que todos os módulos e arquivos já estejam implementados.
-
-Novas pastas e abstrações devem representar responsabilidades reais do sistema
-e preservar os limites entre interface, regras de negócio, integrações e
-persistência.
+O módulo `monitoring` expõe `GET /api/v1/monitoring/status`. O
+`monitoring.service.ts` guarda em memória os horários, contadores e resultados
+informados pelo job e pelo serviço de coleta. O controller entrega esses
+dados em JSON. Os dados são reiniciados com o processo.
 
 ---
 
@@ -286,6 +210,36 @@ PostgreSQL / APIs externas
 Cada camada possui uma responsabilidade específica.
 
 ---
+
+# 6. Configuração e comandos
+
+As variáveis são carregadas com `dotenv/config`. Use [.env.example](./.env.example)
+como referência e execute os comandos Node.js dentro de `backend/`.
+
+| Variável                                              | Uso atual                                                                             |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `PORT`                                                | Porta HTTP; padrão `3000` quando ausente.                                             |
+| `CORS_ORIGIN`                                         | Origem permitida pelo middleware CORS; exemplo `http://localhost:5173`.               |
+| `DATABASE_HOST`                                       | `database` no Compose; `localhost` ao executar Node.js no host.                       |
+| `DATABASE_PORT`                                       | `5432` no Compose; `5433` no host.                                                    |
+| `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | No Compose de desenvolvimento: `greener`, `postgres`, `postgres`.                     |
+| `METRICS_API_URL`, `CARBON_API_URL`                   | Bases das integrações externas, obrigatórias para criar o serviço de coleta.          |
+| `COLLECTION_INTERVAL_SECONDS`                         | Espera após cada rodada; padrão de 30 segundos para valor não positivo ou não finito. |
+| `JWT_SECRET`                                          | Presente no exemplo; ainda sem autenticação implementada nas rotas.                   |
+
+| Comando                | Finalidade                                                            |
+| ---------------------- | --------------------------------------------------------------------- |
+| `npm ci`               | Instalar as dependências do lockfile.                                 |
+| `npm run dev`          | Executar `src/server.ts` com reinício ao alterar arquivos TypeScript. |
+| `npm run build`        | Compilar o TypeScript para `dist/`.                                   |
+| `npm start`            | Executar `dist/server.js` após o build.                               |
+| `npm test`             | Executar os testes com Vitest.                                        |
+| `npm run test:watch`   | Manter os testes em execução durante o desenvolvimento.               |
+| `npm run lint`         | Verificar o código com ESLint, sem avisos permitidos.                 |
+| `npm run format:check` | Conferir a formatação com Prettier.                                   |
+
+As rotas atuais são públicas. A presença de `bcrypt`, `jsonwebtoken` e
+`JWT_SECRET` não implica que o login já esteja disponível.
 
 # 7. Validação com Zod
 
@@ -588,15 +542,13 @@ carbon-api.ts
 Fluxo:
 
 ```text
-region_code
-     ↓
-Carbon Integration
-     ↓
-Carbon API
+GET /regions na Carbon API
      ↓
 Zod
      ↓
-dados validados para o service
+sincronização de regiões em CollectionsService
+     ↓
+fator regional armazenado no PostgreSQL
 ```
 
 Os campos utilizados nessa integração estão descritos em
@@ -651,7 +603,7 @@ Uma falha em uma chamada externa não deve encerrar toda a aplicação.
 
 # 16. Collection Job
 
-O `collection.job.ts` é responsável por iniciar periodicamente o processo de
+O `collections.job.ts` é responsável por iniciar periodicamente o processo de
 monitoramento.
 
 O Job não deve implementar as regras de negócio da coleta.
@@ -782,9 +734,10 @@ flowchart TD
     S --> P[Consultar parâmetros ativos e serviços ativos no banco]
     P --> M[Consultar e validar métricas de cada serviço]
     M --> C[Estimar potência energia e CO2e com o fator regional armazenado]
-    C --> DB[Persistir coleta e atualizar status]
-    M --> E[Tratar falha por serviço]
-    DB --> F[Registrar resultado da rodada]
+    C --> DB[Gravar coleta e atualizar estado do serviço]
+    DB --> H[Registrar observação de sucesso com ID da coleta]
+    M --> E[Registrar falha e atualizar estado conforme o tipo]
+    H --> F[Atualizar monitoramento da rodada em memória]
     E --> F
 ```
 
@@ -846,15 +799,19 @@ INSERT
 PostgreSQL
 ```
 
-A coleta permanece associada ao serviço correspondente.
+A tabela `coleta` guarda as métricas e estimativas da amostra, o conjunto de
+parâmetros e o fator de carbono usado no cálculo. `servico.status` representa
+o estado operacional atual. `status_coleta` guarda as observações de sucesso
+e falha, incluindo ausências confirmadas na descoberta. O monitoramento da
+rodada permanece em memória e é reiniciado com o processo.
 
-Isso permite posteriormente realizar:
-
-- análise histórica;
-- gráficos;
-- rankings;
-- comparações;
-- indicadores agregados.
+Em caso de sucesso, o backend grava a amostra, atualiza o estado do serviço
+para `available` e registra uma observação `success` com o ID da amostra.
+Falhas de consulta e ausências na descoberta geram observações sem amostra.
+O código HTTP é registrado quando há uma resposta HTTP de erro. As gravações
+são independentes, então uma amostra salva pode sobreviver a uma falha na
+gravação da observação. Consulte o [modelo do banco](../database/arquitetura.md)
+e a [classificação das falhas](../docs/API.md#3-greener-metrics-aggregator-api).
 
 ---
 
@@ -1256,6 +1213,43 @@ flowchart LR
 O banco deve utilizar volume persistente para manter os registros mesmo após a
 reinicialização dos containers.
 
+## Executar o backend localmente
+
+Com Node.js 24 e Docker Compose, prepare os arquivos `.env` conforme o
+[README](../README.md#como-executar). Execute na raiz do repositório para
+subir apenas o PostgreSQL pelo Compose e rodar o Node.js no host.
+
+```powershell
+docker compose up -d --wait database
+Set-Location backend
+```
+
+No `.env` do backend, use `DATABASE_HOST=localhost` e `DATABASE_PORT=5433`
+para acessar a porta publicada pelo Compose. Ao executar o backend dentro do
+Compose, use `DATABASE_HOST=database` e `DATABASE_PORT=5432`.
+`METRICS_API_URL` e `CARBON_API_URL` são obrigatórias na inicialização.
+`PORT` define a porta HTTP e `CORS_ORIGIN` configura a origem do frontend.
+
+Ainda em `backend/`, instale as dependências e inicie o processo de desenvolvimento.
+
+```powershell
+npm ci
+npm run dev
+```
+
+Em outro terminal, consulte o processo, o monitoramento em memória e o
+histórico persistido da última tentativa por serviço.
+
+```powershell
+Invoke-RestMethod http://localhost:3000/health
+Invoke-RestMethod http://localhost:3000/api/v1/monitoring/status
+Invoke-RestMethod 'http://localhost:3000/api/v1/collections/status?page=1&limit=20'
+```
+
+`/health` confirma que o processo HTTP responde. Para a última situação
+observada das integrações e do banco, consulte `/api/v1/monitoring/status`.
+Os comandos `npm test` e `npm run build` também são executados em `backend/`.
+
 ---
 
 # 36. Fluxo Completo do GreenER
@@ -1317,23 +1311,25 @@ flowchart LR
 
 # 37. Resumo das Responsabilidades
 
-| Componente     | Responsabilidade                                          |
-| -------------- | --------------------------------------------------------- |
-| Frontend       | Apresentar informações e permitir interação com o usuário |
-| Routes         | Definir endpoints HTTP                                    |
-| Zod            | Validar entradas e dados externos em runtime              |
-| Controllers    | Receber requisições e produzir respostas HTTP             |
-| Services       | Implementar e coordenar regras de negócio                 |
-| Repositories   | Concentrar acesso ao PostgreSQL                           |
-| Integrations   | Concentrar comunicação com APIs externas                  |
-| Collection Job | Iniciar periodicamente os ciclos de monitoramento         |
-| Auth (Sprint 3) | Autenticar usuários e emitir tokens JWT; ainda não implementado |
-| Regions | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
-| Analytics | Histórico e totais implementados; rankings, comparações e cenários futuros |
-| PostgreSQL     | Persistir serviços, coletas e configurações               |
-| Metrics API    | Fornecer serviços e métricas                              |
-| Carbon API     | Fornecer intensidade de carbono                           |
-| JWT Middleware (Sprint 3) | Proteção planejada, ainda ausente |
+| Componente                | Responsabilidade                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Frontend                  | Apresentar informações e permitir interação com o usuário                                                      |
+| Routes                    | Definir endpoints HTTP                                                                                         |
+| Zod                       | Validar entradas e dados externos em runtime                                                                   |
+| Controllers               | Receber requisições e produzir respostas HTTP                                                                  |
+| Services                  | Implementar e coordenar regras de negócio                                                                      |
+| Repositories              | Concentrar acesso ao PostgreSQL                                                                                |
+| Integrations              | Concentrar comunicação com APIs externas                                                                       |
+| Collection Job            | Iniciar periodicamente os ciclos de monitoramento                                                              |
+| Auth (Sprint 3)           | Autenticar usuários e emitir tokens JWT; ainda não implementado                                                |
+| Regions                   | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
+| Analytics                 | Consulta histórico e totais das amostras por serviço.                                                          |
+| Comparisons               | Compara serviços e simula emissões em outra região.                                                            |
+| Collections e Services    | Consultam a última tentativa e o histórico de observações por serviço.                                         |
+| PostgreSQL                | Persiste serviços, regiões, parâmetros, amostras e observações.                                                |
+| Metrics API               | Fornecer serviços e métricas                                                                                   |
+| Carbon API                | Fornecer intensidade de carbono                                                                                |
+| JWT Middleware (Sprint 3) | Proteção planejada, ainda ausente                                                                              |
 
 ---
 
@@ -1431,10 +1427,9 @@ operação; a rodada continua processando os demais serviços.
 
 ## 38.8 Persistência histórica
 
-As coletas são armazenadas no PostgreSQL e sustentam consultas históricas,
-consulta de detalhe, histórico e totais por período já disponíveis na API.
-Rankings, comparações e cenários são usos futuros. A interface atual exibe
-séries simuladas e ainda não consome esses dados persistidos.
+As telas de detalhe e comparação consultam as amostras armazenadas no
+PostgreSQL. O dashboard também consulta os resultados das tentativas
+persistidos em `status_coleta`. Consulte as [rotas disponíveis](../docs/API.md#21-operações-implementadas).
 
 ---
 
@@ -1542,11 +1537,11 @@ agenda a seguinte enquanto estiver ativo.
 ```text
 Collection Job
       ↓
-consultar configurações
+ler intervalo do ambiente
       ↓
 Collection Service
       ↓
-consultar serviços disponíveis
+sincronizar regiões e serviços, depois buscar os serviços ativos
       ↓
 para cada serviço
       ↓
