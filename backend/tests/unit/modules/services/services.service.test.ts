@@ -1,5 +1,5 @@
 import { NotFoundError } from '../../../../src/shared/errors/NotFoundError.js';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { ServicesService } from '../../../../src/modules/services/services.service.js';
 import type { ServiceRepository } from '../../../../src/modules/services/services.repository.js';
 import type { ServiceWithLatestRow } from '../../../../src/modules/services/types/services.types.js';
