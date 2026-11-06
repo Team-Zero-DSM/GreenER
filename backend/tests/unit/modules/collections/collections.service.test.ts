@@ -7,6 +7,7 @@ import type {
     ActiveService,
     EstimateParameter,
 } from '../../../../src/modules/collections/types/collections.types.js';
+import { ExternalApiError } from '../../../../src/shared/errors/external-api-error.js';
 import type { MetricsResponse } from '../../../../src/integrations/metrics-api.schema.js';
 
 describe('Processamento de métricas em coletas (CollectionsService)', () => {
@@ -107,5 +108,86 @@ describe('Processamento de métricas em coletas (CollectionsService)', () => {
         expect(secondCall.memory_gb).not.toBe(firstCall.memory_gb);
         expect(secondCall.estimated_power_w).toBeGreaterThan(firstCall.estimated_power_w);
         expect(secondCall.estimated_co2e_g).toBeGreaterThan(firstCall.estimated_co2e_g);
+    });
+    it('deve registrar falha na coleta e registrar sucesso quando o serviço voltar a responder', async () => {
+        const mockParams: EstimateParameter = {
+            id: 'param-1',
+            cpu_max_watts: 200,
+            ram_watts_per_gb: 3,
+            disk_watts_per_gb: 1,
+            network_watts_per_gb: 2,
+            active: true,
+        };
+        const mockServices: ActiveService[] = [
+            {
+                id: 'service-1',
+                external_id: 'service-api',
+                metrics_path: '/metrics',
+                carbon_intensity: 150,
+            },
+        ];
+        const mockRepo = {
+            findActiveEstimateParameter: vi.fn().mockResolvedValue(mockParams),
+            findActiveServices: vi.fn().mockResolvedValue(mockServices),
+            createCollection: vi.fn().mockResolvedValue({
+                id: 'collection-1',
+                coletado_em: new Date(),
+            }),
+            createStatusCollection: vi.fn().mockResolvedValue(undefined),
+            updateStatus: vi.fn().mockResolvedValue(true),
+        } as unknown as CollectionsRepository;
+        const mockCarbonClient = {} as CarbonClient;
+        const mockMetricsClient = {
+            getMetrics: vi.fn(),
+        } as unknown as MetricsClient;
+        const service = new CollectionsService(mockRepo, mockCarbonClient, mockMetricsClient);
+        const error = new ExternalApiError('Tempo de resposta esgotado', 'timeout');
+        const metrics: MetricsResponse = {
+            collection_interval_seconds: 60,
+            metrics: { cpu_percent: 20, memory_gb: 4, disk_gb: 10, network_gb: 1 },
+        };
+        vi.mocked(mockMetricsClient.getMetrics)
+            .mockRejectedValueOnce(error)
+            .mockResolvedValueOnce(metrics);
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        try {
+            // Primeira tentativa: a API não responde e nenhuma coleta deve ser salva.
+            expect(await service.runCollectionRound()).toBe(0);
+            expect(mockRepo.createCollection).not.toHaveBeenCalled();
+            expect(mockRepo.createStatusCollection).toHaveBeenNthCalledWith(1, {
+                service_id: 'service-1',
+                descricao: 'Tempo de resposta esgotado',
+                http_status: null,
+                tipo: 'timeout',
+            });
+            expect(mockRepo.updateStatus).toHaveBeenNthCalledWith(1, 'service-1', 'unavailable');
+
+            // Segunda tentativa: a API volta e o sucesso fica vinculado à coleta.
+            expect(await service.runCollectionRound()).toBe(1);
+            expect(mockMetricsClient.getMetrics).toHaveBeenCalledTimes(2);
+            expect(mockMetricsClient.getMetrics).toHaveBeenNthCalledWith(1, '/metrics');
+            expect(mockMetricsClient.getMetrics).toHaveBeenNthCalledWith(2, '/metrics');
+            expect(mockRepo.createCollection).toHaveBeenCalledTimes(1);
+            expect(mockRepo.createCollection).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    service_id: 'service-1',
+                    cpu_percent: 20,
+                    memory_gb: 4,
+                }),
+            );
+            expect(mockRepo.createStatusCollection).toHaveBeenCalledTimes(2);
+            expect(mockRepo.createStatusCollection).toHaveBeenNthCalledWith(2, {
+                service_id: 'service-1',
+                coleta_id: 'collection-1',
+                descricao: 'Métricas coletadas e salvas com sucesso.',
+                http_status: null,
+                tipo: 'success',
+            });
+            expect(mockRepo.updateStatus).toHaveBeenCalledTimes(2);
+            expect(mockRepo.updateStatus).toHaveBeenNthCalledWith(2, 'service-1', 'available');
+        } finally {
+            consoleError.mockRestore();
+        }
     });
 });
