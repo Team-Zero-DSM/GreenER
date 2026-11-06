@@ -58,4 +58,60 @@ describe('Comparação de serviços (ComparisonsService)', () => {
             new Date('2026-11-06T12:00:00.001Z'),
         );
     });
+
+    it('deve informar erro quando um serviço da comparação não existir', async () => {
+        const mockServiceRepo = {
+            findIdByExternalId: vi.fn().mockResolvedValueOnce('1').mockResolvedValueOnce(null),
+        } as unknown as ServiceRepository;
+        const mockRepo = {
+            findLatestCollectionAtByServiceIds: vi.fn(),
+            findSummaryByServiceId: vi.fn(),
+        } as unknown as ComparisonsRepository;
+        const service = new ComparisonsService(mockRepo, mockServiceRepo);
+
+        await expect(
+            service.compare({
+                range: '24h',
+                selections: [
+                    { selectionId: 'a', externalId: 'service-a', simulatedRegionCode: null },
+                    { selectionId: 'b', externalId: 'inexistente', simulatedRegionCode: null },
+                ],
+            }),
+        ).rejects.toThrow('Serviço inexistente não foi encontrado');
+        expect(mockServiceRepo.findIdByExternalId).toHaveBeenNthCalledWith(2, 'inexistente');
+        expect(mockRepo.findLatestCollectionAtByServiceIds).not.toHaveBeenCalled();
+        expect(mockRepo.findSummaryByServiceId).not.toHaveBeenCalled();
+    });
+
+    it('deve informar erro quando a região simulada não existir', async () => {
+        const mockServiceRepo = {
+            findIdByExternalId: vi.fn().mockResolvedValueOnce('1').mockResolvedValueOnce('2'),
+        } as unknown as ServiceRepository;
+        const mockRepo = {
+            findLatestCollectionAtByServiceIds: vi
+                .fn()
+                .mockResolvedValue(new Date('2026-11-06T12:00:00Z')),
+            findRegionByCode: vi.fn().mockResolvedValue(null),
+            findSummaryByServiceId: vi.fn(),
+            findPointsByServiceId: vi.fn(),
+        } as unknown as ComparisonsRepository;
+        const service = new ComparisonsService(mockRepo, mockServiceRepo);
+
+        await expect(
+            service.compare({
+                range: '24h',
+                selections: [
+                    {
+                        selectionId: 'a',
+                        externalId: 'service-a',
+                        simulatedRegionCode: 'inexistente',
+                    },
+                    { selectionId: 'b', externalId: 'service-b', simulatedRegionCode: null },
+                ],
+            }),
+        ).rejects.toThrow('Região inexistente não foi encontrada');
+        expect(mockRepo.findRegionByCode).toHaveBeenCalledWith('inexistente');
+        expect(mockRepo.findSummaryByServiceId).not.toHaveBeenCalled();
+        expect(mockRepo.findPointsByServiceId).not.toHaveBeenCalled();
+    });
 });

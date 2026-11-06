@@ -190,4 +190,117 @@ describe('Processamento de métricas em coletas (CollectionsService)', () => {
             consoleError.mockRestore();
         }
     });
+
+    it('deve retornar zero quando não houver serviços ativos', async () => {
+        const mockParams: EstimateParameter = {
+            id: 'param-1',
+            cpu_max_watts: 200,
+            ram_watts_per_gb: 3,
+            disk_watts_per_gb: 1,
+            network_watts_per_gb: 2,
+            active: true,
+        };
+        const mockRepo = {
+            findActiveEstimateParameter: vi.fn().mockResolvedValue(mockParams),
+            findActiveServices: vi.fn().mockResolvedValue([]),
+            createCollection: vi.fn(),
+            createStatusCollection: vi.fn(),
+        } as unknown as CollectionsRepository;
+        const mockMetricsClient = { getMetrics: vi.fn() } as unknown as MetricsClient;
+        const service = new CollectionsService(mockRepo, {} as CarbonClient, mockMetricsClient);
+
+        expect(await service.runCollectionRound()).toBe(0);
+        expect(mockRepo.findActiveServices).toHaveBeenCalledTimes(1);
+        expect(mockMetricsClient.getMetrics).not.toHaveBeenCalled();
+        expect(mockRepo.createCollection).not.toHaveBeenCalled();
+        expect(mockRepo.createStatusCollection).not.toHaveBeenCalled();
+    });
+
+    it('deve informar erro quando não houver parâmetro de estimativa ativo', async () => {
+        const mockRepo = {
+            findActiveEstimateParameter: vi.fn().mockResolvedValue(null),
+            findActiveServices: vi.fn().mockResolvedValue([]),
+            createCollection: vi.fn(),
+        } as unknown as CollectionsRepository;
+        const mockMetricsClient = { getMetrics: vi.fn() } as unknown as MetricsClient;
+        const service = new CollectionsService(mockRepo, {} as CarbonClient, mockMetricsClient);
+
+        await expect(service.runCollectionRound()).rejects.toThrow(
+            'Nenhum parâmetro de estimativa ativo',
+        );
+        expect(mockMetricsClient.getMetrics).not.toHaveBeenCalled();
+        expect(mockRepo.createCollection).not.toHaveBeenCalled();
+    });
+
+    it('deve continuar a coleta dos outros serviços quando um deles falhar', async () => {
+        const mockParams: EstimateParameter = {
+            id: 'param-1',
+            cpu_max_watts: 200,
+            ram_watts_per_gb: 3,
+            disk_watts_per_gb: 1,
+            network_watts_per_gb: 2,
+            active: true,
+        };
+        const mockServices: ActiveService[] = [
+            {
+                id: '1',
+                external_id: 'service-a',
+                metrics_path: '/metrics/a',
+                carbon_intensity: 150,
+            },
+            {
+                id: '2',
+                external_id: 'service-b',
+                metrics_path: '/metrics/b',
+                carbon_intensity: 150,
+            },
+        ];
+        const mockRepo = {
+            findActiveEstimateParameter: vi.fn().mockResolvedValue(mockParams),
+            findActiveServices: vi.fn().mockResolvedValue(mockServices),
+            createCollection: vi
+                .fn()
+                .mockResolvedValue({ id: 'collection-2', coletado_em: new Date() }),
+            createStatusCollection: vi.fn().mockResolvedValue(undefined),
+            updateStatus: vi.fn().mockResolvedValue(true),
+        } as unknown as CollectionsRepository;
+        const metrics: MetricsResponse = {
+            collection_interval_seconds: 60,
+            metrics: { cpu_percent: 20, memory_gb: 4, disk_gb: 10, network_gb: 1 },
+        };
+        const mockMetricsClient = {
+            getMetrics: vi
+                .fn()
+                .mockRejectedValueOnce(new ExternalApiError('Tempo esgotado', 'timeout'))
+                .mockResolvedValueOnce(metrics),
+        } as unknown as MetricsClient;
+        const service = new CollectionsService(mockRepo, {} as CarbonClient, mockMetricsClient);
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        try {
+            expect(await service.runCollectionRound()).toBe(1);
+            expect(mockMetricsClient.getMetrics).toHaveBeenCalledTimes(2);
+            expect(mockMetricsClient.getMetrics).toHaveBeenCalledWith('/metrics/a');
+            expect(mockMetricsClient.getMetrics).toHaveBeenCalledWith('/metrics/b');
+            expect(mockRepo.createCollection).toHaveBeenCalledTimes(1);
+            expect(mockRepo.createCollection).toHaveBeenCalledWith(
+                expect.objectContaining({ service_id: '2' }),
+            );
+            expect(mockRepo.createStatusCollection).toHaveBeenCalledTimes(2);
+            expect(mockRepo.createStatusCollection).toHaveBeenCalledWith(
+                expect.objectContaining({ service_id: '1', tipo: 'timeout' }),
+            );
+            expect(mockRepo.createStatusCollection).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    service_id: '2',
+                    tipo: 'success',
+                    coleta_id: 'collection-2',
+                }),
+            );
+            expect(mockRepo.updateStatus).toHaveBeenCalledWith('1', 'unavailable');
+            expect(mockRepo.updateStatus).toHaveBeenCalledWith('2', 'available');
+        } finally {
+            consoleError.mockRestore();
+        }
+    });
 });
