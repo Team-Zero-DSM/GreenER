@@ -29,7 +29,7 @@ export function CarbonIntensityChart({ regions }: CarbonIntensityChartProps) {
 
     return (
         <div
-            className="mb-2 mt-4 space-y-4"
+            className="mb-2 mt-4 space-y-4 lg:space-y-6"
             role="list"
             aria-label="Intensidade de carbono por região"
         >
@@ -41,10 +41,10 @@ export function CarbonIntensityChart({ regions }: CarbonIntensityChartProps) {
                     <div
                         key={region.code}
                         role="listitem"
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[minmax(5rem,6rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-y-0"
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[minmax(5rem,6rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-y-0 lg:gap-x-2"
                     >
                         <span
-                            className="col-start-1 row-start-1 min-w-0 truncate text-sm font-medium text-foreground sm:font-normal sm:text-muted-foreground"
+                            className="col-start-1 row-start-1 min-w-0 truncate text-md font-medium text-foreground sm:font-normal sm:text-muted-foreground"
                             title={regionName(region)}
                         >
                             {regionName(region)}
