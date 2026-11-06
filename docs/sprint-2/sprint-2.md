@@ -37,14 +37,42 @@ visualizações regionais.
 
 ## Sprint Backlog
 
+## 📋 Sprint Backlog — Sprint 2
+
+| ID | Tarefa | Responsável | Status | Pontos |
+|---|---|---|:---:|---:|
+| **T01** | Implementar componentes e interações da comparação (#83) | henrique | ❌ | 8 |
+| **T02** | Implementação da listagem de serviços e integração com o globo na landing page (#80) | gabriel | ❌ | 8 |
+| **T03** | Criar componente de visualização das métricas (#32) | gabriel | ❌ | 3 |
+| **T04** | Criar componente para exibição das regiões (#97) | vitor | ❌ | 3 |
+| **T05** | Criar componente para exibição de carbono por região (#98) | gabriel | ❌ | 3 |
+| **T06** | Criar componente para exibição do mapa 2D com as regiões (#99) | gabriel | ❌ | 8 |
+| **T07** | Criar estrutura da tela de ranking (#102) | paulo | ❌ | 3 |
+| **T08** | Implementar filtros de critério e período do ranking (#103) | paulo | ❌ | 3 |
+| **T09** | Integrar a tela de ranking ao backend (#104) | paulo | ❌ | 5 |
+| **T10** | Implementar gráfico de barras do ranking (#105) | paulo | ❌ | 5 |
+| **T11** | Implementar tabela de classificação do ranking (#106) | paulo | ❌ | 3 |
+| **T12** | Atualizar diagrama de casos de uso (#77) | henrique | ✅ | 2 |
+| **T13** | Elaborar diagramas de sequência (#78) | henrique | ✅ | 5 |
+| **T14** | Criar estrutura da tela de comparação (#82) | henrique | ✅ | 2 |
+| **T15** | Criar tabela de histórico de status das coletas (#89) | pedro | ✅ | 3 |
+| **T16** | Implementar registro do histórico de status das coletas (#90) | pedro | ✅ | 3 |
+| **T17** | Criar componente de visualização das métricas (#63) | gabriel | ✅ | 3 |
+| **T18** | Implementação das funcionalidades do globo (#79) | gabriel | ❌ | 0 |
+| **T19** | Atualização da Header do projeto (#81) | gabriel | ❌ | 0 |
+| **T20** | Integrar a tela de comparação ao backend (#84) | henrique | ❌ | 0 |
+| **T21** | Implementar a visualização dos resultados comparativos (#85) | henrique | ❌ | 0 |
+| **T22** | Implementar cálculos e resumo comparativo (#86) | henrique | ❌ | 0 |
+| **T23** | Criar endpoint para consultar o histórico de status das coletas (#91) | pedro | ❌ | 0 |
+| **T24** | Criar endpoints para a tela de ranking (#92) | pedro | ❌ | 0 |
+| **T25** | Criar endpoints para a tela de comparação entre serviços (#93) | pedro | ❌ | 0 |
+| **T26** | Validar endpoint de serviços por região (#94) | Vitor | ❌ | 0 |
+| **T27** | Realizar testes das funcionalidades do backend (#95) | pedro | ❌ | 0 |
+| **T28** | Atualizar documentação do backend e do banco de dados (#96) | pedro | ❌ | 0 |
+
 As seis histórias e as 28 tarefas estão reunidas no [backlog por issue](./evidencias-dod.md#sprint-backlog),
 com responsáveis, estimativas registradas e a situação observada em 25/10.
 Os PRs integrados depois dessa conferência constam nas [evidências de integração](./evidencias-dod.md#evidências-e-limites-de-conclusão).
-
-As antigas T03 e T17 tinham o mesmo título e se referiam à atividade de
-visualização de métricas. O backlog passa a usar uma entrada para a #32, com
-os 3 pontos de saldo registrados na Sprint 1. O relato de 22/10 e a entrega
-regional da #80 ficam vinculados à evidência da atividade.
 
 ---
 
