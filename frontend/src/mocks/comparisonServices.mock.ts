@@ -1,0 +1,55 @@
+import type { ServiceSummary } from '@/types/service';
+
+export const mockComparisonServices: ServiceSummary[] = [
+    {
+        id: 'checkout-worker',
+        name: 'Checkout Worker',
+        active: true,
+        status: 'available',
+        lastSeenAt: '2026-10-24T12:00:00.000Z',
+        location: {
+            regionCode: 'br-sudeste',
+            country: 'Brasil',
+            region: 'Sudeste',
+            city: 'São Paulo',
+            latitude: null,
+            longitude: null,
+        },
+        metrics: null,
+        environmental: null,
+    },
+    {
+        id: 'auth-api',
+        name: 'Auth API',
+        active: true,
+        status: 'available',
+        lastSeenAt: '2026-10-24T12:00:00.000Z',
+        location: {
+            regionCode: 'br-sudeste',
+            country: 'Brasil',
+            region: 'Sudeste',
+            city: 'São Paulo',
+            latitude: null,
+            longitude: null,
+        },
+        metrics: null,
+        environmental: null,
+    },
+    {
+        id: 'notification-worker',
+        name: 'Notification Worker',
+        active: true,
+        status: 'unavailable',
+        lastSeenAt: '2026-10-24T11:00:00.000Z',
+        location: {
+            regionCode: 'br-sudeste',
+            country: 'Brasil',
+            region: 'Sudeste',
+            city: 'São Paulo',
+            latitude: null,
+            longitude: null,
+        },
+        metrics: null,
+        environmental: null,
+    },
+];

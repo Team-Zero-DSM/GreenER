@@ -4,7 +4,11 @@ import { validate } from '../../shared/middleware/validate.js';
 import { ServiceRepository } from './services.repository.js';
 import { ServicesService } from './services.service.js';
 import { ServicesController } from './services.controller.js';
-import { getServiceParamsSchema, listServicesQuerySchema } from './services.schema.js';
+import {
+    getServiceParamsSchema,
+    listServicesQuerySchema,
+    collectionStatusHistoryParamsSchema,
+} from './services.schema.js';
 
 const repository = new ServiceRepository(pool);
 const service = new ServicesService(repository);
@@ -17,4 +21,10 @@ servicesRouter.get(
     '/:externalId',
     validate(getServiceParamsSchema, 'params'),
     controller.getByExternalId,
+);
+
+servicesRouter.get(
+    '/:externalId/collection-status',
+    validate(collectionStatusHistoryParamsSchema, 'params'),
+    controller.getStatusHistory,
 );

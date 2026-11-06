@@ -69,3 +69,11 @@ export type Emissions = {
     energyKwh: number;
     co2eG: number;
 };
+
+export interface Status_coleta {
+    service_id: string;
+    coleta_id?: string | null;
+    descricao: string;
+    http_status: number | null;
+    tipo: string;
+}
