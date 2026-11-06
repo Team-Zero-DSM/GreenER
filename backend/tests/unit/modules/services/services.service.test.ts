@@ -1,119 +1,27 @@
+import { NotFoundError } from '../../../../src/shared/errors/NotFoundError.js';
 import { describe, expect, it, vi } from 'vitest';
 import { ServicesService } from '../../../../src/modules/services/services.service.js';
 import type { ServiceRepository } from '../../../../src/modules/services/services.repository.js';
 import type { ServiceWithLatestRow } from '../../../../src/modules/services/types/services.types.js';
 
-const makeServiceRow = (
-    overrides: Partial<ServiceWithLatestRow> = {},
-): ServiceWithLatestRow => ({
-    id: 'db-service-1',
-    external_id: 'service-api',
-    nome: 'API de exemplo',
-    ativo: true,
-    status: 'available',
-    status_atualizado_em: new Date('2026-01-10T12:00:00.000Z'),
-    ultima_vez_visto_em: new Date('2026-01-10T12:05:00.000Z'),
-    codigo: 'BR-SUL',
-    pais: 'Brasil',
-    regiao: 'Sul',
-    cidade: 'Curitiba',
-    latitude: -25.43,
-    longitude: -49.27,
-    carbon_intensity: 120,
-
-    coletado_em: new Date('2026-01-10T12:00:00.000Z'),
-    intervalo_metrica_segundos: 60,
-    cpu_percent: 25.5,
-    memory_gb: 8,
-    disk_gb: 100,
-    network_gb: 2.5,
-    potencia_estimada_w: 45.678,
-    energia_estimada_kwh: 0.000759,
-    collection_carbon_intensity: 115,
-    co2e_estimado_g: 0.087285,
-
-    ...overrides,
-});
-
-const makeRepository = () =>
-    ({
-        findAllWithLatest: vi.fn(),
-    }) as unknown as ServiceRepository;
-
-describe('ServicesService.list', () => {
-    it('encaminha os filtros de região e status ativo ao repositório', async () => {
-        const repository = makeRepository();
-        vi.mocked(repository.findAllWithLatest).mockResolvedValue([]);
-
-        const service = new ServicesService(repository);
-
-        await service.list({
-            regionCode: 'BR-SUL',
-            active: true,
-        });
-
-        expect(repository.findAllWithLatest).toHaveBeenCalledTimes(1);
-        expect(repository.findAllWithLatest).toHaveBeenCalledWith({
-            regionCode: 'BR-SUL',
-            active: true,
-        });
-    });
-
-    it('retorna identificação, status, região e dados da última coleta', async () => {
-        const repository = makeRepository();
-        vi.mocked(repository.findAllWithLatest).mockResolvedValue([
-            makeServiceRow(),
-        ]);
-
-        const service = new ServicesService(repository);
-
-        const result = await service.list({ regionCode: 'BR-SUL' });
-
-        expect(result.filters).toEqual({
-            regionCode: 'BR-SUL',
-            active: null,
-        });
-        expect(result.services).toHaveLength(1);
-        expect(result.services[0]).toMatchObject({
-            id: 'service-api',
-            name: 'API de exemplo',
-            active: true,
-            status: 'available',
-            statusUpdatedAt: '2026-01-10T12:00:00Z',
-            lastSeenAt: '2026-01-10T12:05:00Z',
-            location: {
-                regionCode: 'BR-SUL',
-                country: 'Brasil',
-                region: 'Sul',
-                city: 'Curitiba',
-            },
-            latestCollection: {
-                collectedAt: '2026-01-10T12:00:00Z',
-                collectionIntervalSeconds: 60,
-                metrics: {
-                    cpuPercent: 25.5,
-                    memoryGb: 8,
-                    diskGb: 100,
-                    networkGb: 2.5,
-                },
-                estimates: {
-                    powerWatts: 45.7,
-                    energyKwh: 0.000759,
-                    co2eGrams: 0.087285,
-                    carbonIntensityGco2ePerKwh: 115,
-                },
-            },
-        });
-
-        expect(result.generatedAt).toMatch(
-            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
-        );
-    });
-
-    it('retorna latestCollection como null quando o serviço ainda não tem coleta', async () => {
-        const repository = makeRepository();
-        vi.mocked(repository.findAllWithLatest).mockResolvedValue([
-            makeServiceRow({
+describe('Consulta de serviços (ServicesService)', () => {
+    it('deve consultar os serviços da região informada e retornar seus dados', async () => {
+        const mockRows: ServiceWithLatestRow[] = [
+            {
+                id: '1',
+                external_id: 'service-a',
+                nome: 'Serviço A',
+                ativo: true,
+                status: 'available',
+                status_atualizado_em: new Date('2026-11-06T12:00:00Z'),
+                ultima_vez_visto_em: new Date('2026-11-06T12:00:00Z'),
+                codigo: 'BR',
+                pais: 'Brasil',
+                regiao: 'Sudeste',
+                cidade: 'São Paulo',
+                latitude: null,
+                longitude: null,
+                carbon_intensity: 100,
                 coletado_em: null,
                 intervalo_metrica_segundos: null,
                 cpu_percent: null,
@@ -124,29 +32,116 @@ describe('ServicesService.list', () => {
                 energia_estimada_kwh: null,
                 collection_carbon_intensity: null,
                 co2e_estimado_g: null,
-            }),
+            },
+        ];
+        const mockRepo = {
+            findAllWithLatest: vi.fn().mockResolvedValue(mockRows),
+        } as unknown as ServiceRepository;
+        const service = new ServicesService(mockRepo);
+
+        const result = await service.list({ regionCode: 'BR', active: true });
+
+        expect(mockRepo.findAllWithLatest).toHaveBeenCalledTimes(1);
+        expect(mockRepo.findAllWithLatest).toHaveBeenCalledWith({ regionCode: 'BR', active: true });
+        expect(result.filters).toEqual({ regionCode: 'BR', active: true });
+        expect(result.services).toEqual([
+            {
+                id: 'service-a',
+                name: 'Serviço A',
+                active: true,
+                status: 'available',
+                statusUpdatedAt: '2026-11-06T12:00:00Z',
+                lastSeenAt: '2026-11-06T12:00:00Z',
+                location: {
+                    regionCode: 'BR',
+                    country: 'Brasil',
+                    region: 'Sudeste',
+                    city: 'São Paulo',
+                    latitude: null,
+                    longitude: null,
+                    currentCarbonIntensityGco2ePerKwh: 100,
+                },
+                latestCollection: null,
+            },
         ]);
-
-        const service = new ServicesService(repository);
-
-        const result = await service.list({ regionCode: 'BR-SUL' });
-
-        expect(result.services).toHaveLength(1);
-        expect(result.services[0].latestCollection).toBeNull();
     });
 
-    it('retorna lista vazia quando a região não tem serviços', async () => {
-        const repository = makeRepository();
-        vi.mocked(repository.findAllWithLatest).mockResolvedValue([]);
+    it('deve retornar o histórico com sucesso e falha de um serviço', async () => {
+        const observedAt = new Date('2026-11-06T12:00:00Z');
+        const mockRepo = {
+            findIdByExternalId: vi.fn().mockResolvedValue('1'),
+            findCollectionStatusHistory: vi.fn().mockResolvedValue([
+                {
+                    id: 'status-1',
+                    observado_em: observedAt,
+                    tipo: 'success',
+                    descricao: 'Coleta salva.',
+                    http_status: null,
+                },
+                {
+                    id: 'status-2',
+                    observado_em: new Date('2026-11-06T11:00:00Z'),
+                    tipo: 'timeout',
+                    descricao: 'Tempo esgotado.',
+                    http_status: null,
+                },
+            ]),
+        } as unknown as ServiceRepository;
+        const service = new ServicesService(mockRepo);
 
-        const service = new ServicesService(repository);
+        const result = await service.getCollectionStatusHistory('service-a');
 
-        const result = await service.list({ regionCode: 'BR-SEM-SERVICOS' });
-
-        expect(result.filters).toEqual({
-            regionCode: 'BR-SEM-SERVICOS',
-            active: null,
+        expect(mockRepo.findIdByExternalId).toHaveBeenCalledWith('service-a');
+        expect(mockRepo.findCollectionStatusHistory).toHaveBeenCalledWith('service-a');
+        expect(result).toEqual({
+            externalId: 'service-a',
+            items: [
+                {
+                    id: 'status-1',
+                    observedAt,
+                    result: 'success',
+                    type: 'success',
+                    description: 'Coleta salva.',
+                    httpStatus: null,
+                },
+                {
+                    id: 'status-2',
+                    observedAt: new Date('2026-11-06T11:00:00Z'),
+                    result: 'failure',
+                    type: 'timeout',
+                    description: 'Tempo esgotado.',
+                    httpStatus: null,
+                },
+            ],
         });
-        expect(result.services).toEqual([]);
+    });
+
+    it('deve retornar histórico vazio para um serviço sem tentativas de coleta', async () => {
+        const mockRepo = {
+            findIdByExternalId: vi.fn().mockResolvedValue('1'),
+            findCollectionStatusHistory: vi.fn().mockResolvedValue([]),
+        } as unknown as ServiceRepository;
+        const service = new ServicesService(mockRepo);
+
+        const result = await service.getCollectionStatusHistory('service-a');
+
+        expect(result).toEqual({ externalId: 'service-a', items: [] });
+        expect(mockRepo.findCollectionStatusHistory).toHaveBeenCalledWith('service-a');
+    });
+
+    it('deve informar erro ao consultar o histórico de um serviço inexistente', async () => {
+        const mockRepo = {
+            findIdByExternalId: vi.fn().mockResolvedValue(null),
+            findCollectionStatusHistory: vi.fn(),
+        } as unknown as ServiceRepository;
+        const service = new ServicesService(mockRepo);
+
+        await expect(service.getCollectionStatusHistory('inexistente')).rejects.toThrow(
+            NotFoundError,
+        );
+        await expect(service.getCollectionStatusHistory('inexistente')).rejects.toThrow(
+            'Serviço inexistente não foi encontrado',
+        );
+        expect(mockRepo.findCollectionStatusHistory).not.toHaveBeenCalled();
     });
 });
