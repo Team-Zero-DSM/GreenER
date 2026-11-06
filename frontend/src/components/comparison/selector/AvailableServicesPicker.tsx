@@ -53,7 +53,7 @@ export function AvailableServicesPicker({ servicos, onAdicionar }: AvailableServ
 
                 {servicos.length === 0 && (
                     <p className="px-3 py-4 text-sm text-muted-foreground">
-                        Nenhum serviço disponível.
+                        Nenhum serviço com métricas disponíveis.
                     </p>
                 )}
             </div>
