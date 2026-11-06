@@ -38,6 +38,33 @@ export async function getJson<T>(path: string): Promise<T> {
     return response.json() as Promise<T>;
 }
 
+export async function postJson<TRequest, TResponse>(
+    path: string,
+    body: TRequest,
+): Promise<TResponse> {
+    const response = await fetch(`${API_URL}/api/v1${path}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as {
+            error?: { message?: string };
+        } | null;
+
+        throw new ApiError(
+            body?.error?.message ??
+                `Falha na comunicação com a API (HTTP ${response.status})`,
+            response.status,
+        );
+    }
+
+    return response.json() as Promise<TResponse>;
+}
+
 // Estados que o frontend não conhece viram "unknown" para o selo não quebrar.
 function toStatus(status: string): ServiceStatus {
     return status in statusInfo ? (status as ServiceStatus) : 'unknown';
@@ -106,3 +133,5 @@ export async function fetchServiceHistory(
         `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=120`,
     );
 }
+
+
