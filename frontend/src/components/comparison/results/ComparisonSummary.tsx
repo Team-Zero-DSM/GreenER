@@ -1,14 +1,34 @@
-import { ArrowUpDown, Info, Leaf, Percent, Server, Star, UsersRound } from 'lucide-react';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+
+import {
+    Info,
+    Leaf,
+    Percent,
+    Server,
+    Star,
+    UsersRound,
+} from 'lucide-react';
 
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 import type { ComparisonServiceSelection } from '@/components/comparison/selector/ComparisonServiceSelector';
-import type { ComparisonResponse } from '@/types/comparison';
+
+import type { PreparedComparisonResponse, PreparedComparisonSeries } from '@/utils/comparison';
+
+import { ComparisonDifferenceChart } from './ComparisonDifferenceChart';
 
 interface ComparisonSummaryProps {
     servicosSelecionados: ComparisonServiceSelection[];
-    respostaComparacao: ComparisonResponse | null;
+    respostaComparacao: PreparedComparisonResponse | null;
     metrica: ComparisonMetric;
     servicoPrincipalId: string | null;
+}
+
+type ClassificacaoComparacao = 'acima' | 'abaixo' | 'igual' | 'indisponivel';
+
+interface PosicaoTooltip {
+    x: number;
+    y: number;
 }
 
 function formatarValor(valor: number | null, metrica: ComparisonMetric): string {
@@ -19,6 +39,123 @@ function formatarValor(valor: number | null, metrica: ComparisonMetric): string 
     return valor.toLocaleString('pt-BR', {
         maximumFractionDigits: metrica === 'energyKwh' ? 4 : 2,
     });
+}
+
+// Obtém a quantidade de coletas reais, estimadas e sem métricas.
+function obterEstatisticas(serie: PreparedComparisonSeries | undefined, metrica: ComparisonMetric) {
+    if (!serie) {
+        return {
+            reais: 0,
+            estimadas: 0,
+            semMetricas: 0,
+        };
+    }
+
+    const cobertura = serie.metricCoverage[metrica];
+
+    const reais = cobertura.collectedSampleCount;
+    const estimadas = cobertura.estimatedSampleCount;
+
+    const semMetricas =
+        cobertura.expectedSampleCount !== null
+            ? Math.max(0, cobertura.expectedSampleCount - reais - estimadas)
+            : 0;
+
+    return {
+        reais,
+        estimadas,
+        semMetricas,
+    };
+}
+
+// Tooltip renderizado fora da tabela para não sofrer cortes de overflow.
+function TooltipColetas({
+    nomeServico,
+    serie,
+    metrica,
+}: {
+    nomeServico: string;
+    serie: PreparedComparisonSeries | undefined;
+    metrica: ComparisonMetric;
+}) {
+    const [posicao, setPosicao] = useState<PosicaoTooltip | null>(null);
+
+    const estatisticas = obterEstatisticas(serie, metrica);
+
+    function atualizarPosicao(x: number, y: number) {
+        const larguraTooltip = 240;
+        const alturaTooltip = 155;
+
+        setPosicao({
+            x: Math.max(8, Math.min(x + 12, window.innerWidth - larguraTooltip - 8)),
+            y: Math.max(8, Math.min(y + 12, window.innerHeight - alturaTooltip - 8)),
+        });
+    }
+
+    return (
+        <>
+            <span
+                className="truncate font-medium"
+                tabIndex={0}
+                aria-label={`${nomeServico}. Consulte o detalhamento das coletas.`}
+                onMouseEnter={(evento) => atualizarPosicao(evento.clientX, evento.clientY)}
+                onMouseMove={(evento) => atualizarPosicao(evento.clientX, evento.clientY)}
+                onMouseLeave={() => setPosicao(null)}
+                onFocus={(evento) => {
+                    const rect = evento.currentTarget.getBoundingClientRect();
+
+                    atualizarPosicao(rect.left + rect.width / 2, rect.top);
+                }}
+                onBlur={() => setPosicao(null)}
+            >
+                {nomeServico}
+            </span>
+
+            {posicao &&
+                createPortal(
+                    <div
+                        role="tooltip"
+                        className="pointer-events-none fixed z-[9999] w-60 rounded-lg border border-slate-700 bg-slate-900 p-3 text-xs text-slate-300 shadow-2xl"
+                        style={{
+                            left: posicao.x,
+                            top: posicao.y,
+                        }}
+                    >
+                        <strong className="mb-3 block text-slate-100">
+                            Detalhamento das coletas
+                        </strong>
+
+                        <div className="flex items-center justify-between gap-3 py-1">
+                            <span className="flex items-center gap-2">
+                                <span className="size-2 rounded-full bg-teal-400" />
+                                Reais
+                            </span>
+
+                            <strong className="text-slate-100">{estatisticas.reais}</strong>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3 py-1">
+                            <span className="flex items-center gap-2">
+                                <span className="size-2 rounded-full bg-amber-400" />
+                                Estimadas
+                            </span>
+
+                            <strong className="text-slate-100">{estatisticas.estimadas}</strong>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3 py-1">
+                            <span className="flex items-center gap-2">
+                                <span className="size-2 rounded-full bg-slate-500" />
+                                Sem métricas
+                            </span>
+
+                            <strong className="text-slate-100">{estatisticas.semMetricas}</strong>
+                        </div>
+                    </div>,
+                    document.body,
+                )}
+        </>
+    );
 }
 
 export function ComparisonSummary({
@@ -33,42 +170,103 @@ export function ComparisonSummary({
 
     const tituloValor = metrica === 'co2eGrams' ? 'Emissões (gCO₂e)' : 'Energia (kWh)';
 
-    // Identifica o serviço principal.
+    const series = respostaComparacao?.series ?? [];
+
     const servicoPrincipal = servicosSelecionados.find(
         (item) => item.selectionId === servicoPrincipalId,
     );
 
-    // Localiza a série do serviço principal.
-    const seriePrincipal = respostaComparacao?.series.find(
-        (serie) => serie.selectionId === servicoPrincipalId,
-    );
+    const seriePrincipal = series.find((serie) => serie.selectionId === servicoPrincipalId);
 
-    const valorPrincipal = seriePrincipal ? seriePrincipal.summary[metrica] : null;
+    const valorPrincipalBruto = seriePrincipal?.summary[metrica];
 
-    // Obtém os totais dos demais serviços.
+    const valorPrincipal =
+        typeof valorPrincipalBruto === 'number' && Number.isFinite(valorPrincipalBruto)
+            ? valorPrincipalBruto
+            : null;
+
+    // Obtém somente os valores disponíveis dos demais serviços.
     const valoresDemais = servicosSelecionados.flatMap((servico) => {
         if (servico.selectionId === servicoPrincipalId) {
             return [];
         }
 
-        const serie = respostaComparacao?.series.find(
-            (item) => item.selectionId === servico.selectionId,
-        );
+        const serie = series.find((item) => item.selectionId === servico.selectionId);
 
         const valor = serie?.summary[metrica];
 
         return typeof valor === 'number' && Number.isFinite(valor) ? [valor] : [];
     });
 
-    // Calcula a média dos demais serviços.
+    // Média aritmética dos serviços com valores disponíveis.
     const mediaDemais =
         valoresDemais.length > 0
             ? valoresDemais.reduce((total, valor) => total + valor, 0) / valoresDemais.length
             : null;
 
+    const diferencaAbsoluta =
+        valorPrincipal !== null && mediaDemais !== null ? valorPrincipal - mediaDemais : null;
+
+    const classificacao: ClassificacaoComparacao =
+        diferencaAbsoluta === null
+            ? 'indisponivel'
+            : diferencaAbsoluta > 0
+              ? 'acima'
+              : diferencaAbsoluta < 0
+                ? 'abaixo'
+                : 'igual';
+
+    const diferencaPercentual =
+        diferencaAbsoluta === null || mediaDemais === null
+            ? null
+            : mediaDemais === 0
+              ? diferencaAbsoluta === 0
+                  ? 0
+                  : null
+              : (diferencaAbsoluta / mediaDemais) * 100;
+
+    
+const descricaoDiferenca =
+    diferencaAbsoluta === null
+        ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
+        : classificacao === 'igual'
+          ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
+          : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+                metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+            } ${formatarValor(
+                Math.abs(diferencaAbsoluta),
+                metrica,
+            )} ${unidade} ${
+                classificacao === 'acima' ? 'a mais' : 'a menos'
+            } que a média dos demais.${
+                diferencaPercentual === null
+                    ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+                    : ''
+            }`;
+
+
+const descricaoAntes =
+    `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+        metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+    } `;
+
+const valorDestaque =
+    diferencaAbsoluta !== null && classificacao !== 'igual'
+        ? `${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade}`
+        : null;
+
+const descricaoDepois =
+    ` ${
+        classificacao === 'acima' ? 'a mais' : 'a menos'
+    } que a média dos demais.${
+        diferencaPercentual === null
+            ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+            : ''
+    }`;
+
     return (
         <section className="space-y-4">
-            {/* Cabeçalho. */}
+            {/* Cabeçalho */}
             <div className="flex items-center gap-3">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-teal-400/10">
                     <Leaf className="size-5 text-teal-300" aria-hidden="true" />
@@ -86,7 +284,6 @@ export function ComparisonSummary({
                 </div>
             </div>
 
-            {/* Orientação antes da primeira comparação. */}
             {!respostaComparacao ? (
                 <div className="flex min-h-16 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3">
                     <p className="text-center text-sm text-slate-400">
@@ -107,198 +304,204 @@ export function ComparisonSummary({
                             role="tooltip"
                             className="invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-slate-700 bg-slate-900 p-3 text-left text-xs leading-relaxed text-slate-300 opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
                         >
-                            <span className="mb-2 block font-semibold text-slate-100">
+                            <strong className="mb-2 block text-slate-100">
                                 Como fazer uma comparação
-                            </span>
+                            </strong>
 
                             <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
 
-                            <span className="mb-2 block">
-                                2. Defina o serviço de referência, que será a base da comparação.
-                            </span>
+                            <span className="mb-2 block">2. Defina o serviço de referência.</span>
 
-                            <span className="mb-2 block">
-                                3. Escolha o período para definir o intervalo das coletas
-                                analisadas.
-                            </span>
+                            <span className="mb-2 block">3. Escolha o período analisado.</span>
 
                             <span className="block">
-                                4. Escolha uma região para simular as emissões usando o fator de
-                                carbono dela.
+                                4. Escolha uma região para simular as emissões.
                             </span>
                         </span>
                     </span>
                 </div>
             ) : (
-                <>
-                    {/* Quatro áreas com larguras iguais. */}
-                    <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        {/* Serviço principal. */}
-                        <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-teal-400/50 bg-teal-400/[0.02] p-4">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
-                                    <Star
-                                        className="size-4 fill-teal-400 text-teal-400"
-                                        aria-hidden="true"
-                                    />
-
-                                    <span>Serviço de referência</span>
-                                </div>
-
-                                <div className="flex min-w-0 items-center gap-3">
-                                    <div
-                                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
-                                        style={{
-                                            backgroundColor: servicoPrincipal?.color ?? '#2563EB',
-                                        }}
-                                    >
-                                        <Server className="size-5" aria-hidden="true" />
-                                    </div>
-
-                                    <p className="truncate text-sm font-semibold text-slate-100">
-                                        {servicoPrincipal?.name ?? 'Serviço'}
-                                    </p>
-                                </div>
+                <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    {/* Serviço de referência */}
+                    <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-teal-400/50 bg-teal-400/[0.02] p-4">
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
+                                <Star
+                                    className="size-4 fill-teal-400 text-teal-400"
+                                    aria-hidden="true"
+                                />
+                                Serviço de referência
                             </div>
 
-                            <div className="space-y-1">
-                                <p className="text-3xl font-semibold text-slate-100 tabular-nums sm:text-4xl">
-                                    {formatarValor(valorPrincipal, metrica)}
+                            <div className="flex min-w-0 items-center gap-3">
+                                <div
+                                    className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
+                                    style={{
+                                        backgroundColor: servicoPrincipal?.color ?? '#2563EB',
+                                    }}
+                                >
+                                    <Server className="size-5" />
+                                </div>
 
-                                    {seriePrincipal && (
-                                        <span className="ml-2 text-base font-medium text-slate-400">
-                                            {unidade}
-                                        </span>
-                                    )}
+                                <p className="truncate text-sm font-semibold text-slate-100">
+                                    {servicoPrincipal?.name ?? 'Serviço'}
                                 </p>
-
-                                <p className="text-xs text-slate-400">Total no período</p>
                             </div>
                         </div>
 
-                        {/* Média dos demais serviços. */}
-                        <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                            <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
-                                <UsersRound
-                                    className="size-5 shrink-0 text-slate-300"
-                                    aria-hidden="true"
-                                />
+                        <div className="space-y-1">
+                            <p className="text-3xl font-semibold text-slate-100 tabular-nums sm:text-4xl">
+                                {formatarValor(valorPrincipal, metrica)}
 
-                                <span>Média dos demais serviços</span>
-                            </div>
-
-                            <div className="space-y-2">
-                                <p className="text-3xl font-semibold text-slate-100 tabular-nums sm:text-4xl">
-                                    {formatarValor(mediaDemais, metrica)}
-
+                                {valorPrincipal !== null && (
                                     <span className="ml-2 text-base font-medium text-slate-400">
                                         {unidade}
                                     </span>
-                                </p>
+                                )}
+                            </p>
 
-                                <p className="text-xs text-slate-400">
-                                    {mediaDemais !== null
-                                        ? `Média de ${valoresDemais.length} ${
-                                              valoresDemais.length === 1 ? 'serviço' : 'serviços'
-                                          } selecionados.`
-                                        : 'Não há outros serviços com valores disponíveis.'}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Diferença percentual: próxima task. */}
-                        <div className="flex min-h-[190px] min-w-0 flex-col justify-center gap-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                            <div className="flex items-center gap-3">
-                                <Percent
-                                    className="size-7 shrink-0 text-slate-300"
-                                    aria-hidden="true"
-                                />
-
-                                <ArrowUpDown className="size-5 text-slate-500" aria-hidden="true" />
-
-                                <p className="text-3xl font-semibold text-slate-500 tabular-nums">
-                                    —
-                                </p>
-                            </div>
-
-                            <p className="text-sm leading-relaxed text-slate-400">
-                                A diferença percentual entre o serviço de referência e a média dos
-                                demais será apresentada aqui.
+                            <p className="text-xs text-slate-400">
+                                {valorPrincipal !== null ? 'Total no período' : 'Sem métricas'}
                             </p>
                         </div>
+                    </div>
 
-                        {/* Valores individuais. */}
-                        <div className="min-w-0 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                            <div className="mb-4">
-                                <h4 className="text-sm font-semibold text-slate-100">
-                                    Valores individuais
-                                </h4>
-                            </div>
+                    {/* Média dos demais serviços */}
+                    <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                        <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
+                            <UsersRound className="size-5 shrink-0 text-slate-300" />
+                            Média dos demais serviços
+                        </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full min-w-[210px] text-left text-xs">
-                                    <thead>
-                                        <tr className="border-b border-slate-800 text-slate-400">
-                                            <th className="pb-3 pr-2 font-medium">Serviço</th>
+                        <div className="space-y-2">
+                            <p className="text-3xl font-semibold text-slate-100 tabular-nums sm:text-4xl">
+                                {formatarValor(mediaDemais, metrica)}
 
-                                            <th className="pb-3 text-right font-medium whitespace-nowrap">
-                                                {tituloValor}
-                                            </th>
-                                        </tr>
-                                    </thead>
+                                {mediaDemais !== null && (
+                                    <span className="ml-2 text-base font-medium text-slate-400">
+                                        {unidade}
+                                    </span>
+                                )}
+                            </p>
 
-                                    <tbody>
-                                        {servicosSelecionados.map((servico) => {
-                                            const serie = respostaComparacao.series.find(
-                                                (item) => item.selectionId === servico.selectionId,
-                                            );
-
-                                            const valor = serie ? serie.summary[metrica] : null;
-
-                                            return (
-                                                <tr
-                                                    key={servico.selectionId}
-                                                    className="border-b border-slate-800/70 last:border-0"
-                                                >
-                                                    <td className="py-3 pr-2 text-slate-200">
-                                                        <div className="flex min-w-0 items-center gap-2">
-                                                            <span
-                                                                className="size-2.5 shrink-0 rounded-full"
-                                                                style={{
-                                                                    backgroundColor: servico.color,
-                                                                }}
-                                                                aria-hidden="true"
-                                                            />
-
-                                                            <span className="truncate font-medium">
-                                                                {servico.name}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-
-                                                    <td className="py-3 text-right font-medium text-slate-200 tabular-nums whitespace-nowrap">
-                                                        {formatarValor(valor, metrica)}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-
-                                        {servicosSelecionados.length === 0 && (
-                                            <tr>
-                                                <td
-                                                    colSpan={2}
-                                                    className="py-5 text-center text-slate-400"
-                                                >
-                                                    Nenhum serviço selecionado.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <p className="text-xs text-slate-400">
+                                {mediaDemais !== null
+                                    ? `Média de ${valoresDemais.length} ${
+                                          valoresDemais.length === 1 ? 'serviço' : 'serviços'
+                                      } com valores disponíveis.`
+                                    : 'Não há outros serviços com valores disponíveis.'}
+                            </p>
                         </div>
                     </div>
-                </>
+
+                    {/* Diferença percentual */}
+                    
+{/* Diferença percentual */}
+<div className="flex min-h-[190px] min-w-0 flex-col gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+
+    <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-slate-200">
+            Diferença percentual
+        </span>
+
+        <Percent className="size-6 text-slate-300" />
+    </div>
+
+    <ComparisonDifferenceChart
+    percentual={diferencaPercentual}
+    classificacao={classificacao}
+    descricao={descricaoDiferenca}
+    descricaoAntes={descricaoAntes}
+    valorDestaque={valorDestaque}
+    descricaoDepois={descricaoDepois}
+/>
+
+</div>
+           {/* Valores individuais */}
+                    <div className="min-w-0 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                        <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-slate-100">
+                                Valores individuais
+                            </h4>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[210px] text-left text-xs">
+                                <thead>
+                                    <tr className="border-b border-slate-800 text-slate-400">
+                                        <th className="pb-3 pr-2 font-medium">Serviço</th>
+
+                                        <th className="pb-3 text-right font-medium whitespace-nowrap">
+                                            {tituloValor}
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {servicosSelecionados.map((servico) => {
+                                        const serie = series.find(
+                                            (item) => item.selectionId === servico.selectionId,
+                                        );
+
+                                        const valorBruto = serie?.summary[metrica];
+
+                                        const valor =
+                                            typeof valorBruto === 'number' &&
+                                            Number.isFinite(valorBruto)
+                                                ? valorBruto
+                                                : null;
+
+                                        return (
+                                            <tr
+                                                key={servico.selectionId}
+                                                className="border-b border-slate-800/70 last:border-0"
+                                            >
+                                                <td className="py-3 pr-2 text-slate-200">
+                                                    <div className="flex min-w-0 items-center gap-2">
+                                                        <span
+                                                            className="size-2.5 shrink-0 rounded-full"
+                                                            style={{
+                                                                backgroundColor: servico.color,
+                                                            }}
+                                                            aria-hidden="true"
+                                                        />
+
+                                                        <TooltipColetas
+                                                            nomeServico={servico.name}
+                                                            serie={serie}
+                                                            metrica={metrica}
+                                                        />
+                                                    </div>
+                                                </td>
+
+                                                <td className="py-3 text-right font-medium text-slate-200 tabular-nums whitespace-nowrap">
+                                                    {valor !== null ? (
+                                                        formatarValor(valor, metrica)
+                                                    ) : (
+                                                        <span className="text-slate-500">
+                                                            Sem métricas
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+
+                                    {servicosSelecionados.length === 0 && (
+                                        <tr>
+                                            <td
+                                                colSpan={2}
+                                                className="py-5 text-center text-slate-400"
+                                            >
+                                                Nenhum serviço selecionado.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             )}
         </section>
     );

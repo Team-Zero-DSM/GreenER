@@ -8,16 +8,16 @@ import { RegionPage } from './pages/RegionPage';
 import { RankingPage } from '@/pages/RankingPage';
 
 export default function App() {
-  return (
-    <Routes>
-      <Route element={<DashboardLayout />}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/servicos/:id" element={<ServiceDetailPage />} />
-        <Route path="/comparacao" element={<ComparisonPage />} />
-        <Route path="/regioes" element={<RegionPage />} />
-        <Route path="/ranking" element={<RankingPage />} />
-      </Route>
-    </Routes>
-  );
+    return (
+        <Routes>
+            <Route element={<DashboardLayout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/servicos/:id" element={<ServiceDetailPage />} />
+                <Route path="/comparacao" element={<ComparisonPage />} />
+                <Route path="/regioes" element={<RegionPage />} />
+                <Route path="/ranking" element={<RankingPage />} />
+            </Route>
+        </Routes>
+    );
 }

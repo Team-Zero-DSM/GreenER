@@ -12,14 +12,14 @@ import {
 } from 'recharts';
 
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
-import type { ComparisonPoint } from '@/types/comparison';
+import type { PreparedComparisonPoint } from '@/utils/comparison';
 import type { HistoryRange } from '@/types/service';
 
 interface ComparisonChartSeries {
     selectionId: string;
     name: string;
     color: string;
-    points: ComparisonPoint[];
+    points: PreparedComparisonPoint[];
 }
 
 interface ComparisonChartProps {
@@ -33,7 +33,7 @@ interface ComparisonChartProps {
 interface PontoGrafico {
     timestamp: string;
     timestampMs: number;
-    [selectionId: string]: string | number | null;
+    [selectionId: string]: string | number | null | boolean | undefined;
 }
 
 function formatarHorario(timestamp: string, periodo: HistoryRange): string {
@@ -97,6 +97,11 @@ export function ComparisonChart({
 
     const dadosPorHorario = new Map<string, PontoGrafico>();
 
+    // Verifica se existem valores estimados na métrica selecionada.
+    const possuiEstimativas = series.some((servico) =>
+        servico.points.some((ponto) => ponto.estimatedMetrics?.includes(metrica)),
+    );
+
     // Agrupa os valores dos serviços pelo mesmo horário.
     for (const servico of series) {
         for (const ponto of servico.points) {
@@ -105,7 +110,20 @@ export function ComparisonChart({
                 timestampMs: new Date(ponto.timestamp).getTime(),
             };
 
-            linha[servico.selectionId] = ponto[metrica];
+            const valor = ponto[metrica];
+
+            // Valor utilizado pela linha original do serviço.
+            linha[servico.selectionId] = valor;
+
+            // Valor utilizado exclusivamente pela linha estimada.
+            const chaveEstimativa = `${servico.selectionId}__estimado`;
+
+            linha[chaveEstimativa] =
+                ponto.estimatedMetrics?.includes(metrica) &&
+                typeof valor === 'number' &&
+                Number.isFinite(valor)
+                    ? valor
+                    : null;
 
             dadosPorHorario.set(ponto.timestamp, linha);
         }
@@ -178,10 +196,23 @@ export function ComparisonChart({
                             <span>{servico.name}</span>
                         </div>
                     ))}
+
+                    {/* Identificação dos pontos estimados. */}
+                    {possuiEstimativas && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span
+                                className="size-2.5 shrink-0 rounded-full"
+                                style={{ backgroundColor: '#FBBF24' }}
+                                aria-hidden="true"
+                            />
+
+                            <span>Valor estimado</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Gráfico com áreas transparentes e linhas sobrepostas. */}
+            {/* Gráfico comparativo. */}
             <div className="h-[300px] w-full">
                 <ResponsiveContainer
                     width="100%"
@@ -242,10 +273,19 @@ export function ComparisonChart({
                             labelFormatter={(valor) =>
                                 formatarHorario(new Date(Number(valor)).toISOString(), periodo)
                             }
-                            formatter={(valor, nome) => [
-                                formatarValorMetrica(valor, metrica),
-                                String(nome),
-                            ]}
+                            formatter={(valor, nome, item) => {
+                                const ponto = item.payload as PontoGrafico | undefined;
+                                const chaveEstimativa = `${String(item.dataKey)}__estimado`;
+
+                                const estimado = typeof ponto?.[chaveEstimativa] === 'number';
+
+                                const valorFormatado = formatarValorMetrica(valor, metrica);
+
+                                return [
+                                    estimado ? `${valorFormatado} (Estimado)` : valorFormatado,
+                                    String(nome),
+                                ];
+                            }}
                             contentStyle={{
                                 borderRadius: '8px',
                                 border: '1px solid var(--border)',
@@ -254,7 +294,7 @@ export function ComparisonChart({
                             }}
                         />
 
-                        {/* As áreas são desenhadas primeiro, atrás das linhas. */}
+                        {/* Áreas transparentes dos serviços. */}
                         {series.map((servico) => (
                             <Area
                                 key={`area-${servico.selectionId}`}
@@ -268,13 +308,15 @@ export function ComparisonChart({
                                 dot={false}
                                 activeDot={false}
                                 connectNulls={false}
-                                isAnimationActive={false}
+                                isAnimationActive="auto"
+                                animationDuration={700}
+                                animationEasing="ease-out"
                                 legendType="none"
                                 tooltipType="none"
                             />
                         ))}
 
-                        {/* As linhas permanecem nítidas sobre o preenchimento. */}
+                        {/* Linhas originais dos serviços. */}
                         {series.map((servico) => (
                             <Line
                                 key={servico.selectionId}
@@ -286,9 +328,84 @@ export function ComparisonChart({
                                 dot={false}
                                 activeDot={{ r: 4 }}
                                 connectNulls={false}
-                                isAnimationActive={false}
+                                isAnimationActive="auto"
+                                animationDuration={700}
+                                animationEasing="ease-out"
                             />
                         ))}
+
+                        {/* Linhas amarelas que conectam somente os pontos estimados. */}
+                        {possuiEstimativas &&
+                            series.map((servico) => {
+                                const chaveEstimativa = `${servico.selectionId}__estimado`;
+
+                                return (
+                                    <Line
+                                        key={`estimativa-${servico.selectionId}`}
+                                        type="monotone"
+                                        dataKey={chaveEstimativa}
+                                        name={`${servico.name} (estimado)`}
+                                        stroke="#FBBF24"
+                                        strokeWidth={3}
+                                        dot={(props) => {
+                                            const { cx, cy, index } = props;
+
+                                            if (
+                                                typeof cx !== 'number' ||
+                                                typeof cy !== 'number' ||
+                                                typeof index !== 'number'
+                                            ) {
+                                                return <></>;
+                                            }
+
+                                            const valorAtual =
+                                                dadosGrafico[index]?.[chaveEstimativa];
+
+                                            if (typeof valorAtual !== 'number') {
+                                                return <></>;
+                                            }
+
+                                            const valorAnterior =
+                                                index > 0
+                                                    ? dadosGrafico[index - 1]?.[chaveEstimativa]
+                                                    : null;
+
+                                            const proximoValor =
+                                                index < dadosGrafico.length - 1
+                                                    ? dadosGrafico[index + 1]?.[chaveEstimativa]
+                                                    : null;
+
+                                            const inicioEstimativa =
+                                                typeof valorAnterior !== 'number';
+
+                                            const fimEstimativa = typeof proximoValor !== 'number';
+
+                                            // Mostra somente o início e o fim de cada região estimada.
+                                            if (!inicioEstimativa && !fimEstimativa) {
+                                                return <></>;
+                                            }
+
+                                            return (
+                                                <circle
+                                                    cx={cx}
+                                                    cy={cy}
+                                                    r={5}
+                                                    fill="#FBBF24"
+                                                    stroke="#92400E"
+                                                    strokeWidth={1.5}
+                                                />
+                                            );
+                                        }}
+                                        activeDot={false}
+                                        connectNulls={false}
+                                        isAnimationActive="auto"
+                                        animationDuration={700}
+                                        animationEasing="ease-out"
+                                        legendType="none"
+                                        tooltipType="none"
+                                    />
+                                );
+                            })}
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>

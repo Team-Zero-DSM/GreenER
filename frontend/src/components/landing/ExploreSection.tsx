@@ -1,14 +1,15 @@
 import { Link } from 'react-router';
-import type { RefObject, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import { DataSourceBadge } from '../shared/DataSourceBadge';
 import type { Region } from '@/types/api';
 import { useServices } from '@/hooks/useServices';
 import { formatCo2e, formatEnergy, formatIntensity } from '@/utils/format';
+import { statusMeta } from '@/utils/status';
+import { statusStyle } from '@/utils/statusStyle';
 
 type Service = ReturnType<typeof useServices>['services'][number];
 
 type ExploreSectionProps = {
-    exploreRef: RefObject<HTMLElement | null>;
     rotateLeft: () => void;
     rotateRight: () => void;
 
@@ -20,7 +21,6 @@ type ExploreSectionProps = {
     force2D: boolean;
     setForce2D: Dispatch<SetStateAction<boolean>>;
 
-    backToGlobal: () => void;
     backToRegions: () => void;
     zoom: (factor: number) => void;
 
@@ -33,14 +33,19 @@ function regionTitle(region: Region): string {
     return region.city ?? region.region ?? region.code;
 }
 
-function serviceStatus(status: Service['status']): string {
-    if (status === 'available') return 'Disponível';
-    if (status === 'unavailable') return 'Indisponível';
-    return 'Sem status';
+function Metric({ label, children }: { label: string; children: ReactNode }) {
+    return (
+        <div className="rounded-lg bg-black/20 p-3">
+            <p className="text-xs text-white/60">{label}</p>
+            <div className="mt-1 font-semibold">{children}</div>
+        </div>
+    );
 }
 
+const controlButton =
+    'min-h-11 rounded-md border border-gray-500 bg-slate-950/60 px-4 py-2 text-base text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15';
+
 export function ExploreSection({
-    exploreRef,
     rotateLeft,
     rotateRight,
     dataSource,
@@ -49,13 +54,11 @@ export function ExploreSection({
     setAutoRotate,
     force2D,
     setForce2D,
-    backToGlobal,
     backToRegions,
     zoom,
     regions,
     services,
     onSelectRegion,
-
 }: ExploreSectionProps) {
     const selectedRegion = regions.find((region) => region.code === selectedCode);
 
@@ -66,14 +69,9 @@ export function ExploreSection({
     const showingServices = selectedCode !== null;
 
     return (
-        <section
-            id="explorar"
-            ref={exploreRef}
-            className={`relative z-10 min-w-0`}
-            aria-labelledby="explore-title"
-        >
-            <div className="flex h-[calc(100vh-7rem)] min-h-[400px] flex-col gap-4">
-                <div className={`flex items-center gap-3`}>
+        <section className="relative z-10 min-w-0" aria-labelledby="explore-title">
+            <div className="flex h-[calc(100svh-var(--header-h,4rem)-1.5rem)] min-h-[400px] flex-col gap-4">
+                <div className="flex items-center gap-3">
                     <h2 id="explore-title" className="text-xl font-bold text-white md:text-2xl">
                         {showingServices
                             ? `Serviços de ${selectedRegion ? regionTitle(selectedRegion) : selectedCode}`
@@ -94,27 +92,27 @@ export function ExploreSection({
                 >
                     <button
                         type="button"
-                        onClick={backToGlobal}
-                        disabled={!selectedCode}
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        Visão global
-                    </button>
-
-                    <button
-                        type="button"
                         aria-pressed={autoRotate}
                         onClick={() => setAutoRotate((value) => !value)}
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className={`${controlButton} flex-1 whitespace-nowrap`}
                     >
                         Rotação automática
                     </button>
 
                     <button
                         type="button"
+                        aria-pressed={force2D}
+                        onClick={() => setForce2D((value) => !value)}
+                        className={`${controlButton} flex-1 whitespace-nowrap`}
+                    >
+                        Visualização 2D
+                    </button>
+
+                    <button
+                        type="button"
                         onClick={rotateLeft}
                         aria-label="Girar para a esquerda"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className={`${controlButton} shrink-0`}
                     >
                         ←
                     </button>
@@ -123,36 +121,27 @@ export function ExploreSection({
                         type="button"
                         onClick={rotateRight}
                         aria-label="Girar para a direita"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        className={`${controlButton} shrink-0`}
                     >
                         →
                     </button>
 
                     <button
                         type="button"
-                        onClick={() => zoom(1.15)}
-                        aria-label="Aproximar"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => zoom(1 / 1.15)}
+                        aria-label="Afastar"
+                        className={`${controlButton} shrink-0`}
                     >
                         +
                     </button>
 
                     <button
                         type="button"
-                        onClick={() => zoom(1 / 1.15)}
-                        aria-label="Afastar"
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => zoom(1.15)}
+                        aria-label="Aproximar"
+                        className={`${controlButton} shrink-0`}
                     >
-                        −
-                    </button>
-
-                    <button
-                        type="button"
-                        aria-pressed={force2D}
-                        onClick={() => setForce2D((value) => !value)}
-                        className="rounded-md border border-gray-500 bg-slate-950/60 px-3 py-1 text-sm text-white backdrop-blur transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        Modo 2D
+                        -
                     </button>
                 </div>
 
@@ -160,7 +149,7 @@ export function ExploreSection({
                     <button
                         type="button"
                         onClick={backToRegions}
-                        className="flex w-fit items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white transition-colors hover:bg-white/10"
+                        className="flex w-fit items-center gap-2 rounded-lg border border-white/15 bg-white/5 min-h-11 px-4 py-2 text-base text-white transition-colors hover:bg-white/10"
                     >
                         <span aria-hidden="true">←</span>
                         Voltar para regiões
@@ -187,48 +176,32 @@ export function ExploreSection({
                                 </p>
 
                                 <div className="mt-4 grid grid-cols-2 gap-3">
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Intensidade de carbono</p>
-                                        <p className="mt-1 font-semibold">
-                                            {formatIntensity(region.gco2ePerKwh)}
-                                        </p>
-                                    </div>
+                                    <Metric label="Intensidade de carbono">
+                                        {formatIntensity(region.gco2ePerKwh)}
+                                    </Metric>
 
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Serviços monitorados</p>
-                                        <p className="mt-1 font-semibold">{region.servicesCount}</p>
-                                        <p className="mt-1 text-xs text-white/60">
-                                            {region.statusCounts.available} disponíveis
-                                            {' · '}
+                                    <Metric label="Serviços monitorados">
+                                        {region.servicesCount}
+                                        <p className="mt-1 text-xs font-normal text-white/60">
+                                            {region.statusCounts.available} disponíveis ·{' '}
                                             {region.statusCounts.unavailable} indisponíveis
                                         </p>
                                         {region.statusCounts.metricsMissing > 0 && (
-                                            <p className="mt-1 text-xs text-amber-300">
+                                            <p className="mt-1 text-xs font-normal text-amber-300">
                                                 {region.statusCounts.metricsMissing} sem métricas
                                             </p>
                                         )}
-                                    </div>
+                                    </Metric>
 
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">
-                                            Energia nas últimas 24 h
-                                        </p>
-                                        <p className="mt-1 font-semibold">
-                                            {formatEnergy(region.energyKwh)}
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">
-                                            Emissões de CO₂e nas últimas 24 h
-                                        </p>
-                                        <p className="mt-1 font-semibold">
-                                            {formatCo2e(region.co2eGrams)}
-                                        </p>
-                                    </div>
+                                    <Metric label="Energia nas últimas 24 h">
+                                        {formatEnergy(region.energyKwh)}
+                                    </Metric>
+                                    <Metric label="Emissões de CO₂e nas últimas 24 h">
+                                        {formatCo2e(region.co2eGrams)}
+                                    </Metric>
                                 </div>
                             </button>
-                    ))}
+                        ))}
 
                     {showingServices &&
                         regionServices.map((service) => (
@@ -239,7 +212,9 @@ export function ExploreSection({
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                        <h3 className="break-words text-lg font-semibold">{service.name}</h3>
+                                        <h3 className="break-words text-lg font-semibold">
+                                            {service.name}
+                                        </h3>
 
                                         <p className="mt-1 text-sm text-white/60">
                                             {[
@@ -253,42 +228,29 @@ export function ExploreSection({
                                     </div>
 
                                     <span
-                                        className={`shrink-0 rounded-full px-2 py-1 text-xs ${
-                                            service.status === 'available'
-                                                ? 'bg-emerald-400/15 text-emerald-300'
-                                                : service.status === 'unavailable'
-                                                ? 'bg-red-400/15 text-red-300'
-                                                : 'bg-amber-400/15 text-amber-300'
-                                        }`}
+                                        className={`shrink-0 rounded-full px-2 py-1 text-xs ${statusStyle(service.status).badge}`}
                                     >
-                                        {serviceStatus(service.status)}
+                                        {statusMeta(service.status).label}
                                     </span>
                                 </div>
 
                                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Intensidade de carbono</p>
-                                        <p className="mt-1 font-semibold">
-                                            {formatIntensity(service.environmental?.carbonIntensity ?? null)}
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">Energia nas últimas 24 h</p>
-                                        <p className="mt-1 font-semibold">
-                                            {formatEnergy(service.environmental?.energyKwh ?? null)}
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-lg bg-black/20 p-3">
-                                        <p className="text-xs text-white/60">CO₂e nas últimas 24 h</p>
-                                        <p className="mt-1 font-semibold">
-                                            {formatCo2e(service.environmental?.co2eGrams ?? null)}
-                                        </p>
-                                    </div>
+                                    <Metric label="Intensidade de carbono">
+                                        {formatIntensity(
+                                            service.environmental?.carbonIntensity ?? null,
+                                        )}
+                                    </Metric>
+                                    <Metric label="Energia nas últimas 24 h">
+                                        {formatEnergy(service.environmental?.energyKwh ?? null)}
+                                    </Metric>
+                                    <Metric label="CO₂e nas últimas 24 h">
+                                        {formatCo2e(service.environmental?.co2eGrams ?? null)}
+                                    </Metric>
                                 </div>
 
-                                <p className="mt-3 text-xs text-emerald-300">Ver detalhes do serviço →</p>
+                                <p className="mt-3 text-xs text-emerald-300">
+                                    Ver detalhes do serviço →
+                                </p>
                             </Link>
                         ))}
 
