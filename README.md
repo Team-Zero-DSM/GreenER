@@ -160,9 +160,11 @@ Disponíveis na versão integrada:
 - Atualização automática após as rodadas de coleta, sem recarregar a página.
 - Execução de frontend, backend e banco com Docker Compose.
 
+O ranking de impacto ambiental já possui rota pública no backend
+(`GET /api/v1/rankings`) e integração com a página de ranking da interface.
+
 Pendências e entregas futuras:
 
-- **Sprint 2:** publicação da rota de ranking de impacto ambiental e integração com a interface.
 - **Sprint 3:** autenticação JWT e rota dedicada a cenários.
 - **Sprint a definir:** configuração do intervalo de coleta pela aplicação.
 
@@ -673,7 +675,7 @@ seleção nem representa seu aceite.
 | **US09 — Atualização automática do dashboard** | **T18:** atualização automática; **T19:** verificação sem recarregar a página; **T08:** rotina de coleta que fornece novas informações. | [MonitoringProvider](./frontend/src/contexts/MonitoringProvider.tsx), [useApiQuery](./frontend/src/hooks/useApiQuery.ts); observações de dados e horários em T18–T19 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; a atualização da interface é diferente da frequência do job e do intervalo energético de cada amostra. |
 | **US10 — Consulta do histórico de coletas** | **T07:** processamento e gravação das coletas; **T09:** consultas de histórico e totais no backend; **T13:** gráficos e seleção de período no detalhe; **T17:** integração real; **T20/T21/T30:** suporte de estrutura, banco e modelagem. | [Gravação das coletas](./backend/src/modules/collections/collections.repository.ts), [AnalyticsRepository](./backend/src/modules/analytics/analytics.repository.ts), [rotas de histórico](./backend/src/modules/analytics/analytics.routes.ts), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx); conferência HTTP × SQL em V11 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; a retenção após reinicialização deve ser sustentada por evidência específica, sem confundir volume configurado com verificação executada. |
 | **US11 — Visualização da localização dos serviços** | **T04:** representação da localização; **T05:** disponibilização dos serviços e localização; **T13/T14:** apresentação no detalhe e listagem; **T17:** integração com o backend. | [Mapper](./backend/src/integrations/metrics-api.mapper.ts), [repository de serviços](./backend/src/modules/services/services.repository.ts), [listagem](./frontend/src/components/services/ServiceList.tsx), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx); evidências de T04/T13/T14/T17 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; cidade e coordenadas ausentes devem continuar sendo tratadas como opcionais. |
-| **US12 — Visualização geográfica dos serviços** | **T04/T05:** coordenadas recebidas pela API; **T12:** página inicial; **T15:** parcela do globo e dos marcadores já implementada; **T17:** integração com os serviços reais. | [LandingPage](./frontend/src/pages/LandingPage.tsx) filtra serviços sem coordenadas ao montar os marcadores; [GlobeView](./frontend/src/components/3d/GlobeView.tsx) posiciona os pins; evidências de T12/T17 e decisão de T15 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal. A parcela geográfica implementada não conclui toda a T15: apresentar os serviços ao inspecionar uma região permanece para a Sprint 2. |
+| **US12 — Visualização geográfica dos serviços** | **T04/T05:** coordenadas recebidas pela API; **T12:** página inicial; **T15:** parcela do globo e dos marcadores já implementada; **T17:** integração com os serviços reais. | [LandingPage](./frontend/src/pages/LandingPage.tsx) filtra serviços sem coordenadas ao montar os marcadores; [GlobeView](./frontend/src/components/globe/GlobeView.tsx) posiciona os pins; evidências de T12/T17 e decisão de T15 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal. A parcela geográfica implementada não conclui toda a T15: apresentar os serviços ao inspecionar uma região permanece para a Sprint 2. |
 
 A matriz foi conferida com o código e as evidências já registradas. Esta atualização
 documental não representa uma nova execução de testes nem uma homologação das histórias.

@@ -113,7 +113,7 @@ Representar, em nível conceitual, as entidades do domínio da plataforma GreenE
 | `HOSPEDA`      | `REGIAO` e `SERVICO`               | Uma região hospeda zero ou muitos serviços; um serviço pertence a uma região                 |
 | `GERA`         | `SERVICO` e `COLETA`               | Um serviço gera zero ou muitas coletas; uma coleta pertence a um serviço                     |
 | `UTILIZA`      | `PARAMETRO_ESTIMATIVA` e `COLETA`  | Um parâmetro é usado em zero ou muitas coletas; uma coleta usa um parâmetro                  |
-| `ATUALIZA`     | `USUARIO` e `CONFIGURACAO_SISTEMA` | Um usuário atualiza zero ou muitas configurações; cada configuração tem no máximo um usuário |
+| `ATUALIZA`     | `USUARIO` e `CONFIGURACAO_SISTEMA` | Um usuário referencia zero ou uma configuração global; cada configuração tem no máximo um usuário |
 
 ---
 
@@ -145,10 +145,44 @@ Representar o modelo lógico do banco de dados PostgreSQL da plataforma GreenER,
 | `coleta` | `status_coleta` | `coleta_id` | 0..1 para 0..N |
 | `usuario` | `configuracao_sistema` | `atualizado_por` | 0..1 para 0..1 |
 
+## Dicionário de dados
+
+Os tipos e campos abaixo correspondem ao [schema.sql](./schema.sql). Todas as
+datas usam `TIMESTAMPTZ`. Campos opcionais aceitam `NULL`.
+
+| Tabela | Colunas |
+| --- | --- |
+| `usuario` | `id BIGINT` (identity, PK); `email TEXT` (único); `senha_hash TEXT`; `papel TEXT` (padrão `admin`); `criado_em TIMESTAMPTZ`. |
+| `regiao` | `id BIGINT` (identity, PK); `codigo TEXT` (único); `pais TEXT`; `regiao TEXT`; `cidade TEXT` (opcional); `latitude` e `longitude DOUBLE PRECISION` (opcionais); `carbon_intensity NUMERIC`; `renewable_share_percent NUMERIC`; `atualizado_em TIMESTAMPTZ`. |
+| `servico` | `id BIGINT` (identity, PK); `external_id TEXT` (único); `nome TEXT`; `metrics_path TEXT`; `status TEXT` (padrão `available`); `status_atualizado_em TIMESTAMPTZ`; `ativo BOOLEAN` (padrão `true`); `ultima_vez_visto_em TIMESTAMPTZ`; `regiao_id BIGINT` (FK). |
+| `parametro_estimativa` | `id BIGINT` (identity, PK); `cpu_max_watts`, `ram_watts_per_gb`, `disk_watts_per_gb`, `network_watts_per_gb`: `NUMERIC(10,4)`; `ativo BOOLEAN` (padrão `false`); `criado_em TIMESTAMPTZ`. |
+| `configuracao_sistema` | `id BOOLEAN` (PK, apenas `true`); `intervalo_coleta_segundos INTEGER` (padrão `300`); `atualizado_por BIGINT` (FK opcional); `atualizado_em TIMESTAMPTZ`. |
+| `coleta` | `id UUID` (PK); `servico_id BIGINT` e `parametro_estimativa_id BIGINT` (FKs); `coletado_em TIMESTAMPTZ`; `intervalo_metrica_segundos INTEGER`; `cpu_percent`, `memory_gb`, `disk_gb`, `network_gb`: `DOUBLE PRECISION`; `cpu_watts`, `memory_watts`, `disk_watts`, `network_watts`, `potencia_estimada_w`: `NUMERIC(14,6)`; `energia_estimada_kwh` e `co2e_estimado_g`: `NUMERIC(20,10)`; `carbon_intensity NUMERIC(12,4)`. |
+| `status_coleta` | Colunas detalhadas na seção Histórico de tentativas, no início deste documento. |
+
+Todas as colunas de data têm padrão `now()`. Os UUIDs têm padrão
+`uuid_generate_v4()`. CPU usa %, recursos usam GB, potência usa W, energia
+usa kWh, emissões usam gCO₂e e intensidade usa gCO₂e/kWh. O intervalo da
+métrica é medido em segundos.
+
+## Índices
+
+Além dos índices das PKs e restrições `UNIQUE`, o schema declara:
+
+| Índice | Colunas / condição |
+| --- | --- |
+| `ux_parametro_estimativa_ativo` | `parametro_estimativa(ativo) WHERE ativo = true`, único. |
+| `idx_servico_regiao` | `servico(regiao_id)`. |
+| `idx_servico_ativo` | `servico(ativo)`. |
+| `idx_coleta_servico_tempo` | `coleta(servico_id, coletado_em DESC)`. |
+| `idx_coleta_tempo` | `coleta(coletado_em DESC)`. |
+| `idx_status_coleta_servico_tempo` | `status_coleta(servico_id, observado_em DESC)`. |
+
 ## Regras de Negócio no Banco
 
 Algumas regras são garantidas pelo próprio banco e não aparecem graficamente no diagrama:
 
+- **Integridade referencial:** as FKs não declaram exclusão em cascata. Excluir um registro ainda referenciado gera conflito. `status_coleta.tipo` é texto livre no SQL; a classificação é feita pelo backend. O banco não garante que a coleta vinculada a uma observação pertença ao mesmo serviço da observação.
 - **Configuração única:** `configuracao_sistema` aceita apenas uma linha (`id BOOLEAN` com `CHECK (id = true)`).
 - **Parâmetro ativo único:** índice único parcial em `parametro_estimativa(ativo) WHERE ativo = true`, que permite apenas um conjunto de parâmetros ativo por vez.
 - **Coleta única por instante:** `UNIQUE (servico_id, coletado_em)` impede duas coletas do mesmo serviço no mesmo instante.
@@ -222,6 +256,8 @@ depois de uma reinicialização controlada. Não confundir volume declarado no
 Compose com uma verificação de retenção já executada.
 
 ### SQL utilizado pela aplicação
+
+- `RankingsRepository` consulta a última coleta global e soma energia, CO₂e e quantidade de amostras por serviço, incluindo serviços sem amostras. [Código](../backend/src/modules/rankings/rankings.repository.ts)
 
 - `CollectionsRepository` sincroniza serviços e regiões, grava amostras e observações e consulta a última tentativa de cada serviço. [Código](../backend/src/modules/collections/collections.repository.ts)
 - `ServiceRepository` consulta listagem, detalhe, última amostra e histórico de tentativas por serviço. [Código](../backend/src/modules/services/services.repository.ts)

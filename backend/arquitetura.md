@@ -14,7 +14,7 @@ dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 | `regions`     | Consulta regiões, fatores de carbono, contadores de serviços e totais por período.                                                |
 | `monitoring`  | Expõe os horários, contadores e dependências da rodada mantidos em memória.                                                       |
 | `comparisons` | Compara amostras em um período comum e simula emissões com o fator atual de outra região.                                         |
-| `rankings`    | Calcula a classificação por energia ou CO₂e. O roteador principal ainda não publica a rota.                                       |
+| `rankings`    | Publica GET /api/v1/rankings com classificação por energia ou CO₂e e período configurável.                                       |
 
 `app.ts` configura o Express e monta `/api/v1`. `index.ts` registra os
 roteadores, incluindo `/service` como alias de `/services`. `server.ts`
@@ -210,6 +210,36 @@ PostgreSQL / APIs externas
 Cada camada possui uma responsabilidade específica.
 
 ---
+
+# 6. Configuração e comandos
+
+As variáveis são carregadas com `dotenv/config`. Use [.env.example](./.env.example)
+como referência e execute os comandos Node.js dentro de `backend/`.
+
+| Variável | Uso atual |
+| --- | --- |
+| `PORT` | Porta HTTP; padrão `3000` quando ausente. |
+| `CORS_ORIGIN` | Origem permitida pelo middleware CORS; exemplo `http://localhost:5173`. |
+| `DATABASE_HOST` | `database` no Compose; `localhost` ao executar Node.js no host. |
+| `DATABASE_PORT` | `5432` no Compose; `5433` no host. |
+| `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | No Compose de desenvolvimento: `greener`, `postgres`, `postgres`. |
+| `METRICS_API_URL`, `CARBON_API_URL` | Bases das integrações externas, obrigatórias para criar o serviço de coleta. |
+| `COLLECTION_INTERVAL_SECONDS` | Espera após cada rodada; padrão de 30 segundos para valor não positivo ou não finito. |
+| `JWT_SECRET` | Presente no exemplo; ainda sem autenticação implementada nas rotas. |
+
+| Comando | Finalidade |
+| --- | --- |
+| `npm ci` | Instalar as dependências do lockfile. |
+| `npm run dev` | Executar `src/server.ts` com reinício ao alterar arquivos TypeScript. |
+| `npm run build` | Compilar o TypeScript para `dist/`. |
+| `npm start` | Executar `dist/server.js` após o build. |
+| `npm test` | Executar os testes com Vitest. |
+| `npm run test:watch` | Manter os testes em execução durante o desenvolvimento. |
+| `npm run lint` | Verificar o código com ESLint, sem avisos permitidos. |
+| `npm run format:check` | Conferir a formatação com Prettier. |
+
+As rotas atuais são públicas. A presença de `bcrypt`, `jsonwebtoken` e
+`JWT_SECRET` não implica que o login já esteja disponível.
 
 # 7. Validação com Zod
 

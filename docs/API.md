@@ -25,7 +25,7 @@ fornecê-las ao restante da aplicação.
 
 A implementação atual oferece listagem e detalhe de serviços, histórico de métricas,
 resultados das tentativas de coleta, estado do monitoramento, dados regionais e
-comparação de serviços. O dashboard e o
+comparação de serviços e ranking ambiental. O dashboard e o
 detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
 serviços, sem dados simulados. Essas telas buscam a API ao abrir, ao trocar
 filtro, serviço ou período e depois de cada rodada de coleta do backend
@@ -50,6 +50,7 @@ para listagem, detalhe, histórico de métricas e histórico de tentativas.
 | `GET` | `/api/v1/collections/status` | Listar serviços pelo resultado da última tentativa, com busca, filtro, resumo e paginação. | Não exige. |
 | `GET` | `/api/v1/regions` | Entregar as regiões, dados ambientais, contadores atuais e totais do período. | Não exige. |
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
+| `GET` | `/api/v1/rankings` | Classificar serviços por energia ou CO₂e no período. | Não exige. |
 | `POST` | `/api/v1/comparisons` | Comparar os totais e 120 pontos por seleção, com simulação opcional de região. | Não exige. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
@@ -270,16 +271,37 @@ anterior durante o carregamento ou em caso de falha.
 Body inválido retorna 400; serviço ou região simulada inexistente retorna
 404; falha interna retorna 500.
 
-### 2.2. Ranking em desenvolvimento
+### 2.2. Ranking — implementado
 
-O módulo `rankings` define `GET /api/v1/rankings` como caminho previsto.
-O roteador principal em [`backend/src/index.ts`](../backend/src/index.ts)
-ainda não monta `rankingsRouter`, então o caminho retorna 404 nesta versão.
-O módulo aceita `criterion` (`co2eGrams`, padrão, ou `energyKwh`) e `range`
-(`1h`, `6h`, `24h`, padrão, `7d` ou `30d`). O serviço calcula os totais de
-amostras por serviço em um período ancorado na última coleta global e ordena
-os itens pelo critério escolhido, do maior para o menor. Itens sem amostras
-ficam no final com totais e `position` iguais a `null`.
+```http
+GET /api/v1/rankings?criterion=co2eGrams&range=24h
+```
+
+Rota pública registrada em [`backend/src/index.ts`](../backend/src/index.ts).
+
+| Query | Regra |
+| --- | --- |
+| `criterion` | Opcional: `co2eGrams` (padrão) ou `energyKwh`. |
+| `range` | Opcional: `1h`, `6h`, `24h` (padrão), `7d` ou `30d`. |
+
+Parâmetros desconhecidos, repetidos ou inválidos retornam 400. A resposta 200
+contém `criterion`, `range`, `period: { from, to }` e `items`.
+
+O período termina na última coleta global acrescida de 1 milissegundo para
+incluir a precisão de microssegundos do PostgreSQL. Sem coletas, usa o horário
+atual. O início é calculado a partir de `range`; o SQL usa `coletado_em > from`
+e `coletado_em <= to`.
+
+Cada item contém `position`, `externalId`, `name`, `region: { code, city }`,
+`energyKwh`, `co2eGrams` e `sampleCount`. A consulta inclui serviços ativos e
+inativos, usando a região atual do cadastro. Os totais somam as amostras do
+período, sem garantir cobertura contínua.
+
+Os itens são ordenados pelo critério escolhido, do maior para o menor;
+empates são desfeitos por `externalId` com `localeCompare`. Serviços com
+amostras recebem posições sequenciais a partir de 1. Serviços sem amostras
+ficam no final, com totais e `position` iguais a `null` e `sampleCount: 0`.
+Sem serviços cadastrados, retorna `items: []`. Falha interna retorna 500.
 
 ### 2.3. Operações planejadas
 
