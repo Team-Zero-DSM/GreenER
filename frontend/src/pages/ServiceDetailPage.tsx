@@ -5,6 +5,8 @@ import { ChartCard } from '@/components/charts/ChartCard';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
+import { SegmentedControl } from '@/components/shared/SegmentedControl';
+import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import type { HistoryRange as Range } from '@/types/service';
 
@@ -80,21 +82,12 @@ function ServiceDetail({ id }: { id: string }) {
                                     .join(', ') || 'Localização não informada'}
                             </p>
                         </div>
-                        <div
-                            aria-label="Período dos gráficos"
-                            className="flex rounded-lg border border-border bg-background/60 p-1"
-                        >
-                            {(Object.keys(periods) as Range[]).map((value) => (
-                                <button
-                                    key={value}
-                                    aria-pressed={range === value}
-                                    onClick={() => setRange(value)}
-                                    className={`rounded-md px-3 py-1.5 text-xs transition-colors ${range === value ? 'bg-primary/15 font-semibold text-primary' : 'text-muted-foreground hover:bg-white/5'}`}
-                                >
-                                    {value}
-                                </button>
-                            ))}
-                        </div>
+                        <SegmentedControl
+                            label="Período dos gráficos"
+                            value={range}
+                            options={HISTORY_RANGE_OPTIONS}
+                            onChange={setRange}
+                        />
                     </header>
                     <Card>
                         <CardContent>
