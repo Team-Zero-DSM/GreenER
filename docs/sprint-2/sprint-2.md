@@ -84,7 +84,7 @@ o registro da Sprint 1.
 ## 📈 Burndown da Sprint
 
 <p align="center">
-    <img src="./Burndown-Sprint2.svg" alt="Gráfico de Burndown">
+    <img src="./BurndownSprint2.svg" alt="Gráfico de Burndown">
 </p>
 
 ---
