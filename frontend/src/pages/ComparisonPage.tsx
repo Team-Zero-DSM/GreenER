@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Info } from 'lucide-react';
 
@@ -16,17 +16,13 @@ import { ComparisonChart } from '@/components/comparison/results/ComparisonChart
 
 import { ComparisonSummary } from '@/components/comparison/results/ComparisonSummary';
 
-import { gerarMockComparisonResponse } from '@/mocks/comparisonResponse.mock';
+import { prepararDadosComparacao, type PreparedComparisonResponse } from '@/utils/comparison';
+
+import { compareServices } from '@/api/comparisons';
 
 import type { HistoryRange } from '@/types/service';
 
 import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
-
-const CODIGOS_REGIAO: Record<string, string> = {
-    'São Paulo': 'br-sudeste',
-    Toronto: 'ca-toronto',
-    Ashburn: 'us-east',
-};
 
 export function ComparisonPage() {
     // Configurações da comparação.
@@ -55,24 +51,20 @@ export function ComparisonPage() {
     // Serviço atualmente escolhido como referência.
     const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
 
-    // Resultado da última comparação.
+    // Resultado original da última comparação.
     const [respostaComparacao, setRespostaComparacao] = useState<ComparisonResponse | null>(null);
 
     // Fotografia dos serviços utilizados na última comparação.
     const [servicosComparados, setServicosComparados] = useState<ComparisonServiceSelection[]>([]);
 
-    // Referência utilizada na última comparação.
-    const [servicoPrincipalComparadoId, setServicoPrincipalComparadoId] = useState<string | null>(
-        null,
-    );
-
     // Configuração que gerou a última comparação.
     const [configuracaoComparada, setConfiguracaoComparada] = useState<string | null>(null);
 
     // Configuração que está sendo preparada atualmente.
+    // A referência não faz parte dessa configuração, pois pode ser trocada
+    // sem precisar executar uma nova comparação.
     const configuracaoAtual = JSON.stringify({
         periodo,
-        servicoPrincipalId,
         servicos: servicosSelecionados.map((servico) => ({
             selectionId: servico.selectionId,
             externalId: servico.externalId,
@@ -93,9 +85,13 @@ export function ComparisonPage() {
         [],
     );
 
-    // Executa a comparação utilizando o mock.
-    function handleComparar() {
-        if (!podeComparar) return;
+    const [comparacaoCarregando, setComparacaoCarregando] = useState(false);
+
+    const [erroComparacao, setErroComparacao] = useState<string | null>(null);
+
+    // Executa a comparação utilizando o backend.
+    async function handleComparar() {
+        if (!podeComparar || comparacaoCarregando) return;
 
         const request: ComparisonRequest = {
             range: periodo,
@@ -103,31 +99,43 @@ export function ComparisonPage() {
             selections: servicosSelecionados.map((item) => ({
                 selectionId: item.selectionId,
                 externalId: item.externalId,
-                simulatedRegionCode:
-                    item.simulatedRegion === null
-                        ? null
-                        : (CODIGOS_REGIAO[item.simulatedRegion] ?? null),
+                simulatedRegionCode: item.simulatedRegion,
             })),
         };
 
-        const resposta = gerarMockComparisonResponse(request);
+        setComparacaoCarregando(true);
+        setErroComparacao(null);
 
-        // Salva o resultado e a configuração que o gerou.
-        setRespostaComparacao(resposta);
-        setConfiguracaoComparada(configuracaoAtual);
+        try {
+            const resposta = await compareServices(request);
 
-        // Registra os serviços e a referência utilizados.
-        setServicosComparados(
-            servicosSelecionados.map((servico) => ({
-                ...servico,
-            })),
-        );
+            // Salva o resultado original e a configuração que o gerou.
+            setRespostaComparacao(resposta);
+            setConfiguracaoComparada(configuracaoAtual);
 
-        setServicoPrincipalComparadoId(servicoPrincipalId);
-
-        console.log('Requisição da comparação:', request);
-        console.log('Resposta do mock:', resposta);
+            // Registra os serviços utilizados na última comparação.
+            setServicosComparados(
+                servicosSelecionados.map((servico) => ({
+                    ...servico,
+                })),
+            );
+        } catch (error) {
+            setErroComparacao(
+                error instanceof Error ? error.message : 'Não foi possível executar a comparação.',
+            );
+        } finally {
+            setComparacaoCarregando(false);
+        }
     }
+    // Prepara os dados recebidos antes de enviá-los aos componentes visuais.
+    // O useMemo evita repetir o processamento enquanto a resposta não mudar.
+    const respostaPreparada = useMemo<PreparedComparisonResponse | null>(() => {
+        if (respostaComparacao === null) {
+            return null;
+        }
+
+        return prepararDadosComparacao(respostaComparacao);
+    }, [respostaComparacao]);
 
     // Preserva os serviços da última comparação.
     // Atualiza somente suas cores quando o usuário as altera.
@@ -146,7 +154,7 @@ export function ComparisonPage() {
 
     // Prepara as séries que serão entregues ao gráfico.
     const seriesGrafico =
-        respostaComparacao?.series.flatMap((serie) => {
+        respostaPreparada?.series.flatMap((serie) => {
             const servico = servicosExibidos.find((item) => item.selectionId === serie.selectionId);
 
             if (!servico) {
@@ -185,11 +193,23 @@ export function ComparisonPage() {
                 <ComparisonControls
                     periodo={periodo}
                     metrica={metrica}
-                    podeComparar={podeComparar}
+                    podeComparar={podeComparar && !comparacaoCarregando}
                     onPeriodoChange={setPeriodo}
                     onMetricaChange={setMetrica}
                     onComparar={handleComparar}
                 />
+
+                {comparacaoCarregando && (
+                    <p className="text-sm text-muted-foreground" role="status">
+                        Executando comparação...
+                    </p>
+                )}
+
+                {erroComparacao && (
+                    <p className="text-sm text-red-400" role="alert">
+                        Erro ao executar comparação: {erroComparacao}
+                    </p>
+                )}
 
                 {/* Aviso de alterações pendentes. */}
                 {comparacaoPendente && (
@@ -205,14 +225,14 @@ export function ComparisonPage() {
                 )}
 
                 {/* Gráfico comparativo. */}
-                {respostaComparacao !== null && (
+                {respostaPreparada !== null && (
                     <div className="min-w-0 rounded-lg border border-border p-4">
                         <ComparisonChart
                             series={seriesGrafico}
                             metrica={metrica}
-                            periodo={respostaComparacao.range}
-                            periodoInicio={respostaComparacao.period.from}
-                            periodoFim={respostaComparacao.period.to}
+                            periodo={respostaPreparada.range}
+                            periodoInicio={respostaPreparada.period.from}
+                            periodoFim={respostaPreparada.period.to}
                         />
                     </div>
                 )}
@@ -220,9 +240,9 @@ export function ComparisonPage() {
                 {/* Resumo comparativo. */}
                 <ComparisonSummary
                     servicosSelecionados={servicosExibidos}
-                    respostaComparacao={respostaComparacao}
+                    respostaComparacao={respostaPreparada}
                     metrica={metrica}
-                    servicoPrincipalId={servicoPrincipalComparadoId}
+                    servicoPrincipalId={servicoPrincipalId}
                 />
             </section>
         </main>

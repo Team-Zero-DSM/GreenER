@@ -104,24 +104,22 @@ US08 continua o trabalho anterior; a seleção original da Sprint 1 permanece pr
 | Indicadores consolidados — US07 | Demonstrar energia total, CO₂e total, serviços ativos e indisponíveis do ambiente. Os cards regionais de #97 não comprovam sozinhos os quatro critérios globais. | História #75; #97 como contribuição regional | A definir; falta tarefa explícita para consolidar os quatro indicadores |
 | Documentação e validação | Atualizar diagramas, README, dailies, contratos e modelo; validar histórico de status, ranking, comparação e filtro regional com dados reais e registrar resultados. | #40, #77, #78, #95, #96 | Henrique em #40/#77/#78; #95/#96 a definir |
 
-Os títulos, links, responsáveis e estados individuais das **28 tarefas**, inclusive
-as fechadas, estão no [Sprint Backlog completo](./sprint-2/sprint-2.md#sprint-backlog).
+Os títulos, links, responsáveis, estimativas registradas e estados em 25/10
+das **28 tarefas** estão no [Sprint Backlog completo](./sprint-2/evidencias-dod.md#sprint-backlog).
 Responsável a definir significa ausência de atribuição na issue consultada;
 não foi inferida uma divisão individual.
 
 ### Situação observada e sequência de entrega
 
-- **Fechadas:** #77 e #78, com PRs #87/#88 integrados em `develop`, e #82,
-  com PR #100 integrado. A estrutura da comparação não encerra a US14.
-  #40 também está fechada, mas seu fechamento ocorreu em **19/10**, antes
-  desta sprint; documentação e dailies continuam sendo acompanhamento recorrente.
-- **Abertas com avanço declarado:** #89 tem checklist completo, mas o
-  [PR #101](https://github.com/Team-Zero-DSM/GreenER/pull/101) permanece aberto;
-  integração e preservação dos dados ainda precisam de evidência. #80 tem três
-  critérios marcados e dois pendentes. #32 mantém a inspeção regional desmarcada.
-- **Divergência a conciliar:** a [daily de 22/10](./sprint-2/dailies.md#-22102026)
-  relata conclusão da visualização das métricas; a #32 segue aberta com critério
-  pendente. Preservar o relato sem declarar o saldo de T15 aceito.
+- **Conferência de 25/10:** #77, #78 e #82 constavam como fechadas. O fechamento
+  da #40 em **19/10** antecede a sprint. README e dailies continuam em acompanhamento.
+- **Integrações conferidas em `develop` até 03/11:** o histórico de status,
+  as entregas regionais e partes do ranking e da comparação têm PRs integrados.
+  Os vínculos e os limites de cada entrega estão no [registro de evidências](./sprint-2/evidencias-dod.md#integrações-posteriores-à-conferência).
+- **Saldo de T15:** a [daily de 22/10](./sprint-2/dailies.md#-22102026) relata a
+  conclusão da visualização das métricas. A #32 ainda tinha um critério pendente
+  em 25/10. A listagem regional integrada pela #80 fornece evidência para conferir
+  esse critério na review.
 - **Dependências do histórico:** #89 → #90 → #91; a validação de #95 deve cobrir
   gravação, recuperação e consulta, além da diferença entre US04 e US05.
 - **Integrações:** #92 alimenta #104 e os componentes de ranking; #93 fornece os
@@ -135,19 +133,19 @@ não foi inferida uma divisão individual.
 
 | Código | Requisito relacionado | Entrega concreta | Como verificar | Responsáveis | Evidência no GitHub | Situação |
 |---|---|---|---|---|---|---|
-| ES01 | RNF11, RNF12 | Backlog vinculado a requisitos e histórias | Conferir as seis histórias e 28 tarefas | Equipe | [Sprint Backlog](./sprint-2/sprint-2.md#sprint-backlog) | Registrado; completar cobertura de US07 |
+| ES01 | RNF11, RNF12 | Backlog vinculado a requisitos e histórias | Conferir as seis histórias e 28 tarefas | Equipe | [Sprint Backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Registrado; completar cobertura de US07 |
 | ES02 | RNF12 | Objetivo, seleção, responsáveis e dependências | Conferir este plano, atribuições e planejamento de 20/10 | Equipe | [Registro da sprint](./sprint-2/sprint-2.md), [dailies](./sprint-2/dailies.md) | Em execução; há tarefas sem atribuição |
 | ES03 | RNF11 | Critérios verificáveis por história | Conferir checklists e resultados de integração | Equipe | Issues #3 e #72–#76 no [registro](./sprint-2/sprint-2.md) | Critérios disponíveis; ampliar histórico em US04/US05 e delimitar cenários |
-| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir issues e PRs vinculados | Equipe | [Backlog e evidências](./sprint-2/sprint-2.md) | PRs #87/#88/#100 integrados; #101 aberto |
+| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir issues e PRs vinculados | Equipe | [Backlog e evidências](./sprint-2/evidencias-dod.md) | Integrações registradas até 03/11 |
 | ES05 | RNF12 | Evolução incremental | Examinar commits e merges do período | Equipe | [Commits](https://github.com/Team-Zero-DSM/GreenER/commits/develop/), PRs no registro | Evolução registrada; acompanhar próximas entregas |
 | ES06 | RNF12 | Review, feedback e adaptação | Relacionar feedback às mudanças e registrar encerramento | Equipe | [Dailies](./sprint-2/dailies.md), especialmente 21/10 | Ajustes relatados; review final pendente |
 | ES07 | RNF11, RNF12 | DoD sustentada por evidências | Conferir resultados por tarefa e aceite por história | Equipe; #95 sem atribuição | #95 e [ressalvas do registro](./sprint-2/sprint-2.md) | Validação da sprint e aceite pendentes |
-| ES08 | RNF08 | Documentação compatível com a entrega | Conferir diagramas, README, dailies, contratos e modelo | Henrique; #96 sem atribuição | #40, #77, #78 e #96 no [backlog](./sprint-2/sprint-2.md#sprint-backlog) | Diagramas com PRs integrados; documentação de backend/banco aberta |
-| ES09 | RNF12 | Participação dos cinco integrantes | Conferir presença, atividades, atribuições e artefatos | Todos | [Dailies](./sprint-2/dailies.md), [responsáveis](./sprint-2/sprint-2.md#sprint-backlog) | Acompanhamento registrado; consolidar na review |
+| ES08 | RNF08 | Documentação compatível com a entrega | Conferir diagramas, README, dailies, contratos e modelo | Henrique; #96 sem atribuição no levantamento de 25/10 | #40, #77, #78 e #96 no [backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Diagramas com PRs integrados e documentação técnica acompanhada na #96 |
+| ES09 | RNF12 | Participação dos cinco integrantes | Conferir presença, atividades, atribuições e artefatos | Todos | [Dailies](./sprint-2/dailies.md), [participação](./sprint-2/sprint-2.md#participação-da-equipe) | Presenças e atividades consolidadas para os registros até 28/10 |
 | DW01 | RP01, RP02; RNF09 interno | React/TS, Node/TS e separação das partes | Conferir alterações e compilar aplicações | Equipe | [Frontend](../frontend/package.json), [backend](../backend/package.json), #95 | Base existente; revalidar alterações da sprint |
-| DW02, DW03, DW07 | Recursos da Sprint 1 | Preservar integrações, APIs e Docker | Reexecutar verificações relevantes e contratos de #91–#94 | Pedro; endpoints e #95 sem atribuição | #89–#95 no [backlog](./sprint-2/sprint-2.md#sprint-backlog) | Revalidação e novas integrações pendentes |
-| DW04, DW05 | RF09, RF11, RF14, RF15 | Ranking, comparação e regiões com dados reais | Validar filtros, período, atualização e falhas na interface | Paulo, Henrique, Gabriel e Vitor; atribuições conforme backlog | #32, #79–#86, #97–#99, #102–#106 | Estrutura de comparação fechada; integrações abertas |
-| BD01–BD04 | RF05, RF06, RF08, RF10, RF14, RF15; RP03 | Histórico de status, consultas e agregações | Preservar dados existentes e comparar API × SQL no mesmo período | Pedro; #92/#93/#95 sem atribuição | #89–#93, #95/#96 | PR de tabela aberto; persistência, consulta e validação pendentes |
+| DW02, DW03, DW07 | Recursos da Sprint 1 | Preservar integrações, APIs e Docker | Reexecutar verificações relevantes e contratos de #91–#94 | Pedro; endpoints e #95 sem atribuição no levantamento de 25/10 | #89–#95 no [backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Há PRs integrados. Resultados das verificações a registrar na #95 |
+| DW04, DW05 | RF09, RF11, RF14, RF15 | Ranking, comparação e regiões com dados reais | Validar filtros, período, atualização e falhas na interface | Paulo, Henrique, Gabriel e Vitor conforme o backlog | #32, #79–#86, #97–#99, #102–#106 | Entregas parciais registradas. Integração das telas acompanhada na #84 e na #104 |
+| BD01–BD04 | RF05, RF06, RF08, RF10, RF14, RF15; RP03 | Histórico de status, consultas e agregações | Preservar dados existentes e comparar API × SQL no mesmo período | Pedro; #92/#93/#95 sem atribuição no levantamento de 25/10 | #89–#93, #95/#96 | Tabela, gravação e consulta de status integradas. Validação da entrega a registrar |
 | TP01–TP03 | Histórico, ranking, comparação e regiões | Modelagem, tipos e isolamento de falhas | Conferir entradas inválidas, dados ausentes, recuperação e média zero | Equipe | Critérios de #90–#95 e #86 | Verificações previstas; resultados a registrar |
 
 ## Sprint 3 — Autenticação e cenários avançados
@@ -194,7 +192,7 @@ implementação de autenticação funcional nem evidência de Sprint 3 concluíd
 | Comparação entre serviços | Sprint 2, conforme milestone e #76/#82–#86/#93. | Corrigida a alocação anterior na Sprint 3; estrutura entregue não equivale a comparação integrada. |
 | Cenários regionais | #83/#84 já preveem opções regionais na comparação da Sprint 2. | Delimitar o que será simulação avançada adicional da Sprint 3 antes de fechar seu backlog. |
 | Indicadores consolidados | US07 selecionada na Sprint 2 (#75). | Associar tarefa e responsável para os quatro indicadores globais; cards regionais não encerram a história. |
-| Mapa/globo | Globo integrado na Sprint 1; continuação de T15 na Sprint 2, com Gabriel. | Falta apresentar os serviços associados ao inspecionar uma região; #32 continua como referência do saldo, sem declarar a tarefa inteira concluída. |
+| Mapa/globo | Globo integrado na Sprint 1. Continuação de T15 na Sprint 2, com Gabriel. | A #32 identifica o saldo e o PR #118 fornece evidência da listagem regional para a review. |
 | Intervalo pela aplicação | Depois; sprint a definir. | Não confundir variável de ambiente, tabela existente e endpoint funcional. Alocar antes do fechamento do plano final. |
 | Parâmetros ambientais | Valores iniciais correspondem ao exemplo do modelo simplificado do desafio. | Fonte, unidades e aplicação registradas em [cálculo.md](./cálculo.md); não representam calibração de hardware real. |
 
