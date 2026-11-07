@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageShell } from '@/components/shared/PageShell';
 import { RankingChart } from '@/components/ranking/RankingChart';
 import { RankingFilters } from '@/components/ranking/RankingFilters';
 import { RankingTable } from '@/components/ranking/RankingTable';
@@ -16,15 +18,12 @@ export function RankingPage() {
     const { data: ranking, error, isLoading } = useRanking(criterion, range);
 
     return (
-        <main className="mx-auto max-w-7xl space-y-6 p-6">
+        <PageShell>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <header className="space-y-2">
-                    <h1 className="text-3xl font-semibold">Ranking de impacto</h1>
-
-                    <p className="text-muted-foreground">
-                        Serviços ordenados por emissão ou consumo estimado no período escolhido.
-                    </p>
-                </header>
+                <PageHeader
+                    title="Ranking de impacto"
+                    description="Serviços ordenados por emissão ou consumo estimado no período escolhido."
+                />
 
                 <RankingFilters
                     criterion={criterion}
@@ -63,6 +62,6 @@ export function RankingPage() {
                     <RankingTable criterion={ranking.criterion} items={ranking.items} />
                 </>
             )}
-        </main>
+        </PageShell>
     );
 }

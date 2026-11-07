@@ -1,4 +1,5 @@
 import { formatCo2e, formatEnergy } from '@/components/ranking/formatRankingValue';
+import { ChartCard } from '@/components/charts/ChartCard';
 import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
 interface RankingTableProps {
@@ -26,84 +27,77 @@ function valueClass(isSorted: boolean) {
 
 export function RankingTable({ criterion, items }: RankingTableProps) {
     return (
-        <section
-            aria-label="Tabela de classificação"
-            className="space-y-3 border-t border-border pt-6"
-        >
-            <div>
-                <h2 className="text-xl font-semibold">Classificação</h2>
+        <section aria-label="Tabela de classificação">
+            <ChartCard
+                title="Classificação"
+                subtitle={`Totais somados no período considerado, ordenados por ${sortLabels[criterion]}, do maior para o menor.`}
+            >
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-lg text-sm sm:min-w-xl">
+                        <thead className="border-b border-border text-muted-foreground">
+                            <tr>
+                                {rankingColumns.map((column) => {
+                                    const isSorted = column.criterion === criterion;
 
-                <p className="text-sm text-muted-foreground">
-                    Totais somados no período considerado, ordenados por {sortLabels[criterion]}, do
-                    maior para o menor.
-                </p>
-            </div>
+                                    return (
+                                        <th
+                                            key={column.label}
+                                            scope="col"
+                                            aria-sort={isSorted ? 'descending' : undefined}
+                                            className={`px-4 py-3 text-left font-medium ${column.className ?? ''} ${isSorted ? 'text-foreground' : ''}`}
+                                        >
+                                            {column.label}
+                                        </th>
+                                    );
+                                })}
+                            </tr>
+                        </thead>
 
-            <div className="overflow-x-auto rounded-lg border border-border">
-                <table className="w-full min-w-lg text-sm sm:min-w-xl">
-                    <thead className="border-b border-border text-muted-foreground">
-                        <tr>
-                            {rankingColumns.map((column) => {
-                                const isSorted = column.criterion === criterion;
+                        <tbody>
+                            {items.map((item) => {
+                                // Sem coletas no período o backend devolve position null e métricas null.
+                                const hasData = item.sampleCount > 0;
 
                                 return (
-                                    <th
-                                        key={column.label}
-                                        scope="col"
-                                        aria-sort={isSorted ? 'descending' : undefined}
-                                        className={`px-4 py-3 text-left font-medium ${column.className ?? ''} ${isSorted ? 'text-foreground' : ''}`}
+                                    <tr
+                                        key={item.externalId}
+                                        className={`border-b border-border last:border-b-0 ${hasData ? '' : 'opacity-60'}`}
                                     >
-                                        {column.label}
-                                    </th>
+                                        <td className="px-4 py-3 tabular-nums">
+                                            {item.position ?? '—'}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="font-medium">{item.name}</span>
+
+                                            <span className="block text-xs text-muted-foreground sm:hidden">
+                                                {item.region.code}
+                                            </span>
+
+                                            {!hasData && (
+                                                <span className="mt-1 inline-block whitespace-nowrap rounded-full sm:mt-0 sm:ml-2 border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                                                    Sem dados no período
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
+                                            {item.region.code}
+                                        </td>
+                                        <td className={valueClass(criterion === 'energyKwh')}>
+                                            {formatEnergy(item.energyKwh)}
+                                        </td>
+                                        <td className={valueClass(criterion === 'co2eGrams')}>
+                                            {formatCo2e(item.co2eGrams)}
+                                        </td>
+                                        <td className="px-4 py-3 tabular-nums">
+                                            {item.sampleCount.toLocaleString('pt-BR')}
+                                        </td>
+                                    </tr>
                                 );
                             })}
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {items.map((item) => {
-                            // Sem coletas no período o backend devolve position null e métricas null.
-                            const hasData = item.sampleCount > 0;
-
-                            return (
-                                <tr
-                                    key={item.externalId}
-                                    className={`border-b border-border last:border-b-0 ${hasData ? '' : 'opacity-60'}`}
-                                >
-                                    <td className="px-4 py-3 tabular-nums">
-                                        {item.position ?? '—'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className="font-medium">{item.name}</span>
-
-                                        <span className="block text-xs text-muted-foreground sm:hidden">
-                                            {item.region.code}
-                                        </span>
-
-                                        {!hasData && (
-                                            <span className="mt-1 inline-block whitespace-nowrap rounded-full sm:mt-0 sm:ml-2 border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                                                Sem dados no período
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
-                                        {item.region.code}
-                                    </td>
-                                    <td className={valueClass(criterion === 'energyKwh')}>
-                                        {formatEnergy(item.energyKwh)}
-                                    </td>
-                                    <td className={valueClass(criterion === 'co2eGrams')}>
-                                        {formatCo2e(item.co2eGrams)}
-                                    </td>
-                                    <td className="px-4 py-3 tabular-nums">
-                                        {item.sampleCount.toLocaleString('pt-BR')}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </ChartCard>
         </section>
     );
 }
