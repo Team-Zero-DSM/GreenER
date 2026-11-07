@@ -5,6 +5,8 @@ import { ChartCard } from '@/components/charts/ChartCard';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageShell } from '@/components/shared/PageShell';
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
 import { formatDateTime, formatNumber } from '@/lib/format';
@@ -57,7 +59,7 @@ function ServiceDetail({ id }: { id: string }) {
         { title: 'Memória em uso', key: 'memoryGb', color: '#fbbf24', unit: 'GB' },
     ] as const;
     return (
-        <main className="mx-auto max-w-7xl space-y-4 p-4 sm:p-6">
+        <PageShell>
             <Link to="/dashboard" className="text-sm text-primary hover:underline">
                 ← Serviços
             </Link>
@@ -70,25 +72,18 @@ function ServiceDetail({ id }: { id: string }) {
                 !error && <p className="text-muted-foreground">Carregando serviço...</p>
             ) : (
                 <>
-                    <header className="flex flex-wrap items-end justify-between gap-4">
-                        <div>
-                            <h1 className="text-3xl font-semibold tracking-tight">
-                                {service.name}
-                            </h1>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {service.id} ·{' '}
-                                {[location?.city, location?.region, location?.country]
-                                    .filter(Boolean)
-                                    .join(', ') || 'Localização não informada'}
-                            </p>
-                        </div>
-                        <SegmentedControl
-                            label="Período dos gráficos"
-                            value={range}
-                            options={HISTORY_RANGE_OPTIONS}
-                            onChange={setRange}
-                        />
-                    </header>
+                    <PageHeader
+                        title={service.name}
+                        description={`${service.id} · ${[location?.city, location?.region, location?.country].filter(Boolean).join(', ') || 'Localização não informada'}`}
+                        actions={
+                            <SegmentedControl
+                                label="Período dos gráficos"
+                                value={range}
+                                options={HISTORY_RANGE_OPTIONS}
+                                onChange={setRange}
+                            />
+                        }
+                    />
                     <Card>
                         <CardContent>
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4 xl:grid-cols-7">
@@ -220,6 +215,6 @@ function ServiceDetail({ id }: { id: string }) {
                     </div>
                 </>
             )}
-        </main>
+        </PageShell>
     );
 }
