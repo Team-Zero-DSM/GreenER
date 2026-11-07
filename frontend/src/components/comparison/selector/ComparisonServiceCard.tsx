@@ -8,6 +8,7 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import { ComparisonColorPicker } from './ComparisonColorPicker';
 import { ComparisonRegionPicker } from './ComparisonRegionPicker';
 import type { Region } from '@/types/api';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 interface ComparisonServiceCardProps {
     servico: ServiceSummary;
@@ -55,16 +56,12 @@ export function ComparisonServiceCard({
 
     const regiaoOriginal = servico.location?.city ?? servico.location?.region ?? null;
 
-    const regiaoSelecionada = regioes.find(
-    (regiao) => regiao.code === regiaoSimulada,
-);
+    const regiaoSelecionada = regioes.find((regiao) => regiao.code === regiaoSimulada);
 
-const nomeRegiao =
-    regiaoSimulada === null
-        ? regiaoOriginal
-        : regiaoSelecionada?.city ??
-          regiaoSelecionada?.region ??
-          'Região não encontrada';
+    const nomeRegiao =
+        regiaoSimulada === null
+            ? regiaoOriginal
+            : (regiaoSelecionada?.city ?? regiaoSelecionada?.region ?? 'Região não encontrada');
 
     const statusTexto =
         servico.active === undefined ? 'Status desconhecido' : servico.active ? 'Ativo' : 'Inativo';
@@ -81,101 +78,96 @@ const nomeRegiao =
             {/* Cartão e seletores flutuantes. */}
             <div className="relative min-w-0">
                 {/* Cartão. */}
-                <div
-                    className={`rounded-xl border p-3 transition-colors duration-200 ${
-                        principal
-                            ? 'border-teal-400/80 bg-teal-400/[0.02]'
-                            : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'
-                    }`}
-                >
-                    <div className="flex items-start gap-3">
-                        <div
-                            className="flex size-11 shrink-0 items-center justify-center rounded-full"
-                            style={{ backgroundColor: cor }}
-                        >
-                            <Server aria-hidden="true" className="size-5 text-white" />
-                        </div>
+                <Card className="min-w-0">
+                    <CardContent className="space-y-3">
+                        <div className="flex items-start gap-3">
+                            <div
+                                className="flex size-11 shrink-0 items-center justify-center rounded-full"
+                                style={{ backgroundColor: cor }}
+                            >
+                                <Server aria-hidden="true" className="size-5 text-white" />
+                            </div>
 
-                        <div className="min-w-0 flex-1 space-y-2">
-                            {/* Nome e serviço de referência. */}
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="flex min-w-0 items-start gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={onDefinirPrincipal}
-                                        aria-label={
-                                            principal
-                                                ? `${servico.name} é o serviço de referência`
-                                                : `Definir ${servico.name} como referência`
-                                        }
-                                        title="Definir serviço de referência"
-                                        className="shrink-0 rounded p-0.5 transition-colors hover:bg-slate-800"
-                                    >
-                                        <Star
-                                            aria-hidden="true"
-                                            className={`size-4 transition-colors ${
+                            <div className="min-w-0 flex-1 space-y-2">
+                                {/* Nome e serviço de referência. */}
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex min-w-0 items-start gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={onDefinirPrincipal}
+                                            aria-label={
                                                 principal
-                                                    ? 'fill-teal-400 text-teal-400'
-                                                    : 'text-slate-400 hover:text-teal-300'
-                                            }`}
-                                        />
-                                    </button>
+                                                    ? `${servico.name} é o serviço de referência`
+                                                    : `Definir ${servico.name} como referência`
+                                            }
+                                            title="Definir serviço de referência"
+                                            className="shrink-0 rounded p-0.5 transition-colors hover:bg-slate-800"
+                                        >
+                                            <Star
+                                                aria-hidden="true"
+                                                className={`size-4 transition-colors ${
+                                                    principal
+                                                        ? 'fill-teal-400 text-teal-400'
+                                                        : 'text-slate-400 hover:text-teal-300'
+                                                }`}
+                                            />
+                                        </button>
 
-                                    <h3
-                                        className="break-words text-sm font-semibold text-slate-100"
-                                        title={servico.name}
-                                    >
-                                        {servico.name}
-                                    </h3>
+                                        <h3
+                                            className="break-words text-sm font-semibold text-slate-100"
+                                            title={servico.name}
+                                        >
+                                            {servico.name}
+                                        </h3>
+                                    </div>
+
+                                    {principal && (
+                                        <span className="shrink-0 rounded-full border border-teal-400/50 bg-teal-400/10 px-2 py-0.5 text-xs font-medium text-teal-300">
+                                            Referência
+                                        </span>
+                                    )}
                                 </div>
 
-                                {principal && (
-                                    <span className="shrink-0 rounded-full border border-teal-400/50 bg-teal-400/10 px-2 py-0.5 text-xs font-medium text-teal-300">
-                                        Referência
-                                    </span>
-                                )}
-                            </div>
+                                {/* Região atual. */}
+                                <div className="flex flex-wrap items-center gap-1.5 text-sm">
+                                    <MapPin
+                                        aria-hidden="true"
+                                        className="size-4 shrink-0 text-slate-400"
+                                    />
 
-                            {/* Região atual. */}
-                            <div className="flex flex-wrap items-center gap-1.5 text-sm">
-                                <MapPin
-                                    aria-hidden="true"
-                                    className="size-4 shrink-0 text-slate-400"
-                                />
+                                    {nomeRegiao ? (
+                                        <>
+                                            <span className="text-slate-300">{nomeRegiao}</span>
 
-                                {nomeRegiao ? (
-                                    <>
-                                        <span className="text-slate-300">{nomeRegiao}</span>
+                                            {regiaoSimulada !== null ? (
+                                                <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs text-amber-400">
+                                                    Simulada
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-slate-500">
+                                                    (original)
+                                                </span>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <span className="text-slate-400">Região não informada</span>
+                                    )}
+                                </div>
 
-                                        {regiaoSimulada !== null ? (
-                                            <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs text-amber-400">
-                                                Simulada
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-slate-500">
-                                                (original)
-                                            </span>
-                                        )}
-                                    </>
-                                ) : (
-                                    <span className="text-slate-400">Região não informada</span>
-                                )}
-                            </div>
+                                {/* Status. */}
+                                <div className="flex items-center gap-2 text-sm">
+                                    <span
+                                        aria-hidden="true"
+                                        className={`size-2.5 shrink-0 rounded-full ${statusCor}`}
+                                    />
 
-                            {/* Status. */}
-                            <div className="flex items-center gap-2 text-sm">
-                                <span
-                                    aria-hidden="true"
-                                    className={`size-2.5 shrink-0 rounded-full ${statusCor}`}
-                                />
-
-                                <span className="text-slate-300">{statusTexto}</span>
+                                    <span className="text-slate-300">{statusTexto}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
+                    </CardContent>
                     {/* Botões inferiores. */}
-                    <div className="mt-3 border-t border-slate-800 pt-3">
+                    <CardFooter className="flex-wrap justify-between gap-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             {/* Botão de cor. */}
                             <button
@@ -226,8 +218,8 @@ const nomeRegiao =
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </CardFooter>
+                </Card>
 
                 {/* Seletor de cores flutuante. */}
                 {mostrarCores && (
@@ -252,13 +244,13 @@ const nomeRegiao =
                         className="absolute right-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] shadow-xl shadow-black/30"
                     >
                         <ComparisonRegionPicker
-    regioes={regioes}
-    regiaoAtual={regiaoSimulada}
-    regioesCarregando={regioesCarregando}
-    erroRegioes={erroRegioes}
-    onSelecionarRegiao={onConfirmarRegiao}
-    onFechar={() => setMostrarRegioes(false)}
-/>
+                            regioes={regioes}
+                            regiaoAtual={regiaoSimulada}
+                            regioesCarregando={regioesCarregando}
+                            erroRegioes={erroRegioes}
+                            onSelecionarRegiao={onConfirmarRegiao}
+                            onFechar={() => setMostrarRegioes(false)}
+                        />
                     </div>
                 )}
             </div>

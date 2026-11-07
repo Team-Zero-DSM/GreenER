@@ -5,6 +5,10 @@ import { ChartCard } from '@/components/charts/ChartCard';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageShell } from '@/components/shared/PageShell';
+import { SegmentedControl } from '@/components/shared/SegmentedControl';
+import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import type { HistoryRange as Range } from '@/types/service';
 
@@ -55,7 +59,7 @@ function ServiceDetail({ id }: { id: string }) {
         { title: 'Memória em uso', key: 'memoryGb', color: '#fbbf24', unit: 'GB' },
     ] as const;
     return (
-        <main className="mx-auto max-w-7xl space-y-4 p-4 sm:p-6">
+        <PageShell>
             <Link to="/dashboard" className="text-sm text-primary hover:underline">
                 ← Serviços
             </Link>
@@ -68,34 +72,18 @@ function ServiceDetail({ id }: { id: string }) {
                 !error && <p className="text-muted-foreground">Carregando serviço...</p>
             ) : (
                 <>
-                    <header className="flex flex-wrap items-end justify-between gap-4">
-                        <div>
-                            <h1 className="text-3xl font-semibold tracking-tight">
-                                {service.name}
-                            </h1>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {service.id} ·{' '}
-                                {[location?.city, location?.region, location?.country]
-                                    .filter(Boolean)
-                                    .join(', ') || 'Localização não informada'}
-                            </p>
-                        </div>
-                        <div
-                            aria-label="Período dos gráficos"
-                            className="flex rounded-lg border border-border bg-background/60 p-1"
-                        >
-                            {(Object.keys(periods) as Range[]).map((value) => (
-                                <button
-                                    key={value}
-                                    aria-pressed={range === value}
-                                    onClick={() => setRange(value)}
-                                    className={`rounded-md px-3 py-1.5 text-xs transition-colors ${range === value ? 'bg-primary/15 font-semibold text-primary' : 'text-muted-foreground hover:bg-white/5'}`}
-                                >
-                                    {value}
-                                </button>
-                            ))}
-                        </div>
-                    </header>
+                    <PageHeader
+                        title={service.name}
+                        description={`${service.id} · ${[location?.city, location?.region, location?.country].filter(Boolean).join(', ') || 'Localização não informada'}`}
+                        actions={
+                            <SegmentedControl
+                                label="Período dos gráficos"
+                                value={range}
+                                options={HISTORY_RANGE_OPTIONS}
+                                onChange={setRange}
+                            />
+                        }
+                    />
                     <Card>
                         <CardContent>
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-4 xl:grid-cols-7">
@@ -227,6 +215,6 @@ function ServiceDetail({ id }: { id: string }) {
                     </div>
                 </>
             )}
-        </main>
+        </PageShell>
     );
 }

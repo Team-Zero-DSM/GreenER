@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import {
-    Info,
-    Leaf,
-    Percent,
-    Server,
-    Star,
-    UsersRound,
-} from 'lucide-react';
+import { Info, Leaf, Percent, Server, Star, UsersRound } from 'lucide-react';
 
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 import type { ComparisonServiceSelection } from '@/components/comparison/selector/ComparisonServiceSelector';
@@ -16,6 +9,7 @@ import type { ComparisonServiceSelection } from '@/components/comparison/selecto
 import type { PreparedComparisonResponse, PreparedComparisonSeries } from '@/utils/comparison';
 
 import { ComparisonDifferenceChart } from './ComparisonDifferenceChart';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ComparisonSummaryProps {
     servicosSelecionados: ComparisonServiceSelection[];
@@ -225,38 +219,31 @@ export function ComparisonSummary({
                   : null
               : (diferencaAbsoluta / mediaDemais) * 100;
 
-    
-const descricaoDiferenca =
-    diferencaAbsoluta === null
-        ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
-        : classificacao === 'igual'
-          ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
-          : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
-                metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
-            } ${formatarValor(
-                Math.abs(diferencaAbsoluta),
-                metrica,
-            )} ${unidade} ${
-                classificacao === 'acima' ? 'a mais' : 'a menos'
-            } que a média dos demais.${
-                diferencaPercentual === null
-                    ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
-                    : ''
-            }`;
+    const descricaoDiferenca =
+        diferencaAbsoluta === null
+            ? 'Não há valores disponíveis suficientes para realizar essa comparação.'
+            : classificacao === 'igual'
+              ? 'O serviço de referência apresenta o mesmo valor que a média dos demais.'
+              : `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+                    metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
+                } ${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade} ${
+                    classificacao === 'acima' ? 'a mais' : 'a menos'
+                } que a média dos demais.${
+                    diferencaPercentual === null
+                        ? ' Não é possível calcular o percentual porque a média dos demais é zero.'
+                        : ''
+                }`;
 
-
-const descricaoAntes =
-    `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
+    const descricaoAntes = `${servicoPrincipal?.name ?? 'O serviço de referência'} ${
         metrica === 'co2eGrams' ? 'emitiu' : 'consumiu'
     } `;
 
-const valorDestaque =
-    diferencaAbsoluta !== null && classificacao !== 'igual'
-        ? `${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade}`
-        : null;
+    const valorDestaque =
+        diferencaAbsoluta !== null && classificacao !== 'igual'
+            ? `${formatarValor(Math.abs(diferencaAbsoluta), metrica)} ${unidade}`
+            : null;
 
-const descricaoDepois =
-    ` ${
+    const descricaoDepois = ` ${
         classificacao === 'acima' ? 'a mais' : 'a menos'
     } que a média dos demais.${
         diferencaPercentual === null
@@ -285,150 +272,157 @@ const descricaoDepois =
             </div>
 
             {!respostaComparacao ? (
-                <div className="flex min-h-16 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3">
-                    <p className="text-center text-sm text-slate-400">
-                        Selecione pelo menos dois serviços e clique em Comparar para ver os
-                        resultados.
-                    </p>
+                <Card className="min-h-16">
+                    <CardContent className="flex flex-1 items-center justify-center gap-2">
+                        <p className="text-center text-sm text-muted-foreground">
+                            Selecione pelo menos dois serviços e clique em Comparar para ver os
+                            resultados.
+                        </p>
 
-                    <span className="group relative inline-flex shrink-0">
-                        <button
-                            type="button"
-                            aria-label="Informações sobre como comparar serviços"
-                            className="flex size-6 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-teal-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
-                        >
-                            <Info className="size-4" />
-                        </button>
+                        <span className="group relative inline-flex shrink-0">
+                            <button
+                                type="button"
+                                aria-label="Informações sobre como comparar serviços"
+                                className="flex size-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <Info className="size-4" />
+                            </button>
 
-                        <span
-                            role="tooltip"
-                            className="invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-slate-700 bg-slate-900 p-3 text-left text-xs leading-relaxed text-slate-300 opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-                        >
-                            <strong className="mb-2 block text-slate-100">
-                                Como fazer uma comparação
-                            </strong>
+                            <span
+                                role="tooltip"
+                                className="invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-border bg-popover p-3 text-left text-xs leading-relaxed text-popover-foreground opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                            >
+                                <strong className="mb-2 block">Como fazer uma comparação</strong>
 
-                            <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
+                                <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
 
-                            <span className="mb-2 block">2. Defina o serviço de referência.</span>
+                                <span className="mb-2 block">
+                                    2. Defina o serviço de referência.
+                                </span>
 
-                            <span className="mb-2 block">3. Escolha o período analisado.</span>
+                                <span className="mb-2 block">3. Escolha o período analisado.</span>
 
-                            <span className="block">
-                                4. Escolha uma região para simular as emissões.
+                                <span className="block">
+                                    4. Escolha uma região para simular as emissões.
+                                </span>
                             </span>
                         </span>
-                    </span>
-                </div>
+                    </CardContent>
+                </Card>
             ) : (
                 <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-4">
                     {/* Serviço de referência */}
-                    <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-teal-400/50 bg-teal-400/[0.02] p-4">
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
+                    <Card className="min-h-[190px] min-w-0 justify-between">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
                                 <Star
                                     className="size-4 fill-teal-400 text-teal-400"
                                     aria-hidden="true"
                                 />
                                 Serviço de referência
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="flex flex-1 flex-col justify-between gap-5">
+                            <div className="space-y-3">
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <div
+                                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
+                                        style={{
+                                            backgroundColor: servicoPrincipal?.color ?? '#2563EB',
+                                        }}
+                                    >
+                                        <Server className="size-5" />
+                                    </div>
+
+                                    <p className="truncate text-sm font-semibold">
+                                        {servicoPrincipal?.name ?? 'Serviço'}
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="flex min-w-0 items-center gap-3">
-                                <div
-                                    className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
-                                    style={{
-                                        backgroundColor: servicoPrincipal?.color ?? '#2563EB',
-                                    }}
-                                >
-                                    <Server className="size-5" />
-                                </div>
+                            <div className="space-y-1">
+                                <p className="text-3xl font-semibold tabular-nums sm:text-4xl">
+                                    {formatarValor(valorPrincipal, metrica)}
 
-                                <p className="truncate text-sm font-semibold text-slate-100">
-                                    {servicoPrincipal?.name ?? 'Serviço'}
+                                    {valorPrincipal !== null && (
+                                        <span className="ml-2 text-base font-medium text-muted-foreground">
+                                            {unidade}
+                                        </span>
+                                    )}
+                                </p>
+
+                                <p className="text-xs text-muted-foreground">
+                                    {valorPrincipal !== null ? 'Total no período' : 'Sem métricas'}
                                 </p>
                             </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <p className="text-3xl font-semibold text-slate-100 tabular-nums sm:text-4xl">
-                                {formatarValor(valorPrincipal, metrica)}
-
-                                {valorPrincipal !== null && (
-                                    <span className="ml-2 text-base font-medium text-slate-400">
-                                        {unidade}
-                                    </span>
-                                )}
-                            </p>
-
-                            <p className="text-xs text-slate-400">
-                                {valorPrincipal !== null ? 'Total no período' : 'Sem métricas'}
-                            </p>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
                     {/* Média dos demais serviços */}
-                    <div className="flex min-h-[190px] min-w-0 flex-col justify-between gap-5 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                        <div className="flex items-center gap-2 text-sm font-medium text-slate-200">
-                            <UsersRound className="size-5 shrink-0 text-slate-300" />
-                            Média dos demais serviços
-                        </div>
+                    <Card className="min-h-[190px] min-w-0 justify-between">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <UsersRound className="size-5 shrink-0 text-slate-300" />
+                                Média dos demais serviços
+                            </CardTitle>
+                        </CardHeader>
 
-                        <div className="space-y-2">
-                            <p className="text-3xl font-semibold text-slate-100 tabular-nums sm:text-4xl">
-                                {formatarValor(mediaDemais, metrica)}
+                        <CardContent className="flex flex-1 flex-col justify-between gap-5">
+                            <div className="space-y-2">
+                                <p className="text-3xl font-semibold tabular-nums sm:text-4xl">
+                                    {formatarValor(mediaDemais, metrica)}
 
-                                {mediaDemais !== null && (
-                                    <span className="ml-2 text-base font-medium text-slate-400">
-                                        {unidade}
-                                    </span>
-                                )}
-                            </p>
+                                    {mediaDemais !== null && (
+                                        <span className="ml-2 text-base font-medium text-muted-foreground">
+                                            {unidade}
+                                        </span>
+                                    )}
+                                </p>
 
-                            <p className="text-xs text-slate-400">
-                                {mediaDemais !== null
-                                    ? `Média de ${valoresDemais.length} ${
-                                          valoresDemais.length === 1 ? 'serviço' : 'serviços'
-                                      } com valores disponíveis.`
-                                    : 'Não há outros serviços com valores disponíveis.'}
-                            </p>
-                        </div>
-                    </div>
+                                <p className="text-xs text-muted-foreground">
+                                    {mediaDemais !== null
+                                        ? `Média de ${valoresDemais.length} ${
+                                              valoresDemais.length === 1 ? 'serviço' : 'serviços'
+                                          } com valores disponíveis.`
+                                        : 'Não há outros serviços com valores disponíveis.'}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
 
                     {/* Diferença percentual */}
-                    
-{/* Diferença percentual */}
-<div className="flex min-h-[190px] min-w-0 flex-col gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
 
-    <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-200">
-            Diferença percentual
-        </span>
+                    {/* Diferença percentual */}
+                    <Card className="min-h-[190px] min-w-0">
+                        <CardHeader>
+                            <CardTitle className="flex items-center justify-between">
+                                Diferença percentual
+                                <Percent className="size-6 text-slate-300" />
+                            </CardTitle>
+                        </CardHeader>
 
-        <Percent className="size-6 text-slate-300" />
-    </div>
+                        <CardContent className="flex-1">
+                            <ComparisonDifferenceChart
+                                percentual={diferencaPercentual}
+                                classificacao={classificacao}
+                                descricao={descricaoDiferenca}
+                                descricaoAntes={descricaoAntes}
+                                valorDestaque={valorDestaque}
+                                descricaoDepois={descricaoDepois}
+                            />
+                        </CardContent>
+                    </Card>
+                    {/* Valores individuais */}
+                    <Card className="min-w-0">
+                        <CardHeader>
+                            <CardTitle>Valores individuais</CardTitle>
+                        </CardHeader>
 
-    <ComparisonDifferenceChart
-    percentual={diferencaPercentual}
-    classificacao={classificacao}
-    descricao={descricaoDiferenca}
-    descricaoAntes={descricaoAntes}
-    valorDestaque={valorDestaque}
-    descricaoDepois={descricaoDepois}
-/>
-
-</div>
-           {/* Valores individuais */}
-                    <div className="min-w-0 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                        <div className="mb-4">
-                            <h4 className="text-sm font-semibold text-slate-100">
-                                Valores individuais
-                            </h4>
-                        </div>
-
-                        <div className="overflow-x-auto">
+                        <CardContent className="overflow-x-auto">
                             <table className="w-full min-w-[210px] text-left text-xs">
                                 <thead>
-                                    <tr className="border-b border-slate-800 text-slate-400">
+                                    <tr className="border-b border-border text-muted-foreground">
                                         <th className="pb-3 pr-2 font-medium">Serviço</th>
 
                                         <th className="pb-3 text-right font-medium whitespace-nowrap">
@@ -454,9 +448,9 @@ const descricaoDepois =
                                         return (
                                             <tr
                                                 key={servico.selectionId}
-                                                className="border-b border-slate-800/70 last:border-0"
+                                                className="border-b border-border/70 last:border-0"
                                             >
-                                                <td className="py-3 pr-2 text-slate-200">
+                                                <td className="py-3 pr-2">
                                                     <div className="flex min-w-0 items-center gap-2">
                                                         <span
                                                             className="size-2.5 shrink-0 rounded-full"
@@ -474,11 +468,11 @@ const descricaoDepois =
                                                     </div>
                                                 </td>
 
-                                                <td className="py-3 text-right font-medium text-slate-200 tabular-nums whitespace-nowrap">
+                                                <td className="py-3 text-right font-medium tabular-nums whitespace-nowrap">
                                                     {valor !== null ? (
                                                         formatarValor(valor, metrica)
                                                     ) : (
-                                                        <span className="text-slate-500">
+                                                        <span className="text-muted-foreground">
                                                             Sem métricas
                                                         </span>
                                                     )}
@@ -491,7 +485,7 @@ const descricaoDepois =
                                         <tr>
                                             <td
                                                 colSpan={2}
-                                                className="py-5 text-center text-slate-400"
+                                                className="py-5 text-center text-muted-foreground"
                                             >
                                                 Nenhum serviço selecionado.
                                             </td>
@@ -499,8 +493,8 @@ const descricaoDepois =
                                     )}
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
             )}
         </section>

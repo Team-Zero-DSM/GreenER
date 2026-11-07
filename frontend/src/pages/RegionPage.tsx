@@ -6,28 +6,27 @@ import { CarbonIntensityChart } from '@/components/charts/CarbonIntensityChart';
 import { ChartCard } from '@/components/charts/ChartCard';
 import { RegionsCarousel } from '@/components/regions/RegionsCarousel';
 import { RegionsMap2D } from '@/components/regions/RegionsMap2D';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageShell } from '@/components/shared/PageShell';
 
 export function RegionPage() {
     const fetcher = useCallback(() => fetchRegionsLast24Hours(), []);
     const { data: regions, isLoading, error } = useApiQuery(fetcher);
 
     return (
-        <main className="mx-auto max-w-7xl space-y-8 p-4 sm:p-6 lg:space-y-12">
-            <header className="flex flex-wrap items-start justify-between gap-4">
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-semibold">Regiões</h1>
-                    <p className="text-muted-foreground">
-                        Intensidade de carbono de cada região e o impacto dos serviços hospedados
-                        nela
-                    </p>
-                </div>
-                <Link
-                    to="/#explorar"
-                    className="inline-flex shrink-0 items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-cyan-400/50 hover:bg-cyan-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                >
-                    Ver no globo 3D
-                </Link>
-            </header>
+        <PageShell>
+            <PageHeader
+                title="Regiões"
+                description="Intensidade de carbono de cada região e o impacto dos serviços hospedados nela"
+                actions={
+                    <Link
+                        to="/#explorar"
+                        className="inline-flex shrink-0 items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-cyan-400/50 hover:bg-cyan-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                    >
+                        Ver no globo 3D
+                    </Link>
+                }
+            />
 
             {error && (
                 <p role="alert" className="text-sm text-destructive">
@@ -65,6 +64,6 @@ export function RegionPage() {
             ) : (
                 <p className="text-muted-foreground">Nenhuma região disponível.</p>
             )}
-        </main>
+        </PageShell>
     );
 }
