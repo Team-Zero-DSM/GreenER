@@ -156,3 +156,121 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 - **Frontend — Vitor:** finalizou a tela de regiões, realizando os últimos ajustes necessários para adaptá-la a dispositivos móveis e tablets.
 - **Frontend — Henrique:** alinhou com Pedro como serão disponibilizadas e consumidas as informações do backend para a página de comparação, preparando-se para concluir o componente de resumo e comparação.
 - **Impedimento:** o tempo disponível para o desenvolvimento do projeto continuou limitado.
+
+---
+
+## 📅 29/10/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Vitor:** concluiu a task de criação do componente para exibição das regiões (T04).
+- **Frontend — Henrique:** estava finalizando a implementação dos componentes e interações da tela de comparação (T01), com previsão de conclusão para o dia seguinte.
+- **Impedimento:** o tempo disponível para o desenvolvimento do projeto foi limitado devido às demandas acadêmicas e à aula do professor, que não foi disponibilizada para o desenvolvimento do projeto, dificultando a conclusão de outras tasks.
+
+---
+
+## 📅 03/11/2026
+
+### 👥 Presença
+
+## 📅 03/11/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Paulo:** durante o feriado, concluiu a implementação dos filtros de critério e período da tela de ranking, permitindo controlar os dados exibidos.
+- **Backend — Pedro:** durante o feriado, criou o endpoint para consulta do histórico de status das coletas, permitindo visualizar se foram concluídas com sucesso ou apresentaram falhas.
+- **Backend — Pedro:** concluiu os endpoints necessários para as telas de ranking e comparação de serviços.
+- **Frontend — Vitor:** implementou os componentes de exibição da quantidade de carbono emitida pelas regiões, avançando uma parte importante da tela de regiões.
+- **Frontend — Paulo:** implementou o gráfico de barras da tela de ranking, tornando a visualização dos dados mais direta.
+- **Frontend — Gabriel:** implementou a listagem de serviços e a integração com o globo na landing page, concluindo as principais funcionalidades previstas para a tela inicial.
+- **Contexto:** após o período de feriado e considerando o alto volume de tarefas pendentes no Burndown, a equipe concentrou esforços para acelerar as entregas. Durante o dia, o professor disponibilizou um período maior para o desenvolvimento do projeto, possibilitando a conclusão de cinco tasks.
+
+---
+
+## 📅 04/11/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ✅ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Gabriel:** implementou novas funcionalidades no globo da tela principal, ampliando as possibilidades de interação.
+- **Frontend — Henrique:** implementou a visualização dos cálculos comparativos na tela de comparação, permitindo identificar a diferença percentual de emissão entre os serviços.
+- **Frontend — Paulo:** implementou a tabela de classificação do ranking, concluindo os principais componentes da tela.
+- **Frontend — Gabriel:** atualizou a Header do projeto, melhorando sua estrutura e organização em relação ao layout.
+- **Frontend — Gabriel:** implementou o componente de visualização das métricas.
+- **Contexto:** apesar de o professor não ter disponibilizado um período amplo para o desenvolvimento do projeto, a equipe conseguiu concluir tasks que já estavam próximas da finalização no dia anterior. Não houve novas tasks preparadas para o dia seguinte devido ao tempo limitado.
+
+---
+
+## 📅 05/11/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ✅ |
+| Gabriel | ✅ |
+| Pedro | ✅ |
+| Vitor | ❌ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Gabriel:** implementou o componente de exibição do mapa 2D com as regiões.
+- **Frontend — Henrique:** implementou a visualização dos resultados comparativos, concluindo os componentes previstos para a tela de comparação.
+- **Frontend — Paulo e Backend — Pedro:** avançaram parcialmente em suas tasks, mas não conseguiram concluir novas entregas devido ao tempo limitado.
+- **Impedimento:** o professor não disponibilizou a aula para o desenvolvimento do projeto. Além disso, a equipe precisou dedicar boa parte do dia às atividades e aos trabalhos acadêmicos da disciplina, reduzindo o tempo disponível para outras tasks.
+
+---
+
+## 📅 06/11/2026
+
+### 👥 Presença
+
+| Membro | Presença |
+| --- | --- |
+| Henrique | ✅ |
+| Paulo | ❌ |
+| Gabriel | ❓ |
+| Pedro | ✅ |
+| Vitor | ❓ |
+
+### 📝 Registro da Daily
+
+- **Frontend — Paulo:** concluiu a integração da tela de ranking com o backend, finalizando a tela e deixando-a pronta para a Sprint Review. Apesar de não estar presente na Daily, realizou a entrega da task.
+- **Backend — Pedro:** realizou os testes das funcionalidades do backend, validando as implementações e seus comportamentos.
+- **Backend — Pedro:** validou o endpoint de consulta de serviços por região.
+- **Frontend — Henrique:** concluiu a integração da tela de comparação com o backend, finalizando essa etapa da tela.
+- **Backend — Pedro:** atualizou a documentação do backend e do banco de dados, refletindo as alterações realizadas durante a Sprint.
+- **Contexto:** com a proximidade da Sprint Review e o acúmulo de projetos e avaliações acadêmicas para a semana seguinte, a equipe concentrou os esforços na conclusão das tasks pendentes. O objetivo foi encerrar praticamente todo o desenvolvimento neste dia, deixando para o final de semana apenas a gravação do vídeo da Sprint Review e a preparação das apresentações. A equipe também precisava reservar tempo para estudar para um trabalho de grande peso avaliativo, previsto para quarta-feira.
+
+---
+
