@@ -28,9 +28,15 @@ Por meio dela são desenvolvidos os protótipos das telas utilizadas na document
 
 ---
 
-## 🆕 Versão atual — telas do projeto
+## Versão atual — atualização do design do site
 
-Atualizada em **07/11/2026**, esta versão foi elaborada a partir das telas do site do GreenER, incluindo os layouts de desktop, tablet e celular.
+Esta versão registra as melhorias de design realizadas pela equipe no site do **GreenER**, nos formatos desktop, tablet e celular. Ela apresenta a evolução visual da aplicação em relação ao protótipo inicial, preservado na seção de histórico abaixo.
+
+As telas incluem a padronização visual incorporada ao frontend no [PR #131](https://github.com/Team-Zero-DSM/GreenER/pull/131), com foco em melhorar a organização e a consistência da interface:
+
+- Cabeçalhos, espaçamentos e estrutura das páginas internas padronizados.
+- Cards e gráficos de ranking e comparação alinhados aos componentes compartilhados do projeto.
+- Seletores de período e métrica padronizados nas telas de ranking, detalhe do serviço e comparação.
 
 O arquivo reúne **oito telas por formato**: início, exploração de regiões, serviços, status de coleta, detalhe do serviço, regiões, ranking e comparação. As telas possuem camadas editáveis e navegação entre elas.
 
@@ -38,21 +44,21 @@ Os nomes dos serviços e os valores apresentados são **dados fictícios para de
 
 🔗 Figma: [Acessar versão atual](https://www.figma.com/design/SulLpLrxBg0TqBdFFSwWR5)
 
-| Formato | Acesso às telas |
-| ------- | --------------- |
-| Desktop | [Visualizar protótipo desktop](https://www.figma.com/design/SulLpLrxBg0TqBdFFSwWR5?node-id=1-2) |
-| Tablet | [Visualizar protótipo tablet — 768 px](https://www.figma.com/design/SulLpLrxBg0TqBdFFSwWR5?node-id=47-516) |
+| Formato | Acesso às telas                                                                                             |
+| ------- | ----------------------------------------------------------------------------------------------------------- |
+| Desktop | [Visualizar protótipo desktop](https://www.figma.com/design/SulLpLrxBg0TqBdFFSwWR5?node-id=1-2)             |
+| Tablet  | [Visualizar protótipo tablet — 768 px](https://www.figma.com/design/SulLpLrxBg0TqBdFFSwWR5?node-id=47-516)  |
 | Celular | [Visualizar protótipo celular — 390 px](https://www.figma.com/design/SulLpLrxBg0TqBdFFSwWR5?node-id=47-507) |
 
 ### 📋 PDFs da versão atual
 
-Cada PDF contém as oito telas do respectivo formato. As telas com rolagem vertical foram exportadas com seu conteúdo completo. Para consultar a navegação e as interações, utilize o arquivo do Figma.
+Cada PDF documenta essa atualização do design e contém as oito telas do respectivo formato. As telas com rolagem vertical foram exportadas com seu conteúdo completo. Para consultar a navegação e as interações, utilize o arquivo do Figma.
 
-| Arquivo | Descrição |
-| ------- | --------- |
-| [Greener - Protótipo Desktop - Atual](./Greener%20-%20Protótipo%20Desktop%20-%20Atual.pdf) | Telas atuais para desktop |
-| [Greener - Protótipo Tablet - Atual](./Greener%20-%20Protótipo%20Tablet%20-%20Atual.pdf) | Telas atuais para tablet |
-| [Greener - Protótipo Mobile - Atual](./Greener%20-%20Protótipo%20Mobile%20-%20Atual.pdf) | Telas atuais para celular |
+| Arquivo                                                                                    | Descrição                          |
+| ------------------------------------------------------------------------------------------ | ---------------------------------- |
+| [Greener - Protótipo Desktop - Atual](./Greener%20-%20Protótipo%20Desktop%20-%20Atual.pdf) | Atualização do design para desktop |
+| [Greener - Protótipo Tablet - Atual](./Greener%20-%20Protótipo%20Tablet%20-%20Atual.pdf)   | Atualização do design para tablet  |
+| [Greener - Protótipo Mobile - Atual](./Greener%20-%20Protótipo%20Mobile%20-%20Atual.pdf)   | Atualização do design para celular |
 
 ---
 
@@ -62,11 +68,11 @@ Os PDFs e o arquivo original do Figma abaixo foram mantidos para consulta e acom
 
 ### 📋 Arquivos em PDF
 
-| Arquivo                       | Descrição                                                              |
-| ----------------------------- | ---------------------------------------------------------------------- |
+| Arquivo                                                                | Descrição                                                              |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | [Greener - Protótipo Desktop](./Greener%20-%20Protótipo%20Desktop.pdf) | Protótipo criado para exemplificação do design em dispositivos desktop |
-| [Greener - Protótipo Mobile](./Greener%20-%20Protótipo%20Mobile.pdf)  | Protótipo criado para exemplificação do design em dispositivos mobile  |
-| [Greener - Protótipo Tablet](./Greener%20-%20Protótipo%20Tablet.pdf)  | Protótipo criado para exemplificação do design em dispositivos tablet  |
+| [Greener - Protótipo Mobile](./Greener%20-%20Protótipo%20Mobile.pdf)   | Protótipo criado para exemplificação do design em dispositivos mobile  |
+| [Greener - Protótipo Tablet](./Greener%20-%20Protótipo%20Tablet.pdf)   | Protótipo criado para exemplificação do design em dispositivos tablet  |
 
 ---
 
