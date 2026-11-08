@@ -1,6 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { Info } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageShell } from '@/components/shared/PageShell';
+import { Card, CardContent } from '@/components/ui/card';
 
 import {
     ComparisonServiceSelector,
@@ -172,15 +175,11 @@ export function ComparisonPage() {
         }) ?? [];
 
     return (
-        <main className="mx-auto max-w-7xl space-y-6 p-6">
-            <header className="space-y-2">
-                <h1 className="text-3xl font-semibold">Comparar serviços</h1>
-
-                <p className="text-muted-foreground">
-                    Selecione os serviços que deseja comparar, defina o período e analise as
-                    métricas no mesmo gráfico.
-                </p>
-            </header>
+        <PageShell>
+            <PageHeader
+                title="Comparar serviços"
+                description="Selecione os serviços que deseja comparar, defina o período e analise as métricas no mesmo gráfico."
+            />
 
             <section
                 aria-label="Comparação de serviços"
@@ -226,15 +225,17 @@ export function ComparisonPage() {
 
                 {/* Gráfico comparativo. */}
                 {respostaPreparada !== null && (
-                    <div className="min-w-0 rounded-lg border border-border p-4">
-                        <ComparisonChart
-                            series={seriesGrafico}
-                            metrica={metrica}
-                            periodo={respostaPreparada.range}
-                            periodoInicio={respostaPreparada.period.from}
-                            periodoFim={respostaPreparada.period.to}
-                        />
-                    </div>
+                    <Card className="min-w-0">
+                        <CardContent>
+                            <ComparisonChart
+                                series={seriesGrafico}
+                                metrica={metrica}
+                                periodo={respostaPreparada.range}
+                                periodoInicio={respostaPreparada.period.from}
+                                periodoFim={respostaPreparada.period.to}
+                            />
+                        </CardContent>
+                    </Card>
                 )}
 
                 {/* Resumo comparativo. */}
@@ -245,6 +246,6 @@ export function ComparisonPage() {
                     servicoPrincipalId={servicoPrincipalId}
                 />
             </section>
-        </main>
+        </PageShell>
     );
 }

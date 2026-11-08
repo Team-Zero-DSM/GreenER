@@ -4,6 +4,8 @@ import { CollectionStatusPanel } from '@/components/services/CollectionStatusPan
 import { ServiceFilters } from '@/components/services/ServiceFilters';
 import { ServiceList } from '@/components/services/ServiceList';
 import { StatusLegend } from '@/components/services/StatusLegend';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageShell } from '@/components/shared/PageShell';
 import {
     defaultFilters,
     filterServices,
@@ -26,13 +28,11 @@ export function DashboardPage() {
     const visibleServices = useMemo(() => filterServices(services, filters), [services, filters]);
 
     return (
-        <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-            <header>
-                <h1 className="text-3xl font-semibold">Serviços</h1>
-                <p className="text-muted-foreground">
-                    Estado, localização, métricas e impacto estimado de cada serviço.
-                </p>
-            </header>
+        <PageShell>
+            <PageHeader
+                title="Serviços"
+                description="Estado, localização, métricas e impacto estimado de cada serviço."
+            />
             <nav aria-label="Visualização dos serviços" className="flex gap-2 border-b pb-3">
                 {[
                     { label: 'Métricas dos serviços', value: 'metricas' },
@@ -115,6 +115,6 @@ export function DashboardPage() {
                     )}
                 </>
             )}
-        </main>
+        </PageShell>
     );
 }
