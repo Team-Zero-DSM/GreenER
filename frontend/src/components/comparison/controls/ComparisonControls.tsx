@@ -1,6 +1,9 @@
 import { ArrowLeftRight } from 'lucide-react';
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
-import { HISTORY_RANGE_OPTIONS, IMPACT_METRIC_OPTIONS} from '@/components/shared/segmentedControlOptions';
+import {
+    HISTORY_RANGE_OPTIONS,
+    IMPACT_METRIC_OPTIONS,
+} from '@/components/shared/segmentedControlOptions';
 import type { HistoryRange } from '@/types/service';
 import type { RankingCriterion } from '@/types/ranking';
 

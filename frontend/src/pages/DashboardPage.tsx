@@ -16,15 +16,13 @@ import { useServices } from '@/hooks/useServices';
 export function DashboardPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const collectionView = searchParams.get('visao') === 'coletas';
-    const [regionCode, setRegionCode] = useState('');
-    const [active, setActive] = useState('all');
-    const { services, isLoading, error } = useServices(
-        regionCode || undefined,
-        active === 'all' ? undefined : active === 'true',
-    );
+
+    const { services, isLoading, error } = useServices();
+
     const [filters, setFilters] = useState(defaultFilters);
 
     const countries = useMemo(() => listCountries(services), [services]);
+
     const visibleServices = useMemo(() => filterServices(services, filters), [services, filters]);
 
     return (
@@ -33,61 +31,47 @@ export function DashboardPage() {
                 title="Serviços"
                 description="Estado, localização, métricas e impacto estimado de cada serviço."
             />
-            <nav aria-label="Visualização dos serviços" className="flex gap-2 border-b pb-3">
+
+            <nav
+                aria-label="Visualização dos serviços"
+                className="flex gap-2 border-b border-border pb-3"
+            >
                 {[
                     { label: 'Métricas dos serviços', value: 'metricas' },
                     { label: 'Status de coleta', value: 'coletas' },
-                ].map((tab) => (
-                    <button
-                        key={tab.value}
-                        type="button"
-                        aria-current={
-                            (collectionView ? 'coletas' : 'metricas') === tab.value
-                                ? 'page'
-                                : undefined
-                        }
-                        onClick={() =>
-                            setSearchParams((previous) => {
-                                const next = new URLSearchParams(previous);
-                                next.set('visao', tab.value);
-                                return next;
-                            })
-                        }
-                        className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${(collectionView ? 'coletas' : 'metricas') === tab.value ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-white/5'}`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
+                ].map((tab) => {
+                    const active = (collectionView ? 'coletas' : 'metricas') === tab.value;
+
+                    return (
+                        <button
+                            key={tab.value}
+                            type="button"
+                            aria-current={active ? 'page' : undefined}
+                            onClick={() =>
+                                setSearchParams((previous) => {
+                                    const next = new URLSearchParams(previous);
+                                    next.set('visao', tab.value);
+                                    return next;
+                                })
+                            }
+                            className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                                active
+                                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                                    : 'border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    );
+                })}
             </nav>
+
             {collectionView ? (
                 <CollectionStatusPanel />
             ) : (
-                <>
-                    <div className="flex flex-wrap gap-4">
-                        <label className="flex flex-col gap-1 text-sm">
-                            Código da região
-                            <input
-                                className="rounded-md border bg-secondary px-3 py-2"
-                                placeholder="Todas as regiões"
-                                value={regionCode}
-                                onChange={(event) => setRegionCode(event.target.value)}
-                            />
-                        </label>
-                        <label className="flex flex-col gap-1 text-sm">
-                            Listagem
-                            <select
-                                className="rounded-md border bg-secondary px-3 py-2"
-                                value={active}
-                                onChange={(event) => setActive(event.target.value)}
-                            >
-                                <option value="all">Todos os serviços</option>
-                                <option value="true">Listados</option>
-                                <option value="false">Não listados</option>
-                            </select>
-                        </label>
-                    </div>
-
+                <div className="space-y-5">
                     {isLoading && <p className="text-muted-foreground">Carregando serviços...</p>}
+
                     {error && <p className="text-destructive">{error}</p>}
 
                     {!isLoading && !error && (
@@ -97,23 +81,32 @@ export function DashboardPage() {
                                 countries={countries}
                                 onChange={setFilters}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                Mostrando {visibleServices.length} de {services.length} serviços
-                            </p>
-                            {visibleServices.length === 0 ? (
-                                <p className="text-muted-foreground">
-                                    Nenhum serviço com esses filtros.
+
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span className="tabular-nums">{visibleServices.length}</span>
+                                    <span>de {services.length} serviços</span>
+                                </div>
+
+                                <p className="text-xs text-muted-foreground">
+                                    Energia e CO₂e referentes à última coleta
                                 </p>
+                            </div>
+
+                            {visibleServices.length === 0 ? (
+                                <div className="rounded-xl border border-white/10 bg-card px-4 py-10 text-center">
+                                    <p className="text-sm text-muted-foreground">
+                                        Nenhum serviço encontrado com esses filtros.
+                                    </p>
+                                </div>
                             ) : (
                                 <ServiceList services={visibleServices} />
                             )}
-                            <p className="text-xs text-muted-foreground">
-                                Energia e CO₂e referem-se à última coleta de cada serviço.
-                            </p>
+
                             <StatusLegend />
                         </>
                     )}
-                </>
+                </div>
             )}
         </PageShell>
     );

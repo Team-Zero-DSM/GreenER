@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { A11y, Navigation, Pagination } from 'swiper/modules';
+import { A11y, Mousewheel, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/a11y';
@@ -30,9 +30,10 @@ export function RegionsCarousel({ regions }: RegionsCarouselProps) {
             </button>
 
             <Swiper
-                modules={[A11y, Navigation, Pagination]}
+                modules={[A11y, Mousewheel, Navigation, Pagination]}
                 navigation={{ prevEl, nextEl }}
                 pagination={{ el: paginationEl, clickable: true }}
+                mousewheel={true}
                 spaceBetween={16}
                 breakpoints={{
                     0: { slidesPerView: 1 },

@@ -37,9 +37,7 @@ export function ComparisonRegionPicker({
 
                 {/* Estados de carregamento e erro. */}
                 {regioesCarregando ? (
-                    <p className="px-3 py-3 text-sm text-muted-foreground">
-                        Carregando regiões...
-                    </p>
+                    <p className="px-3 py-3 text-sm text-muted-foreground">Carregando regiões...</p>
                 ) : erroRegioes && regioes.length === 0 ? (
                     <p className="px-3 py-3 text-sm text-red-400">
                         Não foi possível carregar as regiões: {erroRegioes}

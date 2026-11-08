@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import {
     Activity,
+    Check,
     CheckCircle2,
     ChevronDown,
     ChevronRight,
@@ -9,6 +10,8 @@ import {
     TriangleAlert,
     X,
 } from 'lucide-react';
+
+import { useClickOutside } from '@/hooks/useClickOutside';
 import {
     fetchCollectionStatuses,
     fetchCollectionStatusHistory,
@@ -545,6 +548,85 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
     );
 }
 
+interface CollectionFilterSelectProps {
+    label: string;
+    value: string;
+    options: { value: string; label: string }[];
+    onChange: (value: string) => void;
+}
+
+function CollectionFilterSelect({ label, value, options, onChange }: CollectionFilterSelectProps) {
+    const [open, setOpen] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const pickerRef = useRef<HTMLDivElement>(null);
+
+    useClickOutside(open, buttonRef, pickerRef, setOpen);
+
+    const selected = options.find((option) => option.value === value);
+
+    return (
+        <div className={`relative min-w-0 ${open ? 'z-50' : 'z-0'}`}>
+            <button
+                ref={buttonRef}
+                type="button"
+                aria-label={label}
+                aria-expanded={open}
+                onClick={() => setOpen((current) => !current)}
+                className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors ${
+                    open
+                        ? 'border-emerald-400/50 bg-emerald-400/[0.05] text-foreground'
+                        : 'border-input bg-secondary text-foreground hover:border-emerald-400/30'
+                }`}
+            >
+                <span className="truncate">{selected?.label ?? value}</span>
+
+                <ChevronDown
+                    aria-hidden="true"
+                    className={`size-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
+                        open ? 'rotate-180' : ''
+                    }`}
+                />
+            </button>
+
+            {open && (
+                <div
+                    ref={pickerRef}
+                    className="absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto rounded-lg border border-border bg-background p-2 shadow-xl shadow-black/40"
+                >
+                    <div className="flex flex-col gap-1">
+                        {options.map((option) => {
+                            const selected = option.value === value;
+
+                            return (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    aria-pressed={selected}
+                                    onClick={() => {
+                                        onChange(option.value);
+                                        setOpen(false);
+                                    }}
+                                    className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2.5 text-left text-sm transition-colors ${
+                                        selected
+                                            ? 'bg-emerald-400/10 font-medium text-emerald-300'
+                                            : 'text-foreground/80 hover:bg-emerald-400/[0.07] hover:text-emerald-200'
+                                    }`}
+                                >
+                                    <span>{option.label}</span>
+
+                                    {selected && (
+                                        <Check aria-hidden="true" className="size-4 shrink-0" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export function CollectionStatusPanel() {
     const [draft, setDraft] = useState('');
     const [query, setQuery] = useState<CollectionStatusQuery>({
@@ -563,66 +645,82 @@ export function CollectionStatusPanel() {
                 </span>
                 <span>Horários de Brasília</span>
             </div>
+
             <form
                 onSubmit={(event) => {
                     event.preventDefault();
                     setQuery({ ...query, search: draft.trim(), page: 1 });
                 }}
-                className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap"
+                className="relative z-20 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap"
             >
-                <label className="col-span-2 flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-background/40 px-3 sm:min-w-56">
-                    <Search size={16} className="text-muted-foreground" aria-hidden="true" />
+                <label className="group col-span-2 flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-input bg-secondary/60 px-3 transition-colors focus-within:border-emerald-400/50 focus-within:bg-secondary focus-within:ring-2 focus-within:ring-emerald-400/10 sm:min-w-56">
+                    <Search
+                        size={17}
+                        className="shrink-0 text-muted-foreground transition-colors group-focus-within:text-emerald-300"
+                        aria-hidden="true"
+                    />
+
                     <input
+                        type="search"
                         aria-label="Buscar serviço"
                         maxLength={100}
                         placeholder="Buscar por nome ou identificador..."
                         value={draft}
                         onChange={(event) => setDraft(event.target.value)}
-                        className="min-h-11 w-full min-w-0 bg-transparent py-2.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
+                        className="min-h-11 w-full min-w-0 border-0 bg-transparent py-2.5 text-sm text-foreground outline-none ring-0 placeholder:text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                     />
                 </label>
+
                 <button
                     type="submit"
-                    className="col-span-2 min-h-11 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    className="col-span-2 min-h-11 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-colors hover:border-emerald-400/50 hover:bg-emerald-400/15"
                 >
                     Buscar
                 </button>
-                <label className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
-                    Resultado
-                    <select
+
+                <div className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
+                    <span>Resultado</span>
+
+                    <CollectionFilterSelect
+                        label="Resultado"
                         value={query.result}
-                        onChange={(event) =>
+                        options={[
+                            { value: 'all', label: 'Todos os resultados' },
+                            { value: 'success', label: 'Sucesso' },
+                            { value: 'failure', label: 'Com falha' },
+                            { value: 'pending', label: 'Sem tentativas' },
+                        ]}
+                        onChange={(value) =>
                             setQuery({
                                 ...query,
-                                result: event.target.value as CollectionStatusQuery['result'],
+                                result: value as CollectionStatusQuery['result'],
                                 page: 1,
                             })
                         }
-                        className="min-h-11 w-full min-w-0 rounded-lg border bg-secondary px-2 py-2.5 text-base text-foreground sm:w-auto sm:px-3 sm:text-sm"
-                    >
-                        <option value="all">Todos os resultados</option>
-                        <option value="success">Sucesso</option>
-                        <option value="failure">Com falha</option>
-                        <option value="pending">Sem tentativas</option>
-                    </select>
-                </label>
-                <label className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
-                    Por página
-                    <select
-                        value={query.limit}
-                        onChange={(event) =>
-                            setQuery({ ...query, limit: Number(event.target.value), page: 1 })
+                    />
+                </div>
+
+                <div className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
+                    <span>Por página</span>
+
+                    <CollectionFilterSelect
+                        label="Quantidade por página"
+                        value={String(query.limit)}
+                        options={[3, 10, 20, 50].map((limit) => ({
+                            value: String(limit),
+                            label: String(limit),
+                        }))}
+                        onChange={(value) =>
+                            setQuery({
+                                ...query,
+                                limit: Number(value),
+                                page: 1,
+                            })
                         }
-                        className="min-h-11 w-full min-w-0 rounded-lg border bg-secondary px-2 py-2.5 text-base text-foreground sm:w-auto sm:px-3 sm:text-sm"
-                    >
-                        {[3, 10, 20, 50].map((limit) => (
-                            <option key={limit} value={limit}>
-                                {limit}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                    />
+                </div>
             </form>
+
             <CollectionStatusResults
                 query={query}
                 onResult={(result) => setQuery({ ...query, result, page: 1 })}

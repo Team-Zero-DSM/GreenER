@@ -5,7 +5,20 @@ interface CarbonIntensityChartProps {
     regions: Region[];
 }
 
-const BAR_COLORS = ['#f59e0b', '#ec4899', '#10b981', '#3b82f6', '#f97316'];
+const BAR_COLORS = [
+    '#60A5FA',
+    '#34D399',
+    '#22D3EE',
+    '#A78BFA',
+    '#F472B6',
+    '#818CF8',
+    '#2DD4BF',
+    '#93C5FD',
+    '#6EE7B7',
+    '#C4B5FD',
+    '#38BDF8',
+    '#FB7185',
+];
 
 function regionName(region: Region): string {
     return region.city ?? region.region ?? region.code;
@@ -29,46 +42,54 @@ export function CarbonIntensityChart({ regions }: CarbonIntensityChartProps) {
 
     return (
         <div
-            className="mb-2 mt-4 space-y-4 lg:space-y-6"
+            className="mb-2 mt-4 space-y-2"
             role="list"
             aria-label="Intensidade de carbono por região"
         >
             {rows.map((region, index) => {
                 const value = region.gco2ePerKwh;
                 const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+                const color = BAR_COLORS[index % BAR_COLORS.length];
 
                 return (
                     <div
                         key={region.code}
                         role="listitem"
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 sm:grid-cols-[minmax(5rem,6rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-y-0 lg:gap-x-2"
+                        className="group rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-white/5"
                     >
-                        <span
-                            className="col-start-1 row-start-1 min-w-0 truncate text-md font-medium text-foreground sm:font-normal sm:text-muted-foreground"
-                            title={regionName(region)}
-                        >
-                            {regionName(region)}
-                        </span>
-                        <div
-                            className="col-span-2 col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-secondary/80 ring-1 ring-white/5 sm:col-span-1 sm:col-start-2 sm:row-start-1"
-                            role="meter"
-                            aria-label={`Intensidade de carbono de ${regionName(region)}`}
-                            aria-valuemin={0}
-                            aria-valuemax={maxValue}
-                            aria-valuenow={value}
-                        >
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(6rem,8rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-y-0">
+                            {/* Nome da região. */}
+                            <span
+                                className="col-start-1 row-start-1 min-w-0 truncate text-sm font-medium text-foreground sm:font-normal sm:text-muted-foreground"
+                                title={regionName(region)}
+                            >
+                                {regionName(region)}
+                            </span>
+
+                            {/* Valor da intensidade. */}
+                            <span className="col-start-2 row-start-1 whitespace-nowrap text-right text-xs font-semibold tabular-nums text-foreground/80 sm:col-start-3 sm:text-sm">
+                                {formatIntensity(value)}
+                            </span>
+
+                            {/* Barra proporcional. */}
                             <div
-                                className="h-full rounded-full transition-[width] duration-500"
-                                style={{
-                                    width: `${percentage}%`,
-                                    backgroundColor: BAR_COLORS[index % BAR_COLORS.length],
-                                    boxShadow: `0 0 12px ${BAR_COLORS[index % BAR_COLORS.length]}66`,
-                                }}
-                            />
+                                className="col-span-2 col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-secondary/70 ring-1 ring-white/5 sm:col-span-1 sm:col-start-2 sm:row-start-1"
+                                role="meter"
+                                aria-label={`Intensidade de carbono de ${regionName(region)}`}
+                                aria-valuemin={0}
+                                aria-valuemax={maxValue}
+                                aria-valuenow={value}
+                            >
+                                <div
+                                    className="h-full rounded-full transition-[width] duration-500 ease-out"
+                                    style={{
+                                        width: `${percentage}%`,
+                                        backgroundColor: color,
+                                        boxShadow: `0 0 10px ${color}55`,
+                                    }}
+                                />
+                            </div>
                         </div>
-                        <span className="col-start-2 row-start-1 whitespace-nowrap text-right text-xs font-medium tabular-nums text-muted-foreground sm:col-start-3 sm:text-sm">
-                            {formatIntensity(value)}
-                        </span>
                     </div>
                 );
             })}

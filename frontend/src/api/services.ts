@@ -56,8 +56,7 @@ export async function postJson<TRequest, TResponse>(
         } | null;
 
         throw new ApiError(
-            body?.error?.message ??
-                `Falha na comunicação com a API (HTTP ${response.status})`,
+            body?.error?.message ?? `Falha na comunicação com a API (HTTP ${response.status})`,
             response.status,
         );
     }
@@ -133,5 +132,3 @@ export async function fetchServiceHistory(
         `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=120`,
     );
 }
-
-
