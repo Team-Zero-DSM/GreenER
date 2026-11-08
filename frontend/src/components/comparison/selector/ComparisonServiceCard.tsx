@@ -3,12 +3,12 @@ import { useRef, useState } from 'react';
 import { ChevronDown, MapPin, MapPinned, Server, Star, X } from 'lucide-react';
 
 import type { ServiceSummary } from '@/types/service';
+import type { Region } from '@/types/api';
 
 import { useClickOutside } from '@/hooks/useClickOutside';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ComparisonColorPicker } from './ComparisonColorPicker';
 import { ComparisonRegionPicker } from './ComparisonRegionPicker';
-import type { Region } from '@/types/api';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 interface ComparisonServiceCardProps {
     servico: ServiceSummary;
@@ -75,11 +75,9 @@ export function ComparisonServiceCard({
 
     return (
         <div className="space-y-2">
-            {/* Cartão e seletores flutuantes. */}
             <div className="relative min-w-0">
-                {/* Cartão. */}
-                <Card className="min-w-0">
-                    <CardContent className="space-y-3">
+                <Card className="min-w-0 gap-0">
+                    <CardContent className="space-y-3 pb-4">
                         <div className="flex items-start gap-3">
                             <div
                                 className="flex size-11 shrink-0 items-center justify-center rounded-full"
@@ -166,9 +164,10 @@ export function ComparisonServiceCard({
                             </div>
                         </div>
                     </CardContent>
-                    {/* Botões inferiores. */}
-                    <CardFooter className="flex-wrap justify-between gap-2">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
+
+                    {/* A única divisória, integrada ao rodapé. */}
+                    <CardFooter className="relative flex items-center gap-3 border-t-0 px-6 pb-4 pt-3 before:absolute before:left-6 before:right-6 before:top-0 before:h-px before:bg-border/70">
+                        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2">
                             {/* Botão de cor. */}
                             <button
                                 ref={corButtonRef}
@@ -192,32 +191,37 @@ export function ComparisonServiceCard({
                                 />
                             </button>
 
-                            <div className="flex flex-wrap items-center gap-1">
-                                {/* Botão de região. */}
-                                <button
-                                    ref={regiaoButtonRef}
-                                    type="button"
-                                    onClick={() => setMostrarRegioes((atual) => !atual)}
-                                    aria-expanded={mostrarRegioes}
-                                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-slate-800 hover:text-teal-300"
-                                >
-                                    <MapPinned aria-hidden="true" className="size-4 shrink-0" />
+                            {/* Botão de região. */}
+                            <button
+                                ref={regiaoButtonRef}
+                                type="button"
+                                onClick={() => setMostrarRegioes((atual) => !atual)}
+                                aria-expanded={mostrarRegioes}
+                                className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-teal-300"
+                            >
+                                <MapPinned aria-hidden="true" className="size-4 shrink-0" />
 
-                                    <span>Simular região</span>
-                                </button>
+                                <span>Simular região</span>
 
-                                {/* Remover serviço. */}
-                                <button
-                                    type="button"
-                                    onClick={onRemover}
-                                    aria-label={`Remover ${servico.name} da comparação`}
-                                    title="Remover serviço"
-                                    className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-red-400"
-                                >
-                                    <X aria-hidden="true" className="size-4" />
-                                </button>
-                            </div>
+                                <ChevronDown
+                                    aria-hidden="true"
+                                    className={`size-4 transition-transform ${
+                                        mostrarRegioes ? 'rotate-180' : ''
+                                    }`}
+                                />
+                            </button>
                         </div>
+
+                        {/* Remover serviço. */}
+                        <button
+                            type="button"
+                            onClick={onRemover}
+                            aria-label={`Remover ${servico.name} da comparação`}
+                            title="Remover serviço"
+                            className="ml-auto shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-red-400"
+                        >
+                            <X aria-hidden="true" className="size-4" />
+                        </button>
                     </CardFooter>
                 </Card>
 

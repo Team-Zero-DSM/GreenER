@@ -5,7 +5,6 @@ import type { ServiceSummary } from '@/types/service';
 
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useServices } from '@/hooks/useServices';
-
 import { useRegions } from '@/hooks/useRegions';
 
 import { AvailableServicesPicker } from './AvailableServicesPicker';
@@ -35,7 +34,7 @@ interface ComparisonServiceSelectorProps {
 
 const MAX_SERVICOS = 5;
 
-const CORES = ['#3B82F6', '#10B981', '#ffd900', '#A855F7', '#EC4899'];
+const CORES = ['#60A5FA', '#34D399', '#A78BFA', '#FB7185', '#2DD4BF'];
 
 export function ComparisonServiceSelector({ onSelectionsChange }: ComparisonServiceSelectorProps) {
     const [servicosSelecionados, setServicosSelecionados] = useState<ServicoSelecionado[]>([]);

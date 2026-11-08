@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { Info, Leaf, Percent, Server, Star, UsersRound } from 'lucide-react';
+import { Info, Leaf, Percent, Star, UsersRound } from 'lucide-react';
 
 import type { ComparisonMetric } from '@/components/comparison/controls/ComparisonControls';
 import type { ComparisonServiceSelection } from '@/components/comparison/selector/ComparisonServiceSelector';
@@ -310,38 +310,22 @@ export function ComparisonSummary({
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {/* Serviço de referência */}
-                    <Card className="min-h-[190px] min-w-0 justify-between">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Star
-                                    className="size-4 fill-teal-400 text-teal-400"
-                                    aria-hidden="true"
-                                />
-                                Serviço de referência
-                            </CardTitle>
-                        </CardHeader>
+                <div className="grid grid-cols-1 gap-3 xl:grid-cols-12 xl:items-stretch">
+                    {/* COLUNA ESQUERDA: REFERÊNCIA E MÉDIA */}
+                    <div className="grid min-h-[320px] min-w-0 grid-rows-2 gap-3 xl:col-span-4 xl:h-[320px]">
+                        {/* Serviço de referência */}
+                        <Card className="flex h-full min-h-0 min-w-0 flex-col justify-between">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Star
+                                        className="size-4 fill-teal-400 text-teal-400"
+                                        aria-hidden="true"
+                                    />
+                                    Serviço de referência
+                                </CardTitle>
+                            </CardHeader>
 
-                        <CardContent className="flex flex-1 flex-col justify-between gap-5">
-                            <div className="space-y-3">
-                                <div className="flex min-w-0 items-center gap-3">
-                                    <div
-                                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-white"
-                                        style={{
-                                            backgroundColor: servicoPrincipal?.color ?? '#2563EB',
-                                        }}
-                                    >
-                                        <Server className="size-5" />
-                                    </div>
-
-                                    <p className="truncate text-sm font-semibold">
-                                        {servicoPrincipal?.name ?? 'Serviço'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
+                            <CardContent className="flex flex-1 flex-col justify-end gap-1 pt-0">
                                 <p className="text-3xl font-semibold tabular-nums sm:text-4xl">
                                     {formatarValor(valorPrincipal, metrica)}
 
@@ -353,23 +337,35 @@ export function ComparisonSummary({
                                 </p>
 
                                 <p className="text-xs text-muted-foreground">
-                                    {valorPrincipal !== null ? 'Total no período' : 'Sem métricas'}
+                                    {valorPrincipal !== null ? (
+                                        <>
+                                            {metrica === 'co2eGrams'
+                                                ? 'Total de emissões de '
+                                                : 'Total de energia consumida por '}
+
+                                            <strong className="font-bold">
+                                                {servicoPrincipal?.name ?? 'serviço'}
+                                            </strong>
+
+                                            {' no período'}
+                                        </>
+                                    ) : (
+                                        'Sem métricas disponíveis'
+                                    )}
                                 </p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
 
-                    {/* Média dos demais serviços */}
-                    <Card className="min-h-[190px] min-w-0 justify-between">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <UsersRound className="size-5 shrink-0 text-slate-300" />
-                                Média dos demais serviços
-                            </CardTitle>
-                        </CardHeader>
+                        {/* Média dos demais serviços */}
+                        <Card className="flex h-full min-h-0 min-w-0 flex-col justify-between">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <UsersRound className="size-5 shrink-0 text-slate-300" />
+                                    Média dos demais serviços
+                                </CardTitle>
+                            </CardHeader>
 
-                        <CardContent className="flex flex-1 flex-col justify-between gap-5">
-                            <div className="space-y-2">
+                            <CardContent className="flex flex-1 flex-col justify-end gap-1 pt-0">
                                 <p className="text-3xl font-semibold tabular-nums sm:text-4xl">
                                     {formatarValor(mediaDemais, metrica)}
 
@@ -387,14 +383,12 @@ export function ComparisonSummary({
                                           } com valores disponíveis.`
                                         : 'Não há outros serviços com valores disponíveis.'}
                                 </p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                    {/* Diferença percentual */}
-
-                    {/* Diferença percentual */}
-                    <Card className="min-h-[190px] min-w-0">
+                    {/* COLUNA CENTRAL: DIFERENÇA PERCENTUAL */}
+                    <Card className="flex min-h-[320px] min-w-0 flex-col overflow-hidden xl:col-span-5 xl:h-[320px]">
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 Diferença percentual
@@ -402,7 +396,7 @@ export function ComparisonSummary({
                             </CardTitle>
                         </CardHeader>
 
-                        <CardContent className="flex-1">
+                        <CardContent className="flex-1 pt-6">
                             <ComparisonDifferenceChart
                                 percentual={diferencaPercentual}
                                 classificacao={classificacao}
@@ -413,13 +407,14 @@ export function ComparisonSummary({
                             />
                         </CardContent>
                     </Card>
-                    {/* Valores individuais */}
-                    <Card className="min-w-0">
+
+                    {/* COLUNA DIREITA: VALORES INDIVIDUAIS */}
+                    <Card className="flex h-[320px] min-w-0 flex-col overflow-hidden xl:col-span-3">
                         <CardHeader>
                             <CardTitle>Valores individuais</CardTitle>
                         </CardHeader>
 
-                        <CardContent className="overflow-x-auto">
+                        <CardContent className="min-h-0 flex-1 overflow-y-auto">
                             <table className="w-full min-w-[210px] text-left text-xs">
                                 <thead>
                                     <tr className="border-b border-border text-muted-foreground">

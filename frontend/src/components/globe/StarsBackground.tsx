@@ -35,13 +35,7 @@ export function StarsBackground() {
             stars.forEach((star) => {
                 ctx.globalAlpha = star.opacity;
                 ctx.beginPath();
-                ctx.arc(
-                    star.x * width,
-                    star.y * height,
-                    star.radius,
-                    0,
-                    Math.PI * 2,
-                );
+                ctx.arc(star.x * width, star.y * height, star.radius, 0, Math.PI * 2);
                 ctx.fill();
             });
 
@@ -56,11 +50,5 @@ export function StarsBackground() {
         return () => observer.disconnect();
     }, []);
 
-    return (
-        <canvas
-            ref={canvasRef}
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full"
-        />
-    );
+    return <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />;
 }

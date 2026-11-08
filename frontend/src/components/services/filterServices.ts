@@ -33,7 +33,9 @@ export function filterServices(
             search === '' ||
             service.name.toLowerCase().includes(search) ||
             service.id.toLowerCase().includes(search);
+
         const matchesStatus = filters.status === 'all' || service.status === filters.status;
+
         const matchesCountry =
             filters.country === 'all' || (service.location?.country ?? '—') === filters.country;
 

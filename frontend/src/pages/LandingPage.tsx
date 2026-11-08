@@ -162,6 +162,17 @@ export function LandingPage() {
 
                     <a
                         href="#explorar"
+                        onClick={(event) => {
+                            event.preventDefault();
+
+                            exploreContainerRef.current?.scrollIntoView({
+                                behavior: window.matchMedia('(prefers-reduced-motion: reduce)')
+                                    .matches
+                                    ? 'auto'
+                                    : 'smooth',
+                                block: 'start',
+                            });
+                        }}
                         className="mt-8 inline-flex items-center rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition-colors hover:bg-cyan-400"
                     >
                         Explorar regiões
