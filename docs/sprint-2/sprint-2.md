@@ -27,7 +27,7 @@ visualizações regionais.
 |---|---|---|
 | **US04** | Identificação de indisponibilidade | Concluída nesta sprint |
 | **US05** | Identificação de ausência de métricas | Concluída nesta sprint |
-| **US07** | Indicadores ambientais consolidados | Concluída nesta sprint |
+| **US07** | Indicadores ambientais consolidados | Issue fechada; [validação registrada](./evidencias-dod.md#validação-da-us07) |
 | **US08** | Dashboard operacional | Continuidade da Sprint 1; concluída nesta sprint |
 | **US13** | Ranking de impacto | Concluída nesta sprint |
 | **US14** | Comparação entre serviços | Concluída nesta sprint |
@@ -89,7 +89,7 @@ O total de **121 pontos** também aparece no campo `Estimate` da coluna
 | História | Tarefas vinculadas | Entrega registrada |
 |---|---|---|
 | US04 e US05 | #89–#91 | Tabela, registro e consulta do histórico de falhas e recuperação das coletas. PRs #101, #107 e #108. |
-| US07 | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | Visão consolidada do ambiente com totais de energia e CO₂e e contagens de serviços ativos e indisponíveis. |
+| US07 | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | Cards de energia e CO₂e por região. Os quatro indicadores do ambiente foram conferidos no banco. [Detalhes da validação](./evidencias-dod.md#validação-da-us07) |
 | US08 | #32, #79–#81, #94 e #97–#99 | Inspeção de serviços por região, globo e mapa 2D, listagem, navegação e indicadores regionais. PRs #110, #115, #118, #120, #124, #125 e #128. |
 | US13 | #92 e #102–#106 | Ranking integrado ao backend, filtros de critério e período, gráfico e tabela de classificação. PRs #109, #112, #114, #116, [#122](https://github.com/Team-Zero-DSM/GreenER/pull/122) e #126. |
 | US14 | #82–#86 e #93 | Comparação integrada ao backend, seleção de serviços, visualização, cálculos e resumo comparativo. PRs #100, #111, #113, #121, #123 e #129. |
@@ -116,12 +116,15 @@ e o ajuste a partir do feedback do cliente em 21/10 também estão nas [dailies]
 
 ## Verificações e Definition of Done
 
+O fechamento da issue registra o estado do trabalho no GitHub. A aplicação da
+[DoD geral](../../README.md#-definition-of-done--geral) é conferida pelas evidências
+de integração, teste e aceite da história.
+
 | Critério | Resultado registrado |
 |---|---|
-| Tarefas propostas | 28 tarefas registradas como concluídas. |
-| Rastreabilidade | Histórias, tarefas e PRs relacionados no registro de evidências. |
-| Integração | Entregas de histórico, ranking, comparação e regiões integradas. |
-| Validação do backend | PRs #128 e #127, mais a [validação com PostgreSQL e Compose](./evidencias-dod.md#evidências-e-limites-de-conclusão). |
+| Código integrado | Os PRs de histórico, ranking, comparação e regiões estão vinculados às tarefas no [registro de evidências](./evidencias-dod.md#evidências-e-limites-de-conclusão). |
+| Testes e integração | PRs #128 e #127 e [validação com PostgreSQL e Compose](./evidencias-dod.md#evidências-e-limites-de-conclusão), com resultados de instalação, API, migração e testes do backend. |
+| Critérios de aceite | A [validação da US07](./evidencias-dod.md#validação-da-us07) indica onde cada resultado foi observado e explicita a cobertura da interface. |
 | Documentação | #96 fechada, com PR #130; diagramas entregues em #77 e #78. |
 
 ## 🔎 Sprint Review

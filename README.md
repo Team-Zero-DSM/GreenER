@@ -632,7 +632,7 @@ Uma User Story será considerada concluída quando:
 | US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | ✅ Concluída na Sprint 2                      |
 | US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | ✅ Implementada na Sprint 1                    |
 | US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | ✅ Implementada na Sprint 1                    |
-| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | ✅ Concluída na Sprint 2                      |
+| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | Issue fechada na Sprint 2; [validação registrada](./docs/sprint-2/evidencias-dod.md#validação-da-us07) |
 | US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | ✅ Concluída na Sprint 2                      |
 | US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | ✅ Concluída na Sprint 1                       |
 | US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | ✅ Implementada na Sprint 1                    |
@@ -658,8 +658,9 @@ A US05 usa `metrics_missing` para HTTP 500 da consulta de métricas, que signifi
 serviço indisponível ou exportador de métricas indisponível; HTTP 404 significa
 serviço removido ou métricas inexistentes e resulta em `unavailable`.
 Erros da Cloudflare, como HTTP 530, são identificados separadamente no histórico,
-preservando o status anterior do serviço. A US07 foi concluída na Sprint 2,
-conforme os critérios de aceite registrados na [issue #75](https://github.com/Team-Zero-DSM/GreenER/issues/75).
+preservando o status anterior do serviço. A [issue #75](https://github.com/Team-Zero-DSM/GreenER/issues/75)
+registra os critérios de aceite da US07. O [teste da Sprint 2](./docs/sprint-2/evidencias-dod.md#validação-da-us07)
+documenta os indicadores exibidos por região e os totais do ambiente conferidos no banco.
 
 - ❌ — Não iniciada
 - 🔄 — Parcialmente implementada ou com validação de falhas pendente

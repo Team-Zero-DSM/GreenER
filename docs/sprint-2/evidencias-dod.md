@@ -13,7 +13,7 @@ evidências de aceite das histórias estão descritos separadamente abaixo.
 |---|---|---|---|
 | US04 — Identificação de indisponibilidade | [#72](https://github.com/Team-Zero-DSM/GreenER/issues/72) | RF05, RNF04 | Concluída; issue fechada |
 | US05 — Identificação de ausência de métricas | [#73](https://github.com/Team-Zero-DSM/GreenER/issues/73) | RF06, RNF04 | Concluída; issue fechada |
-| US07 — Indicadores ambientais consolidados | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | RF08 | Concluída nesta sprint. A visão global apresenta os totais de energia e CO₂e e as contagens de serviços ativos e indisponíveis. |
+| US07 — Indicadores ambientais consolidados | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | RF08 | Issue fechada. Indicadores regionais exibidos na interface e totais do ambiente conferidos no banco. [Detalhes da validação](#validação-da-us07) |
 | US08 — Dashboard operacional | [#3](https://github.com/Team-Zero-DSM/GreenER/issues/3) | RF09, RNF01, RNF03 | Concluída nesta sprint; issue fechada |
 | US13 — Ranking de impacto | [#74](https://github.com/Team-Zero-DSM/GreenER/issues/74) | RF14 | Concluída; issue fechada |
 | US14 — Comparação entre serviços | [#76](https://github.com/Team-Zero-DSM/GreenER/issues/76) | RF15 | Concluída; issue fechada |
@@ -92,10 +92,27 @@ Os testes de instalação, API e migração rodaram em uma cópia limpa do commi
 | Consulta HTTP de histórico | A API retornou HTTP 200 com uma observação sintética gravada no PostgreSQL. A resposta permitiu a origem do frontend no cabeçalho CORS. |
 | Migração da Sprint 1 | Um banco criado com o schema da Sprint 1 (`f686e6c`) recebeu a [migração](../../database/migrations/001_status_coleta.sql) duas vezes. Após reiniciar o PostgreSQL, a coleta original e o novo status vinculado permaneceram acessíveis, com o índice presente. |
 | Suíte do backend | 30 testes passaram, incluindo três de integração com PostgreSQL, executados a partir do repositório contra o banco isolado. |
-| Indicadores ambientais (US07) | Em `/regioes`, os cards exibiram 2 kWh e 200 g de CO₂e para a primeira região e 3 kWh e 300 g de CO₂e para a segunda. Na mesma janela de 24 horas, o PostgreSQL confirmou 5 kWh e 500 g de CO₂e no ambiente, com 3 serviços ativos e 1 indisponível. [Resultado do teste com dados sintéticos](https://github.com/Team-Zero-DSM/GreenER/issues/75#issuecomment-6751580199) |
 
 As verificações usaram dados sintéticos e dispensaram as APIs externas de
 métricas e carbono. O aceite do cliente é registrado separadamente.
+
+### Validação da US07
+
+O [teste com dados sintéticos](https://github.com/Team-Zero-DSM/GreenER/issues/75#issuecomment-6751580199)
+usou duas regiões e uma janela de 24 horas. Em `/regioes`, os cards exibiram
+2 kWh e 200 g de CO₂e para a primeira região e 3 kWh e 300 g de CO₂e para a segunda.
+
+| Critério da issue #75 | Resultado para todo o ambiente | Onde foi conferido |
+|---|---:|---|
+| Consumo energético total | 5 kWh | PostgreSQL |
+| Emissão total | 500 g de CO₂e | PostgreSQL |
+| Serviços ativos | 3 | PostgreSQL |
+| Serviços indisponíveis | 1 | PostgreSQL |
+
+A evidência da interface cobre os valores por região. A exibição conjunta dos
+quatro indicadores do ambiente em uma tela fica sem evidência neste teste. A
+[demonstração da Sprint 2](https://www.youtube.com/watch?v=jaLqoq2bONs&t=280s)
+apresenta a tela de visão geral no plano da próxima sprint.
 
 ## Dependências e pendências para o encerramento
 
