@@ -161,4 +161,14 @@ para esta atualização.
 
 Link da apresentação da sprint: 
 
-> Preencher ao final da sprint
+<p align="left">
+  <a href="https://www.youtube.com/watch?v=jaLqoq2bONs" target="_blank">
+    <img 
+      src="GreenER-Thumbnail-Sprint_2.png" 
+      alt="GreenER - Sprint 2"
+      width="600"
+      style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);"
+    />
+  </a>
+</p>
+
