@@ -47,11 +47,12 @@
   </ul>
 </details>
 
-
 ## 📌 Descrição do Projeto
+
 O greenER é uma aplicação web que monitora o consumo de CPU, memória, armazenamento e rede, estimando o impacto ambiental de serviços digitais com base na intensidade de carbono da região.
 
 ## 🌱 Relevância do Projeto
+
 A plataforma relaciona o uso de recursos computacionais à eficiência energética e às emissões de CO₂ equivalente, apoiando análises sobre sustentabilidade e Green Computing. Os valores apresentados são estimativas para comparação entre serviços e não substituem medições físicas da infraestrutura.
 
 ---
@@ -98,7 +99,8 @@ GreenER/
 │   ├── plano-de-entregas.md
 │   ├── arquitetura/
 │   ├── prototipo/
-│   └── sprint-1/         # planejamento, dailies, DoD e burndown
+│   ├── sprint-1/         # planejamento, dailies, DoD e burndown
+│   └── sprint-2/         # planejamento, dailies, DoD e burndown
 ├── docker-compose.yml
 └── README.md
 ```
@@ -141,8 +143,8 @@ As entregas seguem o calendário das sprints registrado abaixo.
 
 ```mermaid
 graph TD
-    S1[Sprint 1: Monitoramento, Persistência, Histórico e Interface] --> S2[Sprint 2: Ranking e Continuação de T15]
-    S2 --> S3[Sprint 3: JWT, Comparação e Cenários]
+    S1[Sprint 1: Monitoramento, Persistência, Histórico e Interface] --> S2[Sprint 2: Ranking, Comparação, Histórico de Status e Regiões]
+    S2 --> S3[Sprint 3: JWT e Cenários Avançados]
 ```
 
 ---
@@ -165,8 +167,17 @@ O ranking de impacto ambiental já possui rota pública no backend
 
 Pendências e entregas futuras:
 
-- **Sprint 3:** autenticação JWT e rota dedicada a cenários.
-- **Sprint a definir:** configuração do intervalo de coleta pela aplicação.
+- **Sprint 2:** apresentar os serviços associados ao inspecionar uma região,
+  como continuação da T15, que permanece parcialmente entregue.
+- **Sprint 2:** ranking de impacto ambiental, comparação entre serviços,
+  histórico de status das coletas e ampliação das visualizações regionais.
+  Escopo e acompanhamento no [registro da Sprint 2](./docs/sprint-2/sprint-2.md)
+  e no [plano de entregas](./docs/plano-de-entregas.md).
+- **Sprint 3:** autenticação JWT e simulação de cenários avançados,
+  com delimitação em relação às opções regionais previstas na comparação da Sprint 2.
+- **Proposta para a Sprint 3:** configuração do intervalo de coleta pela área
+  autenticada. O [plano de entregas](./docs/plano-de-entregas.md) registra o
+  critério de aceite.
 
 Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
 Persistência, histórico e globo não acrescentam automaticamente outras histórias.
@@ -198,15 +209,15 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
       </table>
 </body>
 
---- 
+---
 
 ### Sprints
 
-| Sprint | Link                            | Início     | Entrega    | Status |
-| ------ | ------------------------------- | ---------- | ---------- | ------ |
-| 01     | [sprint 1](./docs/sprint-1/sprint-1.md) | 28/09/2026 | 19/10/2026 | ✅     |
-| 02     | [sprint 2](./docs/sprint-1/sprint-1.md) | 20/10/2026 | 09/11/2026 | ❌     |
-| 03     | [sprint 3](./docs/sprint-1/sprint-1.md) | 10/11/2026 | 23/11/2026 | ❌     |
+| Sprint | Link                                                                                                | Início     | Entrega    | Status |
+| ------ | --------------------------------------------------------------------------------------------------- | ---------- | ---------- | ------ |
+| 01     | [sprint 1](./docs/sprint-1/sprint-1.md)                                                             | 28/09/2026 | 19/10/2026 | ✅     |
+| 02     | [sprint 2](./docs/sprint-2/sprint-2.md)                                                             | 20/10/2026 | 09/11/2026 |✅     |
+| 03     | [planejamento da sprint 3](./docs/plano-de-entregas.md#sprint-3--autenticação-e-cenários-avançados) | 10/11/2026 | 23/11/2026 | ❌     |
 
 #### Legenda
 
@@ -226,23 +237,23 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
 <summary><b>Requisitos Funcionais</b></summary>
 <br>
 
-| **Código** | **Requisito Funcional** | **Descrição** |
-| ---------- | ----------------------- | ------------- |
-| RF01 | Descoberta de serviços | O sistema deve consultar o Agregador de Métricas para identificar os serviços disponíveis. |
-| RF02 | Monitoramento dinâmico | O sistema deve se adaptar à inclusão, remoção, indisponibilidade ou restabelecimento de serviços durante a execução. |
-| RF03 | Coleta de métricas por serviço | O sistema deve consultar periodicamente o endpoint `/metrics/{id_servico}` para cada serviço disponível. |
-| RF04 | Variação das métricas | O sistema deve considerar que os valores retornados pela API podem apresentar valores distintos entre requisições. |
-| RF05 | Detecção de indisponibilidade | O sistema deve identificar quando um serviço estiver indisponível ou não responder às requisições. |
-| RF06 | Detecção de ausência de métricas | O sistema deve identificar quando um serviço estiver ativo, mas deixar de exportar métricas. |
-| RF07 | Cálculo individual | O sistema deve calcular consumo energético e emissão de CO₂e para cada serviço monitorado. |
-| RF08 | Indicadores agregados | O sistema deve calcular indicadores consolidados, como consumo total, emissão total, serviços ativos e serviços indisponíveis. |
-| RF09 | Dashboard operacional | O sistema deve exibir, em um dashboard operacional, o status, as métricas, a localização e o impacto ambiental de cada serviço monitorado. |
-| RF10 | Histórico de coletas | O sistema deve armazenar o histórico das coletas realizadas para permitir análise temporal. |
-| RF11 | Atualização contínua | A interface deve atualizar periodicamente os dados apresentados, refletindo as alterações identificadas nas informações dos serviços monitorados. |
-| RF12 | Localização dos serviços | O sistema deve exibir país, região e, quando disponível, cidade onde o serviço está hospedado. |
-| RF13 | Visualização geográfica | O sistema poderá apresentar a posição aproximada dos serviços em um mapa. A ausência de coordenadas não deve impedir a visualização das demais informações. |
-| RF14 | Ranking de impacto | O sistema deve apresentar ranking dos serviços por maior consumo energético ou maior emissão de CO₂e. |
-| RF15 | Comparação entre serviços | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços. |
+| **Código** | **Requisito Funcional**          | **Descrição**                                                                                                                                               |
+| ---------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RF01       | Descoberta de serviços           | O sistema deve consultar o Agregador de Métricas para identificar os serviços disponíveis.                                                                  |
+| RF02       | Monitoramento dinâmico           | O sistema deve se adaptar à inclusão, remoção, indisponibilidade ou restabelecimento de serviços durante a execução.                                        |
+| RF03       | Coleta de métricas por serviço   | O sistema deve consultar periodicamente o endpoint `/metrics/{id_servico}` para cada serviço disponível.                                                    |
+| RF04       | Variação das métricas            | O sistema deve considerar que os valores retornados pela API podem apresentar valores distintos entre requisições.                                          |
+| RF05       | Detecção de indisponibilidade    | O sistema deve identificar quando um serviço estiver indisponível ou não responder às requisições.                                                          |
+| RF06       | Detecção de ausência de métricas | O sistema deve identificar quando um serviço estiver ativo, mas deixar de exportar métricas.                                                                |
+| RF07       | Cálculo individual               | O sistema deve calcular consumo energético e emissão de CO₂e para cada serviço monitorado.                                                                  |
+| RF08       | Indicadores agregados            | O sistema deve calcular indicadores consolidados, como consumo total, emissão total, serviços ativos e serviços indisponíveis.                              |
+| RF09       | Dashboard operacional            | O sistema deve exibir, em um dashboard operacional, o status, as métricas, a localização e o impacto ambiental de cada serviço monitorado.                  |
+| RF10       | Histórico de coletas             | O sistema deve armazenar o histórico das coletas realizadas para permitir análise temporal.                                                                 |
+| RF11       | Atualização contínua             | A interface deve atualizar periodicamente os dados apresentados, refletindo as alterações identificadas nas informações dos serviços monitorados.           |
+| RF12       | Localização dos serviços         | O sistema deve exibir país, região e, quando disponível, cidade onde o serviço está hospedado.                                                              |
+| RF13       | Visualização geográfica          | O sistema poderá apresentar a posição aproximada dos serviços em um mapa. A ausência de coordenadas não deve impedir a visualização das demais informações. |
+| RF14       | Ranking de impacto               | O sistema deve apresentar ranking dos serviços por maior consumo energético ou maior emissão de CO₂e.                                                       |
+| RF15       | Comparação entre serviços        | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços.                                                                  |
 
 O mapa é opcional no desafio original. A Sprint 1 entregou a primeira versão
 do globo. A lista de serviços ao inspecionar uma região entrou na Sprint 2,
@@ -264,20 +275,20 @@ relaciona-se a **RF10/RP03** e Docker a **RP04**. Nas evidências de avaliação
 informar essa correspondência para não confundir requisitos do desafio com
 decisões técnicas da equipe.
 
-| **Código** | **Requisito Não Funcional** | **Descrição** |
-| ---------- | --------------------------- | ------------- |
-| RNF01 | Usabilidade e responsividade | A interface deve ser clara, intuitiva e adaptável para desktop e dispositivos móveis. |
-| RNF02 | Atualização periódica | As informações exibidas devem ser atualizadas automaticamente em intervalos configurados pela aplicação, sem necessidade de recarregamento da página. |
-| RNF03 | Desempenho | O dashboard deve apresentar tempo de resposta compatível com a navegação e consulta contínua dos dados monitorados. |
-| RNF04 | Tolerância a falhas | A indisponibilidade temporária de serviços monitorados ou APIs externas não deve interromper o funcionamento geral do sistema. |
-| RNF05 | Segurança | O acesso às áreas protegidas do sistema deve ser controlado por autenticação JWT implementada no backend. |
-| RNF06 | Persistência de dados | O histórico de coletas deve ser armazenado em PostgreSQL, garantindo a integridade e a persistência das informações. |
-| RNF07 | Containerização | Toda a aplicação deve ser executável através de containers Docker conforme as restrições do projeto. |
-| RNF08 | Documentação técnica | O projeto deve possuir documentação de arquitetura, banco de dados, endpoints, instalação e execução. |
-| RNF09 | Manutenibilidade | O código deve seguir organização modular, separando responsabilidades entre frontend, backend, serviços e banco de dados. |
-| RNF10 | Adaptabilidade | A solução deve ser capaz de monitorar novos serviços identificados pela API sem necessidade de alteração manual no sistema. |
-| RNF11 | Rastreabilidade | User Stories, tarefas e entregas devem estar vinculadas aos requisitos definidos no backlog do projeto. |
-| RNF12 | Gestão Ágil | O projeto deve manter backlog priorizado, registro das sprints, reviews e planejamento contínuo conforme a metodologia Scrum adotada pela equipe. |
+| **Código** | **Requisito Não Funcional**  | **Descrição**                                                                                                                                         |
+| ---------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RNF01      | Usabilidade e responsividade | A interface deve ser clara, intuitiva e adaptável para desktop e dispositivos móveis.                                                                 |
+| RNF02      | Atualização periódica        | As informações exibidas devem ser atualizadas automaticamente em intervalos configurados pela aplicação, sem necessidade de recarregamento da página. |
+| RNF03      | Desempenho                   | O dashboard deve apresentar tempo de resposta compatível com a navegação e consulta contínua dos dados monitorados.                                   |
+| RNF04      | Tolerância a falhas          | A indisponibilidade temporária de serviços monitorados ou APIs externas não deve interromper o funcionamento geral do sistema.                        |
+| RNF05      | Segurança                    | O acesso às áreas protegidas do sistema deve ser controlado por autenticação JWT implementada no backend.                                             |
+| RNF06      | Persistência de dados        | O histórico de coletas deve ser armazenado em PostgreSQL, garantindo a integridade e a persistência das informações.                                  |
+| RNF07      | Containerização              | Toda a aplicação deve ser executável através de containers Docker conforme as restrições do projeto.                                                  |
+| RNF08      | Documentação técnica         | O projeto deve possuir documentação de arquitetura, banco de dados, endpoints, instalação e execução.                                                 |
+| RNF09      | Manutenibilidade             | O código deve seguir organização modular, separando responsabilidades entre frontend, backend, serviços e banco de dados.                             |
+| RNF10      | Adaptabilidade               | A solução deve ser capaz de monitorar novos serviços identificados pela API sem necessidade de alteração manual no sistema.                           |
+| RNF11      | Rastreabilidade              | User Stories, tarefas e entregas devem estar vinculadas aos requisitos definidos no backlog do projeto.                                               |
+| RNF12      | Gestão Ágil                  | O projeto deve manter backlog priorizado, registro das sprints, reviews e planejamento contínuo conforme a metodologia Scrum adotada pela equipe.     |
 
 </details>
 
@@ -297,7 +308,7 @@ decisões técnicas da equipe.
 **quero** que o sistema identifique automaticamente os serviços disponíveis,  
 **para** acompanhar os serviços monitorados sem necessidade de cadastrá-los manualmente.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF01, RNF10
 
@@ -313,7 +324,7 @@ decisões técnicas da equipe.
 **quero** que o sistema reconheça alterações na disponibilidade dos serviços,  
 **para** que o monitoramento represente o estado atual do ambiente.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF02, RNF10
 
@@ -330,7 +341,7 @@ decisões técnicas da equipe.
 **quero** que as métricas dos serviços sejam coletadas periodicamente,  
 **para** acompanhar o comportamento dos serviços monitorados.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF03, RF04
 
@@ -353,7 +364,7 @@ decisões técnicas da equipe.
 **quero** identificar quando um serviço estiver indisponível,  
 **para** saber quais serviços não estão respondendo normalmente.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF05, RNF04
 
@@ -369,7 +380,7 @@ decisões técnicas da equipe.
 **quero** identificar quando um serviço estiver ativo, mas não disponibilizar métricas,  
 **para** diferenciar ausência de dados de indisponibilidade do serviço.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF06, RNF04
 
@@ -391,7 +402,7 @@ decisões técnicas da equipe.
 **quero** visualizar o consumo energético e a emissão estimada de CO₂e de cada serviço,  
 **para** compreender seu impacto ambiental individual.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF07
 
@@ -407,7 +418,7 @@ decisões técnicas da equipe.
 **quero** visualizar indicadores consolidados do ambiente monitorado,  
 **para** compreender sua situação geral.
 
-**Prioridade:** Média  
+**Prioridade:** Média
 
 **Requisitos relacionados:** RF08
 
@@ -430,7 +441,7 @@ decisões técnicas da equipe.
 **quero** visualizar as principais informações dos serviços em um dashboard,  
 **para** acompanhar o ambiente monitorado em um único local.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF09, RNF01, RNF03
 
@@ -447,7 +458,7 @@ decisões técnicas da equipe.
 **quero** que os dados do dashboard sejam atualizados automaticamente,  
 **para** acompanhar as alterações do ambiente sem recarregar a página.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RF11, RNF02
 
@@ -470,7 +481,7 @@ decisões técnicas da equipe.
 **quero** consultar o histórico das coletas realizadas,  
 **para** analisar a evolução das métricas e indicadores ao longo do tempo.
 
-**Prioridade:** Média  
+**Prioridade:** Média
 
 **Requisitos relacionados:** RF10, RNF06
 
@@ -486,7 +497,7 @@ decisões técnicas da equipe.
 **quero** visualizar a localização dos serviços monitorados,  
 **para** relacionar sua localização aos dados apresentados.
 
-**Prioridade:** Média  
+**Prioridade:** Média
 
 **Requisitos relacionados:** RF12
 
@@ -502,7 +513,7 @@ decisões técnicas da equipe.
 **quero** visualizar os serviços em um mapa,  
 **para** compreender sua distribuição geográfica.
 
-**Prioridade:** Média  
+**Prioridade:** Média
 
 **Requisitos relacionados:** RF13
 
@@ -524,7 +535,7 @@ decisões técnicas da equipe.
 **quero** ordenar os serviços por consumo energético ou emissão de CO₂e,  
 **para** analisar os diferentes níveis de impacto ambiental.
 
-**Prioridade:** Média  
+**Prioridade:** Média
 
 **Requisitos relacionados:** RF14
 
@@ -540,7 +551,7 @@ decisões técnicas da equipe.
 **quero** comparar dois ou mais serviços,  
 **para** analisar suas métricas e indicadores ambientais.
 
-**Prioridade:** Média  
+**Prioridade:** Média
 
 **Requisitos relacionados:** RF15
 
@@ -562,7 +573,7 @@ decisões técnicas da equipe.
 **quero** me autenticar na plataforma,  
 **para** acessar os recursos que exigem autorização.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RNF05
 
@@ -579,7 +590,7 @@ decisões técnicas da equipe.
 **quero** que uma falha isolada não interrompa o funcionamento do sistema,  
 **para** continuar acompanhando os demais serviços monitorados.
 
-**Prioridade:** Alta  
+**Prioridade:** Alta
 
 **Requisitos relacionados:** RNF04
 
@@ -613,46 +624,47 @@ Uma User Story será considerada concluída quando:
 <summary><b>📦 Product Backlog</b></summary>
 <br>
 
-| **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados** | **Implementação / validação** |
-| ------ | -------------------------- | ---------------------------------------------- | -------------- | --------------------- | ---------- |
-| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | 🛠️ Implementada |
-| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | 🛠️ Implementada |
-| US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | 🔄 Base implementada; validar falhas |
-| US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | 🔄 Parcial |
-| US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | 🛠️ Implementada no código; validar transições |
-| US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | 🛠️ Implementada |
-| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | 🔄 Parcial |
-| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | 🛠️ Implementada com aceite pendente |
-| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | 🛠️ Implementada |
-| US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | 🛠️ Implementada |
-| US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | 🛠️ Implementada |
-| US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | 🛠️ Implementada |
-| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | 🔄 Módulo disponível, integração pendente |
-| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | 🛠️ Implementada |
-| US15   | Acesso e Segurança         | Autenticação de usuários                       | Alta           | RNF05                 | ❌          |
-| US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                 | 🔄 Base implementada; ampliar validação |
+| **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados** | **Implementação / validação**                 |
+| ------ | -------------------------- | ---------------------------------------------- | -------------- | --------------------- | --------------------------------------------- |
+| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | ✅ Concluída na Sprint 1                       |
+| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | ✅ Concluída na Sprint 1                       |
+| US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | ✅ Concluída na Sprint 2                      |
+| US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | ✅ Concluída na Sprint 2                      |
+| US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | ✅ Implementada na Sprint 1                    |
+| US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | ✅ Implementada na Sprint 1                    |
+| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | Issue fechada na Sprint 2; [validação registrada](./docs/sprint-2/evidencias-dod.md#validação-da-us07) |
+| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | ✅ Concluída na Sprint 2                      |
+| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | ✅ Concluída na Sprint 1                       |
+| US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | ✅ Implementada na Sprint 1                    |
+| US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | ✅ Implementada na Sprint 1                    |
+| US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | ✅ Implementada na Sprint 1                    |
+| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | ✅ Concluída na Sprint 2                      |
+| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | ✅ Concluída na Sprint 2                      |
+| US15   | Acesso e Segurança         | Autenticação de usuários                       | Alta           | RNF05                 | ❌                                            |
+| US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                 | 🔄 Base implementada; ampliar validação       |
 
 <br>
 
 **Legenda**
 
-O código atual contém implementação de **oito histórias: US01, US02, US03,
-US06, US09, US10, US11 e US12**. A US02 ainda exige validação completa das
-transições de descoberta, ausência e restabelecimento. O aceite formal das
-histórias permanece pendente; esta tabela não declara cumprimento integral da DoD.
+A matriz abaixo detalha a rastreabilidade de oito histórias relacionadas às
+entregas da Sprint 1. A US02 ainda exige validação completa das transições de
+descoberta, ausência e restabelecimento. As entregas da Sprint 2 têm seu próprio
+[registro de evidências](./docs/sprint-2/evidencias-dod.md).
 
-US04 e US16 já possuem tratamento de falhas, mas precisam ampliar a validação.
+US04 registra falhas e recuperação no histórico. A US16 tem tratamento de
+falhas implementado e requer validação de cenários adicionais.
 A US05 usa `metrics_missing` para HTTP 500 da consulta de métricas, que significa
 serviço indisponível ou exportador de métricas indisponível; HTTP 404 significa
 serviço removido ou métricas inexistentes e resulta em `unavailable`.
 Erros da Cloudflare, como HTTP 530, são identificados separadamente no histórico,
-preservando o status anterior do serviço. A US07 possui
-totais e contagens regionais; falta a consolidação explícita do ambiente inteiro.
+preservando o status anterior do serviço. A [issue #75](https://github.com/Team-Zero-DSM/GreenER/issues/75)
+registra os critérios de aceite da US07. O [teste da Sprint 2](./docs/sprint-2/evidencias-dod.md#validação-da-us07)
+documenta os indicadores exibidos por região e os totais do ambiente conferidos no banco.
 
 - ❌ — Não iniciada
 - 🔄 — Parcialmente implementada ou com validação de falhas pendente
-- 🛠️ — Implementação presente; observar as ressalvas e o aceite pendente
-- ✅ — Concluída, com DoD e aceite registrados
+- ✅ — História concluída ou implementação registrada na documentação da sprint
 
 ### Rastreabilidade das oito histórias implementadas
 
@@ -666,16 +678,16 @@ Somente **US01, US03, US08 e US09** foram selecionadas originalmente para a
 Sprint 1. Relacionar as entregas às demais histórias do produto não altera essa
 seleção nem representa seu aceite.
 
-| User Story | Tarefas relacionadas e contribuição implementada | Código e evidências | Validação / aceite pendente |
-|---|---|---|---|
-| **US01 — Descoberta de serviços** | **T03:** integração com descoberta; **T04:** modelo e mapper dos serviços; **T05:** endpoint interno de listagem. | [MetricsClient](./backend/src/integrations/metrics-api.ts), [sincronização](./backend/src/modules/collections/collections.service.ts), [rotas de serviços](./backend/src/modules/services/services.routes.ts); evidências de T03–T05 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; a descoberta real já possui evidência registrada. |
-| **US02 — Monitoramento dinâmico** | **T03:** redescoberta dos serviços; **T08:** execução recorrente da sincronização e coleta; **T16:** apresentação do status; **T17:** integração dos estados com a interface. | `syncServices`, `collectService` e `statusFromError` em [CollectionsService](./backend/src/modules/collections/collections.service.ts); `updateDiscoveredService`, `deactivateMissingServices` e `updateStatus` no [repository](./backend/src/modules/collections/collections.repository.ts); [job](./backend/src/jobs/collections.job.ts). | Validar o ciclo completo de novo serviço, remoção, reaparição e recuperação, inclusive falha da descoberta; aceite formal. Reaparição na descoberta e sucesso da coleta são eventos distintos. |
-| **US03 — Coleta periódica de métricas** | **T06:** integração de métricas; **T07:** processamento; **T08:** rotina periódica; **T09:** disponibilização no backend; **T10:** testes da atualização periódica. | [CollectionsService](./backend/src/modules/collections/collections.service.ts), [job](./backend/src/jobs/collections.job.ts); verificações de T06–T10 e V06 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; os testes existentes e a recorrência observada não cobrem todos os cenários de falha. |
-| **US06 — Cálculo do impacto individual** | **T07:** cálculo de potência, energia e CO₂e; **T09:** exposição dos resultados; **T13:** detalhe do serviço; **T17:** integração com dados reais. | `calculateEmissions` em [CollectionsService](./backend/src/modules/collections/collections.service.ts), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx), [fórmulas e unidades](./docs/cálculo.md); reprocessamento V05 e evidências de T07/T13/T17 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; os valores são estimativas do modelo simplificado, não medições físicas. |
-| **US09 — Atualização automática do dashboard** | **T18:** atualização automática; **T19:** verificação sem recarregar a página; **T08:** rotina de coleta que fornece novas informações. | [MonitoringProvider](./frontend/src/contexts/MonitoringProvider.tsx), [useApiQuery](./frontend/src/hooks/useApiQuery.ts); observações de dados e horários em T18–T19 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; a atualização da interface é diferente da frequência do job e do intervalo energético de cada amostra. |
-| **US10 — Consulta do histórico de coletas** | **T07:** processamento e gravação das coletas; **T09:** consultas de histórico e totais no backend; **T13:** gráficos e seleção de período no detalhe; **T17:** integração real; **T20/T21/T30:** suporte de estrutura, banco e modelagem. | [Gravação das coletas](./backend/src/modules/collections/collections.repository.ts), [AnalyticsRepository](./backend/src/modules/analytics/analytics.repository.ts), [rotas de histórico](./backend/src/modules/analytics/analytics.routes.ts), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx); conferência HTTP × SQL em V11 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; a retenção após reinicialização deve ser sustentada por evidência específica, sem confundir volume configurado com verificação executada. |
-| **US11 — Visualização da localização dos serviços** | **T04:** representação da localização; **T05:** disponibilização dos serviços e localização; **T13/T14:** apresentação no detalhe e listagem; **T17:** integração com o backend. | [Mapper](./backend/src/integrations/metrics-api.mapper.ts), [repository de serviços](./backend/src/modules/services/services.repository.ts), [listagem](./frontend/src/components/services/ServiceList.tsx), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx); evidências de T04/T13/T14/T17 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; cidade e coordenadas ausentes devem continuar sendo tratadas como opcionais. |
-| **US12 — Visualização geográfica dos serviços** | **T04/T05:** coordenadas recebidas pela API; **T12:** página inicial; **T15:** parcela do globo e dos marcadores já implementada; **T17:** integração com os serviços reais. | [LandingPage](./frontend/src/pages/LandingPage.tsx) filtra serviços sem coordenadas ao montar os marcadores; [GlobeView](./frontend/src/components/globe/GlobeView.tsx) posiciona os pins; evidências de T12/T17 e decisão de T15 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal. A parcela geográfica implementada não conclui toda a T15: apresentar os serviços ao inspecionar uma região permanece para a Sprint 2. |
+| User Story                                          | Tarefas relacionadas e contribuição implementada                                                                                                                                                                                           | Código e evidências                                                                                                                                                                                                                                                                                                                                                                           | Validação / aceite pendente                                                                                                                                                                    |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **US01 — Descoberta de serviços**                   | **T03:** integração com descoberta; **T04:** modelo e mapper dos serviços; **T05:** endpoint interno de listagem.                                                                                                                          | [MetricsClient](./backend/src/integrations/metrics-api.ts), [sincronização](./backend/src/modules/collections/collections.service.ts), [rotas de serviços](./backend/src/modules/services/services.routes.ts); evidências de T03–T05 no [registro da DoD](./docs/sprint-1/evidencias-dod.md).                                                                                                 | Aceite formal; a descoberta real já possui evidência registrada.                                                                                                                               |
+| **US02 — Monitoramento dinâmico**                   | **T03:** redescoberta dos serviços; **T08:** execução recorrente da sincronização e coleta; **T16:** apresentação do status; **T17:** integração dos estados com a interface.                                                              | `syncServices`, `collectService` e `statusFromError` em [CollectionsService](./backend/src/modules/collections/collections.service.ts); `updateDiscoveredService`, `deactivateMissingServices` e `updateStatus` no [repository](./backend/src/modules/collections/collections.repository.ts); [job](./backend/src/jobs/collections.job.ts).                                                   | Validar o ciclo completo de novo serviço, remoção, reaparição e recuperação, inclusive falha da descoberta; aceite formal. Reaparição na descoberta e sucesso da coleta são eventos distintos. |
+| **US03 — Coleta periódica de métricas**             | **T06:** integração de métricas; **T07:** processamento; **T08:** rotina periódica; **T09:** disponibilização no backend; **T10:** testes da atualização periódica.                                                                        | [CollectionsService](./backend/src/modules/collections/collections.service.ts), [job](./backend/src/jobs/collections.job.ts); verificações de T06–T10 e V06 no [registro da DoD](./docs/sprint-1/evidencias-dod.md).                                                                                                                                                                          | Aceite formal; os testes existentes e a recorrência observada não cobrem todos os cenários de falha.                                                                                           |
+| **US06 — Cálculo do impacto individual**            | **T07:** cálculo de potência, energia e CO₂e; **T09:** exposição dos resultados; **T13:** detalhe do serviço; **T17:** integração com dados reais.                                                                                         | `calculateEmissions` em [CollectionsService](./backend/src/modules/collections/collections.service.ts), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx), [fórmulas e unidades](./docs/cálculo.md); reprocessamento V05 e evidências de T07/T13/T17 no [registro da DoD](./docs/sprint-1/evidencias-dod.md).                                                                             | Aceite formal; os valores são estimativas do modelo simplificado, não medições físicas.                                                                                                        |
+| **US09 — Atualização automática do dashboard**      | **T18:** atualização automática; **T19:** verificação sem recarregar a página; **T08:** rotina de coleta que fornece novas informações.                                                                                                    | [MonitoringProvider](./frontend/src/contexts/MonitoringProvider.tsx), [useApiQuery](./frontend/src/hooks/useApiQuery.ts); observações de dados e horários em T18–T19 no [registro da DoD](./docs/sprint-1/evidencias-dod.md).                                                                                                                                                                 | Aceite formal; a atualização da interface é diferente da frequência do job e do intervalo energético de cada amostra.                                                                          |
+| **US10 — Consulta do histórico de coletas**         | **T07:** processamento e gravação das coletas; **T09:** consultas de histórico e totais no backend; **T13:** gráficos e seleção de período no detalhe; **T17:** integração real; **T20/T21/T30:** suporte de estrutura, banco e modelagem. | [Gravação das coletas](./backend/src/modules/collections/collections.repository.ts), [AnalyticsRepository](./backend/src/modules/analytics/analytics.repository.ts), [rotas de histórico](./backend/src/modules/analytics/analytics.routes.ts), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx); conferência HTTP × SQL em V11 no [registro da DoD](./docs/sprint-1/evidencias-dod.md). | Aceite formal; a retenção após reinicialização deve ser sustentada por evidência específica, sem confundir volume configurado com verificação executada.                                       |
+| **US11 — Visualização da localização dos serviços** | **T04:** representação da localização; **T05:** disponibilização dos serviços e localização; **T13/T14:** apresentação no detalhe e listagem; **T17:** integração com o backend.                                                           | [Mapper](./backend/src/integrations/metrics-api.mapper.ts), [repository de serviços](./backend/src/modules/services/services.repository.ts), [listagem](./frontend/src/components/services/ServiceList.tsx), [detalhe](./frontend/src/pages/ServiceDetailPage.tsx); evidências de T04/T13/T14/T17 no [registro da DoD](./docs/sprint-1/evidencias-dod.md).                                    | Aceite formal; cidade e coordenadas ausentes devem continuar sendo tratadas como opcionais.                                                                                                    |
+| **US12 — Visualização geográfica dos serviços**     | **T04/T05:** coordenadas recebidas pela API; **T12:** página inicial; **T15:** parcela do globo e dos marcadores já implementada; **T17:** integração com os serviços reais.                                                               | [LandingPage](./frontend/src/pages/LandingPage.tsx) filtra serviços sem coordenadas ao montar os marcadores; [GlobeView](./frontend/src/components/globe/GlobeView.tsx) posiciona os pins; evidências de T12/T17 e decisão de T15 no [registro da DoD](./docs/sprint-1/evidencias-dod.md).                                                                                                    | Aceite formal. A parcela geográfica implementada não conclui toda a T15: apresentar os serviços ao inspecionar uma região permanece para a Sprint 2.                                           |
 
 A matriz foi conferida com o código e as evidências já registradas. Esta atualização
 documental não representa uma nova execução de testes nem uma homologação das histórias.
@@ -696,12 +708,12 @@ As mensagens devem referenciar o ID da Issue com `#`:
 
 **Tipos permitidos:**
 
-| Tipo | Descrição |
-| :--- | :--- |
-| **`feat`** | Adição de um novo recurso ou funcionalidade. |
-| **`fix`** | Correção de um erro ou bug. |
-| **`docs`** | Alterações apenas na documentação (ex: README). |
+| Tipo           | Descrição                                                      |
+| :------------- | :------------------------------------------------------------- |
+| **`feat`**     | Adição de um novo recurso ou funcionalidade.                   |
+| **`fix`**      | Correção de um erro ou bug.                                    |
+| **`docs`**     | Alterações apenas na documentação (ex: README).                |
 | **`refactor`** | Mudanças na estrutura do código sem alterar seu comportamento. |
-| **`cleanup`** | Limpeza de código (remover comentários ou trechos inúteis). |
+| **`cleanup`**  | Limpeza de código (remover comentários ou trechos inúteis).    |
 
 </details>

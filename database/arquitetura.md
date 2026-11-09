@@ -234,12 +234,19 @@ Uma alteração posterior no arquivo não migra volumes existentes.
 docker compose exec -T database psql -U postgres -d greener -c "SELECT to_regclass('public.status_coleta') AS tabela, to_regclass('public.idx_status_coleta_servico_tempo') AS indice;"
 ```
 
-Se algum resultado vier vazio, a estrutura daquele volume está incompleta.
-Para preservar as coletas de um volume anterior à mudança, faça backup e
-aplique uma migração com o DDL faltante de `status_coleta` e do índice,
-conforme o [schema.sql](./schema.sql). O script completo é destinado à
-inicialização de bancos vazios. Registros anteriores à inclusão da tabela
-podem ter amostras em `coleta` sem observações de tentativa correspondentes.
+Se algum resultado vier vazio, faça backup do banco e aplique a
+[migração de status de coleta](./migrations/001_status_coleta.sql) a partir da
+raiz do repositório, com o container do banco ativo.
+
+```powershell
+Get-Content -Raw database/migrations/001_status_coleta.sql |
+    docker compose exec -T database psql -X -v ON_ERROR_STOP=1 -U postgres -d greener
+```
+
+A migração cria a tabela e o índice em uma transação e pode ser reaplicada.
+Repita a consulta acima para conferir a estrutura e consulte as coletas
+existentes. Amostras anteriores à migração podem não ter observações de
+tentativa correspondentes.
 
 ### Consultar a estrutura e as coletas existentes
 
