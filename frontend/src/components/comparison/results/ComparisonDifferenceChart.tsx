@@ -1,23 +1,8 @@
+import { ArrowDown, ArrowUp, ArrowUpDown, Minus } from 'lucide-react';
 
-import {
-    ArrowDown,
-    ArrowUp,
-    ArrowUpDown,
-    Minus,
-} from 'lucide-react';
+import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from 'recharts';
 
-import {
-    PolarAngleAxis,
-    RadialBar,
-    RadialBarChart,
-    ResponsiveContainer,
-} from 'recharts';
-
-type ClassificacaoComparacao =
-    | 'acima'
-    | 'abaixo'
-    | 'igual'
-    | 'indisponivel';
+type ClassificacaoComparacao = 'acima' | 'abaixo' | 'igual' | 'indisponivel';
 
 interface ComparisonDifferenceChartProps {
     percentual: number | null;
@@ -42,8 +27,7 @@ export function ComparisonDifferenceChart({
     valorDestaque,
     descricaoDepois,
 }: ComparisonDifferenceChartProps) {
-    const percentualValido =
-        percentual !== null && Number.isFinite(percentual);
+    const percentualValido = percentual !== null && Number.isFinite(percentual);
 
     const magnitude =
         percentualValido && classificacao !== 'indisponivel'
@@ -51,11 +35,7 @@ export function ComparisonDifferenceChart({
             : 0;
 
     const diferencaComSinal =
-        classificacao === 'acima'
-            ? magnitude
-            : classificacao === 'abaixo'
-              ? -magnitude
-              : 0;
+        classificacao === 'acima' ? magnitude : classificacao === 'abaixo' ? -magnitude : 0;
 
     const proporcaoReferencia = 50 + diferencaComSinal / 2;
     const proporcaoMedia = 100 - proporcaoReferencia;
@@ -67,10 +47,7 @@ export function ComparisonDifferenceChart({
         },
     ];
 
-    const corReferencia =
-        classificacao === 'indisponivel'
-            ? '#64748B'
-            : '#2DD4BF';
+    const corReferencia = classificacao === 'indisponivel' ? '#64748B' : '#2DD4BF';
 
     const corMedia = '#475569';
 
@@ -103,7 +80,6 @@ export function ComparisonDifferenceChart({
 
     return (
         <div className="flex w-full flex-col items-center gap-2 text-center">
-
             {/* Medidor radial */}
             <div className="relative mx-auto aspect-[2/1] w-full max-w-[280px] overflow-hidden">
                 <div className="aspect-square w-full">
@@ -115,11 +91,7 @@ export function ComparisonDifferenceChart({
                             innerRadius="62%"
                             outerRadius="96%"
                         >
-                            <PolarAngleAxis
-                                type="number"
-                                domain={[0, 100]}
-                                tick={false}
-                            />
+                            <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
 
                             {/* Serviço de referência */}
                             <RadialBar
@@ -184,9 +156,7 @@ export function ComparisonDifferenceChart({
                     <>
                         {descricaoAntes}
 
-                        <strong className="font-bold text-slate-200">
-                            {valorDestaque}
-                        </strong>
+                        <strong className="font-bold text-slate-200">{valorDestaque}</strong>
 
                         {descricaoDepois}
                     </>
