@@ -92,6 +92,7 @@ Os testes de instalação, API e migração rodaram em uma cópia limpa do commi
 | Consulta HTTP de histórico | A API retornou HTTP 200 com uma observação sintética gravada no PostgreSQL. A resposta permitiu a origem do frontend no cabeçalho CORS. |
 | Migração da Sprint 1 | Um banco criado com o schema da Sprint 1 (`f686e6c`) recebeu a [migração](../../database/migrations/001_status_coleta.sql) duas vezes. Após reiniciar o PostgreSQL, a coleta original e o novo status vinculado permaneceram acessíveis, com o índice presente. |
 | Suíte do backend | 30 testes passaram, incluindo três de integração com PostgreSQL, executados a partir do repositório contra o banco isolado. |
+| Indicadores ambientais (US07) | Em `/regioes`, os cards exibiram 2 kWh e 200 g de CO₂e para a primeira região e 3 kWh e 300 g de CO₂e para a segunda. Na mesma janela de 24 horas, o PostgreSQL confirmou 5 kWh e 500 g de CO₂e no ambiente, com 3 serviços ativos e 1 indisponível. [Resultado do teste com dados sintéticos](https://github.com/Team-Zero-DSM/GreenER/issues/75#issuecomment-6751580199) |
 
 As verificações usaram dados sintéticos e dispensaram as APIs externas de
 métricas e carbono. O aceite do cliente é registrado separadamente.
