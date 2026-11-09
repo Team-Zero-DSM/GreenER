@@ -216,7 +216,7 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
 | Sprint | Link                                                                                                | Início     | Entrega    | Status |
 | ------ | --------------------------------------------------------------------------------------------------- | ---------- | ---------- | ------ |
 | 01     | [sprint 1](./docs/sprint-1/sprint-1.md)                                                             | 28/09/2026 | 19/10/2026 | ✅     |
-| 02     | [sprint 2](./docs/sprint-2/sprint-2.md)                                                             | 20/10/2026 | 09/11/2026 | 🔄     |
+| 02     | [sprint 2](./docs/sprint-2/sprint-2.md)                                                             | 20/10/2026 | 09/11/2026 |✅     |
 | 03     | [planejamento da sprint 3](./docs/plano-de-entregas.md#sprint-3--autenticação-e-cenários-avançados) | 10/11/2026 | 23/11/2026 | ❌     |
 
 #### Legenda
