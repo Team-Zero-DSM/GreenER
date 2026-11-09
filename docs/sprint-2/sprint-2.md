@@ -145,15 +145,15 @@ para esta atualização.
 
 ### O que funcionou?
 
-> Preencher ao final da sprint
+> A organização e a divisão das tarefas funcionaram muito bem. Cada integrante teve clareza sobre suas responsabilidades e pôde trabalhar nas áreas em que tinha mais afinidade. Isso facilitou o acompanhamento das entregas e permitiu concluir todas as tarefas previstas, representando uma evolução em relação à Sprint anterior.
 
 ### O que não funcionou?
 
-> Preencher ao final da sprint
+> Feriados, finais de semana e atividades acadêmicas impactaram um pouco o ritmo de desenvolvimento e fizeram com que o progresso se afastasse temporariamente do Burndown planejado. Apesar disso, os imprevistos não comprometeram o resultado final, e a equipe conseguiu concluir todas as entregas previstas.
 
 ### O que melhorar na próxima Sprint?
 
-> Preencher ao final da sprint
+> Manter o formato atual de organização e divisão das tarefas, aprimorando-o conforme a experiência da equipe. Como a próxima Sprint será mais curta, será importante antecipar as entregas e manter um ritmo de desenvolvimento constante para evitar acúmulo de tarefas no final.
 
 ---
 
