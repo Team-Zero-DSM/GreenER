@@ -79,11 +79,9 @@ Autenticação e configuração do intervalo pela aplicação não compõem esta
 entre serviços no mesmo período, registrar falhas e recuperação das coletas e
 evoluir o dashboard e a navegação por regiões, preservando as entregas da Sprint 1.
 
-**Fonte e data de conferência:** todas as issues abertas e fechadas do
-[milestone Sprint 2](https://github.com/Team-Zero-DSM/GreenER/milestone/2?closed=1),
-consultadas em **25/10/2026**. São **34 issues: 6 histórias e 28 tarefas**;
-**30 abertas e 4 fechadas**. Entre as tarefas, são 24 abertas e 4 fechadas.
-PRs são evidências separadas e não entram nessa contagem.
+O [milestone Sprint 2](https://github.com/Team-Zero-DSM/GreenER/milestone/2?closed=1)
+reúne as issues da sprint. O [backlog documentado](./sprint-2/evidencias-dod.md#sprint-backlog)
+registra 28 tarefas e inclui o PR #63 como apoio da entrega anterior.
 
 **Histórias selecionadas no GitHub:** US04 ([#72](https://github.com/Team-Zero-DSM/GreenER/issues/72)),
 US05 ([#73](https://github.com/Team-Zero-DSM/GreenER/issues/73)),
@@ -95,58 +93,54 @@ US08 continua o trabalho anterior; a seleção original da Sprint 1 permanece pr
 
 ### Entregas e critérios de verificação
 
-| Entrega | Escopo e verificação esperada | Issues | Responsáveis no GitHub |
+| Entrega | Escopo e verificação esperada | Issues | Responsáveis registrados no backlog |
 |---|---|---|---|
-| Histórico de status — US04/US05 | Tabela com serviço, horário e motivo; registrar falhas e recuperação sem interromper os demais serviços; consulta por serviço/período com paginação e validação. Distinguir indisponibilidade de serviço ativo sem métricas. | #89, #90, #91; histórias #72 e #73 | Pedro |
-| Ranking — US13 | API com coletas armazenadas, período e ordenação por energia ou CO₂e; tela com filtros de 1h, 6h, 24h, 7d e 30d, gráfico e tabela; dados reais, atualização após coleta e tratamento de estados vazios/falhas. Conferir valores com o banco no mesmo período. | #92, #102–#106; história #74 | Paulo no frontend; backend a definir |
-| Comparação — US14 | Selecionar de dois a cinco serviços sem duplicação, usar o mesmo período, selecionar métrica e serviço principal; integrar API, gráficos e resumo com diferença percentual, ausência de dados e média zero. As opções regionais/cenários de #83/#84 exigem delimitação com a Sprint 3. | #82–#86, #93; história #76 | Henrique no frontend; backend a definir |
-| Dashboard e regiões — US08 | Concluir inspeção regional da #32; listagem e foco no globo/mapa, modo 2D, marcadores proporcionais, header, cards regionais, gráfico de intensidade e mapa das regiões. Validar serviços por região e responsividade. | #32, #79–#81, #94, #97–#99; história #3 | Gabriel em #32/#79–#81; Vitor em #97; demais a definir |
-| Indicadores consolidados — US07 | Demonstrar energia total, CO₂e total, serviços ativos e indisponíveis do ambiente. Os cards regionais de #97 não comprovam sozinhos os quatro critérios globais. | História #75; #97 como contribuição regional | A definir; falta tarefa explícita para consolidar os quatro indicadores |
-| Documentação e validação | Atualizar diagramas, README, dailies, contratos e modelo; validar histórico de status, ranking, comparação e filtro regional com dados reais e registrar resultados. | #40, #77, #78, #95, #96 | Henrique em #40/#77/#78; #95/#96 a definir |
+| Histórico de status — US04/US05 | Registrar falhas e recuperação com serviço, horário e motivo. Consultar até 100 tentativas recentes por serviço e distinguir indisponibilidade de ausência de métricas. | #89, #90, #91; histórias #72 e #73 | Pedro |
+| Ranking — US13 | API com coletas armazenadas, período e ordenação por energia ou CO₂e; tela com filtros de 1h, 6h, 24h, 7d e 30d, gráfico e tabela; dados reais, atualização após coleta e tratamento de estados vazios/falhas. Conferir valores com o banco no mesmo período. | #92, #102–#106; história #74 | Paulo no frontend e Pedro no backend |
+| Comparação — US14 | Selecionar de dois a cinco serviços sem duplicação, usar o mesmo período, selecionar métrica e serviço principal; integrar API, gráficos e resumo com diferença percentual, ausência de dados e média zero. As opções regionais/cenários de #83/#84 exigem delimitação com a Sprint 3. | #82–#86, #93; história #76 | Henrique no frontend e Pedro no backend |
+| Dashboard e regiões — US08 | Concluir inspeção regional da #32; listagem e foco no globo/mapa, modo 2D, marcadores proporcionais, header, cards regionais, gráfico de intensidade e mapa das regiões. Validar serviços por região e responsividade. | #32, #79–#81, #94, #97–#99; história #3 | Gabriel em #32/#79–#81 e Vitor em #94/#97–#99 |
+| Indicadores consolidados — US07 | Apresentar energia total, CO₂e total e contagens de serviços ativos e indisponíveis do ambiente. | [História #75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | Equipe |
+| Documentação e validação | Atualizar diagramas, README, dailies, contratos e modelo; validar histórico de status, ranking, comparação e filtro regional com dados reais e registrar resultados. | #40, #77, #78, #95, #96 | Henrique em #40/#77/#78 e Pedro em #95/#96 |
 
-Os títulos, links, responsáveis, estimativas registradas e estados em 25/10
-das **28 tarefas** estão no [Sprint Backlog completo](./sprint-2/evidencias-dod.md#sprint-backlog).
-Responsável a definir significa ausência de atribuição na issue consultada;
-não foi inferida uma divisão individual.
+Os títulos, links, responsáveis do planejamento, estimativas e situações das
+**28 tarefas** estão no [Sprint Backlog completo](./sprint-2/evidencias-dod.md#sprint-backlog).
 
-### Situação observada e sequência de entrega
+### Integrações e sequência de entrega
 
-- **Conferência de 25/10:** #77, #78 e #82 constavam como fechadas. O fechamento
-  da #40 em **19/10** antecede a sprint. README e dailies continuam em acompanhamento.
-- **Integrações conferidas em `develop` até 03/11:** o histórico de status,
-  as entregas regionais e partes do ranking e da comparação têm PRs integrados.
-  Os vínculos e os limites de cada entrega estão no [registro de evidências](./sprint-2/evidencias-dod.md#integrações-posteriores-à-conferência).
-- **Saldo de T15:** a [daily de 22/10](./sprint-2/dailies.md#-22102026) relata a
-  conclusão da visualização das métricas. A #32 ainda tinha um critério pendente
-  em 25/10. A listagem regional integrada pela #80 fornece evidência para conferir
-  esse critério na review.
-- **Dependências do histórico:** #89 → #90 → #91; a validação de #95 deve cobrir
-  gravação, recuperação e consulta, além da diferença entre US04 e US05.
+- **Integrações da sprint:** o histórico de status, a inspeção regional, o
+  ranking e a comparação têm PRs integrados. Os vínculos e os limites de cada
+  entrega estão no [registro de evidências](./sprint-2/evidencias-dod.md#evidências-e-limites-de-conclusão).
+- **Saldo de T15:** a listagem regional da #80, integrada no
+  [PR #118](https://github.com/Team-Zero-DSM/GreenER/pull/118), cobre o saldo
+  da inspeção de serviços por região associado à #32.
+- **Dependências do histórico:** #89 → #90 → #91. O
+  [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127) registra os
+  testes de gravação, recuperação, consulta e distinção entre US04 e US05.
 - **Integrações:** #92 alimenta #104 e os componentes de ranking; #93 fornece os
   dados para #84–#86; #94 sustenta a inspeção/listagem regional. Estruturas visuais
   podem avançar em paralelo, mas a entrega exige integração real.
-- **Fechamento:** validar as funcionalidades em #95, atualizar contratos e modelo
-  em #96, reunir evidências por história e registrar review/aceite. Não há nova
-  estimativa de pontos nem declaração de homologação nesta revisão documental.
+- **Validação e documentação:** o [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127)
+  registra os testes da #95. O [PR #130](https://github.com/Team-Zero-DSM/GreenER/pull/130)
+  reúne as atualizações de contratos e do modelo da #96.
 
 ### Matriz da Sprint 2
 
 | Código | Requisito relacionado | Entrega concreta | Como verificar | Responsáveis | Evidência no GitHub | Situação |
 |---|---|---|---|---|---|---|
-| ES01 | RNF11, RNF12 | Backlog vinculado a requisitos e histórias | Conferir as seis histórias e 28 tarefas | Equipe | [Sprint Backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Registrado; completar cobertura de US07 |
-| ES02 | RNF12 | Objetivo, seleção, responsáveis e dependências | Conferir este plano, atribuições e planejamento de 20/10 | Equipe | [Registro da sprint](./sprint-2/sprint-2.md), [dailies](./sprint-2/dailies.md) | Em execução; há tarefas sem atribuição |
-| ES03 | RNF11 | Critérios verificáveis por história | Conferir checklists e resultados de integração | Equipe | Issues #3 e #72–#76 no [registro](./sprint-2/sprint-2.md) | Critérios disponíveis; ampliar histórico em US04/US05 e delimitar cenários |
-| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir issues e PRs vinculados | Equipe | [Backlog e evidências](./sprint-2/evidencias-dod.md) | Integrações registradas até 03/11 |
+| ES01 | RNF11, RNF12 | Backlog vinculado a requisitos e histórias | Conferir as seis histórias e 28 tarefas | Equipe | [Sprint Backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Histórias e tarefas registradas |
+| ES02 | RNF12 | Objetivo, seleção, responsáveis e dependências | Conferir este plano, atribuições e planejamento de 20/10 | Equipe | [Registro da sprint](./sprint-2/sprint-2.md), [dailies](./sprint-2/dailies.md) | Backlog e responsáveis registrados |
+| ES03 | RNF11 | Critérios verificáveis por história | Conferir checklists e resultados de integração | Equipe | [Histórias selecionadas](./sprint-2/evidencias-dod.md#histórias-selecionadas) | Critérios registrados nas issues e nas evidências da sprint |
+| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir issues e PRs vinculados | Equipe | [Backlog e evidências](./sprint-2/evidencias-dod.md) | Entregas vinculadas às issues e aos PRs no registro |
 | ES05 | RNF12 | Evolução incremental | Examinar commits e merges do período | Equipe | [Commits](https://github.com/Team-Zero-DSM/GreenER/commits/develop/), PRs no registro | Evolução registrada; acompanhar próximas entregas |
 | ES06 | RNF12 | Review, feedback e adaptação | Relacionar feedback às mudanças e registrar encerramento | Equipe | [Dailies](./sprint-2/dailies.md), especialmente 21/10 | Ajustes relatados; review final pendente |
-| ES07 | RNF11, RNF12 | DoD sustentada por evidências | Conferir resultados por tarefa e aceite por história | Equipe; #95 sem atribuição | #95 e [ressalvas do registro](./sprint-2/sprint-2.md) | Validação da sprint e aceite pendentes |
-| ES08 | RNF08 | Documentação compatível com a entrega | Conferir diagramas, README, dailies, contratos e modelo | Henrique; #96 sem atribuição no levantamento de 25/10 | #40, #77, #78 e #96 no [backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Diagramas com PRs integrados e documentação técnica acompanhada na #96 |
+| ES07 | RNF11, RNF12 | DoD sustentada por evidências | Conferir resultados por tarefa e aceite por história | Equipe | [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127) e [registro](./sprint-2/evidencias-dod.md) | Validação técnica registrada. Aceites da US07 registrados na #75 |
+| ES08 | RNF08 | Documentação compatível com a entrega | Conferir diagramas, README, dailies, contratos e modelo | Henrique e Pedro | #40, #77, #78 e #96 no [backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Documentação técnica entregue pelo PR #130. Registro e dailies na branch da #40 |
 | ES09 | RNF12 | Participação dos cinco integrantes | Conferir presença, atividades, atribuições e artefatos | Todos | [Dailies](./sprint-2/dailies.md), [participação](./sprint-2/sprint-2.md#participação-da-equipe) | Presenças e atividades consolidadas para os registros até 28/10 |
 | DW01 | RP01, RP02; RNF09 interno | React/TS, Node/TS e separação das partes | Conferir alterações e compilar aplicações | Equipe | [Frontend](../frontend/package.json), [backend](../backend/package.json), #95 | Base existente; revalidar alterações da sprint |
-| DW02, DW03, DW07 | Recursos da Sprint 1 | Preservar integrações, APIs e Docker | Reexecutar verificações relevantes e contratos de #91–#94 | Pedro; endpoints e #95 sem atribuição no levantamento de 25/10 | #89–#95 no [backlog](./sprint-2/evidencias-dod.md#sprint-backlog) | Há PRs integrados. Resultados das verificações a registrar na #95 |
-| DW04, DW05 | RF09, RF11, RF14, RF15 | Ranking, comparação e regiões com dados reais | Validar filtros, período, atualização e falhas na interface | Paulo, Henrique, Gabriel e Vitor conforme o backlog | #32, #79–#86, #97–#99, #102–#106 | Entregas parciais registradas. Integração das telas acompanhada na #84 e na #104 |
-| BD01–BD04 | RF05, RF06, RF08, RF10, RF14, RF15; RP03 | Histórico de status, consultas e agregações | Preservar dados existentes e comparar API × SQL no mesmo período | Pedro; #92/#93/#95 sem atribuição no levantamento de 25/10 | #89–#93, #95/#96 | Tabela, gravação e consulta de status integradas. Validação da entrega a registrar |
-| TP01–TP03 | Histórico, ranking, comparação e regiões | Modelagem, tipos e isolamento de falhas | Conferir entradas inválidas, dados ausentes, recuperação e média zero | Equipe | Critérios de #90–#95 e #86 | Verificações previstas; resultados a registrar |
+| DW02, DW03, DW07 | Recursos da Sprint 1 | Preservar integrações, APIs e Docker | Reexecutar verificações relevantes e contratos de #91–#94 | Pedro e Vitor conforme o backlog | [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127), [PR #128](https://github.com/Team-Zero-DSM/GreenER/pull/128) e [evidências da sprint](./sprint-2/evidencias-dod.md#evidências-e-limites-de-conclusão) | Validação de API, filtro regional e subida em cópia limpa registrada |
+| DW04, DW05 | RF09, RF11, RF14, RF15 | Ranking, comparação e regiões com dados reais | Validar filtros, período, atualização e falhas na interface | Paulo, Henrique, Gabriel e Vitor conforme o backlog | [Ranking #126](https://github.com/Team-Zero-DSM/GreenER/pull/126), [comparação #129](https://github.com/Team-Zero-DSM/GreenER/pull/129) e [inspeção regional #118](https://github.com/Team-Zero-DSM/GreenER/pull/118) | Telas integradas ao backend |
+| BD01–BD04 | RF05, RF06, RF08, RF10, RF14, RF15; RP03 | Histórico de status, consultas e agregações | Preservar dados existentes e comparar API × SQL no mesmo período | Pedro | [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127) e [migração de volume](../database/arquitetura.md#conferir-um-volume-existente) | Testes com PostgreSQL e preservação da amostra da Sprint 1 após migração e reinício registrados |
+| TP01–TP03 | Histórico, ranking, comparação e regiões | Modelagem, tipos e isolamento de falhas | Conferir entradas inválidas, dados ausentes, recuperação e média zero | Equipe | [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127) | Testes automatizados e verificações HTTP registrados |
 
 ## Sprint 3 — Autenticação e cenários avançados
 
@@ -177,6 +171,7 @@ implementação de autenticação funcional nem evidência de Sprint 3 concluíd
 | ES09 | RNF12 | Participação verificável dos cinco integrantes | Conferir artefatos por integrante, além de commits | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
 | DW01 | RP01, RP02; RNF09 interno | React/TS, Node/TS e separação das partes | Conferir código e dependências usadas | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
 | DW06 | RP06; RNF05 interno | Login JWT e proteção no backend | Validar login, rejeição de token e acesso autorizado | [PREENCHER] | Módulo auth e verificações a implementar | Planejado para a Sprint 3 |
+| DW03, DW06 | Configuração de monitoramento | Consultar e alterar o intervalo de coleta pela área autenticada | Validar valores de 10 a 3.600 segundos, rejeitar alterações sem autorização e verificar se o intervalo salvo é aplicado pelo agendador e persiste após reiniciar | Equipe de backend, a confirmar no planejamento | [Contrato previsto](./API.md#24-configuração-de-monitoramento--planejada) | Proposta para a Sprint 3, após autenticação |
 | DW02, DW03, DW07 | Recursos das sprints anteriores | Preservar integrações, API e execução | Revalidar comportamento e regressões | Equipe | Código e verificações da entrega | Planejado e cumulativo |
 | DW04, DW05 | Cenários regionais; RF15 cumulativo | Simulações avançadas e preservação da comparação da Sprint 2 | Delimitar cenários adicionais e conferir resultados com dados reais | A definir | Issues e PRs a definir; #83/#84 como limite do escopo anterior | Planejado; delimitação pendente |
 | BD01–BD04 | RP03; histórico e análises | Consultas e modelo para cenários adicionais | Conferir filtros e relacionamentos por período | A definir | SQL e evidências a definir | Planejado e cumulativo |
@@ -188,12 +183,12 @@ implementação de autenticação funcional nem evidência de Sprint 3 concluíd
 |---|---|---|
 | Autenticação | Sprint 3. | Removida da entrega da Sprint 1; continua no backlog do produto. |
 | Persistência e histórico de métricas | Entregas técnicas da Sprint 1. | Relacionados às tarefas de backend/banco e BD01–BD04; não incluem automaticamente a US10 na seleção. |
-| Histórico de status | Ampliação da Sprint 2 vinculada a US04/US05. | #89–#91; registrar critérios adicionais nas histórias e validar preservação dos dados. |
-| Comparação entre serviços | Sprint 2, conforme milestone e #76/#82–#86/#93. | Corrigida a alocação anterior na Sprint 3; estrutura entregue não equivale a comparação integrada. |
+| Histórico de status | Ampliação da Sprint 2 vinculada a US04/US05. | #89–#91; preservação dos dados verificada em banco de teste com schema da Sprint 1. |
+| Comparação entre serviços | Sprint 2, vinculada às issues #76, #82–#86 e #93. | Tela de comparação integrada à API pelo [PR #129](https://github.com/Team-Zero-DSM/GreenER/pull/129). |
 | Cenários regionais | #83/#84 já preveem opções regionais na comparação da Sprint 2. | Delimitar o que será simulação avançada adicional da Sprint 3 antes de fechar seu backlog. |
-| Indicadores consolidados | US07 selecionada na Sprint 2 (#75). | Associar tarefa e responsável para os quatro indicadores globais; cards regionais não encerram a história. |
+| Indicadores consolidados | US07 concluída na Sprint 2. | A visão global reúne os totais de energia e CO₂e e as contagens de serviços ativos e indisponíveis. |
 | Mapa/globo | Globo integrado na Sprint 1. Continuação de T15 na Sprint 2, com Gabriel. | A #32 identifica o saldo e o PR #118 fornece evidência da listagem regional para a review. |
-| Intervalo pela aplicação | Depois; sprint a definir. | Não confundir variável de ambiente, tabela existente e endpoint funcional. Alocar antes do fechamento do plano final. |
+| Intervalo pela aplicação | Proposta para a Sprint 3, após autenticação. | Confirmar a alocação e o responsável na planning. O intervalo salvo deve controlar o agendador de coletas. |
 | Parâmetros ambientais | Valores iniciais correspondem ao exemplo do modelo simplificado do desafio. | Fonte, unidades e aplicação registradas em [cálculo.md](./cálculo.md); não representam calibração de hardware real. |
 
 As decisões acima orientam o planejamento das entregas.

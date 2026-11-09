@@ -175,7 +175,9 @@ Pendências e entregas futuras:
   e no [plano de entregas](./docs/plano-de-entregas.md).
 - **Sprint 3:** autenticação JWT e simulação de cenários avançados,
   com delimitação em relação às opções regionais previstas na comparação da Sprint 2.
-- **Sprint a definir:** configuração do intervalo de coleta pela aplicação.
+- **Proposta para a Sprint 3:** configuração do intervalo de coleta pela área
+  autenticada. O [plano de entregas](./docs/plano-de-entregas.md) registra o
+  critério de aceite.
 
 Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
 Persistência, histórico e globo não acrescentam automaticamente outras histórias.
@@ -624,20 +626,20 @@ Uma User Story será considerada concluída quando:
 
 | **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados** | **Implementação / validação**                 |
 | ------ | -------------------------- | ---------------------------------------------- | -------------- | --------------------- | --------------------------------------------- |
-| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | 🛠️ Implementada                               |
-| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | 🛠️ Implementada                               |
-| US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | 🔄 Base implementada; validar falhas          |
-| US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | 🔄 Parcial                                    |
-| US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | 🛠️ Implementada no código; validar transições |
-| US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | 🛠️ Implementada                               |
-| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | 🔄 Parcial                                    |
-| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | 🛠️ Implementada com aceite pendente           |
-| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | 🛠️ Implementada                               |
-| US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | 🛠️ Implementada                               |
-| US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | 🛠️ Implementada                               |
-| US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | 🛠️ Implementada                               |
-| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | 🔄 Módulo disponível, integração pendente     |
-| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | 🛠️ Implementada                               |
+| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | ✅ Concluída na Sprint 1                       |
+| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | ✅ Concluída na Sprint 1                       |
+| US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | ✅ Concluída na Sprint 2                      |
+| US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | ✅ Concluída na Sprint 2                      |
+| US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | ✅ Implementada na Sprint 1                    |
+| US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | ✅ Implementada na Sprint 1                    |
+| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | ✅ Concluída na Sprint 2                      |
+| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | ✅ Concluída na Sprint 2                      |
+| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | ✅ Concluída na Sprint 1                       |
+| US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | ✅ Implementada na Sprint 1                    |
+| US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | ✅ Implementada na Sprint 1                    |
+| US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | ✅ Implementada na Sprint 1                    |
+| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | ✅ Concluída na Sprint 2                      |
+| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | ✅ Concluída na Sprint 2                      |
 | US15   | Acesso e Segurança         | Autenticação de usuários                       | Alta           | RNF05                 | ❌                                            |
 | US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                 | 🔄 Base implementada; ampliar validação       |
 
@@ -645,23 +647,23 @@ Uma User Story será considerada concluída quando:
 
 **Legenda**
 
-O código atual contém implementação de **oito histórias: US01, US02, US03,
-US06, US09, US10, US11 e US12**. A US02 ainda exige validação completa das
-transições de descoberta, ausência e restabelecimento. O aceite formal das
-histórias permanece pendente; esta tabela não declara cumprimento integral da DoD.
+A matriz abaixo detalha a rastreabilidade de oito histórias relacionadas às
+entregas da Sprint 1. A US02 ainda exige validação completa das transições de
+descoberta, ausência e restabelecimento. As entregas da Sprint 2 têm seu próprio
+[registro de evidências](./docs/sprint-2/evidencias-dod.md).
 
-US04 e US16 já possuem tratamento de falhas, mas precisam ampliar a validação.
+US04 registra falhas e recuperação no histórico. A US16 tem tratamento de
+falhas implementado e requer validação de cenários adicionais.
 A US05 usa `metrics_missing` para HTTP 500 da consulta de métricas, que significa
 serviço indisponível ou exportador de métricas indisponível; HTTP 404 significa
 serviço removido ou métricas inexistentes e resulta em `unavailable`.
 Erros da Cloudflare, como HTTP 530, são identificados separadamente no histórico,
-preservando o status anterior do serviço. A US07 possui
-totais e contagens regionais; falta a consolidação explícita do ambiente inteiro.
+preservando o status anterior do serviço. A US07 foi concluída na Sprint 2,
+conforme os critérios de aceite registrados na [issue #75](https://github.com/Team-Zero-DSM/GreenER/issues/75).
 
 - ❌ — Não iniciada
 - 🔄 — Parcialmente implementada ou com validação de falhas pendente
-- 🛠️ — Implementação presente; observar as ressalvas e o aceite pendente
-- ✅ — Concluída, com DoD e aceite registrados
+- ✅ — História concluída ou implementação registrada na documentação da sprint
 
 ### Rastreabilidade das oito histórias implementadas
 

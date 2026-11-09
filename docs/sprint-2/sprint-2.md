@@ -2,15 +2,9 @@
 
 ## Situação da entrega
 
-Todas as 28 tarefas propostas nesta página foram concluídas, conforme informado
-pela equipe. A consulta ao GitHub em **06/11/2026** confirma o fechamento das
-tarefas do milestone e das seis histórias selecionadas. O saldo da inspeção
-regional associado à #32 foi entregue nesta sprint.
-
-Os pontos foram conferidos no campo **Estimate** do
-[GitHub Projects — GreenER-ABP2](https://github.com/orgs/Team-Zero-DSM/projects/3).
-Quando o campo estava vazio, foi preservada a estimativa do planejamento local;
-a origem está detalhada no [registro de evidências](./evidencias-dod.md).
+As 28 tarefas registradas abaixo constam como concluídas. A inspeção regional
+associada à #32 foi entregue nesta sprint. As seis histórias selecionadas
+têm entrega registrada.
 
 ## 🎯 Sprint Goal
 
@@ -73,11 +67,8 @@ visualizações regionais.
 | **T27** | Realizar testes das funcionalidades do backend (#95) | pedro | ✅ | 5 |
 | **T28** | Atualizar documentação do backend e do banco de dados (#96) | pedro | ✅ | 3 |
 
-**Resultado: 28 de 28 tarefas concluídas (100%), totalizando 121 pontos.** Os pontos e responsáveis
-estão consolidados no [backlog por issue](./evidencias-dod.md#sprint-backlog).
-Os valores zerados foram substituídos pelas estimativas encontradas no Projects.
-A #63 foi mantida como tarefa de apoio já prevista nesta página, sem alterar
-o registro da Sprint 1.
+**Resultado: 28 tarefas registradas como concluídas, somando 121 pontos de esforço.**
+Os pontos e responsáveis estão no [backlog por issue](./evidencias-dod.md#sprint-backlog).
 
 ---
 
@@ -87,24 +78,28 @@ o registro da Sprint 1.
     <img src="./BurndownSprint2.svg" alt="Gráfico de Burndown">
 </p>
 
+O total de **121 pontos** também aparece no campo `Estimate` da coluna
+**Done**, com o filtro da Sprint 2 no
+[GitHub Projects](https://github.com/orgs/Team-Zero-DSM/projects/3).
+
 ---
 
 ## Evidências e rastreabilidade
 
-| História | Tarefas vinculadas | Entrega concluída |
+| História | Tarefas vinculadas | Entrega registrada |
 |---|---|---|
 | US04 e US05 | #89–#91 | Tabela, registro e consulta do histórico de falhas e recuperação das coletas. PRs #101, #107 e #108. |
-| US07 | #75; contribuição regional de #97 | História de indicadores consolidados fechada no GitHub. Cards regionais integram a entrega do dashboard. |
+| US07 | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | Visão consolidada do ambiente com totais de energia e CO₂e e contagens de serviços ativos e indisponíveis. |
 | US08 | #32, #79–#81, #94 e #97–#99 | Inspeção de serviços por região, globo e mapa 2D, listagem, navegação e indicadores regionais. PRs #110, #115, #118, #120, #124, #125 e #128. |
-| US13 | #92 e #102–#106 | Ranking integrado ao backend, filtros de critério e período, gráfico e tabela de classificação. PRs #109, #112, #114, #116 e #126. |
+| US13 | #92 e #102–#106 | Ranking integrado ao backend, filtros de critério e período, gráfico e tabela de classificação. PRs #109, #112, #114, #116, [#122](https://github.com/Team-Zero-DSM/GreenER/pull/122) e #126. |
 | US14 | #82–#86 e #93 | Comparação integrada ao backend, seleção de serviços, visualização, cálculos e resumo comparativo. PRs #100, #111, #113, #121, #123 e #129. |
 
 Documentação e validação do backend foram concluídas nas tarefas #95 e #96,
 vinculadas aos PRs #127 e #130. Diagramas foram atualizados em #77 e #78,
 com os PRs #87 e #88.
 
-Consulte o [registro de evidências](./evidencias-dod.md#evidências-e-limites-de-conclusão)
-para as fontes e o alcance desta atualização documental.
+Os PRs e os resultados dos testes constam no
+[registro de evidências](./evidencias-dod.md#evidências-e-limites-de-conclusão).
 
 ## Participação da equipe
 
@@ -123,15 +118,11 @@ e o ajuste a partir do feedback do cliente em 21/10 também estão nas [dailies]
 
 | Critério | Resultado registrado |
 |---|---|
-| Tarefas propostas | Todas concluídas; estados atualizados no backlog. |
+| Tarefas propostas | 28 tarefas registradas como concluídas. |
 | Rastreabilidade | Histórias, tarefas e PRs relacionados no registro de evidências. |
 | Integração | Entregas de histórico, ranking, comparação e regiões integradas. |
-| Validação do backend | #94 e #95 fechadas, com PRs #128 e #127. |
+| Validação do backend | PRs #128 e #127, mais a [validação com PostgreSQL e Compose](./evidencias-dod.md#evidências-e-limites-de-conclusão). |
 | Documentação | #96 fechada, com PR #130; diagramas entregues em #77 e #78. |
-
-Esta atualização registra a conclusão informada pela equipe e os estados
-consultados no GitHub. Não representa uma nova execução de testes nem uma ata
-de homologação do cliente.
 
 ## 🔎 Sprint Review
 

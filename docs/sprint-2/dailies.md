@@ -183,10 +183,6 @@ A presença dos integrantes é indicada por ✅ para presentes e ❌ para ausent
 
 ### 👥 Presença
 
-## 📅 03/11/2026
-
-### 👥 Presença
-
 | Membro | Presença |
 | --- | --- |
 | Henrique | ✅ |

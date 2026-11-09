@@ -1,14 +1,11 @@
 # Sprint 2 — Evidências das entregas
 
 **Período planejado:** 20/10/2026 a 09/11/2026.
-**Atualização:** 06/11/2026.
 **Fontes:** [GitHub Projects — GreenER-ABP2](https://github.com/orgs/Team-Zero-DSM/projects/3)
 e [milestone Sprint 2, incluindo fechadas](https://github.com/Team-Zero-DSM/GreenER/milestone/2?closed=1).
 
-Todas as tarefas propostas foram concluídas, conforme informado pela equipe.
-A consulta ao milestone confirmou as seis histórias e as tarefas nele vinculadas
-fechadas. Este registro substitui o retrato parcial de 25/10 e as pendências
-documentais baseadas naquela consulta.
+O backlog registra 28 tarefas concluídas. Os estados das issues e as
+evidências de aceite das histórias estão descritos separadamente abaixo.
 
 ## Histórias selecionadas
 
@@ -16,23 +13,21 @@ documentais baseadas naquela consulta.
 |---|---|---|---|
 | US04 — Identificação de indisponibilidade | [#72](https://github.com/Team-Zero-DSM/GreenER/issues/72) | RF05, RNF04 | Concluída; issue fechada |
 | US05 — Identificação de ausência de métricas | [#73](https://github.com/Team-Zero-DSM/GreenER/issues/73) | RF06, RNF04 | Concluída; issue fechada |
-| US07 — Indicadores ambientais consolidados | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | RF08 | Concluída; issue fechada |
+| US07 — Indicadores ambientais consolidados | [#75](https://github.com/Team-Zero-DSM/GreenER/issues/75) | RF08 | Concluída nesta sprint. A visão global apresenta os totais de energia e CO₂e e as contagens de serviços ativos e indisponíveis. |
 | US08 — Dashboard operacional | [#3](https://github.com/Team-Zero-DSM/GreenER/issues/3) | RF09, RNF01, RNF03 | Concluída nesta sprint; issue fechada |
 | US13 — Ranking de impacto | [#74](https://github.com/Team-Zero-DSM/GreenER/issues/74) | RF14 | Concluída; issue fechada |
 | US14 — Comparação entre serviços | [#76](https://github.com/Team-Zero-DSM/GreenER/issues/76) | RF15 | Concluída; issue fechada |
 
 ## Sprint Backlog
 
-As 28 tarefas abaixo correspondem ao backlog da página da Sprint 2. Os IDs T01–T28
-foram preservados. O saldo de 3 pontos da #32 é contabilizado uma única vez
-nesta sprint. A #63 permanece como apoio já registrado no planejamento local,
-sem ser apresentada como uma nova issue do milestone.
+O backlog da Sprint 2 reúne 28 tarefas, de T01 a T28.
+A issue #32 registra o saldo da inspeção regional. O
+[PR #63](https://github.com/Team-Zero-DSM/GreenER/pull/63) foi integrado na
+Sprint 1 e está no milestone da Sprint 2 como item de apoio, com os 3 pontos
+registrados na T17.
 
-As estimativas do campo **Estimate** do Projects foram utilizadas quando
-disponíveis. Para #90, #63 e #102–#105, o campo consultado estava vazio:
-foram mantidos os pontos do planejamento local. Para #106, também foi preservada
-a estimativa local, pois a consulta individual foi limitada pelo GitHub.
-Esses valores não foram inventados nem substituídos por zero.
+As estimativas do backlog somam **121 pontos**, também exibidos no campo
+`Estimate` da coluna **Done** do Projects com o filtro da Sprint 2.
 
 | ID | Tarefa / issue | Responsável | Status | Pontos |
 |---|---|---|:---:|---:|
@@ -65,13 +60,11 @@ Esses valores não foram inventados nem substituídos por zero.
 | **T27** | Realizar testes das funcionalidades do backend (#95) | pedro | ✅ | 5 |
 | **T28** | Atualizar documentação do backend e do banco de dados (#96) | pedro | ✅ | 3 |
 
-**Total: 121 pontos; 28 tarefas concluídas.** As responsabilidades acima
-mantêm o planejamento da sprint, com #98 e #99 corrigidas para Vitor conforme
-o GitHub. A ausência de atribuição em algumas issues do backend não substitui
-o responsável já registrado no planejamento local.
+As 28 tarefas concluídas somam **121 pontos**. A coluna **Responsável** reúne
+as atribuições do planejamento da sprint e do GitHub.
 
-A #40 trata da manutenção documental e das dailies, com fechamento anterior
-à sprint. Não foi acrescentada como uma 29ª tarefa nem recebeu novos pontos.
+A #40 reúne a manutenção do README e das dailies e fica fora da pontuação
+do backlog da sprint.
 
 ## Evidências e limites de conclusão
 
@@ -82,21 +75,26 @@ A #40 trata da manutenção documental e das dailies, com fechamento anterior
 | Inspeção regional e globo | #32, #79, #80 | [#118](https://github.com/Team-Zero-DSM/GreenER/pull/118), [#120](https://github.com/Team-Zero-DSM/GreenER/pull/120) |
 | Header e navegação | #81 | [#124](https://github.com/Team-Zero-DSM/GreenER/pull/124) |
 | Cards, carbono regional e mapa 2D | #97–#99 | [#110](https://github.com/Team-Zero-DSM/GreenER/pull/110), [#115](https://github.com/Team-Zero-DSM/GreenER/pull/115), [#125](https://github.com/Team-Zero-DSM/GreenER/pull/125) |
-| Ranking: estrutura, filtros, endpoint, gráfico e integração | #92, #102–#106 | [#109](https://github.com/Team-Zero-DSM/GreenER/pull/109), [#112](https://github.com/Team-Zero-DSM/GreenER/pull/112), [#114](https://github.com/Team-Zero-DSM/GreenER/pull/114), [#116](https://github.com/Team-Zero-DSM/GreenER/pull/116), [#126](https://github.com/Team-Zero-DSM/GreenER/pull/126) |
+| Ranking: estrutura, filtros, endpoint, gráfico, tabela e integração | #92, #102–#106 | [#109](https://github.com/Team-Zero-DSM/GreenER/pull/109), [#112](https://github.com/Team-Zero-DSM/GreenER/pull/112), [#114](https://github.com/Team-Zero-DSM/GreenER/pull/114), [#116](https://github.com/Team-Zero-DSM/GreenER/pull/116), [#122](https://github.com/Team-Zero-DSM/GreenER/pull/122), [#126](https://github.com/Team-Zero-DSM/GreenER/pull/126) |
 | Comparação: estrutura, interações, endpoint, resultados, cálculos e integração | #82–#86, #93 | [#100](https://github.com/Team-Zero-DSM/GreenER/pull/100), [#111](https://github.com/Team-Zero-DSM/GreenER/pull/111), [#113](https://github.com/Team-Zero-DSM/GreenER/pull/113), [#121](https://github.com/Team-Zero-DSM/GreenER/pull/121), [#123](https://github.com/Team-Zero-DSM/GreenER/pull/123), [#129](https://github.com/Team-Zero-DSM/GreenER/pull/129) |
 | Validação de serviços por região | #94 | [#128](https://github.com/Team-Zero-DSM/GreenER/pull/128) |
 | Testes do backend | #95 | [#127](https://github.com/Team-Zero-DSM/GreenER/pull/127) |
 | Documentação do backend e banco | #96 | [#130](https://github.com/Team-Zero-DSM/GreenER/pull/130) |
 
-A conclusão das tarefas é registrada com base no relato da equipe e no fechamento
-das issues. Alguns checklists nas descrições continuam desmarcados mesmo com
-a issue fechada; não foram tratados como tarefas ainda em desenvolvimento.
-A US07 está fechada na #75; a contribuição regional de #97 não é usada
-isoladamente como prova dos indicadores globais.
+Os PRs vinculados documentam a implementação das tarefas. A validação da
+#95 está no [PR #127](https://github.com/Team-Zero-DSM/GreenER/pull/127).
+Os testes de instalação, API e migração rodaram em uma cópia limpa do commit
+`0401658`, com PostgreSQL 17 em um projeto Compose isolado.
 
-As evidências de testes estão vinculadas à entrega da #95. Esta atualização
-documental não executou testes e não atribui novos resultados à suíte.
-O fechamento das histórias não substitui uma ata de aceite formal do cliente.
+| Verificação | Resultado |
+|---|---|
+| Instalação limpa | Frontend, backend e PostgreSQL subiram juntos com `docker compose up --build`. O schema criou `status_coleta` e o frontend respondeu HTTP 200. |
+| Consulta HTTP de histórico | A API retornou HTTP 200 com uma observação sintética gravada no PostgreSQL. A resposta permitiu a origem do frontend no cabeçalho CORS. |
+| Migração da Sprint 1 | Um banco criado com o schema da Sprint 1 (`f686e6c`) recebeu a [migração](../../database/migrations/001_status_coleta.sql) duas vezes. Após reiniciar o PostgreSQL, a coleta original e o novo status vinculado permaneceram acessíveis, com o índice presente. |
+| Suíte do backend | 30 testes passaram, incluindo três de integração com PostgreSQL, executados a partir do repositório contra o banco isolado. |
+
+As verificações usaram dados sintéticos e dispensaram as APIs externas de
+métricas e carbono. O aceite do cliente é registrado separadamente.
 
 ## Dependências e pendências para o encerramento
 
@@ -104,13 +102,11 @@ As dependências de implementação previstas foram concluídas: histórico de s
 (#89 → #90 → #91), ranking (#92 e #102–#106), comparação (#82–#86 e #93)
 e visualizações regionais (#32, #79–#81, #94 e #97–#99).
 
-Não há tarefas propostas pendentes de implementação neste registro. Permanecem
-sem registro disponível a retrospectiva da equipe, o feedback e aceite formal do
-cliente e o link da demonstração. Esses registros não foram inventados.
+O registro de feedback e aceite formal, a retrospectiva e o link da
+demonstração seguem na [página da sprint](./sprint-2.md).
 Autenticação e simulação avançada continuam fora do escopo desta entrega.
 
 ## Acompanhamento
 
-As [dailies](./dailies.md) e o burndown permanecem como registros históricos.
-A [página da Sprint 2](./sprint-2.md) consolida as entregas e mantém a contagem
-de participação restrita ao período já documentado, de 20 a 28/10.
+As [dailies](./dailies.md) registram as atividades da sprint. A
+[página da Sprint 2](./sprint-2.md) reúne o burndown e a participação de 20 a 28/10.
