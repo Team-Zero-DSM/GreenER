@@ -23,9 +23,9 @@ fornecê-las ao restante da aplicação.
 
 ## 2. API REST do GreenER
 
-A implementação atual oferece listagem e detalhe de serviços, histórico de coletas,
-estado do monitoramento e os cards de região. As demais operações abaixo são
-planejadas e não devem ser apresentadas como implementadas. O dashboard e o
+A implementação atual oferece listagem e detalhe de serviços, histórico de métricas,
+resultados das tentativas de coleta, estado do monitoramento, dados regionais e
+comparação de serviços e ranking ambiental. O dashboard e o
 detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
 serviços, sem dados simulados. Essas telas buscam a API ao abrir, ao trocar
 filtro, serviço ou período e depois de cada rodada de coleta do backend
@@ -38,7 +38,7 @@ monitoramento consulta `/monitoring/status` 1 segundo depois de cada
 
 Base local: `http://localhost:3000`. As rotas de negócio usam o prefixo
 `/api/v1`. O recurso principal é `/services`; `/service` permanece como alias
-para listagem, detalhe e histórico.
+para listagem, detalhe, histórico de métricas e histórico de tentativas.
 
 | Método | Caminho real | Responsabilidade | Autenticação |
 |---|---|---|---|
@@ -46,8 +46,12 @@ para listagem, detalhe e histórico.
 | `GET` | `/api/v1/services` | Listar serviços, localização e última coleta, com filtros opcionais. | Não exige. |
 | `GET` | `/api/v1/services/:externalId` | Entregar identificação, estado, localização e última coleta válida. | Não exige. |
 | `GET` | `/api/v1/services/:externalId/collections` | Entregar pontos agrupados e totais do período. | Não exige. |
+| `GET` | `/api/v1/services/:externalId/collection-status` | Listar as últimas observações de coleta do serviço. | Não exige. |
+| `GET` | `/api/v1/collections/status` | Listar serviços pelo resultado da última tentativa, com busca, filtro, resumo e paginação. | Não exige. |
 | `GET` | `/api/v1/regions` | Entregar as regiões, dados ambientais, contadores atuais e totais do período. | Não exige. |
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
+| `GET` | `/api/v1/rankings` | Classificar serviços por energia ou CO₂e no período. | Não exige. |
+| `POST` | `/api/v1/comparisons` | Comparar os totais e 120 pontos por seleção, com simulação opcional de região. | Não exige. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
 por exemplo `billing-api`; não é o BIGINT interno. O parâmetro aceita de 1 a
@@ -76,8 +80,8 @@ GET /api/v1/service/billing-api
 
 Não recebe corpo nem filtros de período. Resposta 200:
 
-- `service`: `id`, `name`, `active`, `status`, `lastSeenAt` e `location`.
-- `location`: código, país, região, cidade, coordenadas e fator de carbono
+- `service` inclui `id`, `name`, `active`, `status`, `statusUpdatedAt`, `lastSeenAt` e `location`.
+- `service.location` inclui código, país, região, cidade, coordenadas e fator de carbono
   atual. Cidade e coordenadas podem ser `null`; a localização também pode
   ser `null`.
 - `latestCollection`: horário, intervalo da amostra, métricas e estimativas
@@ -140,6 +144,50 @@ desconhecido retorna 404; falha interna retorna 500. Exemplo de erro:
 
 O estado do monitoramento está detalhado na seção 7.
 
+#### Status das coletas por serviço
+
+```http
+GET /api/v1/collections/status?search=billing&result=failure&page=1&limit=20
+```
+
+| Query | Regra |
+|---|---|
+| `search` | Opcional. Busca por trecho do nome ou do `externalId`, sem distinção entre maiúsculas e minúsculas. Até 100 caracteres após remover espaços nas extremidades. |
+| `result` | Opcional. `success`, `failure` ou `pending`. |
+| `page` | Inteiro a partir de 1. Padrão `1`. |
+| `limit` | Inteiro de 1 a 100. Padrão `20`. |
+
+A consulta inclui serviços ativos e inativos, ordenados por nome. O `result`
+vem do registro mais recente de `status_coleta`, ordenado por `observado_em`
+e `id` decrescentes. O tipo `success` resulta em `success`, os demais tipos
+resultam em `failure`, e a ausência de registro resulta em `pending`.
+
+A resposta 200 contém `summary`, `items` e `pagination`. O `summary` conta os
+serviços encontrados pela busca em `totalServices`, `successfulServices`,
+`failedServices` e `pendingServices`, antes do filtro `result` e da paginação.
+Já `pagination` contém `page`, `limit`, `total` e `totalPages` com base na
+lista após os filtros. Páginas sem resultados retornam `items: []`.
+
+Cada item contém `externalId`, `name`, `location` (`regionCode`, `city`,
+`country`), `result` e `latestAttempt` (`observedAt`, `type`, `description`,
+`httpStatus`) ou `null`. O campo `lastSuccessfulCollectionAt` vem da última
+amostra salva em `coleta` e é `null` quando o serviço ainda não tem amostras.
+Assim, um serviço pode ter falhado na última tentativa e manter a data de uma
+coleta anterior. Parâmetros inválidos ou desconhecidos retornam 400.
+
+#### Histórico de tentativas de um serviço
+
+```http
+GET /api/v1/services/billing-api/collection-status
+```
+
+A resposta 200 contém `externalId` e `items`, com até 100 observações em ordem
+decrescente de `observedAt` e `id`. Cada item tem `id` (UUID), `observedAt`,
+`result` (`success` ou `failure`), `type`, `description` e `httpStatus` (código
+HTTP de erro ou `null`). Um serviço sem observações retorna `items: []`.
+O limite é fixo e a rota não aplica filtros de período ou tipo. Identificador
+inválido retorna 400 e serviço desconhecido retorna 404.
+
 #### Regiões — cards e globo
 
 ```http
@@ -179,32 +227,92 @@ da amostra.
 Regiões ausentes retornam 200 com `regions: []`. Par inválido (incompleto,
 `from >= to` ou formato incorreto) retorna 400; falha interna retorna 500.
 
-### 2.2. Operações planejadas
+#### Comparação de serviços
 
-Distribuição confirmada: listagem interna e integração implementadas na Sprint 1; rankings
-na Sprint 2; autenticação, comparação e cenários na Sprint 3. Persistência e
-histórico são da Sprint 1 e já possuem implementação no backend. A configuração
-do intervalo por endpoint fica para etapa posterior, sem sprint definida.
+```http
+POST /api/v1/comparisons
+Content-Type: application/json
+```
 
-Os caminhos desta tabela são propostas para funcionalidades ainda não
-implementadas, sem garantia de disponibilidade HTTP na versão atual.
+```json
+{
+  "range": "1h",
+  "selections": [
+    { "selectionId": "original", "externalId": "billing-api", "simulatedRegionCode": null },
+    { "selectionId": "simulado", "externalId": "billing-api", "simulatedRegionCode": "br-sudeste" }
+  ]
+}
+```
+
+O body exige `range` (`1h`, `6h`, `24h`, `7d` ou `30d`) e de 2 a 5 seleções.
+Cada seleção exige `selectionId`, `externalId` e `simulatedRegionCode` (código
+da região ou `null` para usar as emissões armazenadas).
+
+A resposta 200 contém `range`, `period: { from, to }` e `series`. Todas as
+seleções usam o mesmo período, encerrado imediatamente após a última coleta
+disponível entre os serviços selecionados e dividido em 120 faixas iguais.
+O limite final inclui 1 milissegundo adicional para preservar coletas com
+precisão de microssegundos do PostgreSQL. Sem coletas em nenhum dos serviços,
+o período termina no momento da requisição. Sem novas coletas, os horários
+das faixas permanecem iguais entre consultas. Cada série contém
+`selectionId`, `summary` e `points`.
+O resumo contém `sampleCount`, `energyKwh` e `co2eGrams`; cada ponto também
+contém `timestamp`, que identifica o início da faixa. Uma faixa inclui
+coletas posteriores ao início e até o fim, inclusive.
+
+Faixas sem coletas retornam quantidade zero e métricas `null`. Na simulação,
+a energia é preservada e as emissões são calculadas como energia em kWh
+vezes o fator atual da região em gCO₂e/kWh, tanto no resumo como nos pontos.
+Os totais representam as amostras disponíveis; faixas vazias não comprovam
+falhas de coleta. A tela de comparação carrega os serviços e as regiões da
+API e consulta este endpoint ao clicar em Comparar, mantendo o resultado
+anterior durante o carregamento ou em caso de falha.
+
+Body inválido retorna 400; serviço ou região simulada inexistente retorna
+404; falha interna retorna 500.
+
+### 2.2. Ranking — implementado
+
+```http
+GET /api/v1/rankings?criterion=co2eGrams&range=24h
+```
+
+Rota pública registrada em [`backend/src/index.ts`](../backend/src/index.ts).
+
+| Query | Regra |
+| --- | --- |
+| `criterion` | Opcional: `co2eGrams` (padrão) ou `energyKwh`. |
+| `range` | Opcional: `1h`, `6h`, `24h` (padrão), `7d` ou `30d`. |
+
+Parâmetros desconhecidos, repetidos ou inválidos retornam 400. A resposta 200
+contém `criterion`, `range`, `period: { from, to }` e `items`.
+
+O período termina na última coleta global acrescida de 1 milissegundo para
+incluir a precisão de microssegundos do PostgreSQL. Sem coletas, usa o horário
+atual. O início é calculado a partir de `range`; o SQL usa `coletado_em > from`
+e `coletado_em <= to`.
+
+Cada item contém `position`, `externalId`, `name`, `region: { code, city }`,
+`energyKwh`, `co2eGrams` e `sampleCount`. A consulta inclui serviços ativos e
+inativos, usando a região atual do cadastro. Os totais somam as amostras do
+período, sem garantir cobertura contínua.
+
+Os itens são ordenados pelo critério escolhido, do maior para o menor;
+empates são desfeitos por `externalId` com `localeCompare`. Serviços com
+amostras recebem posições sequenciais a partir de 1. Serviços sem amostras
+ficam no final, com totais e `position` iguais a `null` e `sampleCount: 0`.
+Sem serviços cadastrados, retorna `items: []`. Falha interna retorna 500.
+
+### 2.3. Operações planejadas
+
+Os caminhos abaixo descrevem contratos propostos.
 
 | Método | Caminho | Responsabilidade |
 |---|---|---|
 | `POST` | `/auth/login` | Validar as credenciais do usuário e emitir um JWT. |
-| `GET` | `/rankings` | Consultar a classificação ambiental com critério e período identificados. |
-| `GET` | `/comparisons` | Consultar dados comparáveis de serviços e regiões selecionados. |
 | `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
 | `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
 | `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |
-
-Para ranking e comparação, os filtros de datas abaixo são planejados. Não
-substituem o contrato implementado de `range` e `to` descrito na seção 2.1.
-
-| Caminho | Parâmetros |
-|---|---|
-| `/rankings` | `from`, `to`, `metric` (`energy` ou `co2e`) |
-| `/comparisons` | `serviceIds` (lista), `from`, `to` |
 
 No contrato planejado, `POST /auth/login` recebe `username` e `password` e
 retorna um `accessToken` JWT. O token será enviado nas chamadas autenticadas pelo cabeçalho
@@ -216,7 +324,7 @@ No contrato planejado, `POST /scenarios` recebe `serviceId`, `targetRegionCode`,
 resposta identifica o cenário como simulação e inclui as hipóteses e parâmetros
 utilizados, distinguindo-o de resultados observados.
 
-### 2.3. Configuração de monitoramento — planejada
+### 2.4. Configuração de monitoramento — planejada
 
 O corpo usado para atualizar o intervalo de coleta é:
 
@@ -233,7 +341,7 @@ do Collection Job. Ele é independente da
 frequência com que o frontend atualiza o dashboard e do intervalo que a API de
 métricas associa aos dados de uma coleta.
 
-### 2.4. Respostas e falhas
+### 2.5. Respostas e falhas
 
 As respostas dos endpoints implementados são JSON e representam dados preparados pelo backend para o
 recurso solicitado. As rotas validam `body`, `params` e `query parameters`
@@ -282,12 +390,51 @@ de domínio antes de armazená-los ou apresentá-los ao frontend. O
 `collection_interval_seconds` descreve o período das métricas recebidas e não
 configura o Collection Job.
 
-O código atual mapeia timeout, falha de comunicação e HTTP 404 de métricas
-para `unavailable`, e HTTP 500 para `metrics_missing`. O contrato externo
-também descreve indisponibilidade para 500, portanto essa classificação não
-comprova a causa exata. A distinção precisa ser esclarecida com o fornecedor;
-não há campo discriminador validado pelo código atual. Uma falha de banco é
-interna e não deve ser atribuída ao serviço monitorado.
+Na consulta de **métricas**, a classificação segue a regra do projeto e o
+[contrato OpenAPI do agregador](https://metrics.unilaunch.org/openapi.json),
+conferido em 25/10/2026:
+
+| Resposta / falha | Significado registrado | Status do serviço | Tipo no histórico |
+|---|---|---|---|
+| Ausente em uma lista de serviços consultada com sucesso | Coleta não realizada porque o serviço não está na lista de serviços monitorados | `unavailable` | `service_missing` (`http_status = null`) |
+| HTTP 404 de métricas | Serviço removido ou métricas inexistentes | `unavailable` | `service_missing` |
+| HTTP 500 de métricas | Serviço indisponível ou exportador de métricas indisponível | `metrics_missing` | `metrics_missing` |
+| HTTP 530 | Falha de acesso à plataforma externa (Cloudflare) | Preserva o status anterior | `cloudflare_error` |
+| HTTP 429 | Limite de consultas atingido | Preserva o status anterior | `bad_status` |
+| HTTP 502 / 503 / 504 | Falha de comunicação / plataforma temporariamente indisponível / demora na resposta | Preserva o status anterior | `bad_status` |
+| Outro HTTP de erro | Não foi possível concluir a consulta externa; código preservado no histórico | Preserva o status anterior | `bad_status` |
+| Timeout local, sem resposta HTTP | Tempo limite excedido | `unavailable` | `timeout` |
+| Falha de comunicação, sem resposta HTTP | API de métricas inacessível | `unavailable` | `unavailable` |
+| JSON inválido ou resposta fora do contrato | Resposta externa inválida | Preserva o status anterior | `invalid_response` |
+
+`404` e `500` não identificam, isoladamente, qual das duas causas do respectivo
+contrato aconteceu; a descrição conserva ambas as possibilidades. O nome
+`metrics_missing` é a classificação interna definida para o HTTP 500 dessa
+consulta e não comprova que o serviço permanece disponível.
+
+`tipo` identifica a ocorrência para apresentação no gráfico; `http_status`
+registra uma resposta HTTP de erro quando ela existe. Por isso, `service_missing`
+agrupa ausência na descoberta e HTTP 404 de métricas, mas apenas o segundo tem
+`http_status = 404`. O contrato informa que `/services` omite serviços removidos;
+não é necessário chamar suas métricas para obter um 404 e confirmar a ausência.
+`bad_status` fica reservado para os outros erros HTTP sem tipo específico.
+
+As descrições das falhas de coleta usam linguagem simples para apresentação no
+gráfico, sem caminhos internos ou termos como JSON e gateway. Por exemplo:
+“A coleta não foi concluída porque a plataforma de métricas demorou demais para
+responder.” O código HTTP fica separado em `http_status`; quando não há resposta,
+é `null`. `tipo` identifica timeout, conexão, resposta inválida ou erro HTTP.
+Falhas nas chamadas de descoberta ou de carbono ficam nos logs e no
+monitoramento da rodada. Erros inesperados durante a coleta individual,
+incluindo falhas de gravação, podem aparecer como `unexpected_error` sem
+código HTTP. Se a gravação da observação falhar, o backend registra o erro
+em log e marca a dependência de banco como indisponível.
+
+Quando o serviço não aparece em uma descoberta sincronizada sem falhas, fica com `ativo = false`
+e `unavailable`. Cada sincronização que confirmar essa ausência registra
+`service_missing` no histórico, mesmo que ele já estivesse inativo. Esse evento
+não possui código HTTP, pois a consulta de métricas não foi realizada. Quando
+o serviço reaparece na descoberta, volta à rotina normal de coleta.
 
 ## 4. Greener Carbon Intensity API
 
@@ -322,13 +469,10 @@ comprovam autenticação implementada na versão atual. Sua entrega está previs
 
 ## 6. Alinhamento entre contrato e implementação
 
-Lista, detalhe, histórico e regiões são consumidos pela interface real. Rotas,
-schemas Zod e tipos devem evoluir em conjunto. Ranking, comparação, cenários,
-JWT e configuração por HTTP continuam planejados. Consultar o [plano](./plano-de-entregas.md)
-e as [rotas do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
-
-O globo e os cards estão integrados; apresentar os serviços associados ao
-inspecionar uma região é o saldo de T15 transferido para a Sprint 2.
+O dashboard consome listagem, detalhe, histórico de métricas e histórico de
+tentativas. A comparação usa as rotas de serviços, regiões e comparação,
+incluindo a simulação de região. Rotas, schemas Zod e tipos devem evoluir em
+conjunto. Consulte as [rotas do frontend](../frontend/arquitetura.md#67-rotas-da-aplicação).
 
 Não existe handler global de rota desconhecida em JSON: um caminho não
 registrado pode retornar o 404 padrão do Express em HTML. Isso difere do 404
