@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, PointerEvent, ReactNode } from 'react';
 
 import {
     PAINEL_DISTRIBUTION_MOCK,
@@ -57,9 +57,18 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
 interface PainelWidgetCardProps {
     widget: PainelWidget;
     editing?: boolean;
+    // Widget que está sendo arrastado no momento.
+    active?: boolean;
+    // Quando informado, o cabeçalho do widget vira a área de arrastar.
+    onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
 }
 
-export function PainelWidgetCard({ widget, editing = false }: PainelWidgetCardProps) {
+export function PainelWidgetCard({
+    widget,
+    editing = false,
+    active = false,
+    onMoveStart,
+}: PainelWidgetCardProps) {
     // No desktop o widget fica exatamente na coordenada salva (a grade do CSS começa
     // em 1, as coordenadas em 0). No tablet e no celular a posição é automática, na
     // ordem da lista: só a altura e, no tablet, meia largura ou largura inteira.
@@ -76,12 +85,14 @@ export function PainelWidgetCard({ widget, editing = false }: PainelWidgetCardPr
     return (
         <article
             style={position}
-            className="min-w-0 [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]"
+            className={`min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
         >
             <PainelWidgetFrame
                 title={widget.title}
                 status={content === null ? 'empty' : 'ready'}
                 editing={editing}
+                active={active}
+                onMoveStart={onMoveStart}
                 actions={WIDGET_ACTIONS}
             >
                 {content}

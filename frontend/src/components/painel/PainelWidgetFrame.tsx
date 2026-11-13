@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react';
-import { CircleAlert, Ellipsis, Inbox } from 'lucide-react';
+import { useState, type PointerEvent, type ReactNode } from 'react';
+import { CircleAlert, Ellipsis, GripVertical, Inbox } from 'lucide-react';
 
 import type { PainelWidgetAction, PainelWidgetStatus } from '@/types/painel';
 
@@ -11,6 +11,10 @@ interface PainelWidgetFrameProps {
     actions?: readonly PainelWidgetAction[];
     // Destaca o contêiner com borda tracejada enquanto o painel está em edição.
     editing?: boolean;
+    // Realça o contêiner enquanto ele é arrastado.
+    active?: boolean;
+    // Quando informado, o título vira a área por onde o widget é arrastado.
+    onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
     children?: ReactNode;
 }
 
@@ -23,6 +27,8 @@ export function PainelWidgetFrame({
     errorMessage,
     actions = [],
     editing = false,
+    active = false,
+    onMoveStart,
     children,
 }: PainelWidgetFrameProps) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -31,14 +37,31 @@ export function PainelWidgetFrame({
         <div
             className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-colors ${
                 editing ? 'border-dashed border-emerald-400/45' : 'border-border'
-            }`}
+            } ${active ? 'shadow-lg ring-2 shadow-black/40 ring-primary' : ''}`}
         >
             <header className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                    <h2 className="truncate text-sm font-semibold">{title}</h2>
-                    {subtitle && (
-                        <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+                <div
+                    onPointerDown={onMoveStart}
+                    title={onMoveStart ? 'Arraste para mover o widget' : undefined}
+                    className={`flex min-w-0 flex-1 items-start gap-1.5 ${
+                        onMoveStart
+                            ? `touch-none select-none ${active ? 'cursor-grabbing' : 'cursor-grab'}`
+                            : ''
+                    }`}
+                >
+                    {onMoveStart && (
+                        <GripVertical
+                            aria-hidden="true"
+                            className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        />
                     )}
+
+                    <div className="min-w-0">
+                        <h2 className="truncate text-sm font-semibold">{title}</h2>
+                        {subtitle && (
+                            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+                        )}
+                    </div>
                 </div>
 
                 {actions.length > 0 && (
