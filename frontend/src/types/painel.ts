@@ -2,6 +2,10 @@ export type PainelTemplateId = 'visao-geral' | 'sustentabilidade' | 'operacional
 
 export type PainelWidgetType = 'kpi' | 'serie-temporal' | 'distribuicao' | 'tabela' | 'status';
 
+export type PainelSeriesChart = 'linha' | 'area' | 'barras';
+
+export type PainelChartType = PainelSeriesChart;
+
 // Situação do conteúdo de um widget. O contêiner (PainelWidgetFrame) mostra o
 // aviso de cada situação e só renderiza o conteúdo quando ela é 'ready'.
 export type PainelWidgetStatus = 'loading' | 'error' | 'empty' | 'ready';
@@ -17,6 +21,8 @@ export interface PainelWidgetAction {
 export interface PainelWidget {
     id: string;
     type: PainelWidgetType;
+    // Tipo de gráfico, para os widgets que têm mais de uma forma de exibir.
+    chart?: PainelChartType;
     title: string;
     x: number;
     y: number;
@@ -34,4 +40,12 @@ export interface PainelKpiData {
     previousValue: number | null;
     lowerIsBetter: boolean;
     fractionDigits?: number;
+}
+
+// Série temporal com uma ou mais séries (ex.: uma por região). Cada ponto traz o
+// rótulo do eixo do tempo e o valor de cada série, pela chave da série.
+export interface PainelSeriesData {
+    unit: string;
+    series: readonly { key: string; label: string }[];
+    points: readonly { label: string; values: Record<string, number> }[];
 }

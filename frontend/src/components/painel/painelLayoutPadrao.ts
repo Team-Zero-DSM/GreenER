@@ -28,6 +28,7 @@ export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
     {
         id: 'co2e-por-regiao',
         type: 'serie-temporal',
+        chart: 'area',
         title: 'Emissão de CO₂e por região',
         x: 0,
         y: 2,
@@ -47,3 +48,6 @@ export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
         h: 4,
     },
 ];
+
+// Cores das séries dos gráficos, na ordem em que as séries aparecem.
+export const PAINEL_CHART_COLORS = ['#34d399', '#22d3ee', '#a78bfa', '#fbbf24', '#f472b6'] as const;

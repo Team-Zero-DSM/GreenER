@@ -1,11 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react';
 
-import { PAINEL_KPI_MOCK } from '@/mocks/painelWidgets.mock';
+import { PAINEL_KPI_MOCK, PAINEL_SERIES_MOCK } from '@/mocks/painelWidgets.mock';
 import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetFrame } from './PainelWidgetFrame';
 import { KpiWidget } from './widgets/KpiWidget';
+import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
 
 // Configurar e remover entram com a personalização (#147) e a edição do layout (#145).
 const WIDGET_ACTIONS: readonly PainelWidgetAction[] = [
@@ -20,6 +21,12 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
         case 'kpi': {
             const data = PAINEL_KPI_MOCK[widget.id];
             return data ? <KpiWidget data={data} /> : null;
+        }
+        case 'serie-temporal': {
+            const data = PAINEL_SERIES_MOCK[widget.id];
+            return data && data.points.length > 0 ? (
+                <TimeSeriesWidget data={data} chart={widget.chart ?? 'linha'} />
+            ) : null;
         }
         default:
             return null;
