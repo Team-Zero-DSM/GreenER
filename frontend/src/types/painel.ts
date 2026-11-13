@@ -4,7 +4,9 @@ export type PainelWidgetType = 'kpi' | 'serie-temporal' | 'distribuicao' | 'tabe
 
 export type PainelSeriesChart = 'linha' | 'area' | 'barras';
 
-export type PainelChartType = PainelSeriesChart;
+export type PainelDistributionChart = 'pizza' | 'rosca' | 'barras-horizontais';
+
+export type PainelChartType = PainelSeriesChart | PainelDistributionChart;
 
 // Situação do conteúdo de um widget. O contêiner (PainelWidgetFrame) mostra o
 // aviso de cada situação e só renderiza o conteúdo quando ela é 'ready'.
@@ -48,4 +50,10 @@ export interface PainelSeriesData {
     unit: string;
     series: readonly { key: string; label: string }[];
     points: readonly { label: string; values: Record<string, number> }[];
+}
+
+// Distribuição de um total entre categorias (ex.: energia por região).
+export interface PainelDistributionData {
+    unit: string;
+    items: readonly { label: string; value: number }[];
 }

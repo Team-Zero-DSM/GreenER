@@ -41,6 +41,7 @@ export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
     {
         id: 'energia-por-regiao',
         type: 'distribuicao',
+        chart: 'rosca',
         title: 'Energia por região',
         x: 8,
         y: 6,

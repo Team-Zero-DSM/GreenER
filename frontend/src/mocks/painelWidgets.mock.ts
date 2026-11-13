@@ -1,4 +1,4 @@
-import type { PainelKpiData, PainelSeriesData } from '@/types/painel';
+import type { PainelDistributionData, PainelKpiData, PainelSeriesData } from '@/types/painel';
 
 // Dados simulados dos widgets do painel, indexados pelo id do widget. Serão
 // trocados pelas rotas do backend na integração (#149).
@@ -57,5 +57,18 @@ export const PAINEL_SERIES_MOCK: Record<string, PainelSeriesData> = {
                 'br-sudeste': emissaoSimulada(hora, 70, 20, 2.2),
             },
         })),
+    },
+};
+
+export const PAINEL_DISTRIBUTION_MOCK: Record<string, PainelDistributionData> = {
+    'energia-por-regiao': {
+        unit: 'kWh',
+        items: [
+            { label: 'us-east', value: 4.8 },
+            { label: 'eu-west', value: 3.9 },
+            { label: 'jp-east', value: 2.1 },
+            { label: 'br-sudeste', value: 1.6 },
+            { label: 'ca-central', value: 1.2 },
+        ],
     },
 };

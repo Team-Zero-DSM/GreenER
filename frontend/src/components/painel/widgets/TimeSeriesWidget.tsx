@@ -10,13 +10,13 @@ import {
     YAxis,
 } from 'recharts';
 
-import type { PainelSeriesChart, PainelSeriesData } from '@/types/painel';
+import type { PainelChartType, PainelSeriesData } from '@/types/painel';
 
 import { PAINEL_CHART_COLORS } from '../painelLayoutPadrao';
 
 interface TimeSeriesWidgetProps {
     data: PainelSeriesData;
-    chart: PainelSeriesChart;
+    chart: PainelChartType;
 }
 
 const formatValue = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 1 });

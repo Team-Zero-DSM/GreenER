@@ -1,10 +1,15 @@
 import type { CSSProperties, ReactNode } from 'react';
 
-import { PAINEL_KPI_MOCK, PAINEL_SERIES_MOCK } from '@/mocks/painelWidgets.mock';
+import {
+    PAINEL_DISTRIBUTION_MOCK,
+    PAINEL_KPI_MOCK,
+    PAINEL_SERIES_MOCK,
+} from '@/mocks/painelWidgets.mock';
 import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetFrame } from './PainelWidgetFrame';
+import { DistributionWidget } from './widgets/DistributionWidget';
 import { KpiWidget } from './widgets/KpiWidget';
 import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
 
@@ -26,6 +31,12 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
             const data = PAINEL_SERIES_MOCK[widget.id];
             return data && data.points.length > 0 ? (
                 <TimeSeriesWidget data={data} chart={widget.chart ?? 'linha'} />
+            ) : null;
+        }
+        case 'distribuicao': {
+            const data = PAINEL_DISTRIBUTION_MOCK[widget.id];
+            return data && data.items.length > 0 ? (
+                <DistributionWidget data={data} chart={widget.chart ?? 'rosca'} />
             ) : null;
         }
         default:
