@@ -7,12 +7,14 @@ import { ComparisonPage } from '@/pages/ComparisonPage';
 import { RegionPage } from './pages/RegionPage';
 import { RankingPage } from '@/pages/RankingPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { PainelPage } from '@/pages/PainelPage';
 
 export default function App() {
     return (
         <Routes>
             <Route element={<DashboardLayout />}>
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/painel" element={<PainelPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/servicos/:id" element={<ServiceDetailPage />} />
                 <Route path="/comparacao" element={<ComparisonPage />} />

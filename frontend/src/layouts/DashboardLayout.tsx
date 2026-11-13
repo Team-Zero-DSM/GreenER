@@ -1,5 +1,13 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { House, Server, ArrowLeftRight, Globe, ListOrdered, UserRound } from 'lucide-react';
+import {
+    House,
+    LayoutDashboard,
+    Server,
+    ArrowLeftRight,
+    Globe,
+    ListOrdered,
+    UserRound,
+} from 'lucide-react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
 import { MonitoringBar } from '@/components/MonitoringBar';
@@ -7,6 +15,12 @@ import { MonitoringProvider } from '@/contexts/MonitoringProvider';
 
 const navItems = [
     { to: '/', label: 'Início', icon: House, prefixes: [] as string[] },
+    {
+        to: '/painel',
+        label: 'Painel',
+        icon: LayoutDashboard,
+        prefixes: ['/painel'],
+    },
     {
         to: '/dashboard',
         label: 'Serviços',
