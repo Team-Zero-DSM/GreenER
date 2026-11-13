@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { LayoutTemplate, Pencil } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
@@ -12,6 +12,31 @@ const TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] = 
     { value: 'sustentabilidade', label: 'Sustentabilidade' },
     { value: 'operacional', label: 'Operacional' },
     { value: 'executivo', label: 'Executivo' },
+];
+
+// Cada widget ocupa um retângulo da grade de 12 colunas: x e y são a coluna e a
+// linha onde ele começa (a partir de 0), w e h são quantas colunas e linhas ocupa.
+interface PainelWidget {
+    id: string;
+    title: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
+const GRID_COLUMNS = 12;
+
+const DEFAULT_WIDGETS: readonly PainelWidget[] = [
+    { id: 'co2e-total', title: 'CO₂e no período', x: 0, y: 0, w: 3, h: 2 },
+    { id: 'energia-total', title: 'Energia no período', x: 3, y: 0, w: 3, h: 2 },
+    { id: 'disponibilidade', title: 'Disponibilidade', x: 6, y: 0, w: 3, h: 2 },
+    { id: 'intensidade-carbono', title: 'Intensidade de carbono', x: 9, y: 0, w: 3, h: 2 },
+    { id: 'co2e-por-regiao', title: 'Emissão de CO₂e por região', x: 0, y: 2, w: 8, h: 4 },
+    { id: 'status-servicos', title: 'Status dos serviços', x: 8, y: 2, w: 4, h: 4 },
+    { id: 'top-emissores', title: 'Top 5 emissores', x: 0, y: 6, w: 4, h: 4 },
+    { id: 'falhas-coleta', title: 'Falhas de coleta', x: 4, y: 6, w: 4, h: 4 },
+    { id: 'energia-por-regiao', title: 'Energia por região', x: 8, y: 6, w: 4, h: 4 },
 ];
 
 export function PainelPage() {
@@ -79,6 +104,33 @@ export function PainelPage() {
                     </button>
                 </section>
             </div>
+
+            <section
+                aria-label="Widgets do painel"
+                className="grid auto-rows-[4.875rem] gap-3"
+                style={{ gridTemplateColumns: `repeat(${GRID_COLUMNS}, minmax(0, 1fr))` }}
+            >
+                {DEFAULT_WIDGETS.map((widget) => {
+                    // A grade do CSS começa em 1, as coordenadas do widget em 0.
+                    const position: CSSProperties = {
+                        gridColumn: `${widget.x + 1} / span ${widget.w}`,
+                        gridRow: `${widget.y + 1} / span ${widget.h}`,
+                    };
+
+                    return (
+                        <article
+                            key={widget.id}
+                            style={position}
+                            className="flex min-w-0 flex-col rounded-xl border border-border bg-card p-4"
+                        >
+                            <h2 className="truncate text-sm font-semibold">{widget.title}</h2>
+                            <p className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+                                Conteúdo do widget em breve
+                            </p>
+                        </article>
+                    );
+                })}
+            </section>
         </main>
     );
 }
