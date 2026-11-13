@@ -1,6 +1,5 @@
 import type { PainelWidget } from '@/types/painel';
 
-import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
 interface PainelGridProps {
@@ -11,8 +10,7 @@ export function PainelGrid({ widgets }: PainelGridProps) {
     return (
         <section
             aria-label="Widgets do painel"
-            className="grid auto-rows-[4.875rem] gap-3"
-            style={{ gridTemplateColumns: `repeat(${PAINEL_GRID_COLUMNS}, minmax(0, 1fr))` }}
+            className="grid auto-rows-[4.875rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
         >
             {widgets.map((widget) => (
                 <PainelWidgetCard key={widget.id} widget={widget} />

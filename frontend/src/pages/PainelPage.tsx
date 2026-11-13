@@ -14,7 +14,7 @@ export function PainelPage() {
 
     return (
         <PainelShell>
-            <div className="flex items-end justify-between gap-4">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <header className="min-w-0 space-y-2">
                     <h1 className="text-3xl font-semibold tracking-tight">
                         Painel de monitoramento

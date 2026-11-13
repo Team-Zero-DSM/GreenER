@@ -1,6 +1,9 @@
 import type { PainelTemplateId, PainelWidget } from '@/types/painel';
 
+// Colunas da grade por tamanho de tela. As classes do PainelGrid precisam
+// acompanhar estes valores (lg:grid-cols-12, md:grid-cols-6 e uma coluna no celular).
 export const PAINEL_GRID_COLUMNS = 12;
+export const PAINEL_TABLET_COLUMNS = 6;
 
 export const PAINEL_TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] = [
     { value: 'visao-geral', label: 'Visão geral' },

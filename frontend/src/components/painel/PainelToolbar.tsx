@@ -25,7 +25,7 @@ export function PainelToolbar({
     onEditingChange,
 }: PainelToolbarProps) {
     return (
-        <section aria-label="Ferramentas do painel" className="flex items-center gap-3">
+        <section aria-label="Ferramentas do painel" className="flex flex-wrap items-center gap-3">
             <label className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 text-sm text-muted-foreground">
                 <LayoutTemplate aria-hidden="true" className="size-4 text-primary" />
                 Template:

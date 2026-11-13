@@ -109,7 +109,7 @@ function DashboardHeader({
 
                     <nav
                         aria-label="Seções do dashboard"
-                        className="flex w-full justify-between gap-1 sm:w-auto sm:justify-start"
+                        className="flex w-full justify-between gap-1 overflow-x-auto sm:w-auto sm:justify-start"
                     >
                         {navItems.map(({ to, label, icon: Icon, prefixes }) => {
                             const isActive =
