@@ -1,4 +1,4 @@
-import { LayoutTemplate, Pencil, Plus } from 'lucide-react';
+import { Check, LayoutTemplate, Pencil, Plus, Undo2 } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
@@ -7,14 +7,20 @@ import type { HistoryRange } from '@/types/service';
 
 import { PAINEL_TEMPLATE_OPTIONS } from './painelLayoutPadrao';
 
+const SECONDARY_BUTTON =
+    'inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/5';
+
 interface PainelToolbarProps {
     template: PainelTemplateId;
     range: HistoryRange;
     editing: boolean;
     onTemplateChange: (template: PainelTemplateId) => void;
     onRangeChange: (range: HistoryRange) => void;
-    onEditingChange: (editing: boolean) => void;
+    onStartEditing: () => void;
     onAddWidget: () => void;
+    // Saem do modo de edição: salvar mantém as alterações, descartar volta ao layout anterior.
+    onSave: () => void;
+    onDiscard: () => void;
 }
 
 export function PainelToolbar({
@@ -23,8 +29,10 @@ export function PainelToolbar({
     editing,
     onTemplateChange,
     onRangeChange,
-    onEditingChange,
+    onStartEditing,
     onAddWidget,
+    onSave,
+    onDiscard,
 }: PainelToolbarProps) {
     return (
         <section aria-label="Ferramentas do painel" className="flex flex-wrap items-center gap-3">
@@ -51,30 +59,33 @@ export function PainelToolbar({
                 onChange={onRangeChange}
             />
 
-            {editing && (
-                <button
-                    type="button"
-                    onClick={onAddWidget}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/5"
-                >
-                    <Plus aria-hidden="true" className="size-4" />
-                    Adicionar widget
+            {editing ? (
+                <>
+                    <button type="button" onClick={onAddWidget} className={SECONDARY_BUTTON}>
+                        <Plus aria-hidden="true" className="size-4" />
+                        Adicionar widget
+                    </button>
+
+                    <button type="button" onClick={onDiscard} className={SECONDARY_BUTTON}>
+                        <Undo2 aria-hidden="true" className="size-4" />
+                        Descartar
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={onSave}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-emerald-400/45 bg-primary px-3 text-sm font-medium whitespace-nowrap text-primary-foreground transition-opacity hover:opacity-90"
+                    >
+                        <Check aria-hidden="true" className="size-4" />
+                        Salvar alterações
+                    </button>
+                </>
+            ) : (
+                <button type="button" onClick={onStartEditing} className={SECONDARY_BUTTON}>
+                    <Pencil aria-hidden="true" className="size-4" />
+                    Editar layout
                 </button>
             )}
-
-            <button
-                type="button"
-                aria-pressed={editing}
-                onClick={() => onEditingChange(!editing)}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                    editing
-                        ? 'border-emerald-400/45 bg-primary text-primary-foreground'
-                        : 'border-border bg-background/60 hover:bg-white/5'
-                }`}
-            >
-                <Pencil aria-hidden="true" className="size-4" />
-                {editing ? 'Concluir edição' : 'Editar layout'}
-            </button>
         </section>
     );
 }

@@ -12,9 +12,24 @@ import type { HistoryRange } from '@/types/service';
 export function PainelPage() {
     const [template, setTemplate] = useState<PainelTemplateId>('visao-geral');
     const [range, setRange] = useState<HistoryRange>('24h');
-    const [editing, setEditing] = useState(false);
-    const [widgets, setWidgets] = useState<readonly PainelWidget[]>(PAINEL_DEFAULT_WIDGETS);
+    // Layout salvo do painel e, durante a edição, o rascunho com as alterações
+    // ainda não salvas. Sem rascunho, o painel está no modo de visualização.
+    const [savedWidgets, setSavedWidgets] =
+        useState<readonly PainelWidget[]>(PAINEL_DEFAULT_WIDGETS);
+    const [draftWidgets, setDraftWidgets] = useState<readonly PainelWidget[] | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
+
+    const editing = draftWidgets !== null;
+    const widgets = draftWidgets ?? savedWidgets;
+
+    function finishEditing(save: boolean) {
+        if (save && draftWidgets) {
+            setSavedWidgets(draftWidgets);
+        }
+
+        setDraftWidgets(null);
+        setCatalogOpen(false);
+    }
 
     return (
         <PainelShell>
@@ -35,8 +50,10 @@ export function PainelPage() {
                     editing={editing}
                     onTemplateChange={setTemplate}
                     onRangeChange={setRange}
-                    onEditingChange={setEditing}
+                    onStartEditing={() => setDraftWidgets(savedWidgets)}
                     onAddWidget={() => setCatalogOpen(true)}
+                    onSave={() => finishEditing(true)}
+                    onDiscard={() => finishEditing(false)}
                 />
             </div>
 
@@ -51,13 +68,13 @@ export function PainelPage() {
                 </p>
             )}
 
-            <PainelGrid widgets={widgets} editing={editing} onWidgetsChange={setWidgets} />
+            <PainelGrid widgets={widgets} editing={editing} onWidgetsChange={setDraftWidgets} />
 
             {editing && catalogOpen && (
                 <PainelWidgetCatalog
                     widgetIdsInUse={widgets.map((widget) => widget.id)}
                     onAdd={(widget) => {
-                        setWidgets(addWidget(widgets, widget));
+                        setDraftWidgets(addWidget(widgets, widget));
                         setCatalogOpen(false);
                     }}
                     onClose={() => setCatalogOpen(false)}
