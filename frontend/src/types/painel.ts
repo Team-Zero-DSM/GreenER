@@ -57,3 +57,10 @@ export interface PainelDistributionData {
     unit: string;
     items: readonly { label: string; value: number }[];
 }
+
+// Tabela ou lista simples (ex.: top serviços, últimas falhas). Cada linha traz o
+// texto de cada coluna, pela chave da coluna.
+export interface PainelTableData {
+    columns: readonly { key: string; label: string; align?: 'left' | 'right' }[];
+    rows: readonly { id: string; cells: Record<string, string> }[];
+}

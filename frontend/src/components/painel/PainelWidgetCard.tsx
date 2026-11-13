@@ -4,6 +4,7 @@ import {
     PAINEL_DISTRIBUTION_MOCK,
     PAINEL_KPI_MOCK,
     PAINEL_SERIES_MOCK,
+    PAINEL_TABLE_MOCK,
 } from '@/mocks/painelWidgets.mock';
 import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
 
@@ -11,6 +12,7 @@ import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao
 import { PainelWidgetFrame } from './PainelWidgetFrame';
 import { DistributionWidget } from './widgets/DistributionWidget';
 import { KpiWidget } from './widgets/KpiWidget';
+import { TableWidget } from './widgets/TableWidget';
 import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
 
 // Configurar e remover entram com a personalização (#147) e a edição do layout (#145).
@@ -38,6 +40,10 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
             return data && data.items.length > 0 ? (
                 <DistributionWidget data={data} chart={widget.chart ?? 'rosca'} />
             ) : null;
+        }
+        case 'tabela': {
+            const data = PAINEL_TABLE_MOCK[widget.id];
+            return data && data.rows.length > 0 ? <TableWidget data={data} /> : null;
         }
         default:
             return null;
