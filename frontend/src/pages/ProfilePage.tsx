@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { UserRound, ShieldCheck, Settings, LogOut } from 'lucide-react';
 
@@ -12,19 +11,33 @@ import { ProfileInformationForm } from '@/components/profile/ProfileInformationF
 import { ProfilePasswordForm } from '@/components/profile/ProfilePasswordForm';
 import { ProfileMenuItem } from '@/components/profile/ProfileMenuItem';
 
-import { mockProfile } from '@/mocks/profile';
-import type { UserProfile } from '@/types/profile';
+import { useProfile } from '@/hooks/useProfile';
+
+import type {
+    UpdateProfileRequest,
+} from '@/types/profile';
 
 type ProfileSection = 'overview' | 'information' | 'security';
 
 export function ProfilePage() {
-    const [profile, setProfile] = useState<UserProfile>(mockProfile);
+    const {
+        profile,
+        isLoading,
+        error,
+        isSavingProfile,
+        isChangingPassword,
+        reload,
+        saveProfile,
+        savePassword,
+    } = useProfile();
 
     const [activeSection, setActiveSection] =
         useState<ProfileSection>('overview');
 
-    function handleSaveProfile(updatedProfile: UserProfile) {
-        setProfile(updatedProfile);
+    async function handleSaveProfile(data: UpdateProfileRequest) {
+        await saveProfile(data);
+
+        // Volta ao menu somente depois da operação bem-sucedida.
         setActiveSection('overview');
     }
 
@@ -35,74 +48,119 @@ export function ProfilePage() {
                 description="Gerencie suas informações pessoais e as configurações da sua conta."
             />
 
-            <Card className="mx-auto w-full max-w-2xl border border-border/70 bg-card/80">
-                <CardContent className="space-y-6 p-6 sm:p-8">
+            {/* Carregamento inicial */}
+            {isLoading && (
+                <Card className="mx-auto w-full max-w-2xl border border-border/70">
+                    <CardContent className="flex min-h-40 items-center justify-center">
+                        <p className="text-sm text-muted-foreground">
+                            Carregando informações do perfil...
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
 
-                    {/* Área fixa: identificação do usuário */}
-                    <ProfileInformationCard profile={profile} />
+            {/* Erro ao carregar o perfil */}
+            {!isLoading && error && (
+                <Card className="mx-auto w-full max-w-2xl border border-border/70">
+                    <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
+                        <p className="text-sm text-red-400">
+                            {error}
+                        </p>
 
-                    <div className="border-t border-border/70" />
+                        <button
+                            type="button"
+                            onClick={reload}
+                            className="min-h-11 rounded-lg bg-emerald-400 px-4 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
+                        >
+                            Tentar novamente
+                        </button>
+                    </CardContent>
+                </Card>
+            )}
 
-                    {/* Área dinâmica: conteúdo conforme a seleção */}
-                    <div className="min-h-80 space-y-4">
+            {/* Conteúdo do perfil */}
+            {!isLoading && !error && profile && (
+                <Card className="mx-auto min-h-[34rem] w-full max-w-2xl border border-border/70 bg-card/80">
+                    <CardContent className="space-y-6 p-6 sm:p-8">
 
-                        {activeSection === 'overview' && (
-                            <div className="space-y-2">
-                                <ProfileMenuItem
-                                    icon={UserRound}
-                                    title="Informações pessoais"
-                                    description="Alterar nome e e-mail"
-                                    onClick={() =>
-                                        setActiveSection('information')
-                                    }
-                                />
+                        {/* Área fixa: identificação do usuário */}
+                        <ProfileInformationCard profile={profile} />
 
-                                <ProfileMenuItem
-                                    icon={ShieldCheck}
-                                    title="Segurança da conta"
-                                    description="Gerenciar senha de acesso"
-                                    onClick={() =>
-                                        setActiveSection('security')
-                                    }
-                                />
+                        <div className="border-t border-border/70" />
 
-                                {profile.role === 'admin' && (
-    <ProfileMenuItem
-        icon={Settings}
-        title="Configurações do sistema"
-        description="Gerenciar configurações administrativas"
-        to="/configuracoes"
-    />
-)}
+                        {/* Área dinâmica: opções e formulários */}
+                        <div className="min-h-[20rem]">
 
-                                <div className="mt-4 border-t border-border/70 pt-3">
+                            {/* Menu principal */}
+                            {activeSection === 'overview' && (
+                                <div className="space-y-2">
                                     <ProfileMenuItem
-                                        icon={LogOut}
-                                        title="Sair da conta"
-                                        description="Encerrar sua sessão na plataforma"
-                                        tone="danger"
-                                        disabled
+                                        icon={UserRound}
+                                        title="Informações pessoais"
+                                        description="Alterar nome e e-mail"
+                                        onClick={() =>
+                                            setActiveSection('information')
+                                        }
                                     />
+
+                                    <ProfileMenuItem
+                                        icon={ShieldCheck}
+                                        title="Segurança da conta"
+                                        description="Gerenciar senha de acesso"
+                                        onClick={() =>
+                                            setActiveSection('security')
+                                        }
+                                    />
+
+                                    {/* Configurações exclusivas do administrador */}
+                                    {profile.role === 'admin' && (
+                                        <ProfileMenuItem
+                                            icon={Settings}
+                                            title="Configurações do sistema"
+                                            description="Gerenciar configurações administrativas"
+                                            to="/configuracoes"
+                                        />
+                                    )}
+
+                                    {/* Sair da conta */}
+                                    <div className="mt-4 border-t border-border/70 pt-3">
+                                        <ProfileMenuItem
+                                            icon={LogOut}
+                                            title="Sair da conta"
+                                            description="Encerrar sua sessão na plataforma"
+                                            tone="danger"
+                                            disabled
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeSection === 'information' && (
-                            <ProfileInformationForm
-                                profile={profile}
-                                onSave={handleSaveProfile}
-                                onBack={() => setActiveSection('overview')}
-                            />
-                        )}
+                            {/* Formulário de informações pessoais */}
+                            {activeSection === 'information' && (
+                                <ProfileInformationForm
+                                    profile={profile}
+                                    onSave={handleSaveProfile}
+                                    onBack={() =>
+                                        setActiveSection('overview')
+                                    }
+                                    isSaving={isSavingProfile}
+                                />
+                            )}
 
-                        {activeSection === 'security' && (
-                            <ProfilePasswordForm
-                                onBack={() => setActiveSection('overview')}
-                            />
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                            {/* Formulário de segurança */}
+                            {activeSection === 'security' && (
+                                <ProfilePasswordForm
+                                    onSubmit={savePassword}
+                                    onBack={() =>
+                                        setActiveSection('overview')
+                                    }
+                                    isSubmitting={isChangingPassword}
+                                />
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
         </PageShell>
     );
 }

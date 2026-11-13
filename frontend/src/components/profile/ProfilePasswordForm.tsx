@@ -1,65 +1,108 @@
-
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
 
+import type {
+    ChangePasswordRequest,
+    ChangePasswordResponse,
+} from '@/types/profile';
+
 interface ProfilePasswordFormProps {
     onBack: () => void;
+    onSubmit: (
+        data: ChangePasswordRequest,
+    ) => Promise<ChangePasswordResponse>;
+    isSubmitting: boolean;
 }
 
-const fields = [
-    {
-        id: 'current-password',
-        label: 'Senha atual',
-        placeholder: 'Digite sua senha atual',
-    },
-    {
-        id: 'new-password',
-        label: 'Nova senha',
-        placeholder: 'Digite sua nova senha',
-    },
-    {
-        id: 'confirm-password',
-        label: 'Confirmar nova senha',
-        placeholder: 'Confirme sua nova senha',
-    },
-];
+const inputClassName =
+    'h-11 w-full rounded-lg border border-input bg-background/60 px-4 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-emerald-400/50 focus-visible:ring-2 focus-visible:ring-emerald-400/15';
 
 export function ProfilePasswordForm({
     onBack,
+    onSubmit,
+    isSubmitting,
 }: ProfilePasswordFormProps) {
-    const [showPasswords, setShowPasswords] = useState<boolean[]>([
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const [showPasswords, setShowPasswords] = useState([
         false,
         false,
         false,
     ]);
 
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [feedback, setFeedback] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     function toggleVisibility(index: number) {
-        setShowPasswords((current) =>
-            current.map((value, i) =>
-                i === index ? !value : value
-            )
+        setShowPasswords((previous) =>
+            previous.map((value, i) =>
+                i === index ? !value : value,
+            ),
         );
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
+        setError(null);
+        setSuccess(null);
+
         if (newPassword !== confirmPassword) {
-            setFeedback('A confirmação da senha não corresponde.');
+            setError('A confirmação da nova senha não corresponde.');
             return;
         }
 
-        setFeedback(
-            'Validação local concluída. A atualização real será integrada ao backend.'
-        );
+        try {
+            const response = await onSubmit({
+                currentPassword,
+                newPassword,
+            });
+
+            setSuccess(response.message);
+
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Não foi possível solicitar a alteração da senha.',
+            );
+        }
     }
 
+    const fields = [
+        {
+            id: 'current-password',
+            label: 'Senha atual',
+            placeholder: 'Digite sua senha atual',
+            value: currentPassword,
+            onChange: setCurrentPassword,
+            autoComplete: 'current-password',
+        },
+        {
+            id: 'new-password',
+            label: 'Nova senha',
+            placeholder: 'Digite sua nova senha',
+            value: newPassword,
+            onChange: setNewPassword,
+            autoComplete: 'new-password',
+        },
+        {
+            id: 'confirm-password',
+            label: 'Confirmar nova senha',
+            placeholder: 'Confirme sua nova senha',
+            value: confirmPassword,
+            onChange: setConfirmPassword,
+            autoComplete: 'new-password',
+        },
+    ];
+
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
                 <h3 className="text-base font-semibold">
                     Segurança da conta
@@ -83,40 +126,28 @@ export function ProfilePasswordForm({
                         <input
                             id={field.id}
                             type={showPasswords[index] ? 'text' : 'password'}
+                            value={field.value}
+                            onChange={(event) =>
+                                field.onChange(event.target.value)
+                            }
                             placeholder={field.placeholder}
-                            autoComplete={
-                                index === 0
-                                    ? 'current-password'
-                                    : 'new-password'
-                            }
+                            autoComplete={field.autoComplete}
+                            className={inputClassName}
+                            disabled={isSubmitting}
                             required
-                            value={
-                                index === 1
-                                    ? newPassword
-                                    : index === 2
-                                      ? confirmPassword
-                                      : undefined
-                            }
-                            onChange={
-                                index === 1
-                                    ? (event) => setNewPassword(event.target.value)
-                                    : index === 2
-                                      ? (event) => setConfirmPassword(event.target.value)
-                                      : undefined
-                            }
-                            className="h-11 w-full rounded-lg border border-input bg-background/60 px-4 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-emerald-400/50 focus-visible:ring-2 focus-visible:ring-emerald-400/15"
                         />
 
                         <button
                             type="button"
                             onClick={() => toggleVisibility(index)}
+                            disabled={isSubmitting}
                             aria-label={
                                 showPasswords[index]
                                     ? 'Ocultar senha'
                                     : 'Mostrar senha'
                             }
                             aria-pressed={showPasswords[index]}
-                            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground hover:text-foreground"
+                            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                         >
                             {showPasswords[index] ? (
                                 <EyeOff className="size-4" />
@@ -128,9 +159,15 @@ export function ProfilePasswordForm({
                 </div>
             ))}
 
-            {feedback && (
-                <p role="status" className="text-sm text-muted-foreground">
-                    {feedback}
+            {error && (
+                <p role="alert" className="text-sm text-red-400">
+                    {error}
+                </p>
+            )}
+
+            {success && (
+                <p role="status" className="text-sm text-emerald-400">
+                    {success}
                 </p>
             )}
 
@@ -144,16 +181,18 @@ export function ProfilePasswordForm({
                     <button
                         type="button"
                         onClick={onBack}
-                        className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                        disabled={isSubmitting}
+                        className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground disabled:opacity-50"
                     >
                         Voltar
                     </button>
 
                     <button
                         type="submit"
-                        className="min-h-11 rounded-lg bg-emerald-400 px-4 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
+                        disabled={isSubmitting}
+                        className="min-h-11 rounded-lg bg-emerald-400 px-4 text-sm font-semibold text-slate-950 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        Atualizar senha
+                        {isSubmitting ? 'Enviando...' : 'Atualizar senha'}
                     </button>
                 </div>
             </div>

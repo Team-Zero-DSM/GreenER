@@ -1,12 +1,15 @@
-
 import { useState, type FormEvent } from 'react';
 
-import type { UserProfile } from '@/types/profile';
+import type {
+    UserProfile,
+    UpdateProfileRequest,
+} from '@/types/profile';
 
 interface ProfileInformationFormProps {
     profile: UserProfile;
-    onSave: (profile: UserProfile) => void;
+    onSave: (data: UpdateProfileRequest) => Promise<void>;
     onBack: () => void;
+    isSaving: boolean;
 }
 
 const inputClassName =
@@ -16,26 +19,32 @@ export function ProfileInformationForm({
     profile,
     onSave,
     onBack,
+    isSaving,
 }: ProfileInformationFormProps) {
     const [name, setName] = useState(profile.name);
     const [email, setEmail] = useState(profile.email);
+    const [error, setError] = useState<string | null>(null);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        setError(null);
 
-        const updatedProfile = {
-            ...profile,
-            name: name.trim(),
-            email: email.trim(),
-        };
-
-        if (!updatedProfile.name || !updatedProfile.email) return;
-
-        onSave(updatedProfile);
+        try {
+            await onSave({
+                name: name.trim(),
+                email: email.trim(),
+            });
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Não foi possível atualizar o perfil.',
+            );
+        }
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
                 <h3 className="text-base font-semibold">
                     Informações pessoais
@@ -59,6 +68,7 @@ export function ProfileInformationForm({
                     placeholder="Digite seu nome"
                     autoComplete="name"
                     className={inputClassName}
+                    disabled={isSaving}
                     required
                 />
             </div>
@@ -76,26 +86,35 @@ export function ProfileInformationForm({
                     placeholder="Digite seu e-mail"
                     autoComplete="email"
                     className={inputClassName}
+                    disabled={isSaving}
                     required
                 />
             </div>
+
+            {error && (
+                <p role="alert" className="text-sm text-red-400">
+                    {error}
+                </p>
+            )}
 
             <div className="flex flex-wrap justify-end gap-2 border-t border-border/70 pt-4">
                 <button
                     type="button"
                     onClick={onBack}
-                    className="min-h-11 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                    disabled={isSaving}
+                    className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground disabled:opacity-50"
                 >
                     Voltar
                 </button>
 
                 <button
                     type="submit"
-                    className="min-h-11 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300"
+                    disabled={isSaving}
+                    className="min-h-11 rounded-lg bg-emerald-400 px-4 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    Salvar alterações
+                    {isSaving ? 'Salvando...' : 'Salvar alterações'}
                 </button>
             </div>
         </form>
     );
-}
+}   
