@@ -1,15 +1,30 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
+import { PAINEL_KPI_MOCK } from '@/mocks/painelWidgets.mock';
 import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetFrame } from './PainelWidgetFrame';
+import { KpiWidget } from './widgets/KpiWidget';
 
 // Configurar e remover entram com a personalização (#147) e a edição do layout (#145).
 const WIDGET_ACTIONS: readonly PainelWidgetAction[] = [
     { label: 'Configurar widget', disabled: true },
     { label: 'Remover widget', disabled: true },
 ];
+
+// Escolhe o componente pelo tipo do widget. Devolve null quando não há dados,
+// e o contêiner mostra o aviso de "sem dados".
+function renderWidgetContent(widget: PainelWidget): ReactNode {
+    switch (widget.type) {
+        case 'kpi': {
+            const data = PAINEL_KPI_MOCK[widget.id];
+            return data ? <KpiWidget data={data} /> : null;
+        }
+        default:
+            return null;
+    }
+}
 
 interface PainelWidgetCardProps {
     widget: PainelWidget;
@@ -27,12 +42,20 @@ export function PainelWidgetCard({ widget }: PainelWidgetCardProps) {
             widget.w > PAINEL_GRID_COLUMNS / 2 ? PAINEL_TABLET_COLUMNS : PAINEL_TABLET_COLUMNS / 2,
     } as CSSProperties;
 
+    const content = renderWidgetContent(widget);
+
     return (
         <article
             style={position}
             className="min-w-0 [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]"
         >
-            <PainelWidgetFrame title={widget.title} status="empty" actions={WIDGET_ACTIONS} />
+            <PainelWidgetFrame
+                title={widget.title}
+                status={content === null ? 'empty' : 'ready'}
+                actions={WIDGET_ACTIONS}
+            >
+                {content}
+            </PainelWidgetFrame>
         </article>
     );
 }

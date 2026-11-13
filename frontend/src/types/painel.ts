@@ -23,3 +23,15 @@ export interface PainelWidget {
     w: number;
     h: number;
 }
+
+// Indicador numérico. A variação é calculada contra previousValue (o mesmo
+// intervalo imediatamente anterior); lowerIsBetter diz se cair é bom (emissão)
+// ou ruim (disponibilidade), para colorir a variação.
+export interface PainelKpiData {
+    label: string;
+    value: number;
+    unit: string;
+    previousValue: number | null;
+    lowerIsBetter: boolean;
+    fractionDigits?: number;
+}
