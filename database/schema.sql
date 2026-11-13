@@ -6,10 +6,24 @@ CREATE TABLE usuario (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
     senha_hash TEXT NOT NULL,
-    papel TEXT NOT NULL DEFAULT 'admin'
+    papel TEXT NOT NULL DEFAULT 'visualizador'
         CHECK (papel IN ('admin', 'visualizador')),
-    criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+    nome TEXT NOT NULL,
+    acesso_ativo BOOLEAN NOT NULL DEFAULT true,
+    versao_sessao INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE UNIQUE INDEX ux_usuario_email_lower ON usuario(lower(email));
+
+CREATE TABLE redefinicao_senha (
+    token_hash TEXT PRIMARY KEY,
+    usuario_id BIGINT NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+    expira_em TIMESTAMPTZ NOT NULL,
+    usado_em TIMESTAMPTZ
+);
+
+CREATE INDEX idx_redefinicao_usuario ON redefinicao_senha(usuario_id);
 
 CREATE TABLE regiao (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

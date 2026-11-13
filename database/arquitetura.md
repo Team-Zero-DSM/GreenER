@@ -5,6 +5,62 @@ O [DER atual](#diagrama-entidade-relacionamento-der) inclui o histórico de
 tentativas em `status_coleta`. `usuario` e `configuracao_sistema` preparam a
 estrutura para autenticação e configuração de monitoramento.
 
+## Cadastro e autenticação de usuários (#156)
+
+`usuario` armazena `nome`, `email`, `senha_hash`, `papel`, `acesso_ativo`,
+`versao_sessao` e a data de criação. Novas contas recebem o papel
+`visualizador`, acesso ativo e versão de sessão zero. O índice
+`ux_usuario_email_lower` impede e-mails duplicados sem distinguir maiúsculas
+e minúsculas. O hash da senha é produzido pelo backend; o banco não recebe
+uma senha em texto puro por meio do fluxo de cadastro.
+
+`redefinicao_senha` pertence a `usuario` e armazena apenas `token_hash` como
+chave primária, `expira_em` obrigatório e `usado_em` opcional. A exclusão de
+uma conta remove seus tokens em cascata. A geração do token, sua validade,
+o uso único e a revogação das sessões serão controlados pelo backend nas
+tasks de autenticação e recuperação de senha.
+
+### Atualizar um banco existente
+
+Em bancos já inicializados, aplicar a migração abaixo. O Compose executa
+`schema.sql` automaticamente apenas quando o volume do PostgreSQL está vazio.
+Não é necessário excluir o volume para atualizar o banco.
+
+```bash
+docker compose exec -T database psql -U postgres -d greener -v ON_ERROR_STOP=1 < database/migrations/002_cadastro_autenticacao.sql
+```
+
+A migração preserva IDs, e-mails, hashes, papéis, datas e relacionamentos
+existentes. Nomes ausentes são preenchidos com os primeiros 100 caracteres
+da parte do e-mail anterior ao `@`. Contas existentes recebem acesso ativo
+e versão de sessão zero. O novo papel padrão vale somente para inserções
+futuras; administradores existentes mantêm seu papel.
+
+Se houver e-mails que diferem apenas entre maiúsculas e minúsculas, a
+migração aborta sem alterar o banco. Identifique os conflitos com a consulta
+abaixo e resolva-os antes de executar novamente; a migração não apaga nem
+mescla usuários automaticamente.
+
+```sql
+SELECT lower(email) AS email, count(*) AS quantidade
+FROM usuario
+GROUP BY lower(email)
+HAVING count(*) > 1;
+```
+
+### Verificação em banco de teste
+
+O teste SQL pode ser executado em um banco vazio inicializado com o schema
+ou em um banco atualizado pela migração:
+
+```bash
+docker compose exec -T database psql -U postgres -d greener -v ON_ERROR_STOP=1 < database/tests/cadastro_autenticacao.sql
+```
+
+Ele verifica valores padrão, nome obrigatório, unicidade do e-mail,
+papéis válidos, vínculo dos tokens, registro de utilização e exclusão em
+cascata. As inserções são revertidas ao final, mas as sequências podem avançar.
+
 ## Histórico de tentativas (`status_coleta`)
 
 | Coluna | Tipo | Uso |
