@@ -1,8 +1,15 @@
 import type { CSSProperties } from 'react';
 
-import type { PainelWidget } from '@/types/painel';
+import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
+import { PainelWidgetFrame } from './PainelWidgetFrame';
+
+// Configurar e remover entram com a personalização (#147) e a edição do layout (#145).
+const WIDGET_ACTIONS: readonly PainelWidgetAction[] = [
+    { label: 'Configurar widget', disabled: true },
+    { label: 'Remover widget', disabled: true },
+];
 
 interface PainelWidgetCardProps {
     widget: PainelWidget;
@@ -23,12 +30,9 @@ export function PainelWidgetCard({ widget }: PainelWidgetCardProps) {
     return (
         <article
             style={position}
-            className="flex min-w-0 [grid-row:span_var(--painel-h)] flex-col rounded-xl border border-border bg-card p-4 md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]"
+            className="min-w-0 [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]"
         >
-            <h2 className="truncate text-sm font-semibold">{widget.title}</h2>
-            <p className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-                Conteúdo do widget em breve
-            </p>
+            <PainelWidgetFrame title={widget.title} status="empty" actions={WIDGET_ACTIONS} />
         </article>
     );
 }
