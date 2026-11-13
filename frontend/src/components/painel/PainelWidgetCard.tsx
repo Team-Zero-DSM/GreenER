@@ -56,9 +56,10 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
 
 interface PainelWidgetCardProps {
     widget: PainelWidget;
+    editing?: boolean;
 }
 
-export function PainelWidgetCard({ widget }: PainelWidgetCardProps) {
+export function PainelWidgetCard({ widget, editing = false }: PainelWidgetCardProps) {
     // No desktop o widget fica exatamente na coordenada salva (a grade do CSS começa
     // em 1, as coordenadas em 0). No tablet e no celular a posição é automática, na
     // ordem da lista: só a altura e, no tablet, meia largura ou largura inteira.
@@ -80,6 +81,7 @@ export function PainelWidgetCard({ widget }: PainelWidgetCardProps) {
             <PainelWidgetFrame
                 title={widget.title}
                 status={content === null ? 'empty' : 'ready'}
+                editing={editing}
                 actions={WIDGET_ACTIONS}
             >
                 {content}

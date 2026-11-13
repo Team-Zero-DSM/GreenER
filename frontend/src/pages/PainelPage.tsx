@@ -4,13 +4,14 @@ import { PainelGrid } from '@/components/painel/PainelGrid';
 import { PAINEL_DEFAULT_WIDGETS } from '@/components/painel/painelLayoutPadrao';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
-import type { PainelTemplateId } from '@/types/painel';
+import type { PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
 export function PainelPage() {
     const [template, setTemplate] = useState<PainelTemplateId>('visao-geral');
     const [range, setRange] = useState<HistoryRange>('24h');
     const [editing, setEditing] = useState(false);
+    const [widgets, setWidgets] = useState<readonly PainelWidget[]>(PAINEL_DEFAULT_WIDGETS);
 
     return (
         <PainelShell>
@@ -35,7 +36,17 @@ export function PainelPage() {
                 />
             </div>
 
-            <PainelGrid widgets={PAINEL_DEFAULT_WIDGETS} />
+            {editing && (
+                <p
+                    role="status"
+                    className="rounded-lg border border-dashed border-emerald-400/45 bg-emerald-400/5 px-4 py-3 text-sm text-muted-foreground"
+                >
+                    <strong className="font-semibold text-foreground">Modo de edição.</strong> As
+                    alterações feitas no layout aparecem na hora no painel.
+                </p>
+            )}
+
+            <PainelGrid widgets={widgets} editing={editing} onWidgetsChange={setWidgets} />
         </PainelShell>
     );
 }

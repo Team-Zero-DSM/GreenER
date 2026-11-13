@@ -9,6 +9,8 @@ interface PainelWidgetFrameProps {
     status: PainelWidgetStatus;
     errorMessage?: string;
     actions?: readonly PainelWidgetAction[];
+    // Destaca o contêiner com borda tracejada enquanto o painel está em edição.
+    editing?: boolean;
     children?: ReactNode;
 }
 
@@ -20,12 +22,17 @@ export function PainelWidgetFrame({
     status,
     errorMessage,
     actions = [],
+    editing = false,
     children,
 }: PainelWidgetFrameProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
-        <div className="flex h-full min-w-0 flex-col rounded-xl border border-border bg-card p-4">
+        <div
+            className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-colors ${
+                editing ? 'border-dashed border-emerald-400/45' : 'border-border'
+            }`}
+        >
             <header className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                     <h2 className="truncate text-sm font-semibold">{title}</h2>
