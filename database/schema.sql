@@ -6,12 +6,12 @@ CREATE TABLE usuario (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
     senha_hash TEXT NOT NULL,
-    papel TEXT NOT NULL DEFAULT 'visualizador'
-        CHECK (papel IN ('admin', 'visualizador')),
-    criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
     nome TEXT NOT NULL,
     acesso_ativo BOOLEAN NOT NULL DEFAULT true,
-    versao_sessao INTEGER NOT NULL DEFAULT 0
+    versao_sessao INTEGER NOT NULL DEFAULT 0,
+    papel TEXT NOT NULL DEFAULT 'visualizador'
+        CHECK (papel IN ('admin', 'visualizador')),
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE UNIQUE INDEX ux_usuario_email_lower ON usuario(lower(email));
@@ -24,6 +24,16 @@ CREATE TABLE redefinicao_senha (
 );
 
 CREATE INDEX idx_redefinicao_usuario ON redefinicao_senha(usuario_id);
+
+CREATE TABLE dashboard (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    usuario_id BIGINT NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+    nome TEXT NOT NULL CHECK (char_length(btrim(nome)) BETWEEN 1 AND 48),
+    periodo TEXT NOT NULL CHECK (periodo IN ('1h', '6h', '24h', '7d', '30d')),
+    widgets JSONB NOT NULL CHECK (jsonb_typeof(widgets) = 'array')
+);
+
+CREATE INDEX idx_dashboard_usuario ON dashboard(usuario_id, id);
 
 CREATE TABLE regiao (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
