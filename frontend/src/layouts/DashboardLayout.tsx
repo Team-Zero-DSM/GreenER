@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { House, Server, ArrowLeftRight, Globe, ListOrdered } from 'lucide-react';
+import { House, Server, ArrowLeftRight, Globe, ListOrdered, UserRound } from 'lucide-react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
 import { MonitoringBar } from '@/components/MonitoringBar';
@@ -114,6 +114,15 @@ function DashboardHeader({
                             );
                         })}
                     </nav>
+                    <NavLink
+                        to="/perfil"
+                        className={`${linkClass} ml-auto ${
+                            pathname === '/perfil' ? activeClass : idleClass
+                        }`}
+                    >
+                        <UserRound aria-hidden="true" className="size-4" />
+                        Perfil
+                    </NavLink>
                 </div>
             </header>
 
