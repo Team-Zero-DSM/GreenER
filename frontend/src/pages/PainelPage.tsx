@@ -42,7 +42,8 @@ export function PainelPage() {
                     className="rounded-lg border border-dashed border-emerald-400/45 bg-emerald-400/5 px-4 py-3 text-sm text-muted-foreground"
                 >
                     <strong className="font-semibold text-foreground">Modo de edição.</strong>{' '}
-                    Arraste um widget pelo título para mudar a posição dele na grade.
+                    Arraste um widget pelo título para mudar a posição e use a alça do canto para
+                    redimensionar.
                 </p>
             )}
 

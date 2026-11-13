@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { PainelWidget } from '@/types/painel';
 
-import { moveWidget } from './painelLayout';
+import { moveWidget, resizeWidget } from './painelLayout';
 import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
@@ -18,6 +18,7 @@ interface PainelGridProps {
 // Gesto em andamento: guarda onde o ponteiro começou e como o layout estava, para
 // calcular a nova posição sempre a partir do início do gesto.
 interface PainelGesture {
+    kind: 'move' | 'resize';
     widget: PainelWidget;
     startX: number;
     startY: number;
@@ -54,12 +55,19 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
             const rows = Math.round((event.clientY - gesture.startY) / gesture.rowStep);
 
             onWidgetsChange?.(
-                moveWidget(
-                    gesture.initialWidgets,
-                    gesture.widget.id,
-                    gesture.widget.x + columns,
-                    gesture.widget.y + rows,
-                ),
+                gesture.kind === 'move'
+                    ? moveWidget(
+                          gesture.initialWidgets,
+                          gesture.widget.id,
+                          gesture.widget.x + columns,
+                          gesture.widget.y + rows,
+                      )
+                    : resizeWidget(
+                          gesture.initialWidgets,
+                          gesture.widget.id,
+                          gesture.widget.w + columns,
+                          gesture.widget.h + rows,
+                      ),
             );
         }
 
@@ -79,7 +87,11 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
         };
     }, [activeWidgetId, onWidgetsChange]);
 
-    function startGesture(widget: PainelWidget, event: ReactPointerEvent<HTMLElement>) {
+    function startGesture(
+        kind: PainelGesture['kind'],
+        widget: PainelWidget,
+        event: ReactPointerEvent<HTMLElement>,
+    ) {
         const grid = gridRef.current;
 
         // Só o botão principal do mouse (ou o toque) inicia o gesto.
@@ -95,6 +107,7 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
         const rowHeight = Number.parseFloat(styles.gridAutoRows) || 0;
 
         gestureRef.current = {
+            kind,
             widget,
             startX: event.clientX,
             startY: event.clientY,
@@ -118,7 +131,12 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
                     widget={widget}
                     editing={editing}
                     active={widget.id === activeWidgetId}
-                    onMoveStart={canArrange ? (event) => startGesture(widget, event) : undefined}
+                    onMoveStart={
+                        canArrange ? (event) => startGesture('move', widget, event) : undefined
+                    }
+                    onResizeStart={
+                        canArrange ? (event) => startGesture('resize', widget, event) : undefined
+                    }
                 />
             ))}
         </section>

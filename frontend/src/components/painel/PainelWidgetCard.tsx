@@ -57,10 +57,12 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
 interface PainelWidgetCardProps {
     widget: PainelWidget;
     editing?: boolean;
-    // Widget que está sendo arrastado no momento.
+    // Widget que está sendo arrastado ou redimensionado no momento.
     active?: boolean;
     // Quando informado, o cabeçalho do widget vira a área de arrastar.
     onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Quando informado, o widget ganha a alça de redimensionar no canto inferior direito.
+    onResizeStart?: (event: PointerEvent<HTMLElement>) => void;
 }
 
 export function PainelWidgetCard({
@@ -68,6 +70,7 @@ export function PainelWidgetCard({
     editing = false,
     active = false,
     onMoveStart,
+    onResizeStart,
 }: PainelWidgetCardProps) {
     // No desktop o widget fica exatamente na coordenada salva (a grade do CSS começa
     // em 1, as coordenadas em 0). No tablet e no celular a posição é automática, na
@@ -85,7 +88,7 @@ export function PainelWidgetCard({
     return (
         <article
             style={position}
-            className={`min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
+            className={`relative min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
         >
             <PainelWidgetFrame
                 title={widget.title}
@@ -97,6 +100,17 @@ export function PainelWidgetCard({
             >
                 {content}
             </PainelWidgetFrame>
+
+            {onResizeStart && (
+                <span
+                    role="presentation"
+                    title="Arraste para redimensionar o widget"
+                    onPointerDown={onResizeStart}
+                    className="absolute right-0 bottom-0 flex size-6 cursor-nwse-resize touch-none items-end justify-end p-1.5"
+                >
+                    <span className="size-2.5 rounded-br-sm border-r-2 border-b-2 border-emerald-400" />
+                </span>
+            )}
         </article>
     );
 }
