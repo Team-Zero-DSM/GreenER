@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { PainelWidget } from '@/types/painel';
 
-import { moveWidget, resizeWidget } from './painelLayout';
+import { arrangeWidgets, moveWidget, resizeWidget } from './painelLayout';
 import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
@@ -54,7 +54,7 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
             const columns = Math.round((event.clientX - gesture.startX) / gesture.columnStep);
             const rows = Math.round((event.clientY - gesture.startY) / gesture.rowStep);
 
-            onWidgetsChange?.(
+            const changed =
                 gesture.kind === 'move'
                     ? moveWidget(
                           gesture.initialWidgets,
@@ -67,8 +67,10 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
                           gesture.widget.id,
                           gesture.widget.w + columns,
                           gesture.widget.h + rows,
-                      ),
-            );
+                      );
+
+            // Os outros widgets abrem espaço para o que está sendo editado.
+            onWidgetsChange?.(arrangeWidgets(changed, gesture.widget.id));
         }
 
         function handlePointerEnd() {

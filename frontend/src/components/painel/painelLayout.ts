@@ -54,3 +54,55 @@ export function resizeWidget(
         };
     });
 }
+
+// Dois widgets se sobrepõem quando seus retângulos se cruzam na grade.
+function widgetsOverlap(a: PainelWidget, b: PainelWidget): boolean {
+    return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+}
+
+function byRowThenColumn(a: PainelWidget, b: PainelWidget): number {
+    return a.y - b.y || a.x - b.x;
+}
+
+// Reorganiza a grade para que nenhum widget fique sobre outro. O widget que o
+// usuário acabou de mover ou redimensionar (fixedId) fica onde foi solto e os
+// demais descem até caber. No fim, todos sobem para fechar as linhas vazias.
+// A ordem da lista é mantida, só as posições mudam.
+export function arrangeWidgets(widgets: readonly PainelWidget[], fixedId?: string): PainelWidget[] {
+    const fixed = widgets.find((widget) => widget.id === fixedId);
+    const placed: PainelWidget[] = fixed ? [fixed] : [];
+
+    // 1. Empurra para baixo quem estiver em cima de um widget já posicionado.
+    for (const widget of widgets.filter((item) => item !== fixed).sort(byRowThenColumn)) {
+        let candidate = widget;
+
+        while (placed.some((other) => widgetsOverlap(candidate, other))) {
+            candidate = { ...candidate, y: candidate.y + 1 };
+        }
+
+        placed.push(candidate);
+    }
+
+    // 2. Sobe cada widget até encostar na borda de cima ou em outro widget.
+    const compacted: PainelWidget[] = [];
+
+    for (const widget of placed.sort(byRowThenColumn)) {
+        let candidate = widget;
+
+        while (candidate.y > 0) {
+            const above = { ...candidate, y: candidate.y - 1 };
+
+            if (compacted.some((other) => widgetsOverlap(above, other))) {
+                break;
+            }
+
+            candidate = above;
+        }
+
+        compacted.push(candidate);
+    }
+
+    const positions = new Map(compacted.map((widget) => [widget.id, widget]));
+
+    return widgets.map((widget) => positions.get(widget.id) ?? widget);
+}

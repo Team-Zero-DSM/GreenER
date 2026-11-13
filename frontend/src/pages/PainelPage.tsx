@@ -43,7 +43,7 @@ export function PainelPage() {
                 >
                     <strong className="font-semibold text-foreground">Modo de edição.</strong>{' '}
                     Arraste um widget pelo título para mudar a posição e use a alça do canto para
-                    redimensionar.
+                    redimensionar. Os demais widgets se reorganizam sozinhos.
                 </p>
             )}
 
