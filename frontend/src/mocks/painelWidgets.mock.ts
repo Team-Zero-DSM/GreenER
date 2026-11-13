@@ -2,6 +2,7 @@ import type {
     PainelDistributionData,
     PainelKpiData,
     PainelSeriesData,
+    PainelStatusData,
     PainelTableData,
 } from '@/types/painel';
 
@@ -149,4 +150,8 @@ export const PAINEL_TABLE_MOCK: Record<string, PainelTableData> = {
             },
         ],
     },
+};
+
+export const PAINEL_STATUS_MOCK: Record<string, PainelStatusData> = {
+    'status-servicos': { available: 17, unavailable: 1, metricsMissing: 2 },
 };

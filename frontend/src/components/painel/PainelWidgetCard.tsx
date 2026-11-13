@@ -4,6 +4,7 @@ import {
     PAINEL_DISTRIBUTION_MOCK,
     PAINEL_KPI_MOCK,
     PAINEL_SERIES_MOCK,
+    PAINEL_STATUS_MOCK,
     PAINEL_TABLE_MOCK,
 } from '@/mocks/painelWidgets.mock';
 import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
@@ -12,6 +13,7 @@ import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao
 import { PainelWidgetFrame } from './PainelWidgetFrame';
 import { DistributionWidget } from './widgets/DistributionWidget';
 import { KpiWidget } from './widgets/KpiWidget';
+import { StatusWidget } from './widgets/StatusWidget';
 import { TableWidget } from './widgets/TableWidget';
 import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
 
@@ -45,8 +47,10 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
             const data = PAINEL_TABLE_MOCK[widget.id];
             return data && data.rows.length > 0 ? <TableWidget data={data} /> : null;
         }
-        default:
-            return null;
+        case 'status': {
+            const data = PAINEL_STATUS_MOCK[widget.id];
+            return data ? <StatusWidget data={data} /> : null;
+        }
     }
 }
 

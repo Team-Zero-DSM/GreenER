@@ -64,3 +64,10 @@ export interface PainelTableData {
     columns: readonly { key: string; label: string; align?: 'left' | 'right' }[];
     rows: readonly { id: string; cells: Record<string, string> }[];
 }
+
+// Quantos serviços estão em cada situação na última rodada de coleta.
+export interface PainelStatusData {
+    available: number;
+    unavailable: number;
+    metricsMissing: number;
+}
