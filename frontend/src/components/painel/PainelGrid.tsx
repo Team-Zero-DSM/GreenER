@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { PainelWidget } from '@/types/painel';
 
-import { arrangeWidgets, moveWidget, resizeWidget } from './painelLayout';
+import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
 import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
@@ -120,6 +120,16 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
         setActiveWidgetId(widget.id);
     }
 
+    if (widgets.length === 0) {
+        return (
+            <p className="rounded-xl border border-dashed border-border px-4 py-16 text-center text-sm text-muted-foreground">
+                {editing
+                    ? 'O painel está vazio. Use "Adicionar widget" para escolher um widget do catálogo.'
+                    : 'O painel está vazio. Entre no modo de edição para adicionar widgets.'}
+            </p>
+        );
+    }
+
     return (
         <section
             ref={gridRef}
@@ -133,6 +143,11 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
                     widget={widget}
                     editing={editing}
                     active={widget.id === activeWidgetId}
+                    onRemove={
+                        editing && onWidgetsChange
+                            ? () => onWidgetsChange(removeWidget(widgets, widget.id))
+                            : undefined
+                    }
                     onMoveStart={
                         canArrange ? (event) => startGesture('move', widget, event) : undefined
                     }

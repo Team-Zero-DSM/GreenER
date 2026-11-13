@@ -17,12 +17,6 @@ import { StatusWidget } from './widgets/StatusWidget';
 import { TableWidget } from './widgets/TableWidget';
 import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
 
-// Configurar e remover entram com a personalização (#147) e a edição do layout (#145).
-const WIDGET_ACTIONS: readonly PainelWidgetAction[] = [
-    { label: 'Configurar widget', disabled: true },
-    { label: 'Remover widget', disabled: true },
-];
-
 // Escolhe o componente pelo tipo do widget. Devolve null quando não há dados,
 // e o contêiner mostra o aviso de "sem dados".
 function renderWidgetContent(widget: PainelWidget): ReactNode {
@@ -63,6 +57,8 @@ interface PainelWidgetCardProps {
     onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
     // Quando informado, o widget ganha a alça de redimensionar no canto inferior direito.
     onResizeStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Quando informado, a ação "Remover widget" do menu fica disponível.
+    onRemove?: () => void;
 }
 
 export function PainelWidgetCard({
@@ -71,7 +67,14 @@ export function PainelWidgetCard({
     active = false,
     onMoveStart,
     onResizeStart,
+    onRemove,
 }: PainelWidgetCardProps) {
+    // Remover só funciona no modo de edição. Configurar entra com a personalização (#147).
+    const actions: readonly PainelWidgetAction[] = [
+        { label: 'Configurar widget', disabled: true },
+        { label: 'Remover widget', onSelect: onRemove, disabled: onRemove === undefined },
+    ];
+
     // No desktop o widget fica exatamente na coordenada salva (a grade do CSS começa
     // em 1, as coordenadas em 0). No tablet e no celular a posição é automática, na
     // ordem da lista: só a altura e, no tablet, meia largura ou largura inteira.
@@ -96,7 +99,7 @@ export function PainelWidgetCard({
                 editing={editing}
                 active={active}
                 onMoveStart={onMoveStart}
-                actions={WIDGET_ACTIONS}
+                actions={actions}
             >
                 {content}
             </PainelWidgetFrame>

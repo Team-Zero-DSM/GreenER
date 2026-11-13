@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
 import { PainelGrid } from '@/components/painel/PainelGrid';
+import { addWidget } from '@/components/painel/painelLayout';
 import { PAINEL_DEFAULT_WIDGETS } from '@/components/painel/painelLayoutPadrao';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
+import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import type { PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
@@ -12,6 +14,7 @@ export function PainelPage() {
     const [range, setRange] = useState<HistoryRange>('24h');
     const [editing, setEditing] = useState(false);
     const [widgets, setWidgets] = useState<readonly PainelWidget[]>(PAINEL_DEFAULT_WIDGETS);
+    const [catalogOpen, setCatalogOpen] = useState(false);
 
     return (
         <PainelShell>
@@ -33,6 +36,7 @@ export function PainelPage() {
                     onTemplateChange={setTemplate}
                     onRangeChange={setRange}
                     onEditingChange={setEditing}
+                    onAddWidget={() => setCatalogOpen(true)}
                 />
             </div>
 
@@ -48,6 +52,17 @@ export function PainelPage() {
             )}
 
             <PainelGrid widgets={widgets} editing={editing} onWidgetsChange={setWidgets} />
+
+            {editing && catalogOpen && (
+                <PainelWidgetCatalog
+                    widgetIdsInUse={widgets.map((widget) => widget.id)}
+                    onAdd={(widget) => {
+                        setWidgets(addWidget(widgets, widget));
+                        setCatalogOpen(false);
+                    }}
+                    onClose={() => setCatalogOpen(false)}
+                />
+            )}
         </PainelShell>
     );
 }

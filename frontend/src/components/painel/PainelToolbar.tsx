@@ -1,4 +1,4 @@
-import { LayoutTemplate, Pencil } from 'lucide-react';
+import { LayoutTemplate, Pencil, Plus } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
@@ -14,6 +14,7 @@ interface PainelToolbarProps {
     onTemplateChange: (template: PainelTemplateId) => void;
     onRangeChange: (range: HistoryRange) => void;
     onEditingChange: (editing: boolean) => void;
+    onAddWidget: () => void;
 }
 
 export function PainelToolbar({
@@ -23,6 +24,7 @@ export function PainelToolbar({
     onTemplateChange,
     onRangeChange,
     onEditingChange,
+    onAddWidget,
 }: PainelToolbarProps) {
     return (
         <section aria-label="Ferramentas do painel" className="flex flex-wrap items-center gap-3">
@@ -48,6 +50,17 @@ export function PainelToolbar({
                 options={HISTORY_RANGE_OPTIONS}
                 onChange={onRangeChange}
             />
+
+            {editing && (
+                <button
+                    type="button"
+                    onClick={onAddWidget}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/5"
+                >
+                    <Plus aria-hidden="true" className="size-4" />
+                    Adicionar widget
+                </button>
+            )}
 
             <button
                 type="button"

@@ -106,3 +106,26 @@ export function arrangeWidgets(widgets: readonly PainelWidget[], fixedId?: strin
 
     return widgets.map((widget) => positions.get(widget.id) ?? widget);
 }
+
+// Adiciona um widget no primeiro espaço livre em que ele couber, procurando linha
+// por linha, da esquerda para a direita. Se não houver vão, ele entra no fim do painel.
+export function addWidget(widgets: readonly PainelWidget[], widget: PainelWidget): PainelWidget[] {
+    const lastRow = Math.max(0, ...widgets.map((item) => item.y + item.h));
+
+    for (let y = 0; y <= lastRow; y += 1) {
+        for (let x = 0; x <= PAINEL_GRID_COLUMNS - widget.w; x += 1) {
+            const candidate = { ...widget, x, y };
+
+            if (!widgets.some((other) => widgetsOverlap(candidate, other))) {
+                return arrangeWidgets([...widgets, candidate]);
+            }
+        }
+    }
+
+    return arrangeWidgets([...widgets, { ...widget, x: 0, y: lastRow }]);
+}
+
+// Remove um widget e sobe os que estavam abaixo dele para ocupar o espaço.
+export function removeWidget(widgets: readonly PainelWidget[], id: string): PainelWidget[] {
+    return arrangeWidgets(widgets.filter((widget) => widget.id !== id));
+}
