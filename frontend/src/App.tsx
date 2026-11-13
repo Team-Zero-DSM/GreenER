@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ComparisonPage } from '@/pages/ComparisonPage';
 import { RegionPage } from './pages/RegionPage';
 import { RankingPage } from '@/pages/RankingPage';
+import { ProfilePage } from '@/pages/ProfilePage';
 
 export default function App() {
     return (
@@ -17,6 +18,7 @@ export default function App() {
                 <Route path="/comparacao" element={<ComparisonPage />} />
                 <Route path="/regioes" element={<RegionPage />} />
                 <Route path="/ranking" element={<RankingPage />} />
+                <Route path="/perfil" element={<ProfilePage />} />
             </Route>
         </Routes>
     );
