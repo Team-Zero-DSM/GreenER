@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { SessionAccount } from './types/accounts.types.js';
+import type { Credentials, SessionAccount } from './types/accounts.types.js';
 
 export const accountColumns = 'id, nome AS name, email, papel AS role';
 
@@ -19,6 +19,15 @@ export class AccountsRepository {
         const { rows } = await this.pool.query<SessionAccount>(
             `SELECT ${accountColumns}, versao_sessao AS "sessionVersion" FROM usuario WHERE id = $1 AND acesso_ativo`,
             [id],
+        );
+        return rows[0] ?? null;
+    }
+
+    async findActiveByEmail(email: string) {
+        const { rows } = await this.pool.query<Credentials>(
+            `SELECT ${accountColumns}, senha_hash AS "passwordHash", versao_sessao AS "sessionVersion"
+         FROM usuario WHERE lower(email) = $1 AND acesso_ativo ORDER BY id LIMIT 1`,
+            [email],
         );
         return rows[0] ?? null;
     }
