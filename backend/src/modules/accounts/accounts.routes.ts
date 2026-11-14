@@ -5,6 +5,7 @@ import { AccountsRepository } from './accounts.repository.js';
 import { AccountsService } from './accounts.service.js';
 import { credentialsSchema, registerSchema } from './accounts.schema.js';
 import { validate } from '../../shared/middleware/validate.js';
+import { throttle } from '../../shared/middleware/throttle.js';
 
 const controller = new AccountsController(new AccountsService(new AccountsRepository(pool)));
 
