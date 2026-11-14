@@ -14,7 +14,7 @@ import { MonitoringBar } from '@/components/MonitoringBar';
 import { MonitoringProvider } from '@/contexts/MonitoringProvider';
 
 const navItems = [
-    { to: '/', label: 'Início', icon: House, prefixes: [] as string[] },
+    { to: '/inicio', label: 'Início', icon: House, prefixes: ['/inicio'] },
     {
         to: '/painel',
         label: 'Painel',
@@ -101,7 +101,7 @@ function DashboardHeader({
             <header ref={headerRef} className="border-b border-border bg-background">
                 <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3 sm:gap-6 sm:px-6">
                     <NavLink
-                        to="/"
+                        to="/inicio"
                         className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-xl font-extrabold text-transparent"
                     >
                         Green<span className="font-light">ER</span>
@@ -167,7 +167,7 @@ function DashboardHeader({
 
 export function DashboardLayout() {
     const { pathname } = useLocation();
-    const isLandingPage = pathname === '/';
+    const isLandingPage = pathname === '/inicio' || pathname === '/inicio/';
 
     const [monitoringLocked, setMonitoringLocked] = useState(false);
 
