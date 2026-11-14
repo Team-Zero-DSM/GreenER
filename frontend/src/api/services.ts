@@ -132,3 +132,34 @@ export async function fetchServiceHistory(
         `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=120`,
     );
 }
+
+export async function patchJson<TRequest, TResponse>(
+    path: string,
+    body: TRequest,
+): Promise<TResponse> {
+    const response = await fetch(`${API_URL}/api/v1${path}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as {
+            error?: { message?: string };
+        } | null;
+
+        throw new ApiError(
+            body?.error?.message ??
+                `Falha na comunicação com a API (HTTP ${response.status})`,
+            response.status,
+        );
+    }
+
+    if (response.status === 204) {
+        return undefined as TResponse;
+    }
+
+    return response.json() as Promise<TResponse>;
+}
