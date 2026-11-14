@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import {
     Card,
@@ -9,12 +10,41 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-type AuthMode = 'login' | 'register';
+import { AuthForm } from '@/components/auth/AuthForm';
+
+import type {
+    AuthMode,
+    LoginRequest,
+    RegisterRequest,
+} from '@/types/auth';
 
 export function AuthPage() {
+    const navigate = useNavigate();
+
     const [mode, setMode] = useState<AuthMode>('login');
+    const [registerFeedback, setRegisterFeedback] = useState('');
 
     const isLogin = mode === 'login';
+
+    function handleLogin(data: LoginRequest) {
+        // Redirecionamento provisório, sem autenticação real.
+        void data;
+        navigate('/inicio');
+    }
+
+    function handleRegister(data: RegisterRequest) {
+        // Simulação local: os dados ainda não são enviados ao backend.
+        void data;
+
+        setRegisterFeedback(
+            'Cadastro validado localmente. A integração será realizada posteriormente.'
+        );
+    }
+
+    function handleModeChange() {
+        setMode(isLogin ? 'register' : 'login');
+        setRegisterFeedback('');
+    }
 
     return (
         <Card className="w-full border border-border/70 bg-card/80">
@@ -31,20 +61,13 @@ export function AuthPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
+                <AuthForm
+                    mode={mode}
+                    onLogin={handleLogin}
+                    onRegister={handleRegister}
+                    statusMessage={registerFeedback}
+                />
 
-                {/* Área reservada para os formulários */}
-                <div
-                    aria-label={
-                        isLogin
-                            ? 'Formulário de login'
-                            : 'Formulário de cadastro'
-                    }
-                    className="min-h-48"
-                >
-                    {/* Os componentes dos formulários serão adicionados na próxima task. */}
-                </div>
-
-                {/* Alternância entre login e cadastro */}
                 <div className="border-t border-border/70 pt-5 text-center">
                     <p className="text-sm text-muted-foreground">
                         {isLogin
@@ -54,15 +77,12 @@ export function AuthPage() {
 
                     <button
                         type="button"
-                        onClick={() =>
-                            setMode(isLogin ? 'register' : 'login')
-                        }
+                        onClick={handleModeChange}
                         className="mt-2 text-sm font-semibold text-emerald-400 transition-colors hover:text-emerald-300"
                     >
                         {isLogin ? 'Criar conta' : 'Entrar'}
                     </button>
                 </div>
-
             </CardContent>
         </Card>
     );
