@@ -8,3 +8,7 @@ export interface Account {
 export interface SessionAccount extends Account {
     sessionVersion: number;
 }
+
+export interface Credentials extends SessionAccount {
+    passwordHash: string;
+}
