@@ -1,11 +1,11 @@
-import { AccountRepository } from '../../modules/accounts/accounts.repository.js';
+import { AccountsRepository } from '../../modules/accounts/accounts.repository.js';
 import { pool } from '../../db/connection.js';
 import { RequestHandler, Response } from 'express';
 import { Account } from '../../modules/accounts/types/accounts.types.js';
 import { authSecret, verifySession } from '../../modules/accounts/accounts.session.js';
 import { AppError } from '../errors/AppError.js';
 
-const accounts = new AccountRepository(pool);
+const accounts = new AccountsRepository(pool);
 
 export function accountFrom(response: Response): Account {
     return response.locals.account as Account;
