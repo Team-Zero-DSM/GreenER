@@ -10,5 +10,5 @@ const controller = new AccountsController(new AccountsService(new AccountsReposi
 
 export const accountsRouter = Router();
 
-accountsRouter.post('/auth/register', validate(registerSchema), controller.register);
-accountsRouter.post('/auth/login', validate(credentialsSchema), controller.login);
+accountsRouter.post('/auth/register', throttle(15), validate(registerSchema), controller.register);
+accountsRouter.post('/auth/login', throttle(30), validate(credentialsSchema), controller.login);
