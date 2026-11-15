@@ -6,11 +6,13 @@ import { AccountsService } from './accounts.service.js';
 import {
     credentialsSchema,
     forgotPasswordSchema,
+    profileSchema,
     registerSchema,
     resetPasswordSchema,
 } from './accounts.schema.js';
 import { validate } from '../../shared/middleware/validate.js';
 import { throttle } from '../../shared/middleware/throttle.js';
+import { requireAccount } from '../../shared/middleware/auth.js';
 
 const controller = new AccountsController(new AccountsService(new AccountsRepository(pool)));
 
@@ -31,3 +33,6 @@ accountsRouter.post(
     validate(resetPasswordSchema),
     controller.resetPassword,
 );
+
+accountsRouter.get('/profile', requireAccount, controller.profile);
+accountsRouter.patch('/profile', requireAccount, validate(profileSchema), controller.updateProfile);
