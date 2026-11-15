@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import type { PainelWidget } from '@/types/painel';
+import type { PainelWidget, PainelWidgetSources } from '@/types/painel';
 
 import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
 import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
@@ -9,6 +9,8 @@ import { PainelWidgetCard } from './PainelWidgetCard';
 
 interface PainelGridProps {
     widgets: readonly PainelWidget[];
+    // Dados de cada widget, pelo id.
+    sources: PainelWidgetSources;
     // No modo de edição os widgets ganham os controles de layout; no modo de
     // visualização a grade só exibe.
     editing?: boolean;
@@ -28,7 +30,12 @@ interface PainelGesture {
     initialWidgets: readonly PainelWidget[];
 }
 
-export function PainelGrid({ widgets, editing = false, onWidgetsChange }: PainelGridProps) {
+export function PainelGrid({
+    widgets,
+    sources,
+    editing = false,
+    onWidgetsChange,
+}: PainelGridProps) {
     const gridRef = useRef<HTMLElement>(null);
     const gestureRef = useRef<PainelGesture | null>(null);
     const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null);
@@ -141,6 +148,7 @@ export function PainelGrid({ widgets, editing = false, onWidgetsChange }: Painel
                 <PainelWidgetCard
                     key={widget.id}
                     widget={widget}
+                    source={sources[widget.id]}
                     editing={editing}
                     active={widget.id === activeWidgetId}
                     onRemove={

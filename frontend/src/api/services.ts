@@ -233,9 +233,10 @@ export async function fetchServiceOverview(
 export async function fetchServiceHistory(
     id: string,
     range: HistoryRange,
+    maxPoints = 120,
 ): Promise<ServiceHistory> {
     return getJson<ServiceHistory>(
-        `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=120`,
+        `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=${maxPoints}`,
         { authenticated: true },
     );
 }

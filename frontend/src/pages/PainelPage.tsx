@@ -6,6 +6,7 @@ import { PAINEL_DEFAULT_WIDGETS } from '@/components/painel/painelLayoutPadrao';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
+import { usePainelData } from '@/hooks/usePainelData';
 import type { PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
@@ -18,6 +19,8 @@ export function PainelPage() {
         useState<readonly PainelWidget[]>(PAINEL_DEFAULT_WIDGETS);
     const [draftWidgets, setDraftWidgets] = useState<readonly PainelWidget[] | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
+
+    const sources = usePainelData();
 
     const editing = draftWidgets !== null;
     const widgets = draftWidgets ?? savedWidgets;
@@ -68,7 +71,12 @@ export function PainelPage() {
                 </p>
             )}
 
-            <PainelGrid widgets={widgets} editing={editing} onWidgetsChange={setDraftWidgets} />
+            <PainelGrid
+                widgets={widgets}
+                sources={sources}
+                editing={editing}
+                onWidgetsChange={setDraftWidgets}
+            />
 
             {editing && catalogOpen && (
                 <PainelWidgetCatalog

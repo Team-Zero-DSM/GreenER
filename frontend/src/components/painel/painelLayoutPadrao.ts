@@ -64,7 +64,7 @@ const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
 };
 
 // Widgets que o usuário pode adicionar ao painel. Por enquanto são os mesmos do
-// layout padrão, que são os que têm dados disponíveis.
+// layout padrão, que são os que têm dados no backend.
 export const PAINEL_WIDGET_CATALOG: readonly { widget: PainelWidget; description: string }[] =
     PAINEL_DEFAULT_WIDGETS.map((widget) => ({
         widget,
