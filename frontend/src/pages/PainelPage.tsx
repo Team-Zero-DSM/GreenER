@@ -3,12 +3,19 @@ import { useState } from 'react';
 import { PainelConfirmDialog } from '@/components/painel/PainelConfirmDialog';
 import { PainelGrid } from '@/components/painel/PainelGrid';
 import { addWidget } from '@/components/painel/painelLayout';
+import { PAINEL_COLUMNS } from '@/components/painel/painelLayoutPadrao';
+import {
+    getLayoutWidgets,
+    setLayoutWidgets,
+    toTabletSize,
+} from '@/components/painel/painelLayoutResponsivo';
 import { getPainelTemplate } from '@/components/painel/painelTemplates';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import { PainelWidgetSettings } from '@/components/painel/PainelWidgetSettings';
+import { usePainelBreakpoint } from '@/hooks/usePainelBreakpoint';
 import { usePainelConfig } from '@/hooks/usePainelConfig';
 import { usePainelData } from '@/hooks/usePainelData';
 import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
@@ -37,14 +44,29 @@ export function PainelPage() {
     const current = draft ?? config;
     const settingsWidget = current.widgets.find((widget) => widget.id === settingsWidgetId);
 
+    // A grade trabalha com o arranjo do tamanho de tela em uso; cada tamanho
+    // (desktop, tablet) mantém o seu.
+    const breakpoint = usePainelBreakpoint();
+    const layoutWidgets = getLayoutWidgets(current, breakpoint);
+
     function changeDraftWidgets(widgets: readonly PainelWidget[]) {
-        setDraft({ ...current, widgets });
+        setDraft(setLayoutWidgets(current, breakpoint, widgets));
+    }
+
+    // Coloca um widget do catálogo no primeiro espaço livre do arranjo em uso.
+    function addCatalogWidget(widget: PainelWidget) {
+        const sized = breakpoint === 'tablet' ? toTabletSize(widget) : widget;
+
+        changeDraftWidgets(addWidget(layoutWidgets, sized, PAINEL_COLUMNS[breakpoint]));
+        setCatalogOpen(false);
     }
 
     // Alterações do modo de edição que ainda não foram salvas.
-    const hasUnsavedChanges = draft !== null && !sameLayout(draft.widgets, config.widgets);
+    const hasUnsavedChanges = draft !== null && JSON.stringify(draft) !== JSON.stringify(config);
     // Painel salvo que já não é igual ao template de onde partiu.
-    const isCustomized = !sameLayout(config.widgets, getPainelTemplate(config.template).widgets);
+    const isCustomized =
+        config.tablet !== undefined ||
+        !sameLayout(config.widgets, getPainelTemplate(config.template).widgets);
 
     // Aplica um template: os widgets do painel são trocados pelos do template. No
     // modo de edição a troca fica no rascunho; fora dele, já é salva.
@@ -152,7 +174,8 @@ export function PainelPage() {
                 </p>
             ) : (
                 <PainelGrid
-                    widgets={current.widgets}
+                    widgets={layoutWidgets}
+                    breakpoint={breakpoint}
                     getSource={getSource}
                     editing={editing}
                     onWidgetsChange={changeDraftWidgets}
@@ -163,10 +186,7 @@ export function PainelPage() {
             {editing && catalogOpen && (
                 <PainelWidgetCatalog
                     widgetIdsInUse={current.widgets.map((widget) => widget.id)}
-                    onAdd={(widget) => {
-                        changeDraftWidgets(addWidget(current.widgets, widget));
-                        setCatalogOpen(false);
-                    }}
+                    onAdd={addCatalogWidget}
                     onClose={() => setCatalogOpen(false)}
                 />
             )}

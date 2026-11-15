@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
-import { usePainelBreakpoint } from '@/hooks/usePainelBreakpoint';
-import type { PainelSourceGetter, PainelWidget } from '@/types/painel';
+import type { PainelBreakpoint, PainelSourceGetter, PainelWidget } from '@/types/painel';
 
 import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
 import { PAINEL_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
 interface PainelGridProps {
+    // Widgets já com a posição do tamanho de tela em uso.
     widgets: readonly PainelWidget[];
+    breakpoint: PainelBreakpoint;
     // Entrega os dados de cada widget.
     getSource: PainelSourceGetter;
     // No modo de edição os widgets ganham os controles de layout; no modo de
@@ -35,6 +36,7 @@ interface PainelGesture {
 
 export function PainelGrid({
     widgets,
+    breakpoint,
     getSource,
     editing = false,
     onWidgetsChange,
@@ -44,11 +46,10 @@ export function PainelGrid({
     const gestureRef = useRef<PainelGesture | null>(null);
     const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null);
 
-    // As coordenadas só valem na grade de 12 colunas (desktop). No tablet e no
-    // celular a posição é automática, então não há o que arrastar.
-    const breakpoint = usePainelBreakpoint();
+    // Arrastar e redimensionar valem nas grades com coordenadas (desktop e tablet).
+    // No celular os widgets são empilhados, então não há o que arrastar.
     const columns = PAINEL_COLUMNS[breakpoint];
-    const canArrange = editing && breakpoint === 'desktop' && onWidgetsChange !== undefined;
+    const canArrange = editing && breakpoint !== 'mobile' && onWidgetsChange !== undefined;
 
     useEffect(() => {
         if (activeWidgetId === null) {

@@ -29,6 +29,14 @@ export interface PainelWidgetAlert {
     threshold: number;
 }
 
+// Retângulo que um widget ocupa na grade.
+export interface PainelWidgetPosition {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
 // Cada widget ocupa um retângulo da grade de 12 colunas: x e y são a coluna e a
 // linha onde ele começa (a partir de 0), w e h são quantas colunas e linhas ocupa.
 export interface PainelWidget {
@@ -119,5 +127,9 @@ export type PainelSourceGetter = (widget: PainelWidget) => PainelWidgetSource;
 // suas posições. É o que as rotas /dashboards/me leem e gravam.
 export interface PainelConfig {
     template: PainelTemplateId;
+    // Widgets com a posição do desktop (12 colunas).
     widgets: readonly PainelWidget[];
+    // Posição de cada widget no tablet (6 colunas), pelo id. Só existe depois que
+    // o usuário arruma o painel no tablet; antes disso o arranjo é automático.
+    tablet?: Record<string, PainelWidgetPosition>;
 }
