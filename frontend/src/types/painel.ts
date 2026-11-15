@@ -1,6 +1,9 @@
 export type PainelTemplateId =
     'visao-geral' | 'sustentabilidade' | 'operacional' | 'executivo' | 'em-branco';
 
+// Tamanhos de tela do painel. Cada um tem a sua quantidade de colunas na grade.
+export type PainelBreakpoint = 'desktop' | 'tablet' | 'mobile';
+
 export type PainelWidgetType = 'kpi' | 'serie-temporal' | 'distribuicao' | 'tabela' | 'status';
 
 export type PainelSeriesChart = 'linha' | 'area' | 'barras';

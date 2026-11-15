@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { usePainelBreakpoint } from '@/hooks/usePainelBreakpoint';
 import type { PainelSourceGetter, PainelWidget } from '@/types/painel';
 
 import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
-import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
+import { PAINEL_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
 interface PainelGridProps {
@@ -28,6 +28,8 @@ interface PainelGesture {
     // Tamanho, em pixels, de um passo de coluna e de linha (célula + espaçamento).
     columnStep: number;
     rowStep: number;
+    // Colunas da grade no tamanho de tela em que o gesto começou.
+    columns: number;
     initialWidgets: readonly PainelWidget[];
 }
 
@@ -44,8 +46,9 @@ export function PainelGrid({
 
     // As coordenadas só valem na grade de 12 colunas (desktop). No tablet e no
     // celular a posição é automática, então não há o que arrastar.
-    const isDesktop = useMediaQuery('(min-width: 1024px)');
-    const canArrange = editing && isDesktop && onWidgetsChange !== undefined;
+    const breakpoint = usePainelBreakpoint();
+    const columns = PAINEL_COLUMNS[breakpoint];
+    const canArrange = editing && breakpoint === 'desktop' && onWidgetsChange !== undefined;
 
     useEffect(() => {
         if (activeWidgetId === null) {
@@ -70,12 +73,14 @@ export function PainelGrid({
                           gesture.widget.id,
                           gesture.widget.x + columns,
                           gesture.widget.y + rows,
+                          gesture.columns,
                       )
                     : resizeWidget(
                           gesture.initialWidgets,
                           gesture.widget.id,
                           gesture.widget.w + columns,
                           gesture.widget.h + rows,
+                          gesture.columns,
                       );
 
             // Os outros widgets abrem espaço para o que está sendo editado.
@@ -122,7 +127,8 @@ export function PainelGrid({
             widget,
             startX: event.clientX,
             startY: event.clientY,
-            columnStep: (grid.getBoundingClientRect().width + columnGap) / PAINEL_GRID_COLUMNS,
+            columnStep: (grid.getBoundingClientRect().width + columnGap) / columns,
+            columns,
             rowStep: rowHeight + rowGap,
             initialWidgets: widgets,
         };

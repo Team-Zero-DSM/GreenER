@@ -11,6 +11,9 @@ export const PAINEL_WIDGET_MIN_SIZE: Record<PainelWidgetType, { w: number; h: nu
     status: { w: 3, h: 3 },
 };
 
+// As funções abaixo recebem em `columns` a quantidade de colunas da grade em uso
+// (12 no desktop, 6 no tablet), para valerem em qualquer tamanho de tela.
+
 // Devolve a lista com o widget na nova posição. A coluna é limitada para o widget
 // não sair pela lateral da grade, e a linha não pode ser negativa.
 export function moveWidget(
@@ -18,6 +21,7 @@ export function moveWidget(
     id: string,
     x: number,
     y: number,
+    columns = PAINEL_GRID_COLUMNS,
 ): PainelWidget[] {
     return widgets.map((widget) => {
         if (widget.id !== id) {
@@ -26,7 +30,7 @@ export function moveWidget(
 
         return {
             ...widget,
-            x: Math.min(Math.max(x, 0), PAINEL_GRID_COLUMNS - widget.w),
+            x: Math.min(Math.max(x, 0), columns - widget.w),
             y: Math.max(y, 0),
         };
     });
@@ -39,6 +43,7 @@ export function resizeWidget(
     id: string,
     w: number,
     h: number,
+    columns = PAINEL_GRID_COLUMNS,
 ): PainelWidget[] {
     return widgets.map((widget) => {
         if (widget.id !== id) {
@@ -49,7 +54,7 @@ export function resizeWidget(
 
         return {
             ...widget,
-            w: Math.min(Math.max(w, minimum.w), PAINEL_GRID_COLUMNS - widget.x),
+            w: Math.min(Math.max(w, minimum.w), columns - widget.x),
             h: Math.max(h, minimum.h),
         };
     });
@@ -109,11 +114,15 @@ export function arrangeWidgets(widgets: readonly PainelWidget[], fixedId?: strin
 
 // Adiciona um widget no primeiro espaço livre em que ele couber, procurando linha
 // por linha, da esquerda para a direita. Se não houver vão, ele entra no fim do painel.
-export function addWidget(widgets: readonly PainelWidget[], widget: PainelWidget): PainelWidget[] {
+export function addWidget(
+    widgets: readonly PainelWidget[],
+    widget: PainelWidget,
+    columns = PAINEL_GRID_COLUMNS,
+): PainelWidget[] {
     const lastRow = Math.max(0, ...widgets.map((item) => item.y + item.h));
 
     for (let y = 0; y <= lastRow; y += 1) {
-        for (let x = 0; x <= PAINEL_GRID_COLUMNS - widget.w; x += 1) {
+        for (let x = 0; x <= columns - widget.w; x += 1) {
             const candidate = { ...widget, x, y };
 
             if (!widgets.some((other) => widgetsOverlap(candidate, other))) {
