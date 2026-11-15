@@ -1,15 +1,21 @@
 import { useState } from 'react';
 
+import { PainelConfirmDialog } from '@/components/painel/PainelConfirmDialog';
 import { PainelGrid } from '@/components/painel/PainelGrid';
 import { addWidget } from '@/components/painel/painelLayout';
+import { getPainelTemplate } from '@/components/painel/painelTemplates';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import { usePainelConfig } from '@/hooks/usePainelConfig';
 import { usePainelData } from '@/hooks/usePainelData';
-import type { PainelWidget } from '@/types/painel';
+import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
+
+function sameLayout(a: readonly PainelWidget[], b: readonly PainelWidget[]): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
 
 export function PainelPage() {
     const [range, setRange] = useState<HistoryRange>('24h');
@@ -17,21 +23,56 @@ export function PainelPage() {
     // edição, o rascunho com as alterações ainda não salvas. Sem rascunho, o
     // painel está no modo de visualização.
     const { config, isLoading, notice, saveConfig } = usePainelConfig();
-    const [draftWidgets, setDraftWidgets] = useState<readonly PainelWidget[] | null>(null);
+    const [draft, setDraft] = useState<PainelConfig | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
+    // Template escolhido no seletor que ainda espera a confirmação do usuário.
+    const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
 
     const sources = usePainelData(range);
 
-    const editing = draftWidgets !== null;
-    const widgets = draftWidgets ?? config.widgets;
+    const editing = draft !== null;
+    const current = draft ?? config;
+
+    function changeDraftWidgets(widgets: readonly PainelWidget[]) {
+        setDraft({ ...current, widgets });
+    }
+
+    // Alterações do modo de edição que ainda não foram salvas.
+    const hasUnsavedChanges = draft !== null && !sameLayout(draft.widgets, config.widgets);
+    // Painel salvo que já não é igual ao template de onde partiu.
+    const isCustomized = !sameLayout(config.widgets, getPainelTemplate(config.template).widgets);
+
+    // Aplica um template: os widgets do painel são trocados pelos do template. No
+    // modo de edição a troca fica no rascunho; fora dele, já é salva.
+    function applyTemplate(id: PainelTemplateId) {
+        const next: PainelConfig = { template: id, widgets: getPainelTemplate(id).widgets };
+
+        if (editing) {
+            setDraft(next);
+        } else {
+            void saveConfig(next);
+        }
+
+        setPendingTemplate(null);
+    }
+
+    // Trocar de template apaga o arranjo atual, então pede confirmação quando há
+    // alterações não salvas ou um painel personalizado que seria perdido.
+    function requestTemplate(id: PainelTemplateId) {
+        if (hasUnsavedChanges || (!editing && isCustomized)) {
+            setPendingTemplate(id);
+        } else {
+            applyTemplate(id);
+        }
+    }
 
     function finishEditing(save: boolean) {
         // Sair do modo de edição salvando grava a configuração no backend.
-        if (save && draftWidgets) {
-            void saveConfig({ ...config, widgets: draftWidgets });
+        if (save && draft) {
+            void saveConfig(draft);
         }
 
-        setDraftWidgets(null);
+        setDraft(null);
         setCatalogOpen(false);
     }
 
@@ -50,13 +91,13 @@ export function PainelPage() {
                 </header>
 
                 <PainelToolbar
-                    template={config.template}
+                    template={current.template}
                     range={range}
                     editing={editing}
-                    onTemplateChange={(template) => void saveConfig({ ...config, template })}
+                    onTemplateChange={requestTemplate}
                     onRangeChange={setRange}
                     onStartEditing={() => {
-                        if (!isLoading) setDraftWidgets(config.widgets);
+                        if (!isLoading) setDraft(config);
                     }}
                     onAddWidget={() => setCatalogOpen(true)}
                     onSave={() => finishEditing(true)}
@@ -90,21 +131,35 @@ export function PainelPage() {
                 </p>
             ) : (
                 <PainelGrid
-                    widgets={widgets}
+                    widgets={current.widgets}
                     sources={sources}
                     editing={editing}
-                    onWidgetsChange={setDraftWidgets}
+                    onWidgetsChange={changeDraftWidgets}
                 />
             )}
 
             {editing && catalogOpen && (
                 <PainelWidgetCatalog
-                    widgetIdsInUse={widgets.map((widget) => widget.id)}
+                    widgetIdsInUse={current.widgets.map((widget) => widget.id)}
                     onAdd={(widget) => {
-                        setDraftWidgets(addWidget(widgets, widget));
+                        changeDraftWidgets(addWidget(current.widgets, widget));
                         setCatalogOpen(false);
                     }}
                     onClose={() => setCatalogOpen(false)}
+                />
+            )}
+
+            {pendingTemplate && (
+                <PainelConfirmDialog
+                    title={`Aplicar o template "${getPainelTemplate(pendingTemplate).label}"?`}
+                    message={
+                        hasUnsavedChanges
+                            ? 'Você tem alterações não salvas no layout. Ao aplicar o template, elas serão substituídas pelos widgets dele.'
+                            : 'O seu painel personalizado será substituído pelos widgets do template.'
+                    }
+                    confirmLabel="Aplicar template"
+                    onConfirm={() => applyTemplate(pendingTemplate)}
+                    onCancel={() => setPendingTemplate(null)}
                 />
             )}
         </PainelShell>

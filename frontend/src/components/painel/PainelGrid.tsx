@@ -132,7 +132,7 @@ export function PainelGrid({
             <p className="rounded-xl border border-dashed border-border px-4 py-16 text-center text-sm text-muted-foreground">
                 {editing
                     ? 'O painel está vazio. Use "Adicionar widget" para escolher um widget do catálogo.'
-                    : 'O painel está vazio. Entre no modo de edição para adicionar widgets.'}
+                    : 'O painel está vazio. Clique em "Editar layout" e depois em "Adicionar widget" para montar o seu.'}
             </p>
         );
     }

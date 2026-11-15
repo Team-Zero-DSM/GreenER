@@ -30,18 +30,24 @@ export function KpiWidget({ data }: KpiWidgetProps) {
           : 'text-destructive';
 
     return (
-        <div className="flex flex-1 flex-col justify-end gap-1">
-            <p className="text-xs text-muted-foreground">{label}</p>
+        // O widget é um contêiner do CSS: quando fica largo (ex.: template Executivo),
+        // o valor e os textos crescem para serem lidos de longe.
+        <div className="@container flex flex-1 flex-col justify-end gap-1">
+            <p className="text-xs text-muted-foreground @md:text-sm @xl:text-base">{label}</p>
             <p className="flex flex-wrap items-baseline gap-x-1.5">
-                <span className="text-3xl font-bold tracking-tight tabular-nums">
+                <span className="text-3xl font-bold tracking-tight tabular-nums @md:text-5xl @xl:text-7xl">
                     {formattedValue}
                 </span>
-                <span className="text-sm text-muted-foreground">{unit}</span>
+                <span className="text-sm text-muted-foreground @md:text-lg @xl:text-2xl">
+                    {unit}
+                </span>
             </p>
             {variation === null ? (
-                <p className="text-xs text-muted-foreground">Sem período anterior para comparar</p>
+                <p className="text-xs text-muted-foreground @xl:text-sm">
+                    Sem período anterior para comparar
+                </p>
             ) : (
-                <p className="flex flex-wrap items-center gap-x-1 text-xs">
+                <p className="flex flex-wrap items-center gap-x-1 text-xs @xl:text-sm">
                     <span
                         className={`inline-flex items-center gap-0.5 font-semibold tabular-nums ${variationColor}`}
                     >

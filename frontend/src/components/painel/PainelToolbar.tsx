@@ -5,7 +5,7 @@ import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptio
 import type { PainelTemplateId } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
-import { PAINEL_TEMPLATE_OPTIONS } from './painelLayoutPadrao';
+import { PAINEL_TEMPLATE_OPTIONS } from './painelTemplates';
 
 const SECONDARY_BUTTON =
     'inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/5';

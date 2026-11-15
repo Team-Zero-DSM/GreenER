@@ -1,4 +1,5 @@
-export type PainelTemplateId = 'visao-geral' | 'sustentabilidade' | 'operacional' | 'executivo';
+export type PainelTemplateId =
+    'visao-geral' | 'sustentabilidade' | 'operacional' | 'executivo' | 'em-branco';
 
 export type PainelWidgetType = 'kpi' | 'serie-temporal' | 'distribuicao' | 'tabela' | 'status';
 
