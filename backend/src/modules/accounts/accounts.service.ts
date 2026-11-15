@@ -1,7 +1,12 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { AppError } from '../../shared/errors/AppError.js';
 import { AccountsRepository } from './accounts.repository.js';
-import { AccountCredentials, RegisterInput, ResetPasswordInput } from './accounts.schema.js';
+import {
+    AccountCredentials,
+    ProfileInput,
+    RegisterInput,
+    ResetPasswordInput,
+} from './accounts.schema.js';
 import { authSecret, createSession } from './accounts.session.js';
 import bcrypt from 'bcrypt';
 import { passwordResetMailer } from './reset-mail.js';
@@ -38,5 +43,12 @@ export class AccountsService {
     async resetPassword({ token, password }: ResetPasswordInput) {
         const hash = await bcrypt.hash(password, 12);
         await this.repository.consumeReset(digest(token), hash);
+    }
+
+    async updateProfile(id: string, { name, email, currentPassword }: ProfileInput) {
+        const account = await this.repository.updateProfile(id, name, email, async (hash) =>
+            Boolean(currentPassword && (await bcrypt.compare(currentPassword, hash))),
+        );
+        return createSession(account);
     }
 }

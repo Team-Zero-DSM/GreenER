@@ -1,4 +1,10 @@
-import { AccountCredentials, RegisterInput, ResetPasswordInput } from './accounts.schema.js';
+import { accountFrom } from '../../shared/middleware/auth.js';
+import {
+    AccountCredentials,
+    ProfileInput,
+    RegisterInput,
+    ResetPasswordInput,
+} from './accounts.schema.js';
 import { AccountsService } from './accounts.service.js';
 import type { Request, Response } from 'express';
 
@@ -25,5 +31,13 @@ export class AccountsController {
     resetPassword = async (req: Request, res: Response) => {
         await this.service.resetPassword(req.body as ResetPasswordInput);
         res.sendStatus(204);
+    };
+
+    profile = (_req: Request, res: Response) => {
+        const { id, name, email, role } = accountFrom(res);
+        res.json({ id, name, email, role });
+    };
+    updateProfile = async (req: Request, res: Response) => {
+        res.json(await this.service.updateProfile(accountFrom(res).id, req.body as ProfileInput));
     };
 }

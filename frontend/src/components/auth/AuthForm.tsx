@@ -11,9 +11,11 @@ import type {
 
 interface AuthFormProps {
     mode: AuthMode;
-    onLogin: (data: LoginRequest) => void;
-    onRegister: (data: RegisterRequest) => void;
+    onLogin: (data: LoginRequest) => Promise<void>;
+    onRegister: (data: RegisterRequest) => Promise<void>;
     statusMessage?: string;
+    externalError?: string;
+    isSubmitting?: boolean;
 }
 
 export function AuthForm({
@@ -21,10 +23,12 @@ export function AuthForm({
     onLogin,
     onRegister,
     statusMessage,
+    externalError,
+    isSubmitting = false,
 }: AuthFormProps) {
     const isLogin = mode === 'login';
 
-    const [username, setUsername] = useState('');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,8 +37,10 @@ export function AuthForm({
     const [forgotPasswordMessage, setForgotPasswordMessage] =
         useState<string | null>(null);
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        if (isSubmitting) return;
 
         setError(null);
         setForgotPasswordMessage(null);
@@ -45,52 +51,69 @@ export function AuthForm({
                 password,
             };
 
-            onLogin(loginData);
+            await onLogin(loginData);
             return;
         }
 
-        // Verifica se o nome de usuário foi preenchido corretamente.
-        if (!username.trim()) {
-            setError('Informe um nome de usuário válido.');
+        // Validação do nome.
+        if (!name.trim()) {
+            setError('Informe um nome válido.');
             return;
         }
 
-        // Verifica o tamanho mínimo da senha.
+        if (name.trim().length > 100) {
+            setError('O nome deve possuir no máximo 100 caracteres.');
+            return;
+        }
+
+        // Validação do tamanho da senha.
         if (password.length < 8) {
             setError('A senha deve possuir pelo menos 8 caracteres.');
             return;
         }
 
-        // Verifica se a confirmação corresponde à senha.
+        // Limite de 72 bytes utilizado pelo bcrypt no backend.
+        const passwordBytes = new TextEncoder().encode(password).length;
+
+        if (passwordBytes > 72) {
+            setError('A senha não pode ultrapassar 72 bytes.');
+            return;
+        }
+
+        // Confirmação da senha.
         if (password !== confirmPassword) {
             setError('As senhas não correspondem.');
             return;
         }
 
         const registerData: RegisterRequest = {
-            username: username.trim(),
+            name: name.trim(),
             email: email.trim(),
             password,
         };
 
-        onRegister(registerData);
+        await onRegister(registerData);
     }
 
     return (
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-
+        <form
+            className="flex flex-col gap-5"
+            onSubmit={handleSubmit}
+        >
+            {/* Nome: somente cadastro */}
             {!isLogin && (
                 <AuthInput
-                    id="auth-username"
-                    label="Nome de usuário"
+                    id="auth-name"
+                    label="Nome"
                     type="text"
-                    value={username}
-                    placeholder="Digite seu nome de usuário"
-                    autoComplete="username"
-                    onChange={setUsername}
+                    value={name}
+                    placeholder="Digite seu nome"
+                    autoComplete="name"
+                    onChange={setName}
                 />
             )}
 
+            {/* E-mail */}
             <AuthInput
                 id="auth-email"
                 label="E-mail"
@@ -101,6 +124,7 @@ export function AuthForm({
                 onChange={setEmail}
             />
 
+            {/* Senha */}
             <AuthInput
                 id="auth-password"
                 label="Senha"
@@ -115,7 +139,7 @@ export function AuthForm({
                             type="button"
                             onClick={() =>
                                 setForgotPasswordMessage(
-                                    'A recuperação de senha estará disponível após a integração com o backend.'
+                                    'A recuperação de senha estará disponível após sua integração.'
                                 )
                             }
                             className="shrink-0 text-xs font-medium text-emerald-400 transition-colors hover:text-emerald-300"
@@ -126,6 +150,7 @@ export function AuthForm({
                 }
             />
 
+            {/* Confirmação: somente cadastro */}
             {!isLogin && (
                 <AuthInput
                     id="auth-confirm-password"
@@ -138,31 +163,41 @@ export function AuthForm({
                 />
             )}
 
-            {error && (
+            {/* Mensagens de erro */}
+            {(error || externalError) && (
                 <p role="alert" className="text-sm text-red-400">
-                    {error}
+                    {error || externalError}
                 </p>
             )}
 
+            {/* Recuperação de senha */}
             {forgotPasswordMessage && (
                 <p role="status" className="text-sm text-muted-foreground">
                     {forgotPasswordMessage}
                 </p>
             )}
 
+            {/* Mensagem de sucesso */}
             {statusMessage && (
                 <p role="status" className="text-sm text-emerald-400">
                     {statusMessage}
                 </p>
             )}
 
+            {/* Envio do formulário */}
             <button
                 type="submit"
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300"
+                disabled={isSubmitting}
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
             >
-                {isLogin ? 'Entrar' : 'Criar conta'}
+                {isSubmitting
+                    ? isLogin
+                        ? 'Entrando...'
+                        : 'Criando conta...'
+                    : isLogin
+                        ? 'Entrar'
+                        : 'Criar conta'}
             </button>
-
         </form>
     );
 }

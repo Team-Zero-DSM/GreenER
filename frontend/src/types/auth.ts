@@ -1,4 +1,3 @@
-
 export type AuthMode = 'login' | 'register';
 
 export interface LoginRequest {
@@ -7,7 +6,19 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-    username: string;
+    name: string;
     email: string;
     password: string;
+}
+
+export interface AuthenticatedUser {
+    id: string;
+    name: string;
+    email: string;
+    role: 'admin' | 'visualizador';
+}
+
+export interface AuthSession {
+    token: string;
+    user: AuthenticatedUser;
 }

@@ -81,4 +81,40 @@ export class AccountsRepository {
             client.release();
         }
     }
+
+    async updateProfile(
+        id: string,
+        name: string,
+        email: string,
+        verifyCurrentPassword: (hash: string) => Promise<boolean>,
+    ) {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const { rows: current } = await client.query<{ email: string; hash: string }>(
+                'SELECT email, senha_hash AS hash FROM usuario WHERE id = $1 AND acesso_ativo FOR UPDATE',
+                [id],
+            );
+            if (!current[0]) throw new AppError('Conta indisponível.', 401);
+            const changedEmail = email !== current[0].email;
+            if (changedEmail && !(await verifyCurrentPassword(current[0].hash))) {
+                throw new AppError('Confirme sua senha atual para alterar o e-mail.', 400);
+            }
+            const { rows } = await client.query<SessionAccount>(
+                `UPDATE usuario SET nome = $2, email = $3, versao_sessao = versao_sessao + $4
+             WHERE id = $1 RETURNING ${accountColumns}, versao_sessao AS "sessionVersion"`,
+                [id, name, email, changedEmail ? 1 : 0],
+            );
+            if (changedEmail) {
+                await client.query('DELETE FROM redefinicao_senha WHERE usuario_id = $1', [id]);
+            }
+            await client.query('COMMIT');
+            return rows[0];
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
 }
