@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { fetchCollectionStatuses } from '@/api/collection-status';
 import { fetchPainelRegions, fetchPainelServiceHistories } from '@/api/painel';
@@ -32,24 +32,20 @@ const NOW_LABEL = 'Situação atual';
 
 const FAILURES_LIMIT = 5;
 
-interface Query<T> {
-    data: T | null;
-    error: string | null;
-}
-
 // Traduz o estado de uma consulta na situação do widget que depende dela.
 function toSource<T>(
-    query: Query<T>,
+    data: T | null,
+    error: string | null,
     subtitle: string,
     build: (data: T) => PainelWidgetContent | null,
 ): PainelWidgetSource {
-    if (query.data === null) {
-        return query.error
-            ? { status: 'error', subtitle, errorMessage: query.error }
+    if (data === null) {
+        return error
+            ? { status: 'error', subtitle, errorMessage: error }
             : { status: 'loading', subtitle };
     }
 
-    const content = build(query.data);
+    const content = build(data);
 
     return content ? { status: 'ready', subtitle, content } : { status: 'empty', subtitle };
 }
@@ -61,11 +57,15 @@ function toSource<T>(
 export function usePainelData(range: HistoryRange): PainelWidgetSources {
     const period = RANGE_LABELS[range];
 
-    const regions = useApiQuery(useCallback(() => fetchPainelRegions(range), [range]));
+    const { data: regions, error: regionsError } = useApiQuery(
+        useCallback(() => fetchPainelRegions(range), [range]),
+    );
 
-    const ranking = useApiQuery(useCallback(() => fetchRanking('co2eGrams', range), [range]));
+    const { data: ranking, error: rankingError } = useApiQuery(
+        useCallback(() => fetchRanking('co2eGrams', range), [range]),
+    );
 
-    const failures = useApiQuery(
+    const { data: failures, error: failuresError } = useApiQuery(
         useCallback(
             () =>
                 fetchCollectionStatuses({
@@ -78,17 +78,36 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
         ),
     );
 
-    const histories = useApiQuery(useCallback(() => fetchPainelServiceHistories(range), [range]));
+    const { data: histories, error: historiesError } = useApiQuery(
+        useCallback(() => fetchPainelServiceHistories(range), [range]),
+    );
 
-    return {
-        'co2e-total': toSource(regions, period, buildCo2eKpi),
-        'energia-total': toSource(regions, period, buildEnergyKpi),
-        disponibilidade: toSource(regions, NOW_LABEL, buildAvailabilityKpi),
-        'intensidade-carbono': toSource(regions, period, buildCarbonIntensityKpi),
-        'energia-por-regiao': toSource(regions, period, buildEnergyByRegion),
-        'status-servicos': toSource(regions, NOW_LABEL, buildServiceStatus),
-        'top-emissores': toSource(ranking, period, buildTopEmitters),
-        'falhas-coleta': toSource(failures, NOW_LABEL, buildCollectionFailures),
-        'co2e-por-regiao': toSource(histories, period, (data) => buildEmissionSeries(data, range)),
-    };
+    // Só recalcula quando alguma consulta muda, para os widgets não redesenharem à toa.
+    return useMemo(
+        () => ({
+            'co2e-total': toSource(regions, regionsError, period, buildCo2eKpi),
+            'energia-total': toSource(regions, regionsError, period, buildEnergyKpi),
+            disponibilidade: toSource(regions, regionsError, NOW_LABEL, buildAvailabilityKpi),
+            'intensidade-carbono': toSource(regions, regionsError, period, buildCarbonIntensityKpi),
+            'energia-por-regiao': toSource(regions, regionsError, period, buildEnergyByRegion),
+            'status-servicos': toSource(regions, regionsError, NOW_LABEL, buildServiceStatus),
+            'top-emissores': toSource(ranking, rankingError, period, buildTopEmitters),
+            'falhas-coleta': toSource(failures, failuresError, NOW_LABEL, buildCollectionFailures),
+            'co2e-por-regiao': toSource(histories, historiesError, period, (data) =>
+                buildEmissionSeries(data, range),
+            ),
+        }),
+        [
+            regions,
+            regionsError,
+            ranking,
+            rankingError,
+            failures,
+            failuresError,
+            histories,
+            historiesError,
+            period,
+            range,
+        ],
+    );
 }

@@ -8,6 +8,7 @@ import type {
 } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
+import { PainelWidgetBoundary } from './PainelWidgetBoundary';
 import { PainelWidgetFrame } from './PainelWidgetFrame';
 import { DistributionWidget } from './widgets/DistributionWidget';
 import { KpiWidget } from './widgets/KpiWidget';
@@ -86,18 +87,32 @@ export function PainelWidgetCard({
             style={position}
             className={`relative min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
         >
-            <PainelWidgetFrame
-                title={widget.title}
-                subtitle={source?.subtitle}
-                status={status}
-                errorMessage={source?.errorMessage}
-                editing={editing}
-                active={active}
-                onMoveStart={onMoveStart}
-                actions={actions}
+            <PainelWidgetBoundary
+                resetKey={source}
+                fallback={
+                    <PainelWidgetFrame
+                        title={widget.title}
+                        subtitle={source?.subtitle}
+                        status="error"
+                        errorMessage="Este widget encontrou um erro ao exibir os dados."
+                        editing={editing}
+                        actions={actions}
+                    />
+                }
             >
-                {content}
-            </PainelWidgetFrame>
+                <PainelWidgetFrame
+                    title={widget.title}
+                    subtitle={source?.subtitle}
+                    status={status}
+                    errorMessage={source?.errorMessage}
+                    editing={editing}
+                    active={active}
+                    onMoveStart={onMoveStart}
+                    actions={actions}
+                >
+                    {content}
+                </PainelWidgetFrame>
+            </PainelWidgetBoundary>
 
             {onResizeStart && (
                 <span

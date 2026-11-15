@@ -32,7 +32,9 @@ export async function fetchPainelRegions(range: HistoryRange): Promise<PainelReg
 
     const [current, previous] = await Promise.all([
         fetchRegionsByPeriod(from, to),
-        fetchRegionsByPeriod(previousFrom, from),
+        // Sem o período anterior os indicadores só ficam sem a variação, então a
+        // falha desta consulta não derruba os widgets.
+        fetchRegionsByPeriod(previousFrom, from).catch((): Region[] => []),
     ]);
 
     return { current, previous };
@@ -50,10 +52,22 @@ export async function fetchPainelServiceHistories(
 ): Promise<PainelServiceHistory[]> {
     const services = await fetchServices({ active: true });
 
-    return Promise.all(
+    const results = await Promise.allSettled(
         services.map(async (service) => ({
             service,
             history: await fetchServiceHistory(service.id, range, PAINEL_SERIES_POINTS),
         })),
     );
+
+    const histories = results
+        .filter((result) => result.status === 'fulfilled')
+        .map((result) => result.value);
+
+    // O histórico de um serviço fora do ar não impede o gráfico dos demais. Só é
+    // erro quando nenhum serviço respondeu.
+    if (services.length > 0 && histories.length === 0) {
+        throw new Error('Não foi possível carregar o histórico dos serviços.');
+    }
+
+    return histories;
 }
