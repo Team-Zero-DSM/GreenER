@@ -84,6 +84,8 @@ export type PainelWidgetContent =
 // e, quando ela deu certo, o conteúdo.
 export interface PainelWidgetSource {
     status: PainelWidgetStatus;
+    // Período a que os dados se referem, mostrado abaixo do título.
+    subtitle?: string;
     errorMessage?: string;
     content?: PainelWidgetContent;
 }

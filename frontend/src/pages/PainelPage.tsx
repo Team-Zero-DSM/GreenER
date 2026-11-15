@@ -21,7 +21,7 @@ export function PainelPage() {
     const [draftWidgets, setDraftWidgets] = useState<readonly PainelWidget[] | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
 
-    const sources = usePainelData();
+    const sources = usePainelData(range);
 
     const editing = draftWidgets !== null;
     const widgets = draftWidgets ?? savedWidgets;

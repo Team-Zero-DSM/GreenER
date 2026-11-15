@@ -88,6 +88,7 @@ export function PainelWidgetCard({
         >
             <PainelWidgetFrame
                 title={widget.title}
+                subtitle={source?.subtitle}
                 status={status}
                 errorMessage={source?.errorMessage}
                 editing={editing}
