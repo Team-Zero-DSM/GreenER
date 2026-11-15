@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import type { PainelWidget } from '@/types/painel';
 
 import { PAINEL_WIDGET_TYPE_LABELS } from './painelLayoutPadrao';
+import { getMetricsForType, getWidgetMetricId, PAINEL_METRICS } from './painelMetricas';
 
 interface PainelWidgetSettingsProps {
     widget: PainelWidget;
@@ -22,6 +23,21 @@ export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetS
     const [form, setForm] = useState<PainelWidget>(widget);
 
     const title = form.title.trim();
+
+    const metrics = getMetricsForType(widget.type);
+    const metricId = getWidgetMetricId(form);
+
+    function changeMetric(nextId: string) {
+        const previous = PAINEL_METRICS.find((metric) => metric.id === metricId);
+        const next = PAINEL_METRICS.find((metric) => metric.id === nextId);
+
+        setForm({
+            ...form,
+            metric: nextId,
+            // Se o título ainda é o nome da métrica anterior, acompanha a troca.
+            title: next && form.title === previous?.label ? next.label : form.title,
+        });
+    }
 
     function handleSubmit(event: FormEvent) {
         event.preventDefault();
@@ -89,6 +105,27 @@ export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetS
                                 Informe um título para o widget.
                             </span>
                         )}
+                    </label>
+
+                    <label className={FIELD_LABEL}>
+                        Métrica
+                        <select
+                            value={metricId}
+                            disabled={metrics.length < 2}
+                            onChange={(event) => changeMetric(event.target.value)}
+                            className={`${FIELD_INPUT} disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
+                            {metrics.map((metric) => (
+                                <option key={metric.id} value={metric.id} className="bg-popover">
+                                    {metric.label}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="mt-1.5 block text-xs font-normal text-muted-foreground">
+                            {metrics.length < 2
+                                ? 'Este tipo de widget tem uma única métrica.'
+                                : 'O que o widget mostra. As opções dependem do tipo do widget.'}
+                        </span>
                     </label>
                 </div>
 

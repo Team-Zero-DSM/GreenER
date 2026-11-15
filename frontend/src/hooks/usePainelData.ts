@@ -5,7 +5,13 @@ import { fetchPainelRegions, fetchPainelServiceHistories } from '@/api/painel';
 import { fetchRanking } from '@/api/rankings';
 import { fetchServices } from '@/api/services';
 import { useApiQuery } from '@/hooks/useApiQuery';
-import type { PainelWidgetContent, PainelWidgetSource, PainelWidgetSources } from '@/types/painel';
+import { getWidgetMetricId } from '@/components/painel/painelMetricas';
+import type {
+    PainelSourceGetter,
+    PainelWidgetContent,
+    PainelWidgetSource,
+    PainelWidgetSources,
+} from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 import {
     buildAvailabilityKpi,
@@ -16,6 +22,7 @@ import {
     buildEmissionSeries,
     buildEnergyByRegion,
     buildEnergyKpi,
+    buildEnergySeries,
     buildLatestAttempts,
     buildServiceStatus,
     buildServicesWithoutMetrics,
@@ -55,11 +62,12 @@ function toSource<T>(
     return content ? { status: 'ready', subtitle, content } : { status: 'empty', subtitle };
 }
 
-// Busca no backend os dados de todos os widgets do painel e devolve, pelo id do
-// widget, a situação e o conteúdo de cada um. Widgets que saem da mesma rota
+// Busca no backend os dados de todas as métricas do painel e devolve a função que
+// entrega, para cada widget, a situação e o conteúdo da métrica configurada nele
+// (ou da métrica original do widget). Métricas que saem da mesma rota
 // compartilham a mesma consulta. O período escolhido na barra do painel vale para
 // todas as consultas: quando ele muda, todas são refeitas.
-export function usePainelData(range: HistoryRange): PainelWidgetSources {
+export function usePainelData(range: HistoryRange): PainelSourceGetter {
     const period = RANGE_LABELS[range];
 
     const { data: regions, error: regionsError } = useApiQuery(
@@ -105,7 +113,7 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
     );
 
     // Só recalcula quando alguma consulta muda, para os widgets não redesenharem à toa.
-    return useMemo(
+    const sources: PainelWidgetSources = useMemo(
         () => ({
             'co2e-total': toSource(regions, regionsError, period, buildCo2eKpi),
             'energia-total': toSource(regions, regionsError, period, buildEnergyKpi),
@@ -126,6 +134,9 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
             'co2e-por-regiao': toSource(histories, historiesError, period, (data) =>
                 buildEmissionSeries(data, range),
             ),
+            'energia-no-tempo': toSource(histories, historiesError, period, (data) =>
+                buildEnergySeries(data, range),
+            ),
         }),
         [
             regions,
@@ -143,5 +154,10 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
             period,
             range,
         ],
+    );
+
+    return useCallback(
+        (widget) => sources[getWidgetMetricId(widget)] ?? { status: 'empty' },
+        [sources],
     );
 }

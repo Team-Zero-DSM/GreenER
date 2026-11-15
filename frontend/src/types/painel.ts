@@ -26,6 +26,8 @@ export interface PainelWidget {
     type: PainelWidgetType;
     // Tipo de gráfico, para os widgets que têm mais de uma forma de exibir.
     chart?: PainelChartType;
+    // Métrica exibida, quando o usuário escolhe uma diferente da original do widget.
+    metric?: string;
     title: string;
     x: number;
     y: number;
@@ -91,8 +93,11 @@ export interface PainelWidgetSource {
     content?: PainelWidgetContent;
 }
 
-// Fontes de dados do painel, pelo id do widget.
+// Fontes de dados do painel, pelo id da métrica.
 export type PainelWidgetSources = Record<string, PainelWidgetSource>;
+
+// Devolve a fonte de dados de um widget, conforme a métrica configurada nele.
+export type PainelSourceGetter = (widget: PainelWidget) => PainelWidgetSource;
 
 // Configuração do painel de um usuário: o template escolhido e os widgets com
 // suas posições. É o que as rotas /dashboards/me leem e gravam.

@@ -332,11 +332,13 @@ function formatSeriesLabel(timestamp: string, range: HistoryRange): string {
           });
 }
 
-// Soma o CO₂e dos serviços por região em cada faixa de tempo. Ficam no gráfico as
-// regiões que mais emitiram no período.
-export function buildEmissionSeries(
+// Soma o valor dos serviços por região em cada faixa de tempo. Ficam no gráfico
+// as regiões com os maiores totais no período.
+function buildRegionSeries(
     histories: readonly PainelServiceHistory[],
     range: HistoryRange,
+    key: 'co2eGrams' | 'energyKwh',
+    unit: string,
 ): PainelWidgetContent | null {
     const totals = new Map<string, number>();
     const buckets = new Map<string, Record<string, number>>();
@@ -347,9 +349,9 @@ export function buildEmissionSeries(
         for (const point of history.points) {
             const bucket = buckets.get(point.timestamp) ?? {};
 
-            bucket[region] = (bucket[region] ?? 0) + point.co2eGrams;
+            bucket[region] = (bucket[region] ?? 0) + point[key];
             buckets.set(point.timestamp, bucket);
-            totals.set(region, (totals.get(region) ?? 0) + point.co2eGrams);
+            totals.set(region, (totals.get(region) ?? 0) + point[key]);
         }
     }
 
@@ -371,9 +373,23 @@ export function buildEmissionSeries(
     return {
         type: 'serie-temporal',
         data: {
-            unit: 'g CO₂e',
+            unit,
             series: regions.map((region) => ({ key: region, label: region })),
             points,
         },
     };
+}
+
+export function buildEmissionSeries(
+    histories: readonly PainelServiceHistory[],
+    range: HistoryRange,
+): PainelWidgetContent | null {
+    return buildRegionSeries(histories, range, 'co2eGrams', 'g CO₂e');
+}
+
+export function buildEnergySeries(
+    histories: readonly PainelServiceHistory[],
+    range: HistoryRange,
+): PainelWidgetContent | null {
+    return buildRegionSeries(histories, range, 'energyKwh', 'kWh');
 }
