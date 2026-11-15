@@ -50,6 +50,8 @@ interface PainelWidgetCardProps {
     onResizeStart?: (event: PointerEvent<HTMLElement>) => void;
     // Quando informado, a ação "Remover widget" do menu fica disponível.
     onRemove?: () => void;
+    // Abre o painel de configuração deste widget.
+    onConfigure?: () => void;
 }
 
 export function PainelWidgetCard({
@@ -60,10 +62,11 @@ export function PainelWidgetCard({
     onMoveStart,
     onResizeStart,
     onRemove,
+    onConfigure,
 }: PainelWidgetCardProps) {
-    // Remover só funciona no modo de edição. Configurar entra com a personalização (#147).
+    // Remover só funciona no modo de edição.
     const actions: readonly PainelWidgetAction[] = [
-        { label: 'Configurar widget', disabled: true },
+        { label: 'Configurar widget', onSelect: onConfigure, disabled: onConfigure === undefined },
         { label: 'Remover widget', onSelect: onRemove, disabled: onRemove === undefined },
     ];
 

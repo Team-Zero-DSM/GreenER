@@ -15,6 +15,7 @@ interface PainelGridProps {
     // visualização a grade só exibe.
     editing?: boolean;
     onWidgetsChange?: (widgets: readonly PainelWidget[]) => void;
+    onConfigureWidget?: (widget: PainelWidget) => void;
 }
 
 // Gesto em andamento: guarda onde o ponteiro começou e como o layout estava, para
@@ -35,6 +36,7 @@ export function PainelGrid({
     sources,
     editing = false,
     onWidgetsChange,
+    onConfigureWidget,
 }: PainelGridProps) {
     const gridRef = useRef<HTMLElement>(null);
     const gestureRef = useRef<PainelGesture | null>(null);
@@ -151,6 +153,7 @@ export function PainelGrid({
                     source={sources[widget.id]}
                     editing={editing}
                     active={widget.id === activeWidgetId}
+                    onConfigure={onConfigureWidget ? () => onConfigureWidget(widget) : undefined}
                     onRemove={
                         editing && onWidgetsChange
                             ? () => onWidgetsChange(removeWidget(widgets, widget.id))
