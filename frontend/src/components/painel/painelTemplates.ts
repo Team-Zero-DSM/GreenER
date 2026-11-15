@@ -85,6 +85,12 @@ export const PAINEL_TEMPLATES: readonly PainelTemplate[] = [
             place('co2e-por-regiao', 0, 6, 12, 5),
         ],
     },
+    {
+        id: 'em-branco',
+        label: 'Em branco',
+        description: 'Painel vazio, para montar do zero com os widgets do catálogo.',
+        widgets: [],
+    },
 ];
 
 export const PAINEL_TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] =
