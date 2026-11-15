@@ -176,6 +176,7 @@ export function PainelPage() {
                     key={settingsWidget.id}
                     widget={settingsWidget}
                     regionCodes={regionCodes}
+                    getSource={getSource}
                     onApply={applyWidgetSettings}
                     onClose={() => setSettingsWidgetId(null)}
                 />

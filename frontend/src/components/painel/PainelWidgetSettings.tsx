@@ -2,16 +2,24 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
-import type { PainelChartType, PainelWidget, PainelWidgetType } from '@/types/painel';
+import type {
+    PainelChartType,
+    PainelSourceGetter,
+    PainelWidget,
+    PainelWidgetType,
+} from '@/types/painel';
 
 import { PAINEL_WIDGET_TYPE_LABELS } from './painelLayoutPadrao';
 import { PAINEL_PALETTES } from './painelPaletas';
+import { PainelWidgetView } from './PainelWidgetView';
 import { getMetricsForType, getWidgetMetricId, PAINEL_METRICS } from './painelMetricas';
 
 interface PainelWidgetSettingsProps {
     widget: PainelWidget;
     // Regiões disponíveis para o filtro do widget.
     regionCodes: readonly string[];
+    // Entrega os dados para a pré-visualização, conforme a métrica e o filtro do formulário.
+    getSource: PainelSourceGetter;
     // Recebe o widget com as alterações quando o usuário aplica.
     onApply: (widget: PainelWidget) => void;
     onClose: () => void;
@@ -41,6 +49,7 @@ const FIELD_INPUT =
 export function PainelWidgetSettings({
     widget,
     regionCodes,
+    getSource,
     onApply,
     onClose,
 }: PainelWidgetSettingsProps) {
@@ -117,6 +126,20 @@ export function PainelWidgetSettings({
                 </header>
 
                 <div className="flex-1 space-y-5 overflow-y-auto p-4">
+                    <section aria-label="Pré-visualização" className="space-y-1.5">
+                        <p className={FIELD_LABEL}>Pré-visualização</p>
+                        {/* Mostra o widget com as opções do formulário, antes de aplicar. */}
+                        <div className={widget.type === 'kpi' ? 'h-40' : 'h-72'}>
+                            <PainelWidgetView
+                                widget={{ ...form, title: title || 'Sem título' }}
+                                source={getSource(form)}
+                            />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            O painel só muda quando você clicar em Aplicar.
+                        </p>
+                    </section>
+
                     <label className={FIELD_LABEL}>
                         Título
                         <input
