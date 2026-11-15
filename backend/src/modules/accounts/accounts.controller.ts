@@ -1,4 +1,4 @@
-import { AccountCredentials, RegisterInput } from './accounts.schema.js';
+import { AccountCredentials, RegisterInput, ResetPasswordInput } from './accounts.schema.js';
 import { AccountsService } from './accounts.service.js';
 import type { Request, Response } from 'express';
 
@@ -13,5 +13,17 @@ export class AccountsController {
 
     login = async (req: Request, res: Response) => {
         res.json(await this.service.login(req.body as AccountCredentials));
+    };
+    forgotPassword = async (req: Request, res: Response) => {
+        const { email } = req.body as { email: string };
+        await this.service.requestPasswordReset(email);
+        res.status(202).json({
+            message: 'Se houver uma conta ativa, enviaremos um link de redefinição.',
+        });
+    };
+
+    resetPassword = async (req: Request, res: Response) => {
+        await this.service.resetPassword(req.body as ResetPasswordInput);
+        res.sendStatus(204);
     };
 }
