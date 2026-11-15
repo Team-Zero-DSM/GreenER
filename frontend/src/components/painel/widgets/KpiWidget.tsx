@@ -4,9 +4,11 @@ import type { PainelKpiData } from '@/types/painel';
 
 interface KpiWidgetProps {
     data: PainelKpiData;
+    // O valor passou do limite de alerta configurado no widget.
+    alerting?: boolean;
 }
 
-export function KpiWidget({ data }: KpiWidgetProps) {
+export function KpiWidget({ data, alerting = false }: KpiWidgetProps) {
     const { label, value, unit, previousValue, lowerIsBetter, fractionDigits = 1 } = data;
 
     const formattedValue = value.toLocaleString('pt-BR', {
@@ -35,7 +37,11 @@ export function KpiWidget({ data }: KpiWidgetProps) {
         <div className="@container flex flex-1 flex-col justify-end gap-1">
             <p className="text-xs text-muted-foreground @md:text-sm @xl:text-base">{label}</p>
             <p className="flex flex-wrap items-baseline gap-x-1.5">
-                <span className="text-3xl font-bold tracking-tight tabular-nums @md:text-5xl @xl:text-7xl">
+                <span
+                    className={`text-3xl font-bold tracking-tight tabular-nums @md:text-5xl @xl:text-7xl ${
+                        alerting ? 'text-destructive' : ''
+                    }`}
+                >
                     {formattedValue}
                 </span>
                 <span className="text-sm text-muted-foreground @md:text-lg @xl:text-2xl">

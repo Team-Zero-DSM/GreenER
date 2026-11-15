@@ -1,17 +1,9 @@
 import { useEffect } from 'react';
 import { Check, Plus, X } from 'lucide-react';
 
-import type { PainelWidget, PainelWidgetType } from '@/types/painel';
+import type { PainelWidget } from '@/types/painel';
 
-import { PAINEL_WIDGET_CATALOG } from './painelLayoutPadrao';
-
-const WIDGET_TYPE_LABELS: Record<PainelWidgetType, string> = {
-    kpi: 'Indicador',
-    'serie-temporal': 'Série temporal',
-    distribuicao: 'Distribuição',
-    tabela: 'Tabela',
-    status: 'Status',
-};
+import { PAINEL_WIDGET_CATALOG, PAINEL_WIDGET_TYPE_LABELS } from './painelLayoutPadrao';
 
 interface PainelWidgetCatalogProps {
     // Ids dos widgets que já estão no painel, para não adicionar o mesmo duas vezes.
@@ -81,7 +73,7 @@ export function PainelWidgetCatalog({ widgetIdsInUse, onAdd, onClose }: PainelWi
                                 >
                                     <span className="min-w-0 flex-1 space-y-1">
                                         <span className="block text-xs font-medium tracking-wide text-primary uppercase">
-                                            {WIDGET_TYPE_LABELS[item.widget.type]}
+                                            {PAINEL_WIDGET_TYPE_LABELS[item.widget.type]}
                                         </span>
                                         <span className="block text-sm font-semibold">
                                             {item.widget.title}

@@ -1,41 +1,9 @@
-import type { CSSProperties, PointerEvent, ReactNode } from 'react';
+import type { CSSProperties, PointerEvent } from 'react';
 
-import type {
-    PainelWidget,
-    PainelWidgetAction,
-    PainelWidgetContent,
-    PainelWidgetSource,
-} from '@/types/painel';
+import type { PainelWidget, PainelWidgetAction, PainelWidgetSource } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
-import { PainelWidgetBoundary } from './PainelWidgetBoundary';
-import { PainelWidgetFrame } from './PainelWidgetFrame';
-import { DistributionWidget } from './widgets/DistributionWidget';
-import { KpiWidget } from './widgets/KpiWidget';
-import { StatusWidget } from './widgets/StatusWidget';
-import { TableWidget } from './widgets/TableWidget';
-import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
-
-// Escolhe o componente pelo tipo do widget. Devolve null quando o conteúdo não
-// existe ou não é do tipo do widget, e o contêiner mostra o aviso de "sem dados".
-function renderWidgetContent(widget: PainelWidget, content?: PainelWidgetContent): ReactNode {
-    if (!content || content.type !== widget.type) {
-        return null;
-    }
-
-    switch (content.type) {
-        case 'kpi':
-            return <KpiWidget data={content.data} />;
-        case 'serie-temporal':
-            return <TimeSeriesWidget data={content.data} chart={widget.chart ?? 'linha'} />;
-        case 'distribuicao':
-            return <DistributionWidget data={content.data} chart={widget.chart ?? 'rosca'} />;
-        case 'tabela':
-            return <TableWidget data={content.data} />;
-        case 'status':
-            return <StatusWidget data={content.data} />;
-    }
-}
+import { PainelWidgetView } from './PainelWidgetView';
 
 interface PainelWidgetCardProps {
     widget: PainelWidget;
@@ -50,6 +18,8 @@ interface PainelWidgetCardProps {
     onResizeStart?: (event: PointerEvent<HTMLElement>) => void;
     // Quando informado, a ação "Remover widget" do menu fica disponível.
     onRemove?: () => void;
+    // Abre o painel de configuração deste widget.
+    onConfigure?: () => void;
 }
 
 export function PainelWidgetCard({
@@ -60,10 +30,11 @@ export function PainelWidgetCard({
     onMoveStart,
     onResizeStart,
     onRemove,
+    onConfigure,
 }: PainelWidgetCardProps) {
-    // Remover só funciona no modo de edição. Configurar entra com a personalização (#147).
+    // Remover só funciona no modo de edição.
     const actions: readonly PainelWidgetAction[] = [
-        { label: 'Configurar widget', disabled: true },
+        { label: 'Configurar widget', onSelect: onConfigure, disabled: onConfigure === undefined },
         { label: 'Remover widget', onSelect: onRemove, disabled: onRemove === undefined },
     ];
 
@@ -78,41 +49,19 @@ export function PainelWidgetCard({
             widget.w > PAINEL_GRID_COLUMNS / 2 ? PAINEL_TABLET_COLUMNS : PAINEL_TABLET_COLUMNS / 2,
     } as CSSProperties;
 
-    const content = source?.status === 'ready' ? renderWidgetContent(widget, source.content) : null;
-    const status =
-        source && source.status !== 'ready' ? source.status : content ? 'ready' : 'empty';
-
     return (
         <article
             style={position}
             className={`relative min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
         >
-            <PainelWidgetBoundary
-                resetKey={source}
-                fallback={
-                    <PainelWidgetFrame
-                        title={widget.title}
-                        subtitle={source?.subtitle}
-                        status="error"
-                        errorMessage="Este widget encontrou um erro ao exibir os dados."
-                        editing={editing}
-                        actions={actions}
-                    />
-                }
-            >
-                <PainelWidgetFrame
-                    title={widget.title}
-                    subtitle={source?.subtitle}
-                    status={status}
-                    errorMessage={source?.errorMessage}
-                    editing={editing}
-                    active={active}
-                    onMoveStart={onMoveStart}
-                    actions={actions}
-                >
-                    {content}
-                </PainelWidgetFrame>
-            </PainelWidgetBoundary>
+            <PainelWidgetView
+                widget={widget}
+                source={source}
+                actions={actions}
+                editing={editing}
+                active={active}
+                onMoveStart={onMoveStart}
+            />
 
             {onResizeStart && (
                 <span

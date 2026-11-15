@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import type { PainelWidget, PainelWidgetSources } from '@/types/painel';
+import type { PainelSourceGetter, PainelWidget } from '@/types/painel';
 
 import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
 import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
@@ -9,12 +9,13 @@ import { PainelWidgetCard } from './PainelWidgetCard';
 
 interface PainelGridProps {
     widgets: readonly PainelWidget[];
-    // Dados de cada widget, pelo id.
-    sources: PainelWidgetSources;
+    // Entrega os dados de cada widget.
+    getSource: PainelSourceGetter;
     // No modo de edição os widgets ganham os controles de layout; no modo de
     // visualização a grade só exibe.
     editing?: boolean;
     onWidgetsChange?: (widgets: readonly PainelWidget[]) => void;
+    onConfigureWidget?: (widget: PainelWidget) => void;
 }
 
 // Gesto em andamento: guarda onde o ponteiro começou e como o layout estava, para
@@ -32,9 +33,10 @@ interface PainelGesture {
 
 export function PainelGrid({
     widgets,
-    sources,
+    getSource,
     editing = false,
     onWidgetsChange,
+    onConfigureWidget,
 }: PainelGridProps) {
     const gridRef = useRef<HTMLElement>(null);
     const gestureRef = useRef<PainelGesture | null>(null);
@@ -148,9 +150,10 @@ export function PainelGrid({
                 <PainelWidgetCard
                     key={widget.id}
                     widget={widget}
-                    source={sources[widget.id]}
+                    source={getSource(widget)}
                     editing={editing}
                     active={widget.id === activeWidgetId}
+                    onConfigure={onConfigureWidget ? () => onConfigureWidget(widget) : undefined}
                     onRemove={
                         editing && onWidgetsChange
                             ? () => onWidgetsChange(removeWidget(widgets, widget.id))

@@ -1,4 +1,4 @@
-import type { PainelWidget, PainelWidgetType } from '@/types/painel';
+import type { PainelKpiData, PainelWidget, PainelWidgetType } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
 
@@ -128,4 +128,15 @@ export function addWidget(widgets: readonly PainelWidget[], widget: PainelWidget
 // Remove um widget e sobe os que estavam abaixo dele para ocupar o espaço.
 export function removeWidget(widgets: readonly PainelWidget[], id: string): PainelWidget[] {
     return arrangeWidgets(widgets.filter((widget) => widget.id !== id));
+}
+
+// Diz se o valor do indicador passou do limite de alerta configurado no widget.
+export function isAlerting(widget: PainelWidget, data: PainelKpiData): boolean {
+    if (!widget.alert) {
+        return false;
+    }
+
+    return widget.alert.direction === 'acima'
+        ? data.value > widget.alert.threshold
+        : data.value < widget.alert.threshold;
 }

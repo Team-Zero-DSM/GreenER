@@ -8,6 +8,7 @@ import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
+import { PainelWidgetSettings } from '@/components/painel/PainelWidgetSettings';
 import { usePainelConfig } from '@/hooks/usePainelConfig';
 import { usePainelData } from '@/hooks/usePainelData';
 import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
@@ -25,13 +26,16 @@ export function PainelPage() {
     const { config, isLoading, notice, saveConfig } = usePainelConfig();
     const [draft, setDraft] = useState<PainelConfig | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
+    // Widget com o painel de configuração aberto.
+    const [settingsWidgetId, setSettingsWidgetId] = useState<string | null>(null);
     // Template escolhido no seletor que ainda espera a confirmação do usuário.
     const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
 
-    const sources = usePainelData(range);
+    const { getSource, regionCodes } = usePainelData(range);
 
     const editing = draft !== null;
     const current = draft ?? config;
+    const settingsWidget = current.widgets.find((widget) => widget.id === settingsWidgetId);
 
     function changeDraftWidgets(widgets: readonly PainelWidget[]) {
         setDraft({ ...current, widgets });
@@ -64,6 +68,23 @@ export function PainelPage() {
         } else {
             applyTemplate(id);
         }
+    }
+
+    // Troca um widget pela versão configurada. No modo de edição a troca fica no
+    // rascunho; fora dele, já é salva.
+    function applyWidgetSettings(widget: PainelWidget) {
+        const next: PainelConfig = {
+            ...current,
+            widgets: current.widgets.map((item) => (item.id === widget.id ? widget : item)),
+        };
+
+        if (editing) {
+            setDraft(next);
+        } else {
+            void saveConfig(next);
+        }
+
+        setSettingsWidgetId(null);
     }
 
     function finishEditing(save: boolean) {
@@ -132,9 +153,10 @@ export function PainelPage() {
             ) : (
                 <PainelGrid
                     widgets={current.widgets}
-                    sources={sources}
+                    getSource={getSource}
                     editing={editing}
                     onWidgetsChange={changeDraftWidgets}
+                    onConfigureWidget={(widget) => setSettingsWidgetId(widget.id)}
                 />
             )}
 
@@ -146,6 +168,17 @@ export function PainelPage() {
                         setCatalogOpen(false);
                     }}
                     onClose={() => setCatalogOpen(false)}
+                />
+            )}
+
+            {settingsWidget && (
+                <PainelWidgetSettings
+                    key={settingsWidget.id}
+                    widget={settingsWidget}
+                    regionCodes={regionCodes}
+                    getSource={getSource}
+                    onApply={applyWidgetSettings}
+                    onClose={() => setSettingsWidgetId(null)}
                 />
             )}
 
