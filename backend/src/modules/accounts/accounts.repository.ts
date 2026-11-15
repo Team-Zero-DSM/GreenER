@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 import type { Credentials, SessionAccount } from './types/accounts.types.js';
 import { AppError } from '../../shared/errors/AppError.js';
 
@@ -49,9 +49,7 @@ export class AccountsRepository {
     }
 
     async consumeReset(tokenHash: string, hash: string) {
-        const client = await this.pool.connect();
-        try {
-            await client.query('BEGIN');
+        await this.transaction(async (client) => {
             const { rows } = await client.query<{ id: string }>(
                 `SELECT u.id FROM usuario u JOIN redefinicao_senha r ON r.usuario_id = u.id
              WHERE r.token_hash = $1 AND r.usado_em IS NULL AND r.expira_em > now() AND u.acesso_ativo
@@ -68,38 +66,18 @@ export class AccountsRepository {
                 [tokenHash],
             );
             if (!consumed.rowCount) throw invalid();
-            await client.query(
-                `UPDATE usuario SET senha_hash = $2, versao_sessao = versao_sessao + 1 WHERE id = $1`,
-                [account.id, hash],
-            );
-            await client.query('DELETE FROM redefinicao_senha WHERE usuario_id = $1', [account.id]);
-            await client.query('COMMIT');
-        } catch (error) {
-            await client.query('ROLLBACK');
-            throw error;
-        } finally {
-            client.release();
-        }
+            await this.savePassword(client, account.id, hash);
+        });
     }
 
-    async updateProfile(
-        id: string,
-        name: string,
-        email: string,
-        verifyCurrentPassword: (hash: string) => Promise<boolean>,
-    ) {
-        const client = await this.pool.connect();
-        try {
-            await client.query('BEGIN');
-            const { rows: current } = await client.query<{ email: string; hash: string }>(
-                'SELECT email, senha_hash AS hash FROM usuario WHERE id = $1 AND acesso_ativo FOR UPDATE',
+    async updateProfile(id: string, name: string, email: string) {
+        return this.transaction(async (client) => {
+            const { rows: current } = await client.query<{ email: string }>(
+                'SELECT email FROM usuario WHERE id = $1 AND acesso_ativo FOR UPDATE',
                 [id],
             );
             if (!current[0]) throw new AppError('Conta indisponível.', 401);
             const changedEmail = email !== current[0].email;
-            if (changedEmail && !(await verifyCurrentPassword(current[0].hash))) {
-                throw new AppError('Confirme sua senha atual para alterar o e-mail.', 400);
-            }
             const { rows } = await client.query<SessionAccount>(
                 `UPDATE usuario SET nome = $2, email = $3, versao_sessao = versao_sessao + $4
              WHERE id = $1 RETURNING ${accountColumns}, versao_sessao AS "sessionVersion"`,
@@ -108,8 +86,39 @@ export class AccountsRepository {
             if (changedEmail) {
                 await client.query('DELETE FROM redefinicao_senha WHERE usuario_id = $1', [id]);
             }
-            await client.query('COMMIT');
             return rows[0];
+        });
+    }
+
+    async changePassword(id: string, generateHash: (currentHash: string) => Promise<string>) {
+        return this.transaction(async (client) => {
+            const { rows: current } = await client.query<{ hash: string }>(
+                'SELECT senha_hash AS hash FROM usuario WHERE id = $1 AND acesso_ativo FOR UPDATE',
+                [id],
+            );
+            if (!current[0]) throw new AppError('Conta indisponível.', 401);
+            const hash = await generateHash(current[0].hash);
+            return this.savePassword(client, id, hash);
+        });
+    }
+
+    private async savePassword(client: PoolClient, id: string, hash: string) {
+        const { rows } = await client.query<SessionAccount>(
+            `UPDATE usuario SET senha_hash = $2, versao_sessao = versao_sessao + 1
+             WHERE id = $1 RETURNING ${accountColumns}, versao_sessao AS "sessionVersion"`,
+            [id, hash],
+        );
+        await client.query('DELETE FROM redefinicao_senha WHERE usuario_id = $1', [id]);
+        return rows[0];
+    }
+
+    private async transaction<T>(operation: (client: PoolClient) => Promise<T>): Promise<T> {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const result = await operation(client);
+            await client.query('COMMIT');
+            return result;
         } catch (error) {
             await client.query('ROLLBACK');
             throw error;

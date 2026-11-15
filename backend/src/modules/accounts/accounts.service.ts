@@ -3,6 +3,7 @@ import { AppError } from '../../shared/errors/AppError.js';
 import { AccountsRepository } from './accounts.repository.js';
 import {
     AccountCredentials,
+    ChangePasswordInput,
     ProfileInput,
     RegisterInput,
     ResetPasswordInput,
@@ -45,10 +46,19 @@ export class AccountsService {
         await this.repository.consumeReset(digest(token), hash);
     }
 
-    async updateProfile(id: string, { name, email, currentPassword }: ProfileInput) {
-        const account = await this.repository.updateProfile(id, name, email, async (hash) =>
-            Boolean(currentPassword && (await bcrypt.compare(currentPassword, hash))),
-        );
+    async updateProfile(id: string, { name, email }: ProfileInput) {
+        const account = await this.repository.updateProfile(id, name, email);
+        return createSession(account);
+    }
+
+    async changePassword(id: string, { currentPassword, newPassword }: ChangePasswordInput) {
+        authSecret();
+        const account = await this.repository.changePassword(id, async (currentHash) => {
+            if (!(await bcrypt.compare(currentPassword, currentHash))) {
+                throw new AppError('Senha atual incorreta.', 400);
+            }
+            return bcrypt.hash(newPassword, 12);
+        });
         return createSession(account);
     }
 }
