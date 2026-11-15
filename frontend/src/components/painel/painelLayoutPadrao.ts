@@ -57,6 +57,24 @@ export const PAINEL_EXTRA_WIDGETS: readonly PainelWidget[] = [
         w: 4,
         h: 4,
     },
+    {
+        id: 'servicos-sem-metricas',
+        type: 'tabela',
+        title: 'Serviços sem métricas',
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4,
+    },
+    {
+        id: 'ultimas-tentativas',
+        type: 'tabela',
+        title: 'Últimas tentativas de coleta',
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4,
+    },
 ];
 
 // Todos os widgets que existem no painel, com o tamanho padrão de cada um.
@@ -83,6 +101,8 @@ const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
     'falhas-coleta': 'Últimas tentativas de coleta que falharam.',
     'energia-por-regiao': 'Como o consumo de energia se divide entre as regiões.',
     'co2e-distribuicao': 'Como a emissão de CO₂e se divide entre as regiões.',
+    'servicos-sem-metricas': 'Serviços que respondem, mas não estão enviando métricas.',
+    'ultimas-tentativas': 'Resultado da tentativa de coleta mais recente de cada serviço.',
 };
 
 // Widgets que o usuário pode adicionar ao painel pelo catálogo.

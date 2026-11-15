@@ -56,6 +56,21 @@ export const PAINEL_TEMPLATES: readonly PainelTemplate[] = [
             place('co2e-por-regiao', 0, 6, 12, 4),
         ],
     },
+    {
+        id: 'operacional',
+        label: 'Operacional',
+        description:
+            'Disponibilidade, falhas de coleta, serviços sem métricas e últimas tentativas.',
+        // À esquerda, a disponibilidade e o status dos serviços; à direita, as
+        // falhas de coleta em destaque e, abaixo, as duas listas de acompanhamento.
+        widgets: [
+            place('disponibilidade', 0, 0, 4, 2),
+            place('status-servicos', 0, 2, 4, 5),
+            place('falhas-coleta', 4, 0, 8, 3),
+            place('servicos-sem-metricas', 4, 3, 4, 4),
+            place('ultimas-tentativas', 8, 3, 4, 4),
+        ],
+    },
 ];
 
 export const PAINEL_TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] =

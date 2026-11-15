@@ -3,7 +3,7 @@ import type { PainelRegionsData, PainelServiceHistory } from '@/api/painel';
 import type { Region } from '@/types/api';
 import type { PainelWidgetContent } from '@/types/painel';
 import type { RankingResponse } from '@/types/ranking';
-import type { HistoryRange } from '@/types/service';
+import type { HistoryRange, ServiceSummary } from '@/types/service';
 
 // Funções que convertem as respostas do backend no conteúdo de cada widget do
 // painel. Devolvem null quando não há dados, e o widget mostra "sem dados".
@@ -237,6 +237,78 @@ export function buildCollectionFailures(
                     quando: item.latestAttempt
                         ? formatElapsed(item.latestAttempt.observedAt, now)
                         : '—',
+                },
+            })),
+        },
+    };
+}
+
+// Serviços que estão no ar, mas sem enviar métricas.
+export function buildServicesWithoutMetrics(
+    services: readonly ServiceSummary[],
+): PainelWidgetContent | null {
+    const missing = services.filter((service) => service.status === 'metrics_missing');
+
+    if (missing.length === 0) return null;
+
+    const now = Date.now();
+
+    return {
+        type: 'tabela',
+        data: {
+            columns: [
+                { key: 'servico', label: 'Serviço' },
+                { key: 'regiao', label: 'Região' },
+                { key: 'visto', label: 'Visto', align: 'right' },
+            ],
+            rows: missing.map((service) => ({
+                id: service.id,
+                cells: {
+                    servico: service.name,
+                    regiao: service.location?.regionCode ?? '—',
+                    visto: formatElapsed(service.lastSeenAt, now),
+                },
+            })),
+        },
+    };
+}
+
+const ATTEMPT_RESULT_LABELS = {
+    success: 'Sucesso',
+    failure: 'Falha',
+    pending: 'Pendente',
+} as const;
+
+// Tentativa de coleta mais recente de cada serviço, da mais nova para a mais antiga.
+export function buildLatestAttempts(
+    statuses: CollectionStatusResponse,
+): PainelWidgetContent | null {
+    const attempts = statuses.items
+        .filter((item) => item.latestAttempt !== null)
+        .sort(
+            (a, b) =>
+                new Date(b.latestAttempt?.observedAt ?? 0).getTime() -
+                new Date(a.latestAttempt?.observedAt ?? 0).getTime(),
+        );
+
+    if (attempts.length === 0) return null;
+
+    const now = Date.now();
+
+    return {
+        type: 'tabela',
+        data: {
+            columns: [
+                { key: 'servico', label: 'Serviço' },
+                { key: 'resultado', label: 'Resultado' },
+                { key: 'quando', label: 'Quando', align: 'right' },
+            ],
+            rows: attempts.map((item) => ({
+                id: item.externalId,
+                cells: {
+                    servico: item.name,
+                    resultado: ATTEMPT_RESULT_LABELS[item.result],
+                    quando: formatElapsed(item.latestAttempt?.observedAt ?? '', now),
                 },
             })),
         },

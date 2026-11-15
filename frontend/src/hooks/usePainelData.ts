@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { fetchCollectionStatuses } from '@/api/collection-status';
 import { fetchPainelRegions, fetchPainelServiceHistories } from '@/api/painel';
 import { fetchRanking } from '@/api/rankings';
+import { fetchServices } from '@/api/services';
 import { useApiQuery } from '@/hooks/useApiQuery';
 import type { PainelWidgetContent, PainelWidgetSource, PainelWidgetSources } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
@@ -15,7 +16,9 @@ import {
     buildEmissionSeries,
     buildEnergyByRegion,
     buildEnergyKpi,
+    buildLatestAttempts,
     buildServiceStatus,
+    buildServicesWithoutMetrics,
     buildTopEmitters,
 } from '@/utils/painel';
 
@@ -32,6 +35,7 @@ const RANGE_LABELS: Record<HistoryRange, string> = {
 const NOW_LABEL = 'Situação atual';
 
 const FAILURES_LIMIT = 5;
+const ATTEMPTS_LIMIT = 8;
 
 // Traduz o estado de uma consulta na situação do widget que depende dela.
 function toSource<T>(
@@ -83,6 +87,23 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
         useCallback(() => fetchPainelServiceHistories(range), [range]),
     );
 
+    const { data: attempts, error: attemptsError } = useApiQuery(
+        useCallback(
+            () =>
+                fetchCollectionStatuses({
+                    search: '',
+                    result: 'all',
+                    page: 1,
+                    limit: ATTEMPTS_LIMIT,
+                }),
+            [],
+        ),
+    );
+
+    const { data: services, error: servicesError } = useApiQuery(
+        useCallback(() => fetchServices(), []),
+    );
+
     // Só recalcula quando alguma consulta muda, para os widgets não redesenharem à toa.
     return useMemo(
         () => ({
@@ -95,6 +116,13 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
             'status-servicos': toSource(regions, regionsError, NOW_LABEL, buildServiceStatus),
             'top-emissores': toSource(ranking, rankingError, period, buildTopEmitters),
             'falhas-coleta': toSource(failures, failuresError, NOW_LABEL, buildCollectionFailures),
+            'ultimas-tentativas': toSource(attempts, attemptsError, NOW_LABEL, buildLatestAttempts),
+            'servicos-sem-metricas': toSource(
+                services,
+                servicesError,
+                NOW_LABEL,
+                buildServicesWithoutMetrics,
+            ),
             'co2e-por-regiao': toSource(histories, historiesError, period, (data) =>
                 buildEmissionSeries(data, range),
             ),
@@ -108,6 +136,10 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
             failuresError,
             histories,
             historiesError,
+            attempts,
+            attemptsError,
+            services,
+            servicesError,
             period,
             range,
         ],
