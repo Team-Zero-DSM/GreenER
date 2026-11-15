@@ -16,7 +16,7 @@ export function passwordResetMailer() {
     ) {
         throw new AppError('A recuperação de senha está temporariamente indisponível.', 503);
     }
-    const url = new URL('/redefinir-senha', APP_PUBLIC_URL);
+    const url = new URL('/login', APP_PUBLIC_URL);
     if (!['http:', 'https:'].includes(url.protocol)) {
         throw new AppError('A recuperação de senha está temporariamente indisponível.', 503);
     }

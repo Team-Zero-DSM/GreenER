@@ -1,3 +1,4 @@
+
 import { postJson, ApiError } from '@/api/services';
 
 import type {
@@ -7,9 +8,9 @@ import type {
     LoginRequest,
 } from '@/types/auth';
 
-
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+const API_URL = (
+    import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+).replace(/\/+$/, '');
 
 // Cadastra um usuário no backend.
 export async function registerAccount(
@@ -21,10 +22,14 @@ export async function registerAccount(
     );
 }
 
-
-
-export async function loginAccount(data: LoginRequest): Promise<AuthSession> {
-    return postJson('/auth/login', data);
+// Realiza o login do usuário.
+export async function loginAccount(
+    data: LoginRequest,
+): Promise<AuthSession> {
+    return postJson<LoginRequest, AuthSession>(
+        '/auth/login',
+        data,
+    );
 }
 
 // Consulta os dados do usuário autenticado.
@@ -52,4 +57,30 @@ export async function getCurrentUser(
     }
 
     return response.json() as Promise<AuthenticatedUser>;
+}
+
+// Solicita o envio do link de recuperação de senha.
+export async function requestPasswordReset(
+    email: string,
+): Promise<void> {
+    await postJson<
+        { email: string },
+        { message: string }
+    >('/auth/forgot-password', {
+        email: email.trim(),
+    });
+}
+
+// Redefine a senha utilizando o token recebido por e-mail.
+export async function resetPassword(
+    token: string,
+    password: string,
+): Promise<void> {
+    await postJson<
+        { token: string; password: string },
+        void
+    >('/auth/reset-password', {
+        token,
+        password,
+    });
 }
