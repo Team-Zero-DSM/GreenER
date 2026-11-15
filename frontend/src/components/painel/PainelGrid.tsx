@@ -163,7 +163,14 @@ export function PainelGrid({
                     onConfigure={onConfigureWidget ? () => onConfigureWidget(widget) : undefined}
                     onRemove={
                         editing && onWidgetsChange
-                            ? () => onWidgetsChange(removeWidget(widgets, widget.id))
+                            ? () =>
+                                  onWidgetsChange(
+                                      // No celular não há posições a reorganizar: o
+                                      // widget só sai da pilha.
+                                      breakpoint === 'mobile'
+                                          ? widgets.filter((item) => item.id !== widget.id)
+                                          : removeWidget(widgets, widget.id),
+                                  )
                             : undefined
                     }
                     onMoveStart={

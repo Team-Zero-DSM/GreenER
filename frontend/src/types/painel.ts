@@ -132,4 +132,7 @@ export interface PainelConfig {
     // Posição de cada widget no tablet (6 colunas), pelo id. Só existe depois que
     // o usuário arruma o painel no tablet; antes disso o arranjo é automático.
     tablet?: Record<string, PainelWidgetPosition>;
+    // Ordem dos widgets no celular (ids), de cima para baixo. Só existe depois que
+    // o usuário reordena no celular; antes disso segue a ordem de leitura do desktop.
+    mobileOrder?: readonly string[];
 }

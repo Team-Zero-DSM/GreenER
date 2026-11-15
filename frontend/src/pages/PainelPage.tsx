@@ -55,9 +55,15 @@ export function PainelPage() {
 
     // Coloca um widget do catálogo no primeiro espaço livre do arranjo em uso.
     function addCatalogWidget(widget: PainelWidget) {
-        const sized = breakpoint === 'tablet' ? toTabletSize(widget) : widget;
+        if (breakpoint === 'mobile') {
+            // No celular o widget novo entra no fim da pilha.
+            changeDraftWidgets([...layoutWidgets, widget]);
+        } else {
+            const sized = breakpoint === 'tablet' ? toTabletSize(widget) : widget;
 
-        changeDraftWidgets(addWidget(layoutWidgets, sized, PAINEL_COLUMNS[breakpoint]));
+            changeDraftWidgets(addWidget(layoutWidgets, sized, PAINEL_COLUMNS[breakpoint]));
+        }
+
         setCatalogOpen(false);
     }
 
@@ -66,6 +72,7 @@ export function PainelPage() {
     // Painel salvo que já não é igual ao template de onde partiu.
     const isCustomized =
         config.tablet !== undefined ||
+        config.mobileOrder !== undefined ||
         !sameLayout(config.widgets, getPainelTemplate(config.template).widgets);
 
     // Aplica um template: os widgets do painel são trocados pelos do template. No

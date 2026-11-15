@@ -14,7 +14,8 @@ import {
 
 // Cada tamanho de tela tem o seu arranjo dos widgets:
 // - desktop: as coordenadas dos próprios widgets (config.widgets), em 12 colunas;
-// - tablet: as posições guardadas em config.tablet, em 6 colunas.
+// - tablet: as posições guardadas em config.tablet, em 6 colunas;
+// - celular: uma coluna só, com os widgets empilhados na ordem de config.mobileOrder.
 // As funções deste arquivo entregam à grade os widgets já com a posição do tamanho
 // de tela em uso e gravam de volta, na configuração, o que a grade alterou.
 
@@ -59,6 +60,21 @@ function getTabletWidgets(config: PainelConfig): PainelWidget[] {
     return placed;
 }
 
+// Widgets na ordem em que são empilhados no celular: primeiro os que o usuário já
+// ordenou, na ordem definida por ele, e depois os demais, na ordem de leitura do
+// desktop (linha por linha, da esquerda para a direita).
+function getMobileWidgets(config: PainelConfig): PainelWidget[] {
+    const order = config.mobileOrder ?? [];
+    const byId = new Map(config.widgets.map((widget) => [widget.id, widget]));
+
+    const ordered = order.flatMap((id) => byId.get(id) ?? []);
+    const remaining = config.widgets
+        .filter((widget) => !order.includes(widget.id))
+        .sort(byRowThenColumn);
+
+    return [...ordered, ...remaining];
+}
+
 // Widgets do painel com a posição do tamanho de tela informado.
 export function getLayoutWidgets(
     config: PainelConfig,
@@ -69,8 +85,7 @@ export function getLayoutWidgets(
     }
 
     if (breakpoint === 'mobile') {
-        // No celular os widgets ficam empilhados, na ordem de leitura do desktop.
-        return [...config.widgets].sort(byRowThenColumn);
+        return getMobileWidgets(config);
     }
 
     return [...config.widgets];
@@ -95,7 +110,12 @@ export function setLayoutWidgets(
             ? Object.fromEntries(Object.entries(config.tablet).filter(([id]) => ids.has(id)))
             : undefined;
 
-        return { ...config, widgets, tablet };
+        return {
+            ...config,
+            widgets,
+            tablet,
+            mobileOrder: config.mobileOrder?.filter((id) => ids.has(id)),
+        };
     }
 
     // O desktop mantém as próprias posições: sai quem foi removido e quem foi
@@ -115,8 +135,10 @@ export function setLayoutWidgets(
             ...config,
             widgets: desktop,
             tablet: Object.fromEntries(widgets.map((widget) => [widget.id, toPosition(widget)])),
+            mobileOrder: config.mobileOrder?.filter((id) => ids.has(id)),
         };
     }
 
-    return { ...config, widgets: desktop };
+    // No celular o que se guarda é a ordem em que os widgets aparecem.
+    return { ...config, widgets: desktop, mobileOrder: widgets.map((widget) => widget.id) };
 }
