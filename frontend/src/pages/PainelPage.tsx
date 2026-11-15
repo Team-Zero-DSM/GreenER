@@ -2,13 +2,14 @@ import { useState } from 'react';
 
 import { PainelGrid } from '@/components/painel/PainelGrid';
 import { addWidget } from '@/components/painel/painelLayout';
+import { getPainelTemplate } from '@/components/painel/painelTemplates';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import { usePainelConfig } from '@/hooks/usePainelConfig';
 import { usePainelData } from '@/hooks/usePainelData';
-import type { PainelWidget } from '@/types/painel';
+import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
 export function PainelPage() {
@@ -17,21 +18,37 @@ export function PainelPage() {
     // edição, o rascunho com as alterações ainda não salvas. Sem rascunho, o
     // painel está no modo de visualização.
     const { config, isLoading, notice, saveConfig } = usePainelConfig();
-    const [draftWidgets, setDraftWidgets] = useState<readonly PainelWidget[] | null>(null);
+    const [draft, setDraft] = useState<PainelConfig | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
 
     const sources = usePainelData(range);
 
-    const editing = draftWidgets !== null;
-    const widgets = draftWidgets ?? config.widgets;
+    const editing = draft !== null;
+    const current = draft ?? config;
+
+    function changeDraftWidgets(widgets: readonly PainelWidget[]) {
+        setDraft({ ...current, widgets });
+    }
+
+    // Aplica um template: os widgets do painel são trocados pelos do template. No
+    // modo de edição a troca fica no rascunho; fora dele, já é salva.
+    function applyTemplate(id: PainelTemplateId) {
+        const next: PainelConfig = { template: id, widgets: getPainelTemplate(id).widgets };
+
+        if (editing) {
+            setDraft(next);
+        } else {
+            void saveConfig(next);
+        }
+    }
 
     function finishEditing(save: boolean) {
         // Sair do modo de edição salvando grava a configuração no backend.
-        if (save && draftWidgets) {
-            void saveConfig({ ...config, widgets: draftWidgets });
+        if (save && draft) {
+            void saveConfig(draft);
         }
 
-        setDraftWidgets(null);
+        setDraft(null);
         setCatalogOpen(false);
     }
 
@@ -50,13 +67,13 @@ export function PainelPage() {
                 </header>
 
                 <PainelToolbar
-                    template={config.template}
+                    template={current.template}
                     range={range}
                     editing={editing}
-                    onTemplateChange={(template) => void saveConfig({ ...config, template })}
+                    onTemplateChange={applyTemplate}
                     onRangeChange={setRange}
                     onStartEditing={() => {
-                        if (!isLoading) setDraftWidgets(config.widgets);
+                        if (!isLoading) setDraft(config);
                     }}
                     onAddWidget={() => setCatalogOpen(true)}
                     onSave={() => finishEditing(true)}
@@ -90,18 +107,18 @@ export function PainelPage() {
                 </p>
             ) : (
                 <PainelGrid
-                    widgets={widgets}
+                    widgets={current.widgets}
                     sources={sources}
                     editing={editing}
-                    onWidgetsChange={setDraftWidgets}
+                    onWidgetsChange={changeDraftWidgets}
                 />
             )}
 
             {editing && catalogOpen && (
                 <PainelWidgetCatalog
-                    widgetIdsInUse={widgets.map((widget) => widget.id)}
+                    widgetIdsInUse={current.widgets.map((widget) => widget.id)}
                     onAdd={(widget) => {
-                        setDraftWidgets(addWidget(widgets, widget));
+                        changeDraftWidgets(addWidget(current.widgets, widget));
                         setCatalogOpen(false);
                     }}
                     onClose={() => setCatalogOpen(false)}
