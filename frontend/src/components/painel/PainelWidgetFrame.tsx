@@ -13,6 +13,8 @@ interface PainelWidgetFrameProps {
     accentColor?: string;
     // Destaca o contêiner com borda tracejada enquanto o painel está em edição.
     editing?: boolean;
+    // Destaca o contêiner quando o indicador passou do limite de alerta.
+    alerting?: boolean;
     // Realça o contêiner enquanto ele é arrastado.
     active?: boolean;
     // Quando informado, o título vira a área por onde o widget é arrastado.
@@ -30,6 +32,7 @@ export function PainelWidgetFrame({
     actions = [],
     accentColor,
     editing = false,
+    alerting = false,
     active = false,
     onMoveStart,
     children,
@@ -39,7 +42,11 @@ export function PainelWidgetFrame({
     return (
         <div
             className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-colors ${
-                editing ? 'border-dashed border-emerald-400/45' : 'border-border'
+                alerting
+                    ? 'border-destructive/70 bg-destructive/5'
+                    : editing
+                      ? 'border-dashed border-emerald-400/45'
+                      : 'border-border'
             } ${active ? 'shadow-lg ring-2 shadow-black/40 ring-primary' : ''}`}
         >
             <header className="flex items-start justify-between gap-2">
@@ -68,7 +75,12 @@ export function PainelWidgetFrame({
                     )}
 
                     <div className="min-w-0">
-                        <h2 className="truncate text-sm font-semibold">{title}</h2>
+                        <h2 className="truncate text-sm font-semibold">
+                            {title}
+                            {alerting && (
+                                <span className="sr-only"> (acima do limite de alerta)</span>
+                            )}
+                        </h2>
                         {subtitle && (
                             <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
                         )}

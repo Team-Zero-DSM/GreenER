@@ -31,7 +31,7 @@ export function PainelPage() {
     // Template escolhido no seletor que ainda espera a confirmação do usuário.
     const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
 
-    const getSource = usePainelData(range);
+    const { getSource, regionCodes } = usePainelData(range);
 
     const editing = draft !== null;
     const current = draft ?? config;
@@ -175,6 +175,7 @@ export function PainelPage() {
                 <PainelWidgetSettings
                     key={settingsWidget.id}
                     widget={settingsWidget}
+                    regionCodes={regionCodes}
                     onApply={applyWidgetSettings}
                     onClose={() => setSettingsWidgetId(null)}
                 />

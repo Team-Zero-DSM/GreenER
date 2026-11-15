@@ -19,6 +19,13 @@ export interface PainelWidgetAction {
     disabled?: boolean;
 }
 
+// Limite de alerta: o indicador ganha a cor de destaque quando o valor fica acima
+// (ou abaixo) do limite, na unidade exibida no widget.
+export interface PainelWidgetAlert {
+    direction: 'acima' | 'abaixo';
+    threshold: number;
+}
+
 // Cada widget ocupa um retângulo da grade de 12 colunas: x e y são a coluna e a
 // linha onde ele começa (a partir de 0), w e h são quantas colunas e linhas ocupa.
 export interface PainelWidget {
@@ -30,6 +37,10 @@ export interface PainelWidget {
     metric?: string;
     // Paleta de cores escolhida pelo usuário (id em painelPaletas.ts).
     palette?: string;
+    // Código da região, quando o widget mostra só os dados dela.
+    region?: string;
+    // Limite de alerta dos indicadores (KPI).
+    alert?: PainelWidgetAlert;
     title: string;
     x: number;
     y: number;

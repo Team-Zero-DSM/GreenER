@@ -10,6 +10,8 @@ import type { HistoryRange, ServiceSummary } from '@/types/service';
 
 const MAX_SERIES = 5;
 const TOP_EMITTERS = 5;
+const MAX_FAILURES = 5;
+const MAX_ATTEMPTS = 8;
 
 // Soma um total das regiões. Fica null quando nenhuma região tem valor no período.
 function sumRegions(regions: readonly Region[], key: 'energyKwh' | 'co2eGrams'): number | null {
@@ -217,7 +219,9 @@ export function buildTopEmitters(ranking: RankingResponse): PainelWidgetContent 
 export function buildCollectionFailures(
     statuses: CollectionStatusResponse,
 ): PainelWidgetContent | null {
-    if (statuses.items.length === 0) return null;
+    const failed = statuses.items.slice(0, MAX_FAILURES);
+
+    if (failed.length === 0) return null;
 
     const now = Date.now();
 
@@ -229,7 +233,7 @@ export function buildCollectionFailures(
                 { key: 'motivo', label: 'Motivo' },
                 { key: 'quando', label: 'Quando', align: 'right' },
             ],
-            rows: statuses.items.map((item) => ({
+            rows: failed.map((item) => ({
                 id: item.externalId,
                 cells: {
                     servico: item.name,
@@ -289,7 +293,8 @@ export function buildLatestAttempts(
             (a, b) =>
                 new Date(b.latestAttempt?.observedAt ?? 0).getTime() -
                 new Date(a.latestAttempt?.observedAt ?? 0).getTime(),
-        );
+        )
+        .slice(0, MAX_ATTEMPTS);
 
     if (attempts.length === 0) return null;
 

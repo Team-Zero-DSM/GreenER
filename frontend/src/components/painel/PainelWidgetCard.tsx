@@ -7,6 +7,7 @@ import type {
     PainelWidgetSource,
 } from '@/types/painel';
 
+import { isAlerting } from './painelLayout';
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
 import { getWidgetColors } from './painelPaletas';
 import { PainelWidgetBoundary } from './PainelWidgetBoundary';
@@ -26,7 +27,7 @@ function renderWidgetContent(widget: PainelWidget, content?: PainelWidgetContent
 
     switch (content.type) {
         case 'kpi':
-            return <KpiWidget data={content.data} />;
+            return <KpiWidget data={content.data} alerting={isAlerting(widget, content.data)} />;
         case 'serie-temporal':
             return (
                 <TimeSeriesWidget
@@ -95,6 +96,10 @@ export function PainelWidgetCard({
     } as CSSProperties;
 
     const content = source?.status === 'ready' ? renderWidgetContent(widget, source.content) : null;
+    const alerting =
+        source?.status === 'ready' &&
+        source.content?.type === 'kpi' &&
+        isAlerting(widget, source.content.data);
     const status =
         source && source.status !== 'ready' ? source.status : content ? 'ready' : 'empty';
 
@@ -122,6 +127,7 @@ export function PainelWidgetCard({
                     accentColor={widget.palette ? getWidgetColors(widget)[0] : undefined}
                     subtitle={source?.subtitle}
                     status={status}
+                    alerting={alerting}
                     errorMessage={source?.errorMessage}
                     editing={editing}
                     active={active}

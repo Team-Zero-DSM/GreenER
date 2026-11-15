@@ -10,6 +10,8 @@ import { getMetricsForType, getWidgetMetricId, PAINEL_METRICS } from './painelMe
 
 interface PainelWidgetSettingsProps {
     widget: PainelWidget;
+    // Regiões disponíveis para o filtro do widget.
+    regionCodes: readonly string[];
     // Recebe o widget com as alterações quando o usuário aplica.
     onApply: (widget: PainelWidget) => void;
     onClose: () => void;
@@ -36,7 +38,12 @@ const FIELD_INPUT =
     'mt-1.5 min-h-11 w-full rounded-lg border border-border bg-background/60 px-3 text-sm outline-none focus:border-emerald-400/60';
 
 // Painel lateral de configuração de um widget, aberto pelo menu do próprio widget.
-export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetSettingsProps) {
+export function PainelWidgetSettings({
+    widget,
+    regionCodes,
+    onApply,
+    onClose,
+}: PainelWidgetSettingsProps) {
     // Cópia do widget que o formulário altera. O painel só muda ao aplicar.
     const [form, setForm] = useState<PainelWidget>(widget);
 
@@ -203,6 +210,102 @@ export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetS
                             Todas as paletas usam tons claros, legíveis no tema escuro.
                         </p>
                     </fieldset>
+
+                    <label className={FIELD_LABEL}>
+                        Filtrar por região
+                        <select
+                            value={form.region ?? ''}
+                            onChange={(event) =>
+                                setForm({ ...form, region: event.target.value || undefined })
+                            }
+                            className={FIELD_INPUT}
+                        >
+                            <option value="" className="bg-popover">
+                                Todas as regiões
+                            </option>
+                            {regionCodes.map((code) => (
+                                <option key={code} value={code} className="bg-popover">
+                                    {code}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    {widget.type === 'kpi' && (
+                        <fieldset className="space-y-2">
+                            <legend className={FIELD_LABEL}>Limite de alerta</legend>
+
+                            <label className="flex items-center gap-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={form.alert !== undefined}
+                                    onChange={(event) =>
+                                        setForm({
+                                            ...form,
+                                            alert: event.target.checked
+                                                ? { direction: 'acima', threshold: 0 }
+                                                : undefined,
+                                        })
+                                    }
+                                    className="size-4 accent-emerald-400"
+                                />
+                                Destacar o indicador quando o valor passar do limite
+                            </label>
+
+                            {form.alert && (
+                                <div className="grid grid-cols-2 gap-2">
+                                    <label className="text-xs text-muted-foreground">
+                                        Quando o valor estiver
+                                        <select
+                                            value={form.alert.direction}
+                                            onChange={(event) =>
+                                                setForm({
+                                                    ...form,
+                                                    alert: {
+                                                        direction: event.target.value as
+                                                            'acima' | 'abaixo',
+                                                        threshold: form.alert?.threshold ?? 0,
+                                                    },
+                                                })
+                                            }
+                                            className={`${FIELD_INPUT} text-foreground`}
+                                        >
+                                            <option value="acima" className="bg-popover">
+                                                Acima de
+                                            </option>
+                                            <option value="abaixo" className="bg-popover">
+                                                Abaixo de
+                                            </option>
+                                        </select>
+                                    </label>
+
+                                    <label className="text-xs text-muted-foreground">
+                                        Limite
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            value={form.alert.threshold}
+                                            onChange={(event) =>
+                                                setForm({
+                                                    ...form,
+                                                    alert: {
+                                                        direction: form.alert?.direction ?? 'acima',
+                                                        threshold: Number(event.target.value) || 0,
+                                                    },
+                                                })
+                                            }
+                                            className={`${FIELD_INPUT} text-foreground`}
+                                        />
+                                    </label>
+                                </div>
+                            )}
+
+                            <p className="text-xs text-muted-foreground">
+                                O limite usa a unidade exibida no widget. Ao passar dele, o valor e
+                                a borda ficam em vermelho.
+                            </p>
+                        </fieldset>
+                    )}
                 </div>
 
                 <footer className="flex flex-wrap justify-end gap-2 border-t border-border p-4">
