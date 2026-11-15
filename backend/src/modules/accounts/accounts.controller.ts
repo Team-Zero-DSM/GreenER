@@ -1,6 +1,7 @@
 import { accountFrom } from '../../shared/middleware/auth.js';
 import {
     AccountCredentials,
+    ChangePasswordInput,
     ProfileInput,
     RegisterInput,
     ResetPasswordInput,
@@ -39,5 +40,11 @@ export class AccountsController {
     };
     updateProfile = async (req: Request, res: Response) => {
         res.json(await this.service.updateProfile(accountFrom(res).id, req.body as ProfileInput));
+    };
+
+    changePassword = async (req: Request, res: Response) => {
+        res.json(
+            await this.service.changePassword(accountFrom(res).id, req.body as ChangePasswordInput),
+        );
     };
 }
