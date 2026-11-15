@@ -70,6 +70,23 @@ export function PainelPage() {
         }
     }
 
+    // Troca um widget pela versão configurada. No modo de edição a troca fica no
+    // rascunho; fora dele, já é salva.
+    function applyWidgetSettings(widget: PainelWidget) {
+        const next: PainelConfig = {
+            ...current,
+            widgets: current.widgets.map((item) => (item.id === widget.id ? widget : item)),
+        };
+
+        if (editing) {
+            setDraft(next);
+        } else {
+            void saveConfig(next);
+        }
+
+        setSettingsWidgetId(null);
+    }
+
     function finishEditing(save: boolean) {
         // Sair do modo de edição salvando grava a configuração no backend.
         if (save && draft) {
@@ -156,7 +173,9 @@ export function PainelPage() {
 
             {settingsWidget && (
                 <PainelWidgetSettings
+                    key={settingsWidget.id}
                     widget={settingsWidget}
+                    onApply={applyWidgetSettings}
                     onClose={() => setSettingsWidgetId(null)}
                 />
             )}
