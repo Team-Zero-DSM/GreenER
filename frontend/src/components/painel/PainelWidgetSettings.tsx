@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 
-import type { PainelWidget } from '@/types/painel';
+import { SegmentedControl } from '@/components/shared/SegmentedControl';
+import type { PainelChartType, PainelWidget, PainelWidgetType } from '@/types/painel';
 
 import { PAINEL_WIDGET_TYPE_LABELS } from './painelLayoutPadrao';
 import { getMetricsForType, getWidgetMetricId, PAINEL_METRICS } from './painelMetricas';
@@ -12,6 +13,22 @@ interface PainelWidgetSettingsProps {
     onApply: (widget: PainelWidget) => void;
     onClose: () => void;
 }
+
+// Tipos de gráfico que cada tipo de widget sabe desenhar. O primeiro é o padrão.
+const CHART_OPTIONS: Partial<
+    Record<PainelWidgetType, readonly { value: PainelChartType; label: string }[]>
+> = {
+    'serie-temporal': [
+        { value: 'linha', label: 'Linha' },
+        { value: 'area', label: 'Área' },
+        { value: 'barras', label: 'Barras' },
+    ],
+    distribuicao: [
+        { value: 'rosca', label: 'Rosca' },
+        { value: 'pizza', label: 'Pizza' },
+        { value: 'barras-horizontais', label: 'Barras horizontais' },
+    ],
+};
 
 const FIELD_LABEL = 'block text-sm font-medium';
 const FIELD_INPUT =
@@ -24,6 +41,7 @@ export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetS
 
     const title = form.title.trim();
 
+    const chartOptions = CHART_OPTIONS[widget.type];
     const metrics = getMetricsForType(widget.type);
     const metricId = getWidgetMetricId(form);
 
@@ -127,6 +145,18 @@ export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetS
                                 : 'O que o widget mostra. As opções dependem do tipo do widget.'}
                         </span>
                     </label>
+
+                    {chartOptions && (
+                        <div className="space-y-1.5">
+                            <p className={FIELD_LABEL}>Tipo de gráfico</p>
+                            <SegmentedControl
+                                label="Tipo de gráfico"
+                                value={form.chart ?? chartOptions[0].value}
+                                options={chartOptions}
+                                onChange={(chart) => setForm({ ...form, chart })}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <footer className="flex flex-wrap justify-end gap-2 border-t border-border p-4">
