@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Minimize } from 'lucide-react';
 
 import { PainelConfirmDialog } from '@/components/painel/PainelConfirmDialog';
 import { PainelGrid } from '@/components/painel/PainelGrid';
@@ -18,6 +19,7 @@ import { PainelWidgetSettings } from '@/components/painel/PainelWidgetSettings';
 import { usePainelBreakpoint } from '@/hooks/usePainelBreakpoint';
 import { usePainelConfig } from '@/hooks/usePainelConfig';
 import { usePainelData } from '@/hooks/usePainelData';
+import { usePainelFullscreen } from '@/hooks/usePainelFullscreen';
 import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
@@ -39,6 +41,9 @@ export function PainelPage() {
     const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
 
     const { getSource, regionCodes } = usePainelData(range);
+
+    // Modo tela cheia/TV: esconde a navegação e as ferramentas de edição.
+    const fullscreen = usePainelFullscreen();
 
     const editing = draft !== null;
     const current = draft ?? config;
@@ -127,32 +132,46 @@ export function PainelPage() {
     }
 
     return (
-        <PainelShell>
+        <PainelShell fullscreen={fullscreen.active}>
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <header className="min-w-0 space-y-2">
                     <h1 className="text-3xl font-semibold tracking-tight">
                         Painel de monitoramento
                     </h1>
-                    <p className="text-muted-foreground">
-                        Indicadores de operação e impacto ambiental reunidos em um painel
-                        personalizável.
-                    </p>
+                    {!fullscreen.active && (
+                        <p className="text-muted-foreground">
+                            Indicadores de operação e impacto ambiental reunidos em um painel
+                            personalizável.
+                        </p>
+                    )}
                     <PainelUpdateInfo />
                 </header>
 
-                <PainelToolbar
-                    template={current.template}
-                    range={range}
-                    editing={editing}
-                    onTemplateChange={requestTemplate}
-                    onRangeChange={setRange}
-                    onStartEditing={() => {
-                        if (!isLoading) setDraft(config);
-                    }}
-                    onAddWidget={() => setCatalogOpen(true)}
-                    onSave={() => finishEditing(true)}
-                    onDiscard={() => finishEditing(false)}
-                />
+                {fullscreen.active ? (
+                    <button
+                        type="button"
+                        onClick={fullscreen.exit}
+                        className="inline-flex min-h-11 items-center gap-2 self-start rounded-lg border border-border bg-background/60 px-3 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/5 xl:self-auto"
+                    >
+                        <Minimize aria-hidden="true" className="size-4" />
+                        Sair da tela cheia
+                    </button>
+                ) : (
+                    <PainelToolbar
+                        template={current.template}
+                        range={range}
+                        editing={editing}
+                        onTemplateChange={requestTemplate}
+                        onRangeChange={setRange}
+                        onStartEditing={() => {
+                            if (!isLoading) setDraft(config);
+                        }}
+                        onAddWidget={() => setCatalogOpen(true)}
+                        onSave={() => finishEditing(true)}
+                        onDiscard={() => finishEditing(false)}
+                        onEnterFullscreen={fullscreen.enter}
+                    />
+                )}
             </div>
 
             {editing && (
@@ -167,7 +186,7 @@ export function PainelPage() {
                 </p>
             )}
 
-            {notice && (
+            {notice && !fullscreen.active && (
                 <p
                     role="status"
                     className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
