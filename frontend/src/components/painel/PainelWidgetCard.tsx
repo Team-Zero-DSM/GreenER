@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, PointerEvent, ReactNode } from 'react';
 
 import {
     PAINEL_DISTRIBUTION_MOCK,
@@ -16,12 +16,6 @@ import { KpiWidget } from './widgets/KpiWidget';
 import { StatusWidget } from './widgets/StatusWidget';
 import { TableWidget } from './widgets/TableWidget';
 import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
-
-// Configurar e remover entram com a personalização (#147) e a edição do layout (#145).
-const WIDGET_ACTIONS: readonly PainelWidgetAction[] = [
-    { label: 'Configurar widget', disabled: true },
-    { label: 'Remover widget', disabled: true },
-];
 
 // Escolhe o componente pelo tipo do widget. Devolve null quando não há dados,
 // e o contêiner mostra o aviso de "sem dados".
@@ -56,9 +50,31 @@ function renderWidgetContent(widget: PainelWidget): ReactNode {
 
 interface PainelWidgetCardProps {
     widget: PainelWidget;
+    editing?: boolean;
+    // Widget que está sendo arrastado ou redimensionado no momento.
+    active?: boolean;
+    // Quando informado, o cabeçalho do widget vira a área de arrastar.
+    onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Quando informado, o widget ganha a alça de redimensionar no canto inferior direito.
+    onResizeStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Quando informado, a ação "Remover widget" do menu fica disponível.
+    onRemove?: () => void;
 }
 
-export function PainelWidgetCard({ widget }: PainelWidgetCardProps) {
+export function PainelWidgetCard({
+    widget,
+    editing = false,
+    active = false,
+    onMoveStart,
+    onResizeStart,
+    onRemove,
+}: PainelWidgetCardProps) {
+    // Remover só funciona no modo de edição. Configurar entra com a personalização (#147).
+    const actions: readonly PainelWidgetAction[] = [
+        { label: 'Configurar widget', disabled: true },
+        { label: 'Remover widget', onSelect: onRemove, disabled: onRemove === undefined },
+    ];
+
     // No desktop o widget fica exatamente na coordenada salva (a grade do CSS começa
     // em 1, as coordenadas em 0). No tablet e no celular a posição é automática, na
     // ordem da lista: só a altura e, no tablet, meia largura ou largura inteira.
@@ -75,15 +91,29 @@ export function PainelWidgetCard({ widget }: PainelWidgetCardProps) {
     return (
         <article
             style={position}
-            className="min-w-0 [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]"
+            className={`relative min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
         >
             <PainelWidgetFrame
                 title={widget.title}
                 status={content === null ? 'empty' : 'ready'}
-                actions={WIDGET_ACTIONS}
+                editing={editing}
+                active={active}
+                onMoveStart={onMoveStart}
+                actions={actions}
             >
                 {content}
             </PainelWidgetFrame>
+
+            {onResizeStart && (
+                <span
+                    role="presentation"
+                    title="Arraste para redimensionar o widget"
+                    onPointerDown={onResizeStart}
+                    className="absolute right-0 bottom-0 flex size-6 cursor-nwse-resize touch-none items-end justify-end p-1.5"
+                >
+                    <span className="size-2.5 rounded-br-sm border-r-2 border-b-2 border-emerald-400" />
+                </span>
+            )}
         </article>
     );
 }
