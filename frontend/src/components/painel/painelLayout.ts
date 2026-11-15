@@ -149,3 +149,24 @@ export function isAlerting(widget: PainelWidget, data: PainelKpiData): boolean {
         ? data.value > widget.alert.threshold
         : data.value < widget.alert.threshold;
 }
+
+// Troca um widget de lugar com o vizinho de cima (-1) ou de baixo (+1) na lista.
+// É como a ordem é alterada no celular, onde os widgets ficam empilhados.
+export function shiftWidget(
+    widgets: readonly PainelWidget[],
+    id: string,
+    direction: -1 | 1,
+): PainelWidget[] {
+    const index = widgets.findIndex((widget) => widget.id === id);
+    const target = index + direction;
+
+    if (index < 0 || target < 0 || target >= widgets.length) {
+        return [...widgets];
+    }
+
+    const reordered = [...widgets];
+
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+
+    return reordered;
+}

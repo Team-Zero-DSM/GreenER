@@ -1,4 +1,5 @@
 import type { CSSProperties, PointerEvent } from 'react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 import type { PainelWidget, PainelWidgetAction, PainelWidgetSource } from '@/types/painel';
 
@@ -19,7 +20,14 @@ interface PainelWidgetCardProps {
     onRemove?: () => void;
     // Abre o painel de configuração deste widget.
     onConfigure?: () => void;
+    // Reordenação no celular: quando o widget é a opção de reordenar, o cabeçalho
+    // ganha os botões de subir e descer. undefined desabilita o botão (primeiro ou
+    // último da pilha).
+    reorder?: { onMoveUp?: () => void; onMoveDown?: () => void };
 }
+
+const REORDER_BUTTON =
+    'inline-flex size-9 items-center justify-center rounded-lg border border-border text-foreground transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40';
 
 export function PainelWidgetCard({
     widget,
@@ -30,6 +38,7 @@ export function PainelWidgetCard({
     onResizeStart,
     onRemove,
     onConfigure,
+    reorder,
 }: PainelWidgetCardProps) {
     // Remover só funciona no modo de edição.
     const actions: readonly PainelWidgetAction[] = [
@@ -55,6 +64,30 @@ export function PainelWidgetCard({
                 widget={widget}
                 source={source}
                 actions={actions}
+                headerExtra={
+                    reorder && (
+                        <div className="-mt-1 flex shrink-0 gap-1">
+                            <button
+                                type="button"
+                                aria-label={`Subir o widget ${widget.title}`}
+                                disabled={!reorder.onMoveUp}
+                                onClick={reorder.onMoveUp}
+                                className={REORDER_BUTTON}
+                            >
+                                <ArrowUp aria-hidden="true" className="size-4" />
+                            </button>
+                            <button
+                                type="button"
+                                aria-label={`Descer o widget ${widget.title}`}
+                                disabled={!reorder.onMoveDown}
+                                onClick={reorder.onMoveDown}
+                                className={REORDER_BUTTON}
+                            >
+                                <ArrowDown aria-hidden="true" className="size-4" />
+                            </button>
+                        </div>
+                    )
+                }
                 editing={editing}
                 active={active}
                 onMoveStart={onMoveStart}

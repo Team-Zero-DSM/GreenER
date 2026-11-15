@@ -2,7 +2,13 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 
 import type { PainelBreakpoint, PainelSourceGetter, PainelWidget } from '@/types/painel';
 
-import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
+import {
+    arrangeWidgets,
+    moveWidget,
+    removeWidget,
+    resizeWidget,
+    shiftWidget,
+} from './painelLayout';
 import { PAINEL_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
@@ -153,7 +159,7 @@ export function PainelGrid({
             data-editing={editing}
             className="grid auto-rows-[4.875rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
         >
-            {widgets.map((widget) => (
+            {widgets.map((widget, index) => (
                 <PainelWidgetCard
                     key={widget.id}
                     widget={widget}
@@ -171,6 +177,24 @@ export function PainelGrid({
                                           ? widgets.filter((item) => item.id !== widget.id)
                                           : removeWidget(widgets, widget.id),
                                   )
+                            : undefined
+                    }
+                    reorder={
+                        // No celular a ordem é trocada pelos botões de subir e descer,
+                        // já que arrastar atrapalharia a rolagem da página.
+                        editing && breakpoint === 'mobile' && onWidgetsChange
+                            ? {
+                                  onMoveUp:
+                                      index > 0
+                                          ? () =>
+                                                onWidgetsChange(shiftWidget(widgets, widget.id, -1))
+                                          : undefined,
+                                  onMoveDown:
+                                      index < widgets.length - 1
+                                          ? () =>
+                                                onWidgetsChange(shiftWidget(widgets, widget.id, 1))
+                                          : undefined,
+                              }
                             : undefined
                     }
                     onMoveStart={

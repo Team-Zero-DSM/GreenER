@@ -9,6 +9,8 @@ interface PainelWidgetFrameProps {
     status: PainelWidgetStatus;
     errorMessage?: string;
     actions?: readonly PainelWidgetAction[];
+    // Controles extras do cabeçalho, mostrados antes do menu de ações.
+    headerExtra?: ReactNode;
     // Cor da paleta escolhida para o widget, mostrada como marcador ao lado do título.
     accentColor?: string;
     // Destaca o contêiner com borda tracejada enquanto o painel está em edição.
@@ -30,6 +32,7 @@ export function PainelWidgetFrame({
     status,
     errorMessage,
     actions = [],
+    headerExtra,
     accentColor,
     editing = false,
     alerting = false,
@@ -86,6 +89,8 @@ export function PainelWidgetFrame({
                         )}
                     </div>
                 </div>
+
+                {headerExtra}
 
                 {actions.length > 0 && (
                     <div
