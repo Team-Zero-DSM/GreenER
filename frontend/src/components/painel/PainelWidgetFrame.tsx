@@ -9,6 +9,8 @@ interface PainelWidgetFrameProps {
     status: PainelWidgetStatus;
     errorMessage?: string;
     actions?: readonly PainelWidgetAction[];
+    // Cor da paleta escolhida para o widget, mostrada como marcador ao lado do título.
+    accentColor?: string;
     // Destaca o contêiner com borda tracejada enquanto o painel está em edição.
     editing?: boolean;
     // Realça o contêiner enquanto ele é arrastado.
@@ -26,6 +28,7 @@ export function PainelWidgetFrame({
     status,
     errorMessage,
     actions = [],
+    accentColor,
     editing = false,
     active = false,
     onMoveStart,
@@ -53,6 +56,14 @@ export function PainelWidgetFrame({
                         <GripVertical
                             aria-hidden="true"
                             className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        />
+                    )}
+
+                    {accentColor && (
+                        <span
+                            aria-hidden="true"
+                            className="mt-1.5 size-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: accentColor }}
                         />
                     )}
 

@@ -2,21 +2,21 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 import type { PainelChartType, PainelDistributionData } from '@/types/painel';
 
-import { PAINEL_CHART_COLORS } from '../painelLayoutPadrao';
-
 interface DistributionWidgetProps {
     data: PainelDistributionData;
     chart: PainelChartType;
+    // Cores das séries, na ordem em que aparecem.
+    colors: readonly string[];
 }
 
 const formatValue = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
-export function DistributionWidget({ data, chart }: DistributionWidgetProps) {
+export function DistributionWidget({ data, chart, colors }: DistributionWidgetProps) {
     const total = data.items.reduce((sum, item) => sum + item.value, 0);
     const largest = Math.max(...data.items.map((item) => item.value));
     const items = data.items.map((item, index) => ({
         ...item,
-        color: PAINEL_CHART_COLORS[index % PAINEL_CHART_COLORS.length],
+        color: colors[index % colors.length],
         share: total > 0 ? (item.value / total) * 100 : 0,
     }));
 

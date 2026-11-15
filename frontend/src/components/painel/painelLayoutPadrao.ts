@@ -120,6 +120,3 @@ export const PAINEL_WIDGET_CATALOG: readonly { widget: PainelWidget; description
         widget,
         description: PAINEL_WIDGET_DESCRIPTIONS[widget.id] ?? '',
     }));
-
-// Cores das séries dos gráficos, na ordem em que as séries aparecem.
-export const PAINEL_CHART_COLORS = ['#34d399', '#22d3ee', '#a78bfa', '#fbbf24', '#f472b6'] as const;

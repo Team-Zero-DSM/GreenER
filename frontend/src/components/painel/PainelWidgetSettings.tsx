@@ -5,6 +5,7 @@ import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import type { PainelChartType, PainelWidget, PainelWidgetType } from '@/types/painel';
 
 import { PAINEL_WIDGET_TYPE_LABELS } from './painelLayoutPadrao';
+import { PAINEL_PALETTES } from './painelPaletas';
 import { getMetricsForType, getWidgetMetricId, PAINEL_METRICS } from './painelMetricas';
 
 interface PainelWidgetSettingsProps {
@@ -157,6 +158,51 @@ export function PainelWidgetSettings({ widget, onApply, onClose }: PainelWidgetS
                             />
                         </div>
                     )}
+
+                    <fieldset className="space-y-1.5">
+                        <legend className={FIELD_LABEL}>Paleta de cores</legend>
+                        <div className="grid grid-cols-2 gap-2">
+                            {PAINEL_PALETTES.map((palette) => {
+                                const selected =
+                                    (form.palette ?? PAINEL_PALETTES[0].id) === palette.id;
+
+                                return (
+                                    <label
+                                        key={palette.id}
+                                        className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                                            selected
+                                                ? 'border-emerald-400/60 bg-emerald-400/10'
+                                                : 'border-border hover:bg-white/5'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="painel-paleta"
+                                            value={palette.id}
+                                            checked={selected}
+                                            onChange={() =>
+                                                setForm({ ...form, palette: palette.id })
+                                            }
+                                            className="sr-only"
+                                        />
+                                        {palette.label}
+                                        <span aria-hidden="true" className="flex gap-0.5">
+                                            {palette.colors.map((color) => (
+                                                <span
+                                                    key={color}
+                                                    className="size-3 rounded-full"
+                                                    style={{ backgroundColor: color }}
+                                                />
+                                            ))}
+                                        </span>
+                                    </label>
+                                );
+                            })}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Todas as paletas usam tons claros, legíveis no tema escuro.
+                        </p>
+                    </fieldset>
                 </div>
 
                 <footer className="flex flex-wrap justify-end gap-2 border-t border-border p-4">

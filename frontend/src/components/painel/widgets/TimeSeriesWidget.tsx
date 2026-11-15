@@ -12,16 +12,16 @@ import {
 
 import type { PainelChartType, PainelSeriesData } from '@/types/painel';
 
-import { PAINEL_CHART_COLORS } from '../painelLayoutPadrao';
-
 interface TimeSeriesWidgetProps {
     data: PainelSeriesData;
     chart: PainelChartType;
+    // Cores das séries, na ordem em que aparecem.
+    colors: readonly string[];
 }
 
 const formatValue = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
-export function TimeSeriesWidget({ data, chart }: TimeSeriesWidgetProps) {
+export function TimeSeriesWidget({ data, chart, colors }: TimeSeriesWidgetProps) {
     // O Recharts espera uma linha por ponto, com uma coluna para cada série.
     const rows = data.points.map((point) => ({ label: point.label, ...point.values }));
 
@@ -34,8 +34,7 @@ export function TimeSeriesWidget({ data, chart }: TimeSeriesWidgetProps) {
                             aria-hidden="true"
                             className="size-2 rounded-full"
                             style={{
-                                backgroundColor:
-                                    PAINEL_CHART_COLORS[index % PAINEL_CHART_COLORS.length],
+                                backgroundColor: colors[index % colors.length],
                             }}
                         />
                         {serie.label}
@@ -79,7 +78,7 @@ export function TimeSeriesWidget({ data, chart }: TimeSeriesWidgetProps) {
                         />
 
                         {data.series.map((serie, index) => {
-                            const color = PAINEL_CHART_COLORS[index % PAINEL_CHART_COLORS.length];
+                            const color = colors[index % colors.length];
 
                             // Área e barras empilham as séries para mostrar o total;
                             // a linha compara as séries lado a lado.

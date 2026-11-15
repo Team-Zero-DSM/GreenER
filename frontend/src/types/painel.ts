@@ -28,6 +28,8 @@ export interface PainelWidget {
     chart?: PainelChartType;
     // Métrica exibida, quando o usuário escolhe uma diferente da original do widget.
     metric?: string;
+    // Paleta de cores escolhida pelo usuário (id em painelPaletas.ts).
+    palette?: string;
     title: string;
     x: number;
     y: number;

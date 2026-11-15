@@ -8,6 +8,7 @@ import type {
 } from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
+import { getWidgetColors } from './painelPaletas';
 import { PainelWidgetBoundary } from './PainelWidgetBoundary';
 import { PainelWidgetFrame } from './PainelWidgetFrame';
 import { DistributionWidget } from './widgets/DistributionWidget';
@@ -27,9 +28,21 @@ function renderWidgetContent(widget: PainelWidget, content?: PainelWidgetContent
         case 'kpi':
             return <KpiWidget data={content.data} />;
         case 'serie-temporal':
-            return <TimeSeriesWidget data={content.data} chart={widget.chart ?? 'linha'} />;
+            return (
+                <TimeSeriesWidget
+                    data={content.data}
+                    chart={widget.chart ?? 'linha'}
+                    colors={getWidgetColors(widget)}
+                />
+            );
         case 'distribuicao':
-            return <DistributionWidget data={content.data} chart={widget.chart ?? 'rosca'} />;
+            return (
+                <DistributionWidget
+                    data={content.data}
+                    chart={widget.chart ?? 'rosca'}
+                    colors={getWidgetColors(widget)}
+                />
+            );
         case 'tabela':
             return <TableWidget data={content.data} />;
         case 'status':
@@ -95,6 +108,7 @@ export function PainelWidgetCard({
                 fallback={
                     <PainelWidgetFrame
                         title={widget.title}
+                        accentColor={widget.palette ? getWidgetColors(widget)[0] : undefined}
                         subtitle={source?.subtitle}
                         status="error"
                         errorMessage="Este widget encontrou um erro ao exibir os dados."
@@ -105,6 +119,7 @@ export function PainelWidgetCard({
             >
                 <PainelWidgetFrame
                     title={widget.title}
+                    accentColor={widget.palette ? getWidgetColors(widget)[0] : undefined}
                     subtitle={source?.subtitle}
                     status={status}
                     errorMessage={source?.errorMessage}
