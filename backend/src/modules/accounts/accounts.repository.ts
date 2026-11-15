@@ -31,4 +31,19 @@ export class AccountsRepository {
         );
         return rows[0] ?? null;
     }
+
+    async issueReset(email: string, tokenHash: string) {
+        const { rows } = await this.pool.query<{ email: string }>(
+            `WITH candidate AS (
+            SELECT id, email FROM usuario WHERE lower(email) = $1 AND acesso_ativo ORDER BY id LIMIT 1 FOR UPDATE
+         ), issued AS (
+            INSERT INTO redefinicao_senha (token_hash, usuario_id, expira_em)
+            SELECT $2, id, now() + interval '30 minutes' FROM candidate
+            RETURNING usuario_id
+         )
+         SELECT email FROM candidate JOIN issued ON issued.usuario_id = candidate.id`,
+            [email, tokenHash],
+        );
+        return rows[0]?.email;
+    }
 }

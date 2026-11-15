@@ -14,4 +14,11 @@ export class AccountsController {
     login = async (req: Request, res: Response) => {
         res.json(await this.service.login(req.body as AccountCredentials));
     };
+    forgotPassword = async (req: Request, res: Response) => {
+        const { email } = req.body as { email: string };
+        await this.service.requestPasswordReset(email);
+        res.status(202).json({
+            message: 'Se houver uma conta ativa, enviaremos um link de redefinição.',
+        });
+    };
 }
