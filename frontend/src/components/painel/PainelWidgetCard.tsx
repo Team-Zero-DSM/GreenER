@@ -1,15 +1,14 @@
 import type { CSSProperties, PointerEvent, ReactNode } from 'react';
 
-import {
-    PAINEL_DISTRIBUTION_MOCK,
-    PAINEL_KPI_MOCK,
-    PAINEL_SERIES_MOCK,
-    PAINEL_STATUS_MOCK,
-    PAINEL_TABLE_MOCK,
-} from '@/mocks/painelWidgets.mock';
-import type { PainelWidget, PainelWidgetAction } from '@/types/painel';
+import type {
+    PainelWidget,
+    PainelWidgetAction,
+    PainelWidgetContent,
+    PainelWidgetSource,
+} from '@/types/painel';
 
 import { PAINEL_GRID_COLUMNS, PAINEL_TABLET_COLUMNS } from './painelLayoutPadrao';
+import { PainelWidgetBoundary } from './PainelWidgetBoundary';
 import { PainelWidgetFrame } from './PainelWidgetFrame';
 import { DistributionWidget } from './widgets/DistributionWidget';
 import { KpiWidget } from './widgets/KpiWidget';
@@ -17,39 +16,31 @@ import { StatusWidget } from './widgets/StatusWidget';
 import { TableWidget } from './widgets/TableWidget';
 import { TimeSeriesWidget } from './widgets/TimeSeriesWidget';
 
-// Escolhe o componente pelo tipo do widget. Devolve null quando não há dados,
-// e o contêiner mostra o aviso de "sem dados".
-function renderWidgetContent(widget: PainelWidget): ReactNode {
-    switch (widget.type) {
-        case 'kpi': {
-            const data = PAINEL_KPI_MOCK[widget.id];
-            return data ? <KpiWidget data={data} /> : null;
-        }
-        case 'serie-temporal': {
-            const data = PAINEL_SERIES_MOCK[widget.id];
-            return data && data.points.length > 0 ? (
-                <TimeSeriesWidget data={data} chart={widget.chart ?? 'linha'} />
-            ) : null;
-        }
-        case 'distribuicao': {
-            const data = PAINEL_DISTRIBUTION_MOCK[widget.id];
-            return data && data.items.length > 0 ? (
-                <DistributionWidget data={data} chart={widget.chart ?? 'rosca'} />
-            ) : null;
-        }
-        case 'tabela': {
-            const data = PAINEL_TABLE_MOCK[widget.id];
-            return data && data.rows.length > 0 ? <TableWidget data={data} /> : null;
-        }
-        case 'status': {
-            const data = PAINEL_STATUS_MOCK[widget.id];
-            return data ? <StatusWidget data={data} /> : null;
-        }
+// Escolhe o componente pelo tipo do widget. Devolve null quando o conteúdo não
+// existe ou não é do tipo do widget, e o contêiner mostra o aviso de "sem dados".
+function renderWidgetContent(widget: PainelWidget, content?: PainelWidgetContent): ReactNode {
+    if (!content || content.type !== widget.type) {
+        return null;
+    }
+
+    switch (content.type) {
+        case 'kpi':
+            return <KpiWidget data={content.data} />;
+        case 'serie-temporal':
+            return <TimeSeriesWidget data={content.data} chart={widget.chart ?? 'linha'} />;
+        case 'distribuicao':
+            return <DistributionWidget data={content.data} chart={widget.chart ?? 'rosca'} />;
+        case 'tabela':
+            return <TableWidget data={content.data} />;
+        case 'status':
+            return <StatusWidget data={content.data} />;
     }
 }
 
 interface PainelWidgetCardProps {
     widget: PainelWidget;
+    // Situação e conteúdo vindos do backend. Sem fonte, o widget fica "sem dados".
+    source?: PainelWidgetSource;
     editing?: boolean;
     // Widget que está sendo arrastado ou redimensionado no momento.
     active?: boolean;
@@ -63,6 +54,7 @@ interface PainelWidgetCardProps {
 
 export function PainelWidgetCard({
     widget,
+    source,
     editing = false,
     active = false,
     onMoveStart,
@@ -86,23 +78,41 @@ export function PainelWidgetCard({
             widget.w > PAINEL_GRID_COLUMNS / 2 ? PAINEL_TABLET_COLUMNS : PAINEL_TABLET_COLUMNS / 2,
     } as CSSProperties;
 
-    const content = renderWidgetContent(widget);
+    const content = source?.status === 'ready' ? renderWidgetContent(widget, source.content) : null;
+    const status =
+        source && source.status !== 'ready' ? source.status : content ? 'ready' : 'empty';
 
     return (
         <article
             style={position}
             className={`relative min-w-0 ${active ? 'z-10' : ''} [grid-row:span_var(--painel-h)] md:[grid-column:span_var(--painel-w-tablet)] lg:[grid-column:var(--painel-col)] lg:[grid-row:var(--painel-row)]`}
         >
-            <PainelWidgetFrame
-                title={widget.title}
-                status={content === null ? 'empty' : 'ready'}
-                editing={editing}
-                active={active}
-                onMoveStart={onMoveStart}
-                actions={actions}
+            <PainelWidgetBoundary
+                resetKey={source}
+                fallback={
+                    <PainelWidgetFrame
+                        title={widget.title}
+                        subtitle={source?.subtitle}
+                        status="error"
+                        errorMessage="Este widget encontrou um erro ao exibir os dados."
+                        editing={editing}
+                        actions={actions}
+                    />
+                }
             >
-                {content}
-            </PainelWidgetFrame>
+                <PainelWidgetFrame
+                    title={widget.title}
+                    subtitle={source?.subtitle}
+                    status={status}
+                    errorMessage={source?.errorMessage}
+                    editing={editing}
+                    active={active}
+                    onMoveStart={onMoveStart}
+                    actions={actions}
+                >
+                    {content}
+                </PainelWidgetFrame>
+            </PainelWidgetBoundary>
 
             {onResizeStart && (
                 <span

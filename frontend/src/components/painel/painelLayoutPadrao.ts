@@ -1,4 +1,4 @@
-import type { PainelTemplateId, PainelWidget } from '@/types/painel';
+import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 
 // Colunas da grade por tamanho de tela. As classes do PainelGrid precisam
 // acompanhar estes valores (lg:grid-cols-12, md:grid-cols-6 e uma coluna no celular).
@@ -50,6 +50,12 @@ export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
     },
 ];
 
+// Configuração de quem ainda não salvou um painel.
+export const PAINEL_DEFAULT_CONFIG: PainelConfig = {
+    template: 'visao-geral',
+    widgets: PAINEL_DEFAULT_WIDGETS,
+};
+
 // Descrição de cada widget no catálogo do modo de edição, pelo id do widget.
 const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
     'co2e-total': 'Total de CO₂e emitido no período e variação contra o período anterior.',
@@ -64,7 +70,7 @@ const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
 };
 
 // Widgets que o usuário pode adicionar ao painel. Por enquanto são os mesmos do
-// layout padrão, que são os que têm dados disponíveis.
+// layout padrão, que são os que têm dados no backend.
 export const PAINEL_WIDGET_CATALOG: readonly { widget: PainelWidget; description: string }[] =
     PAINEL_DEFAULT_WIDGETS.map((widget) => ({
         widget,
