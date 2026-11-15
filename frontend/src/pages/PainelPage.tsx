@@ -4,6 +4,7 @@ import { PainelGrid } from '@/components/painel/PainelGrid';
 import { addWidget } from '@/components/painel/painelLayout';
 import { PAINEL_DEFAULT_WIDGETS } from '@/components/painel/painelLayoutPadrao';
 import { PainelShell } from '@/components/painel/PainelShell';
+import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import { usePainelData } from '@/hooks/usePainelData';
@@ -45,6 +46,7 @@ export function PainelPage() {
                         Indicadores de operação e impacto ambiental reunidos em um painel
                         personalizável.
                     </p>
+                    <PainelUpdateInfo />
                 </header>
 
                 <PainelToolbar
