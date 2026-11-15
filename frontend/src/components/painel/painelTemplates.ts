@@ -71,6 +71,20 @@ export const PAINEL_TEMPLATES: readonly PainelTemplate[] = [
             place('ultimas-tentativas', 8, 3, 4, 4),
         ],
     },
+    {
+        id: 'executivo',
+        label: 'Executivo',
+        description: 'Poucos indicadores, bem grandes, para apresentar em TV ou telão.',
+        // Quatro indicadores ocupando metade da tela cada um e a emissão no tempo
+        // na largura inteira. Os números crescem junto com o tamanho do widget.
+        widgets: [
+            place('co2e-total', 0, 0, 6, 3),
+            place('energia-total', 6, 0, 6, 3),
+            place('disponibilidade', 0, 3, 6, 3),
+            place('intensidade-carbono', 6, 3, 6, 3),
+            place('co2e-por-regiao', 0, 6, 12, 5),
+        ],
+    },
 ];
 
 export const PAINEL_TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] =
