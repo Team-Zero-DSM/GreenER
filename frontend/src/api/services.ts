@@ -79,7 +79,7 @@ async function parseResponse<TResponse>(
 // Centraliza a comunicação HTTP com o backend.
 async function requestJson<TResponse>(
     path: string,
-    method: 'GET' | 'POST' | 'PATCH',
+    method: 'GET' | 'POST' | 'PATCH' | 'PUT',
     body?: unknown,
     options: ApiRequestOptions = {},
 ): Promise<TResponse> {
@@ -149,6 +149,14 @@ export async function patchJson<TRequest, TResponse>(
     options: ApiRequestOptions = {},
 ): Promise<TResponse> {
     return requestJson<TResponse>(path, 'PATCH', body, options);
+}
+
+export async function putJson<TRequest, TResponse>(
+    path: string,
+    body: TRequest,
+    options: ApiRequestOptions = {},
+): Promise<TResponse> {
+    return requestJson<TResponse>(path, 'PUT', body, options);
 }
 
 // Estados que o frontend não conhece viram "unknown" para o selo não quebrar.

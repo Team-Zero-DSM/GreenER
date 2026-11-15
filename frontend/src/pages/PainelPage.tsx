@@ -2,33 +2,33 @@ import { useState } from 'react';
 
 import { PainelGrid } from '@/components/painel/PainelGrid';
 import { addWidget } from '@/components/painel/painelLayout';
-import { PAINEL_DEFAULT_WIDGETS } from '@/components/painel/painelLayoutPadrao';
 import { PainelShell } from '@/components/painel/PainelShell';
 import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
+import { usePainelConfig } from '@/hooks/usePainelConfig';
 import { usePainelData } from '@/hooks/usePainelData';
-import type { PainelTemplateId, PainelWidget } from '@/types/painel';
+import type { PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
 export function PainelPage() {
-    const [template, setTemplate] = useState<PainelTemplateId>('visao-geral');
     const [range, setRange] = useState<HistoryRange>('24h');
-    // Layout salvo do painel e, durante a edição, o rascunho com as alterações
-    // ainda não salvas. Sem rascunho, o painel está no modo de visualização.
-    const [savedWidgets, setSavedWidgets] =
-        useState<readonly PainelWidget[]>(PAINEL_DEFAULT_WIDGETS);
+    // Configuração salva do painel (carregada ao abrir a página) e, durante a
+    // edição, o rascunho com as alterações ainda não salvas. Sem rascunho, o
+    // painel está no modo de visualização.
+    const { config, isLoading, notice, saveConfig } = usePainelConfig();
     const [draftWidgets, setDraftWidgets] = useState<readonly PainelWidget[] | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
 
     const sources = usePainelData(range);
 
     const editing = draftWidgets !== null;
-    const widgets = draftWidgets ?? savedWidgets;
+    const widgets = draftWidgets ?? config.widgets;
 
     function finishEditing(save: boolean) {
+        // Sair do modo de edição salvando grava a configuração no backend.
         if (save && draftWidgets) {
-            setSavedWidgets(draftWidgets);
+            void saveConfig({ ...config, widgets: draftWidgets });
         }
 
         setDraftWidgets(null);
@@ -50,12 +50,14 @@ export function PainelPage() {
                 </header>
 
                 <PainelToolbar
-                    template={template}
+                    template={config.template}
                     range={range}
                     editing={editing}
-                    onTemplateChange={setTemplate}
+                    onTemplateChange={(template) => void saveConfig({ ...config, template })}
                     onRangeChange={setRange}
-                    onStartEditing={() => setDraftWidgets(savedWidgets)}
+                    onStartEditing={() => {
+                        if (!isLoading) setDraftWidgets(config.widgets);
+                    }}
                     onAddWidget={() => setCatalogOpen(true)}
                     onSave={() => finishEditing(true)}
                     onDiscard={() => finishEditing(false)}
@@ -73,12 +75,27 @@ export function PainelPage() {
                 </p>
             )}
 
-            <PainelGrid
-                widgets={widgets}
-                sources={sources}
-                editing={editing}
-                onWidgetsChange={setDraftWidgets}
-            />
+            {notice && (
+                <p
+                    role="alert"
+                    className="rounded-lg border border-amber-400/40 bg-amber-400/5 px-4 py-3 text-sm text-amber-200"
+                >
+                    {notice}
+                </p>
+            )}
+
+            {isLoading ? (
+                <p role="status" className="py-16 text-center text-sm text-muted-foreground">
+                    Carregando o seu painel…
+                </p>
+            ) : (
+                <PainelGrid
+                    widgets={widgets}
+                    sources={sources}
+                    editing={editing}
+                    onWidgetsChange={setDraftWidgets}
+                />
+            )}
 
             {editing && catalogOpen && (
                 <PainelWidgetCatalog

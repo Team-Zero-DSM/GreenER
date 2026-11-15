@@ -92,3 +92,10 @@ export interface PainelWidgetSource {
 
 // Fontes de dados do painel, pelo id do widget.
 export type PainelWidgetSources = Record<string, PainelWidgetSource>;
+
+// Configuração do painel de um usuário: o template escolhido e os widgets com
+// suas posições. É o que as rotas /dashboards/me leem e gravam.
+export interface PainelConfig {
+    template: PainelTemplateId;
+    widgets: readonly PainelWidget[];
+}

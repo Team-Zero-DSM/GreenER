@@ -1,4 +1,4 @@
-import type { PainelTemplateId, PainelWidget } from '@/types/painel';
+import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 
 // Colunas da grade por tamanho de tela. As classes do PainelGrid precisam
 // acompanhar estes valores (lg:grid-cols-12, md:grid-cols-6 e uma coluna no celular).
@@ -49,6 +49,12 @@ export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
         h: 4,
     },
 ];
+
+// Configuração de quem ainda não salvou um painel.
+export const PAINEL_DEFAULT_CONFIG: PainelConfig = {
+    template: 'visao-geral',
+    widgets: PAINEL_DEFAULT_WIDGETS,
+};
 
 // Descrição de cada widget no catálogo do modo de edição, pelo id do widget.
 const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
