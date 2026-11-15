@@ -11,6 +11,7 @@ import { RegionPage } from '@/pages/RegionPage';
 import { RankingPage } from '@/pages/RankingPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { PainelPage } from '@/pages/PainelPage';
+import { AdminSettingsPage } from '@/pages/AdminSettingsPage';
 
 export default function App() {
     return (
@@ -33,6 +34,7 @@ export default function App() {
                 <Route path="/regioes" element={<RegionPage />} />
                 <Route path="/ranking" element={<RankingPage />} />
                 <Route path="/perfil" element={<ProfilePage />} />
+                <Route path="/configuracoes" element={<AdminSettingsPage />} />
             </Route>
         </Routes>
     );
