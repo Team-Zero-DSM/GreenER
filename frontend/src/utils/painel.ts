@@ -147,29 +147,42 @@ export function buildServiceStatus({ current }: PainelRegionsData): PainelWidget
     return { type: 'status', data: counts };
 }
 
-// Energia por região, da maior para a menor. Além das maiores, o resto vira "Outras".
-export function buildEnergyByRegion({ current }: PainelRegionsData): PainelWidgetContent | null {
-    const regions = current
-        .map((region) => ({ label: region.code, value: region.energyKwh ?? 0 }))
+// Divide um total entre as regiões, da maior para a menor. Além das maiores, o
+// resto vira "Outras".
+function buildRegionDistribution(
+    regions: readonly Region[],
+    key: 'energyKwh' | 'co2eGrams',
+    unit: string,
+): PainelWidgetContent | null {
+    const shares = regions
+        .map((region) => ({ label: region.code, value: region[key] ?? 0 }))
         .filter((region) => region.value > 0)
         .sort((a, b) => b.value - a.value);
 
-    if (regions.length === 0) return null;
+    if (shares.length === 0) return null;
 
     const items =
-        regions.length > MAX_SERIES
+        shares.length > MAX_SERIES
             ? [
-                  ...regions.slice(0, MAX_SERIES - 1),
+                  ...shares.slice(0, MAX_SERIES - 1),
                   {
                       label: 'Outras',
-                      value: regions
+                      value: shares
                           .slice(MAX_SERIES - 1)
                           .reduce((sum, region) => sum + region.value, 0),
                   },
               ]
-            : regions;
+            : shares;
 
-    return { type: 'distribuicao', data: { unit: 'kWh', items } };
+    return { type: 'distribuicao', data: { unit, items } };
+}
+
+export function buildEnergyByRegion({ current }: PainelRegionsData): PainelWidgetContent | null {
+    return buildRegionDistribution(current, 'energyKwh', 'kWh');
+}
+
+export function buildCo2eByRegion({ current }: PainelRegionsData): PainelWidgetContent | null {
+    return buildRegionDistribution(current, 'co2eGrams', 'g CO₂e');
 }
 
 export function buildTopEmitters(ranking: RankingResponse): PainelWidgetContent | null {

@@ -9,6 +9,7 @@ import type { HistoryRange } from '@/types/service';
 import {
     buildAvailabilityKpi,
     buildCarbonIntensityKpi,
+    buildCo2eByRegion,
     buildCo2eKpi,
     buildCollectionFailures,
     buildEmissionSeries,
@@ -90,6 +91,7 @@ export function usePainelData(range: HistoryRange): PainelWidgetSources {
             disponibilidade: toSource(regions, regionsError, NOW_LABEL, buildAvailabilityKpi),
             'intensidade-carbono': toSource(regions, regionsError, period, buildCarbonIntensityKpi),
             'energia-por-regiao': toSource(regions, regionsError, period, buildEnergyByRegion),
+            'co2e-distribuicao': toSource(regions, regionsError, period, buildCo2eByRegion),
             'status-servicos': toSource(regions, regionsError, NOW_LABEL, buildServiceStatus),
             'top-emissores': toSource(ranking, rankingError, period, buildTopEmitters),
             'falhas-coleta': toSource(failures, failuresError, NOW_LABEL, buildCollectionFailures),
