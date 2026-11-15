@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { PainelConfirmDialog } from '@/components/painel/PainelConfirmDialog';
 import { PainelGrid } from '@/components/painel/PainelGrid';
 import { addWidget } from '@/components/painel/painelLayout';
 import { getPainelTemplate } from '@/components/painel/painelTemplates';
@@ -12,6 +13,10 @@ import { usePainelData } from '@/hooks/usePainelData';
 import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
+function sameLayout(a: readonly PainelWidget[], b: readonly PainelWidget[]): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function PainelPage() {
     const [range, setRange] = useState<HistoryRange>('24h');
     // Configuração salva do painel (carregada ao abrir a página) e, durante a
@@ -20,6 +25,8 @@ export function PainelPage() {
     const { config, isLoading, notice, saveConfig } = usePainelConfig();
     const [draft, setDraft] = useState<PainelConfig | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
+    // Template escolhido no seletor que ainda espera a confirmação do usuário.
+    const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
 
     const sources = usePainelData(range);
 
@@ -30,6 +37,11 @@ export function PainelPage() {
         setDraft({ ...current, widgets });
     }
 
+    // Alterações do modo de edição que ainda não foram salvas.
+    const hasUnsavedChanges = draft !== null && !sameLayout(draft.widgets, config.widgets);
+    // Painel salvo que já não é igual ao template de onde partiu.
+    const isCustomized = !sameLayout(config.widgets, getPainelTemplate(config.template).widgets);
+
     // Aplica um template: os widgets do painel são trocados pelos do template. No
     // modo de edição a troca fica no rascunho; fora dele, já é salva.
     function applyTemplate(id: PainelTemplateId) {
@@ -39,6 +51,18 @@ export function PainelPage() {
             setDraft(next);
         } else {
             void saveConfig(next);
+        }
+
+        setPendingTemplate(null);
+    }
+
+    // Trocar de template apaga o arranjo atual, então pede confirmação quando há
+    // alterações não salvas ou um painel personalizado que seria perdido.
+    function requestTemplate(id: PainelTemplateId) {
+        if (hasUnsavedChanges || (!editing && isCustomized)) {
+            setPendingTemplate(id);
+        } else {
+            applyTemplate(id);
         }
     }
 
@@ -70,7 +94,7 @@ export function PainelPage() {
                     template={current.template}
                     range={range}
                     editing={editing}
-                    onTemplateChange={applyTemplate}
+                    onTemplateChange={requestTemplate}
                     onRangeChange={setRange}
                     onStartEditing={() => {
                         if (!isLoading) setDraft(config);
@@ -122,6 +146,20 @@ export function PainelPage() {
                         setCatalogOpen(false);
                     }}
                     onClose={() => setCatalogOpen(false)}
+                />
+            )}
+
+            {pendingTemplate && (
+                <PainelConfirmDialog
+                    title={`Aplicar o template "${getPainelTemplate(pendingTemplate).label}"?`}
+                    message={
+                        hasUnsavedChanges
+                            ? 'Você tem alterações não salvas no layout. Ao aplicar o template, elas serão substituídas pelos widgets dele.'
+                            : 'O seu painel personalizado será substituído pelos widgets do template.'
+                    }
+                    confirmLabel="Aplicar template"
+                    onConfirm={() => applyTemplate(pendingTemplate)}
+                    onCancel={() => setPendingTemplate(null)}
                 />
             )}
         </PainelShell>
