@@ -77,8 +77,8 @@ export function PainelPage() {
 
             {notice && (
                 <p
-                    role="alert"
-                    className="rounded-lg border border-amber-400/40 bg-amber-400/5 px-4 py-3 text-sm text-amber-200"
+                    role="status"
+                    className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
                 >
                     {notice}
                 </p>
