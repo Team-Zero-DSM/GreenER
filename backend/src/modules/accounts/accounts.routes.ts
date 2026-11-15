@@ -3,7 +3,12 @@ import { pool } from '../../db/connection.js';
 import { AccountsController } from './accounts.controller.js';
 import { AccountsRepository } from './accounts.repository.js';
 import { AccountsService } from './accounts.service.js';
-import { credentialsSchema, forgotPasswordSchema, registerSchema } from './accounts.schema.js';
+import {
+    credentialsSchema,
+    forgotPasswordSchema,
+    registerSchema,
+    resetPasswordSchema,
+} from './accounts.schema.js';
 import { validate } from '../../shared/middleware/validate.js';
 import { throttle } from '../../shared/middleware/throttle.js';
 
@@ -18,4 +23,11 @@ accountsRouter.post(
     throttle(10),
     validate(forgotPasswordSchema),
     controller.forgotPassword,
+);
+
+accountsRouter.post(
+    '/auth/reset-password',
+    throttle(20),
+    validate(resetPasswordSchema),
+    controller.resetPassword,
 );

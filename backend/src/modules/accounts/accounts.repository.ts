@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import type { Credentials, SessionAccount } from './types/accounts.types.js';
+import { AppError } from '../../shared/errors/AppError.js';
 
 export const accountColumns = 'id, nome AS name, email, papel AS role';
 
@@ -45,5 +46,39 @@ export class AccountsRepository {
             [email, tokenHash],
         );
         return rows[0]?.email;
+    }
+
+    async consumeReset(tokenHash: string, hash: string) {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            const { rows } = await client.query<{ id: string }>(
+                `SELECT u.id FROM usuario u JOIN redefinicao_senha r ON r.usuario_id = u.id
+             WHERE r.token_hash = $1 AND r.usado_em IS NULL AND r.expira_em > now() AND u.acesso_ativo
+             FOR UPDATE OF u`,
+                [tokenHash],
+            );
+            const account = rows[0];
+            const invalid = () =>
+                new AppError('O link expirou ou já foi usado. Solicite outro.', 400);
+            if (!account) throw invalid();
+            const consumed = await client.query(
+                `UPDATE redefinicao_senha SET usado_em = now()
+             WHERE token_hash = $1 AND usado_em IS NULL AND expira_em > now()`,
+                [tokenHash],
+            );
+            if (!consumed.rowCount) throw invalid();
+            await client.query(
+                `UPDATE usuario SET senha_hash = $2, versao_sessao = versao_sessao + 1 WHERE id = $1`,
+                [account.id, hash],
+            );
+            await client.query('DELETE FROM redefinicao_senha WHERE usuario_id = $1', [account.id]);
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 }
