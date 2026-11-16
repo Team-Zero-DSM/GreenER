@@ -8,4 +8,12 @@ export class DashboardsService {
     async getMine(userId: string): Promise<{ dashboard: DashboardConfig | null }> {
         return { dashboard: await this.repository.findByUser(userId) };
     }
+
+    // Grava a configuração (já validada pela rota) e devolve o painel salvo.
+    async saveMine(
+        userId: string,
+        config: DashboardConfig,
+    ): Promise<{ dashboard: DashboardConfig }> {
+        return { dashboard: await this.repository.upsert(userId, config) };
+    }
 }

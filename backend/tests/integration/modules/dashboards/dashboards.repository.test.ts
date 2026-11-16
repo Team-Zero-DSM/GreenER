@@ -36,4 +36,45 @@ describe.skipIf(!testDatabaseUrl)('Painel do usuário com PostgreSQL', () => {
             dashboard: { template: 'visao-geral', widgets },
         });
     });
+
+    it('deve criar o painel no primeiro PUT e substituí-lo nos seguintes', async () => {
+        const service = new DashboardsService(new DashboardsRepository(database.pool));
+        const created = await database.pool.query<{ id: string }>(
+            `INSERT INTO usuario (email, senha_hash, nome) VALUES ('bia@greener.dev', 'x', 'Bia') RETURNING id`,
+        );
+        const otherId = created.rows[0].id;
+        const first = {
+            template: 'executivo',
+            widgets: [
+                { id: 'co2e-total', type: 'kpi' as const, title: 'CO₂e', x: 0, y: 0, w: 6, h: 3 },
+            ],
+        };
+        const second = {
+            template: 'em-branco',
+            widgets: [
+                {
+                    id: 'status-servicos',
+                    type: 'status' as const,
+                    title: 'Status',
+                    x: 0,
+                    y: 0,
+                    w: 4,
+                    h: 3,
+                },
+            ],
+            tablet: { 'status-servicos': { x: 0, y: 0, w: 6, h: 3 } },
+            mobileOrder: ['status-servicos'],
+        };
+
+        await expect(service.saveMine(otherId, first)).resolves.toEqual({ dashboard: first });
+        await expect(service.saveMine(otherId, second)).resolves.toEqual({ dashboard: second });
+
+        // Continua uma linha só por usuário, com a última configuração enviada.
+        const rows = await database.pool.query(
+            'SELECT template FROM painel_usuario WHERE usuario_id = $1',
+            [otherId],
+        );
+        expect(rows.rows).toEqual([{ template: 'em-branco' }]);
+        await expect(service.getMine(otherId)).resolves.toEqual({ dashboard: second });
+    });
 });
