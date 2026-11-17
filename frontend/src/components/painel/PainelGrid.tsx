@@ -1,14 +1,21 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import type { PainelSourceGetter, PainelWidget } from '@/types/painel';
+import type { PainelBreakpoint, PainelSourceGetter, PainelWidget } from '@/types/painel';
 
-import { arrangeWidgets, moveWidget, removeWidget, resizeWidget } from './painelLayout';
-import { PAINEL_GRID_COLUMNS } from './painelLayoutPadrao';
+import {
+    arrangeWidgets,
+    moveWidget,
+    removeWidget,
+    resizeWidget,
+    shiftWidget,
+} from './painelLayout';
+import { PAINEL_COLUMNS } from './painelLayoutPadrao';
 import { PainelWidgetCard } from './PainelWidgetCard';
 
 interface PainelGridProps {
+    // Widgets já com a posição do tamanho de tela em uso.
     widgets: readonly PainelWidget[];
+    breakpoint: PainelBreakpoint;
     // Entrega os dados de cada widget.
     getSource: PainelSourceGetter;
     // No modo de edição os widgets ganham os controles de layout; no modo de
@@ -28,11 +35,14 @@ interface PainelGesture {
     // Tamanho, em pixels, de um passo de coluna e de linha (célula + espaçamento).
     columnStep: number;
     rowStep: number;
+    // Colunas da grade no tamanho de tela em que o gesto começou.
+    columns: number;
     initialWidgets: readonly PainelWidget[];
 }
 
 export function PainelGrid({
     widgets,
+    breakpoint,
     getSource,
     editing = false,
     onWidgetsChange,
@@ -42,10 +52,10 @@ export function PainelGrid({
     const gestureRef = useRef<PainelGesture | null>(null);
     const [activeWidgetId, setActiveWidgetId] = useState<string | null>(null);
 
-    // As coordenadas só valem na grade de 12 colunas (desktop). No tablet e no
-    // celular a posição é automática, então não há o que arrastar.
-    const isDesktop = useMediaQuery('(min-width: 1024px)');
-    const canArrange = editing && isDesktop && onWidgetsChange !== undefined;
+    // Arrastar e redimensionar valem nas grades com coordenadas (desktop e tablet).
+    // No celular os widgets são empilhados, então não há o que arrastar.
+    const columns = PAINEL_COLUMNS[breakpoint];
+    const canArrange = editing && breakpoint !== 'mobile' && onWidgetsChange !== undefined;
 
     useEffect(() => {
         if (activeWidgetId === null) {
@@ -70,12 +80,14 @@ export function PainelGrid({
                           gesture.widget.id,
                           gesture.widget.x + columns,
                           gesture.widget.y + rows,
+                          gesture.columns,
                       )
                     : resizeWidget(
                           gesture.initialWidgets,
                           gesture.widget.id,
                           gesture.widget.w + columns,
                           gesture.widget.h + rows,
+                          gesture.columns,
                       );
 
             // Os outros widgets abrem espaço para o que está sendo editado.
@@ -122,7 +134,8 @@ export function PainelGrid({
             widget,
             startX: event.clientX,
             startY: event.clientY,
-            columnStep: (grid.getBoundingClientRect().width + columnGap) / PAINEL_GRID_COLUMNS,
+            columnStep: (grid.getBoundingClientRect().width + columnGap) / columns,
+            columns,
             rowStep: rowHeight + rowGap,
             initialWidgets: widgets,
         };
@@ -146,7 +159,7 @@ export function PainelGrid({
             data-editing={editing}
             className="grid auto-rows-[4.875rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
         >
-            {widgets.map((widget) => (
+            {widgets.map((widget, index) => (
                 <PainelWidgetCard
                     key={widget.id}
                     widget={widget}
@@ -156,7 +169,32 @@ export function PainelGrid({
                     onConfigure={onConfigureWidget ? () => onConfigureWidget(widget) : undefined}
                     onRemove={
                         editing && onWidgetsChange
-                            ? () => onWidgetsChange(removeWidget(widgets, widget.id))
+                            ? () =>
+                                  onWidgetsChange(
+                                      // No celular não há posições a reorganizar: o
+                                      // widget só sai da pilha.
+                                      breakpoint === 'mobile'
+                                          ? widgets.filter((item) => item.id !== widget.id)
+                                          : removeWidget(widgets, widget.id),
+                                  )
+                            : undefined
+                    }
+                    reorder={
+                        // No celular a ordem é trocada pelos botões de subir e descer,
+                        // já que arrastar atrapalharia a rolagem da página.
+                        editing && breakpoint === 'mobile' && onWidgetsChange
+                            ? {
+                                  onMoveUp:
+                                      index > 0
+                                          ? () =>
+                                                onWidgetsChange(shiftWidget(widgets, widget.id, -1))
+                                          : undefined,
+                                  onMoveDown:
+                                      index < widgets.length - 1
+                                          ? () =>
+                                                onWidgetsChange(shiftWidget(widgets, widget.id, 1))
+                                          : undefined,
+                              }
                             : undefined
                     }
                     onMoveStart={
