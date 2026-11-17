@@ -35,6 +35,15 @@ CREATE TABLE dashboard (
 
 CREATE INDEX idx_dashboard_usuario ON dashboard(usuario_id, id);
 
+CREATE TABLE painel_usuario (
+    usuario_id BIGINT PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
+    template TEXT NOT NULL,
+    widgets JSONB NOT NULL CHECK (jsonb_typeof(widgets) = 'array'),
+    posicoes_tablet JSONB CHECK (posicoes_tablet IS NULL OR jsonb_typeof(posicoes_tablet) = 'object'),
+    ordem_mobile JSONB CHECK (ordem_mobile IS NULL OR jsonb_typeof(ordem_mobile) = 'array'),
+    atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE regiao (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     codigo TEXT NOT NULL UNIQUE,
