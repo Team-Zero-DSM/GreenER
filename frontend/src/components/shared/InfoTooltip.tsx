@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useId } from 'react';
@@ -9,10 +8,7 @@ interface InfoTooltipProps {
     ariaLabel?: string;
 }
 
-export function InfoTooltip({
-    content,
-    ariaLabel = 'Mais informações',
-}: InfoTooltipProps) {
+export function InfoTooltip({ content, ariaLabel = 'Mais informações' }: InfoTooltipProps) {
     const buttonRef = useRef<HTMLButtonElement>(null);
     const closeTimer = useRef<number | null>(null);
     const tooltipId = useId();

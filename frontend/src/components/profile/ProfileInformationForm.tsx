@@ -1,9 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
-import type {
-    UserProfile,
-    UpdateProfileRequest,
-} from '@/types/profile';
+import type { UserProfile, UpdateProfileRequest } from '@/types/profile';
 
 interface ProfileInformationFormProps {
     profile: UserProfile;
@@ -35,20 +32,14 @@ export function ProfileInformationForm({
                 email: email.trim(),
             });
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Não foi possível atualizar o perfil.',
-            );
+            setError(err instanceof Error ? err.message : 'Não foi possível atualizar o perfil.');
         }
     }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
-                <h3 className="text-base font-semibold">
-                    Informações pessoais
-                </h3>
+                <h3 className="text-base font-semibold">Informações pessoais</h3>
 
                 <p className="text-sm text-muted-foreground">
                     Atualize seu nome e endereço de e-mail.
@@ -75,18 +66,15 @@ export function ProfileInformationForm({
 
             <div className="space-y-2">
                 <div className="flex items-center gap-1.5">
-    <label
-        htmlFor="profile-email"
-        className="text-sm font-medium"
-    >
-        E-mail
-    </label>
+                    <label htmlFor="profile-email" className="text-sm font-medium">
+                        E-mail
+                    </label>
 
-    <InfoTooltip
-        content="Use um e-mail atualizado. Ele será utilizado para recuperar o acesso à sua conta."
-        ariaLabel="Informações sobre o uso do e-mail"
-    />
-</div>
+                    <InfoTooltip
+                        content="Use um e-mail atualizado. Ele será utilizado para recuperar o acesso à sua conta."
+                        ariaLabel="Informações sobre o uso do e-mail"
+                    />
+                </div>
 
                 <input
                     id="profile-email"
@@ -127,4 +115,4 @@ export function ProfileInformationForm({
             </div>
         </form>
     );
-}   
+}

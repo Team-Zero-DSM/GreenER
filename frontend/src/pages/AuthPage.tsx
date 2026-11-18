@@ -1,31 +1,17 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { AuthForm } from '@/components/auth/AuthForm';
 
-import {
-    registerAccount,
-    loginAccount,
-} from '@/api/auth';
+import { registerAccount, loginAccount } from '@/api/auth';
 
 import { ApiError } from '@/api/services';
 
 import { useAuth } from '@/hooks/useAuth';
 
-import type {
-    AuthMode,
-    LoginRequest,
-    RegisterRequest,
-} from '@/types/auth';
+import type { AuthMode, LoginRequest, RegisterRequest } from '@/types/auth';
 
 export function AuthPage() {
     const navigate = useNavigate();
@@ -55,21 +41,18 @@ export function AuthPage() {
 
             // Redireciona após autenticação bem-sucedida.
             navigate('/inicio', { replace: true });
-
         } catch (error) {
             if (error instanceof ApiError) {
                 if (error.status === 401) {
                     setFormError('E-mail ou senha inválidos.');
                 } else if (error.status === 429) {
-                    setFormError(
-                        'Muitas tentativas. Tente novamente mais tarde.'
-                    );
+                    setFormError('Muitas tentativas. Tente novamente mais tarde.');
                 } else {
                     setFormError(error.message);
                 }
             } else {
                 setFormError(
-                    'Não foi possível conectar ao servidor. Verifique se o backend está em execução.'
+                    'Não foi possível conectar ao servidor. Verifique se o backend está em execução.',
                 );
             }
         } finally {
@@ -90,21 +73,18 @@ export function AuthPage() {
             setSession(session);
 
             navigate('/inicio', { replace: true });
-
         } catch (error) {
             if (error instanceof ApiError) {
                 if (error.status === 409) {
                     setFormError('Este e-mail já está cadastrado.');
                 } else if (error.status === 429) {
-                    setFormError(
-                        'Muitas tentativas. Tente novamente mais tarde.'
-                    );
+                    setFormError('Muitas tentativas. Tente novamente mais tarde.');
                 } else {
                     setFormError(error.message);
                 }
             } else {
                 setFormError(
-                    'Não foi possível conectar ao servidor. Verifique se o backend está em execução.'
+                    'Não foi possível conectar ao servidor. Verifique se o backend está em execução.',
                 );
             }
         } finally {
@@ -126,9 +106,7 @@ export function AuthPage() {
         <Card className="w-full border border-border/70 bg-card/80">
             <CardHeader>
                 <CardTitle className="text-2xl">
-                    {isLogin
-                        ? 'Acesse sua conta'
-                        : 'Crie sua conta'}
+                    {isLogin ? 'Acesse sua conta' : 'Crie sua conta'}
                 </CardTitle>
 
                 <CardDescription>
@@ -150,9 +128,7 @@ export function AuthPage() {
 
                 <div className="border-t border-border/70 pt-5 text-center">
                     <p className="text-sm text-muted-foreground">
-                        {isLogin
-                            ? 'Ainda não possui uma conta?'
-                            : 'Já possui uma conta?'}
+                        {isLogin ? 'Ainda não possui uma conta?' : 'Já possui uma conta?'}
                     </p>
 
                     <button

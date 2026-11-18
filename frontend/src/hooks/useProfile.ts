@@ -1,19 +1,10 @@
-
 import { useCallback, useEffect, useState } from 'react';
 
-import {
-    getMyProfile,
-    updateMyProfile,
-    changeMyPassword,
-} from '@/api/profile';
+import { getMyProfile, updateMyProfile, changeMyPassword } from '@/api/profile';
 
 import { useAuth } from '@/hooks/useAuth';
 
-import type {
-    UserProfile,
-    UpdateProfileRequest,
-    ChangePasswordRequest,
-} from '@/types/profile';
+import type { UserProfile, UpdateProfileRequest, ChangePasswordRequest } from '@/types/profile';
 
 interface ProfileState {
     profile: UserProfile | null;
@@ -22,9 +13,7 @@ interface ProfileState {
 }
 
 function getErrorMessage(error: unknown): string {
-    return error instanceof Error
-        ? error.message
-        : 'Ocorreu um erro inesperado.';
+    return error instanceof Error ? error.message : 'Ocorreu um erro inesperado.';
 }
 
 export function useProfile() {

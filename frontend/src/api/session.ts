@@ -10,10 +10,7 @@ function isValidSession(value: unknown): value is AuthSession {
 
     const session = value as Record<string, unknown>;
 
-    if (
-        typeof session.token !== 'string' ||
-        !session.token
-    ) {
+    if (typeof session.token !== 'string' || !session.token) {
         return false;
     }
 
@@ -34,14 +31,9 @@ function isValidSession(value: unknown): value is AuthSession {
 // Armazena a sessão no navegador.
 export function saveAuthSession(session: AuthSession): void {
     try {
-        sessionStorage.setItem(
-            SESSION_KEY,
-            JSON.stringify(session),
-        );
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
     } catch {
-        throw new Error(
-            'Não foi possível armazenar a sessão neste navegador.',
-        );
+        throw new Error('Não foi possível armazenar a sessão neste navegador.');
     }
 }
 

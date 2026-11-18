@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
@@ -7,11 +6,7 @@ import { ResetPasswordDialog } from '@/components/auth/ResetPasswordDialog';
 
 import { validateEmail } from '@/lib/validation';
 
-import type {
-    AuthMode,
-    LoginRequest,
-    RegisterRequest,
-} from '@/types/auth';
+import type { AuthMode, LoginRequest, RegisterRequest } from '@/types/auth';
 
 // Recupera o token do fragmento da URL.
 function getResetTokenFromUrl(): string | null {
@@ -19,9 +14,7 @@ function getResetTokenFromUrl(): string | null {
         return null;
     }
 
-    const params = new URLSearchParams(
-        window.location.hash.slice(1),
-    );
+    const params = new URLSearchParams(window.location.hash.slice(1));
 
     return params.get('token');
 }
@@ -52,17 +45,13 @@ export function AuthForm({
 
     const [error, setError] = useState<string | null>(null);
 
-    const [isForgotPasswordOpen, setIsForgotPasswordOpen] =
-        useState(false);
+    const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
     // Recupera o token na própria inicialização do estado.
-    const [resetToken, setResetToken] = useState<string | null>(
-        getResetTokenFromUrl,
-    );
+    const [resetToken, setResetToken] = useState<string | null>(getResetTokenFromUrl);
 
     // O Dialog já começa aberto quando existe um token na URL.
-    const [isResetPasswordOpen, setIsResetPasswordOpen] =
-        useState(() => Boolean(resetToken));
+    const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(() => Boolean(resetToken));
 
     // Remove o token da barra de endereço sem atualizar o estado.
     useEffect(() => {
@@ -171,11 +160,7 @@ export function AuthForm({
 
     return (
         <>
-            <form
-                className="flex flex-col gap-5"
-                onSubmit={handleSubmit}
-                noValidate
-            >
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
                 {/* Nome: somente cadastro */}
                 {!isLogin && (
                     <AuthInput
@@ -205,17 +190,15 @@ export function AuthForm({
                 <AuthInput
                     id="auth-password"
                     infoTooltip={
-    !isLogin
-        ? "Mínimo de 8 caracteres e evite senhas comuns ou fáceis de adivinhar."
-        : undefined
-}
+                        !isLogin
+                            ? 'Mínimo de 8 caracteres e evite senhas comuns ou fáceis de adivinhar.'
+                            : undefined
+                    }
                     label="Senha"
                     type="password"
                     value={password}
                     placeholder="Digite sua senha"
-                    autoComplete={
-                        isLogin ? 'current-password' : 'new-password'
-                    }
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
                     onChange={setPassword}
                     labelAction={
                         isLogin ? (
@@ -268,17 +251,14 @@ export function AuthForm({
                             ? 'Entrando...'
                             : 'Criando conta...'
                         : isLogin
-                            ? 'Entrar'
-                            : 'Criar conta'}
+                          ? 'Entrar'
+                          : 'Criar conta'}
                 </button>
             </form>
 
             {/* Dialog de recuperação de senha */}
             {isForgotPasswordOpen && (
-                <ForgotPasswordDialog
-                    initialEmail={email}
-                    onOpenChange={setIsForgotPasswordOpen}
-                />
+                <ForgotPasswordDialog initialEmail={email} onOpenChange={setIsForgotPasswordOpen} />
             )}
 
             {/* Dialog de redefinição de senha */}

@@ -1,4 +1,3 @@
-
 import { useState, type ReactNode } from 'react';
 
 import { Eye, EyeOff } from 'lucide-react';
@@ -40,10 +39,7 @@ export function AuthInput({
         <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-1.5">
-                    <label
-                        htmlFor={id}
-                        className="text-sm font-medium text-foreground"
-                    >
+                    <label htmlFor={id} className="text-sm font-medium text-foreground">
                         {label}
                     </label>
 
@@ -74,19 +70,11 @@ export function AuthInput({
                 {isPassword && (
                     <button
                         type="button"
-                        onClick={() =>
-                            setShowPassword((previous) => !previous)
-                        }
-                        aria-label={
-                            showPassword ? 'Ocultar senha' : 'Mostrar senha'
-                        }
+                        onClick={() => setShowPassword((previous) => !previous)}
+                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                         className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                     >
-                        {showPassword ? (
-                            <EyeOff className="size-4" />
-                        ) : (
-                            <Eye className="size-4" />
-                        )}
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                 )}
             </div>

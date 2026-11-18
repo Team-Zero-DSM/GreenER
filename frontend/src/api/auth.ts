@@ -1,42 +1,22 @@
-
 import { postJson, ApiError } from '@/api/services';
 
-import type {
-    AuthSession,
-    AuthenticatedUser,
-    RegisterRequest,
-    LoginRequest,
-} from '@/types/auth';
+import type { AuthSession, AuthenticatedUser, RegisterRequest, LoginRequest } from '@/types/auth';
 
-const API_URL = (
-    import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
-).replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
 
 // Cadastra um usuário no backend.
-export async function registerAccount(
-    data: RegisterRequest,
-): Promise<AuthSession> {
-    return postJson<RegisterRequest, AuthSession>(
-        '/auth/register',
-        data,
-    );
+export async function registerAccount(data: RegisterRequest): Promise<AuthSession> {
+    return postJson<RegisterRequest, AuthSession>('/auth/register', data);
 }
 
 // Realiza o login do usuário.
-export async function loginAccount(
-    data: LoginRequest,
-): Promise<AuthSession> {
-    return postJson<LoginRequest, AuthSession>(
-        '/auth/login',
-        data,
-    );
+export async function loginAccount(data: LoginRequest): Promise<AuthSession> {
+    return postJson<LoginRequest, AuthSession>('/auth/login', data);
 }
 
 // Consulta os dados do usuário autenticado.
 // Utilizada para validar e restaurar uma sessão após F5.
-export async function getCurrentUser(
-    token: string,
-): Promise<AuthenticatedUser> {
+export async function getCurrentUser(token: string): Promise<AuthenticatedUser> {
     const response = await fetch(`${API_URL}/api/v1/profile`, {
         method: 'GET',
         headers: {
@@ -50,8 +30,7 @@ export async function getCurrentUser(
         } | null;
 
         throw new ApiError(
-            body?.error?.message ??
-                `Falha na validação da sessão (HTTP ${response.status})`,
+            body?.error?.message ?? `Falha na validação da sessão (HTTP ${response.status})`,
             response.status,
         );
     }
@@ -60,26 +39,15 @@ export async function getCurrentUser(
 }
 
 // Solicita o envio do link de recuperação de senha.
-export async function requestPasswordReset(
-    email: string,
-): Promise<void> {
-    await postJson<
-        { email: string },
-        { message: string }
-    >('/auth/forgot-password', {
+export async function requestPasswordReset(email: string): Promise<void> {
+    await postJson<{ email: string }, { message: string }>('/auth/forgot-password', {
         email: email.trim(),
     });
 }
 
 // Redefine a senha utilizando o token recebido por e-mail.
-export async function resetPassword(
-    token: string,
-    password: string,
-): Promise<void> {
-    await postJson<
-        { token: string; password: string },
-        void
-    >('/auth/reset-password', {
+export async function resetPassword(token: string, password: string): Promise<void> {
+    await postJson<{ token: string; password: string }, void>('/auth/reset-password', {
         token,
         password,
     });

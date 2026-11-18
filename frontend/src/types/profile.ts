@@ -1,6 +1,5 @@
 import type { AuthenticatedUser } from '@/types/auth';
 
-
 export type ProfileRole = AuthenticatedUser['role'];
 export type UserProfile = AuthenticatedUser;
 
