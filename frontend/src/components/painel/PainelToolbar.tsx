@@ -1,4 +1,4 @@
-import { Check, LayoutTemplate, Pencil, Plus, Undo2 } from 'lucide-react';
+import { Check, LayoutTemplate, Maximize, Pencil, Plus, Undo2 } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
@@ -21,6 +21,8 @@ interface PainelToolbarProps {
     // Saem do modo de edição: salvar mantém as alterações, descartar volta ao layout anterior.
     onSave: () => void;
     onDiscard: () => void;
+    // Entra no modo tela cheia/TV.
+    onEnterFullscreen: () => void;
 }
 
 export function PainelToolbar({
@@ -33,6 +35,7 @@ export function PainelToolbar({
     onAddWidget,
     onSave,
     onDiscard,
+    onEnterFullscreen,
 }: PainelToolbarProps) {
     return (
         <section aria-label="Ferramentas do painel" className="flex flex-wrap items-center gap-3">
@@ -81,10 +84,17 @@ export function PainelToolbar({
                     </button>
                 </>
             ) : (
-                <button type="button" onClick={onStartEditing} className={SECONDARY_BUTTON}>
-                    <Pencil aria-hidden="true" className="size-4" />
-                    Editar layout
-                </button>
+                <>
+                    <button type="button" onClick={onStartEditing} className={SECONDARY_BUTTON}>
+                        <Pencil aria-hidden="true" className="size-4" />
+                        Editar layout
+                    </button>
+
+                    <button type="button" onClick={onEnterFullscreen} className={SECONDARY_BUTTON}>
+                        <Maximize aria-hidden="true" className="size-4" />
+                        Tela cheia
+                    </button>
+                </>
             )}
         </section>
     );

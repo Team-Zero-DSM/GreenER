@@ -7,6 +7,30 @@ export const accountColumns = 'id, nome AS name, email, papel AS role';
 export class AccountsRepository {
     constructor(private readonly pool: Pool) {}
 
+    async createFirstAdmin(name: string, email: string, hash: string) {
+        return this.transaction(async (client) => {
+            // Impede que duas execuções criem o primeiro administrador ao mesmo tempo.
+            await client.query('LOCK TABLE usuario IN SHARE ROW EXCLUSIVE MODE');
+            const { rowCount } = await client.query(
+                "SELECT id FROM usuario WHERE papel = 'admin' AND acesso_ativo LIMIT 1",
+            );
+            if (rowCount) throw new AppError('Já existe um administrador ativo.', 409);
+
+            const { rows } = await client.query<SessionAccount>(
+                `INSERT INTO usuario (nome, email, senha_hash, papel)
+                 VALUES ($1, $2, $3, 'admin')
+                 ON CONFLICT (lower(email)) DO UPDATE SET
+                     nome = EXCLUDED.nome, senha_hash = EXCLUDED.senha_hash,
+                     papel = 'admin', acesso_ativo = true,
+                     versao_sessao = usuario.versao_sessao + 1
+                 RETURNING ${accountColumns}, versao_sessao AS "sessionVersion"`,
+                [name, email, hash],
+            );
+            await client.query('DELETE FROM redefinicao_senha WHERE usuario_id = $1', [rows[0].id]);
+            return rows[0];
+        });
+    }
+
     async create(name: string, email: string, hash: string) {
         const { rows } = await this.pool.query<SessionAccount>(
             `INSERT INTO usuario (nome, email, senha_hash, papel) VALUES ($1, $2, $3, 'visualizador')

@@ -1,6 +1,9 @@
 export type PainelTemplateId =
     'visao-geral' | 'sustentabilidade' | 'operacional' | 'executivo' | 'em-branco';
 
+// Tamanhos de tela do painel. Cada um tem a sua quantidade de colunas na grade.
+export type PainelBreakpoint = 'desktop' | 'tablet' | 'mobile';
+
 export type PainelWidgetType = 'kpi' | 'serie-temporal' | 'distribuicao' | 'tabela' | 'status';
 
 export type PainelSeriesChart = 'linha' | 'area' | 'barras';
@@ -24,6 +27,14 @@ export interface PainelWidgetAction {
 export interface PainelWidgetAlert {
     direction: 'acima' | 'abaixo';
     threshold: number;
+}
+
+// Retângulo que um widget ocupa na grade.
+export interface PainelWidgetPosition {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
 }
 
 // Cada widget ocupa um retângulo da grade de 12 colunas: x e y são a coluna e a
@@ -116,5 +127,12 @@ export type PainelSourceGetter = (widget: PainelWidget) => PainelWidgetSource;
 // suas posições. É o que as rotas /dashboards/me leem e gravam.
 export interface PainelConfig {
     template: PainelTemplateId;
+    // Widgets com a posição do desktop (12 colunas).
     widgets: readonly PainelWidget[];
+    // Posição de cada widget no tablet (6 colunas), pelo id. Só existe depois que
+    // o usuário arruma o painel no tablet; antes disso o arranjo é automático.
+    tablet?: Record<string, PainelWidgetPosition>;
+    // Ordem dos widgets no celular (ids), de cima para baixo. Só existe depois que
+    // o usuário reordena no celular; antes disso segue a ordem de leitura do desktop.
+    mobileOrder?: readonly string[];
 }

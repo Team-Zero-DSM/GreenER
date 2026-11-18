@@ -55,6 +55,7 @@ interface PainelWidgetViewProps {
     // Situação e conteúdo vindos do backend. Sem fonte, o widget fica "sem dados".
     source?: PainelWidgetSource;
     actions?: readonly PainelWidgetAction[];
+    headerExtra?: ReactNode;
     editing?: boolean;
     active?: boolean;
     onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
@@ -67,6 +68,7 @@ export function PainelWidgetView({
     widget,
     source,
     actions,
+    headerExtra,
     editing = false,
     active = false,
     onMoveStart,
@@ -91,6 +93,7 @@ export function PainelWidgetView({
                     errorMessage="Este widget encontrou um erro ao exibir os dados."
                     editing={editing}
                     actions={actions}
+                    headerExtra={headerExtra}
                 />
             }
         >
@@ -105,6 +108,7 @@ export function PainelWidgetView({
                 active={active}
                 onMoveStart={onMoveStart}
                 actions={actions}
+                headerExtra={headerExtra}
             >
                 {content}
             </PainelWidgetFrame>

@@ -1,9 +1,22 @@
-import type { PainelConfig, PainelWidget, PainelWidgetType } from '@/types/painel';
+import type {
+    PainelBreakpoint,
+    PainelConfig,
+    PainelWidget,
+    PainelWidgetType,
+} from '@/types/painel';
 
 // Colunas da grade por tamanho de tela. As classes do PainelGrid precisam
 // acompanhar estes valores (lg:grid-cols-12, md:grid-cols-6 e uma coluna no celular).
 export const PAINEL_GRID_COLUMNS = 12;
 export const PAINEL_TABLET_COLUMNS = 6;
+
+// Colunas da grade em cada tamanho de tela: 12 no desktop, 6 no tablet e uma
+// única coluna no celular, com os widgets empilhados.
+export const PAINEL_COLUMNS: Record<PainelBreakpoint, number> = {
+    desktop: PAINEL_GRID_COLUMNS,
+    tablet: PAINEL_TABLET_COLUMNS,
+    mobile: 1,
+};
 
 // Nome de cada tipo de widget, como aparece no catálogo e nas configurações.
 export const PAINEL_WIDGET_TYPE_LABELS: Record<PainelWidgetType, string> = {

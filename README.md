@@ -135,6 +135,22 @@ Confira os valores dos arquivos `.env`. No Docker, o backend acessa o banco por
 
 Para encerrar: `docker compose down`.
 
+### Primeiro administrador
+
+Com o banco configurado e em execução, rode na raiz do projeto:
+
+```powershell
+docker compose exec backend npm run admin:create
+```
+
+Para executar localmente, entre em `backend/`, instale as dependências com
+`npm ci` e rode `npm run admin:create`. O comando usa a conexão do `backend/.env`.
+
+Informe nome, e-mail e senha. Se o e-mail já estiver cadastrado, a conta será
+promovida e receberá o nome e a senha informados, com o acesso reativado.
+As sessões e os tokens de recuperação anteriores serão invalidados.
+Se já existir um administrador ativo, o comando será recusado.
+
 ---
 
 ## ⏳ Cronograma de Evolução
