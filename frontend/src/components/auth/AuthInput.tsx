@@ -1,6 +1,9 @@
 
 import { useState, type ReactNode } from 'react';
+
 import { Eye, EyeOff } from 'lucide-react';
+
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
 
 interface AuthInputProps {
     id: string;
@@ -12,6 +15,7 @@ interface AuthInputProps {
     onChange: (value: string) => void;
     required?: boolean;
     labelAction?: ReactNode;
+    infoTooltip?: string;
 }
 
 export function AuthInput({
@@ -24,23 +28,32 @@ export function AuthInput({
     onChange,
     required = true,
     labelAction,
+    infoTooltip,
 }: AuthInputProps) {
     const [showPassword, setShowPassword] = useState(false);
 
     const isPassword = type === 'password';
 
-    const inputType =
-        isPassword && showPassword ? 'text' : type;
+    const inputType = isPassword && showPassword ? 'text' : type;
 
     return (
         <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-3">
-                <label
-                    htmlFor={id}
-                    className="text-sm font-medium text-foreground"
-                >
-                    {label}
-                </label>
+                <div className="flex min-w-0 items-center gap-1.5">
+                    <label
+                        htmlFor={id}
+                        className="text-sm font-medium text-foreground"
+                    >
+                        {label}
+                    </label>
+
+                    {infoTooltip && (
+                        <InfoTooltip
+                            content={infoTooltip}
+                            ariaLabel={`Informações sobre ${label.toLowerCase()}`}
+                        />
+                    )}
+                </div>
 
                 {labelAction}
             </div>
@@ -61,7 +74,9 @@ export function AuthInput({
                 {isPassword && (
                     <button
                         type="button"
-                        onClick={() => setShowPassword((previous) => !previous)}
+                        onClick={() =>
+                            setShowPassword((previous) => !previous)
+                        }
                         aria-label={
                             showPassword ? 'Ocultar senha' : 'Mostrar senha'
                         }

@@ -1,10 +1,8 @@
-export type ProfileRole = 'admin' | 'visualizador';
+import type { AuthenticatedUser } from '@/types/auth';
 
-export interface UserProfile {
-    name: string;
-    email: string;
-    role: ProfileRole;
-}
+
+export type ProfileRole = AuthenticatedUser['role'];
+export type UserProfile = AuthenticatedUser;
 
 // Dados enviados para atualizar o perfil.
 export interface UpdateProfileRequest {
@@ -12,12 +10,8 @@ export interface UpdateProfileRequest {
     email: string;
 }
 
-// Dados enviados para solicitar a alteração da senha.
+// Dados enviados para alterar a senha.
 export interface ChangePasswordRequest {
     currentPassword: string;
     newPassword: string;
-}
-
-export interface ChangePasswordResponse {
-    message: string;
 }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
 import { requestPasswordReset } from '@/api/auth';
+import { validateEmail } from '@/lib/validation';
 
 interface ForgotPasswordDialogProps {
     onOpenChange: (open: boolean) => void;
@@ -15,7 +16,6 @@ export function ForgotPasswordDialog({
 }: ForgotPasswordDialogProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
-    // Os estados começam com valores novos a cada montagem.
     const [email, setEmail] = useState(initialEmail.trim());
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,16 +50,10 @@ export function ForgotPasswordDialog({
         setError(null);
 
         const normalizedEmail = email.trim();
+        const emailError = validateEmail(normalizedEmail);
 
-        if (!normalizedEmail) {
-            setError('Informe seu e-mail.');
-            return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(normalizedEmail)) {
-            setError('Informe um endereço de e-mail válido.');
+        if (emailError) {
+            setError(emailError);
             return;
         }
 
@@ -118,6 +112,7 @@ export function ForgotPasswordDialog({
 
                         <form
                             onSubmit={handleSubmit}
+                            noValidate
                             className="flex flex-col gap-5"
                         >
                             <AuthInput

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import type {
     UserProfile,
     UpdateProfileRequest,
@@ -74,9 +74,19 @@ export function ProfileInformationForm({
             </div>
 
             <div className="space-y-2">
-                <label htmlFor="profile-email" className="text-sm font-medium">
-                    E-mail
-                </label>
+                <div className="flex items-center gap-1.5">
+    <label
+        htmlFor="profile-email"
+        className="text-sm font-medium"
+    >
+        E-mail
+    </label>
+
+    <InfoTooltip
+        content="Use um e-mail atualizado. Ele será utilizado para recuperar o acesso à sua conta."
+        ariaLabel="Informações sobre o uso do e-mail"
+    />
+</div>
 
                 <input
                     id="profile-email"

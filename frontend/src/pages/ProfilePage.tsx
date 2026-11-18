@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { UserRound, ShieldCheck, Settings, LogOut } from 'lucide-react';
 
@@ -12,14 +13,15 @@ import { ProfilePasswordForm } from '@/components/profile/ProfilePasswordForm';
 import { ProfileMenuItem } from '@/components/profile/ProfileMenuItem';
 
 import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
 
-import type {
-    UpdateProfileRequest,
-} from '@/types/profile';
+import type { UpdateProfileRequest } from '@/types/profile';
 
 type ProfileSection = 'overview' | 'information' | 'security';
 
 export function ProfilePage() {
+    const { logout } = useAuth();
+
     const {
         profile,
         isLoading,
@@ -129,7 +131,7 @@ export function ProfilePage() {
                                             title="Sair da conta"
                                             description="Encerrar sua sessão na plataforma"
                                             tone="danger"
-                                            disabled
+                                            onClick={logout}
                                         />
                                     </div>
                                 </div>

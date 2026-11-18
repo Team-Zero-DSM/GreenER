@@ -1,16 +1,14 @@
+
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
-
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import type {
     ChangePasswordRequest,
-    ChangePasswordResponse,
 } from '@/types/profile';
 
 interface ProfilePasswordFormProps {
     onBack: () => void;
-    onSubmit: (
-        data: ChangePasswordRequest,
-    ) => Promise<ChangePasswordResponse>;
+    onSubmit: (data: ChangePasswordRequest) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -49,18 +47,35 @@ export function ProfilePasswordForm({
         setError(null);
         setSuccess(null);
 
+        // Valida o tamanho mínimo da nova senha.
+        if (newPassword.length < 8) {
+            setError('A nova senha deve possuir pelo menos 8 caracteres.');
+            return;
+        }
+
+        // O bcrypt aceita no máximo 72 bytes.
+        const passwordBytes = new TextEncoder().encode(newPassword).length;
+
+        if (passwordBytes > 72) {
+            setError('A nova senha não pode ultrapassar 72 bytes.');
+            return;
+        }
+
+        // Confirma se as senhas são iguais.
         if (newPassword !== confirmPassword) {
             setError('A confirmação da nova senha não corresponde.');
             return;
         }
 
         try {
-            const response = await onSubmit({
+            await onSubmit({
                 currentPassword,
                 newPassword,
             });
 
-            setSuccess(response.message);
+            setSuccess(
+                'Senha alterada com sucesso. Sua sessão continua ativa.',
+            );
 
             setCurrentPassword('');
             setNewPassword('');
@@ -69,7 +84,7 @@ export function ProfilePasswordForm({
             setError(
                 err instanceof Error
                     ? err.message
-                    : 'Não foi possível solicitar a alteração da senha.',
+                    : 'Não foi possível alterar a senha.',
             );
         }
     }
@@ -115,12 +130,21 @@ export function ProfilePasswordForm({
 
             {fields.map((field, index) => (
                 <div key={field.id} className="space-y-2">
-                    <label
-                        htmlFor={field.id}
-                        className="text-sm font-medium"
-                    >
-                        {field.label}
-                    </label>
+                    <div className="flex items-center gap-1.5">
+    <label
+        htmlFor={field.id}
+        className="text-sm font-medium"
+    >
+        {field.label}
+    </label>
+
+    {field.id === 'new-password' && (
+        <InfoTooltip
+            content="Utilize pelo menos 8 caracteres e evite senhas comuns."
+            ariaLabel="Dicas para criar uma senha segura"
+        />
+    )}
+</div>
 
                     <div className="relative">
                         <input
