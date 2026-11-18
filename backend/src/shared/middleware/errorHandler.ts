@@ -1,15 +1,9 @@
-
 import type { Request, Response, NextFunction } from 'express';
 import { DatabaseError } from 'pg';
 import { ZodError } from 'zod';
 import { AppError } from '../errors/AppError.js';
 
-export function errorHandler(
-    err: unknown,
-    _req: Request,
-    res: Response,
-    next: NextFunction,
-): void {
+export function errorHandler(err: unknown, _req: Request, res: Response, next: NextFunction): void {
     if (res.headersSent) {
         next(err);
         return;
@@ -22,11 +16,7 @@ export function errorHandler(
         return;
     }
 
-    if (
-        err instanceof SyntaxError &&
-        'type' in err &&
-        err.type === 'entity.parse.failed'
-    ) {
+    if (err instanceof SyntaxError && 'type' in err && err.type === 'entity.parse.failed') {
         res.status(400).json({
             error: {
                 message: 'Dados inválidos',
@@ -43,9 +33,7 @@ export function errorHandler(
 
     if (err instanceof ZodError) {
         const hasInvalidEmail = err.issues.some(
-            (issue) =>
-                issue.path[0] === 'email' &&
-                issue.code === 'invalid_format',
+            (issue) => issue.path[0] === 'email' && issue.code === 'invalid_format',
         );
 
         res.status(400).json({
@@ -64,14 +52,9 @@ export function errorHandler(
 
     if (err instanceof DatabaseError) {
         if (err.code === '23505') {
-            const emailConstraints = [
-                'usuario_email_key',
-                'ux_usuario_email_lower',
-            ];
+            const emailConstraints = ['usuario_email_key', 'ux_usuario_email_lower'];
 
-            const isDuplicateEmail = emailConstraints.includes(
-                err.constraint ?? '',
-            );
+            const isDuplicateEmail = emailConstraints.includes(err.constraint ?? '');
 
             res.status(409).json({
                 error: {
