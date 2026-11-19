@@ -1,25 +1,122 @@
-import type { PainelTemplateId, PainelWidget } from '@/types/painel';
+import type { PainelConfig, PainelWidget, PainelWidgetType } from '@/types/painel';
 
 // Colunas da grade por tamanho de tela. As classes do PainelGrid precisam
 // acompanhar estes valores (lg:grid-cols-12, md:grid-cols-6 e uma coluna no celular).
 export const PAINEL_GRID_COLUMNS = 12;
 export const PAINEL_TABLET_COLUMNS = 6;
 
-export const PAINEL_TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] = [
-    { value: 'visao-geral', label: 'Visão geral' },
-    { value: 'sustentabilidade', label: 'Sustentabilidade' },
-    { value: 'operacional', label: 'Operacional' },
-    { value: 'executivo', label: 'Executivo' },
+// Nome de cada tipo de widget, como aparece no catálogo e nas configurações.
+export const PAINEL_WIDGET_TYPE_LABELS: Record<PainelWidgetType, string> = {
+    kpi: 'Indicador',
+    'serie-temporal': 'Série temporal',
+    distribuicao: 'Distribuição',
+    tabela: 'Tabela',
+    status: 'Status',
+};
+
+// Widgets do template "Visão geral", que é também o painel de quem nunca salvou um.
+export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
+    { id: 'co2e-total', type: 'kpi', title: 'CO₂e no período', x: 0, y: 0, w: 3, h: 2 },
+    { id: 'energia-total', type: 'kpi', title: 'Energia no período', x: 3, y: 0, w: 3, h: 2 },
+    { id: 'disponibilidade', type: 'kpi', title: 'Disponibilidade', x: 6, y: 0, w: 3, h: 2 },
+    {
+        id: 'intensidade-carbono',
+        type: 'kpi',
+        title: 'Intensidade de carbono',
+        x: 9,
+        y: 0,
+        w: 3,
+        h: 2,
+    },
+    {
+        id: 'co2e-por-regiao',
+        type: 'serie-temporal',
+        chart: 'area',
+        title: 'Emissão de CO₂e por região',
+        x: 0,
+        y: 2,
+        w: 8,
+        h: 4,
+    },
+    { id: 'status-servicos', type: 'status', title: 'Status dos serviços', x: 8, y: 2, w: 4, h: 4 },
+    { id: 'top-emissores', type: 'tabela', title: 'Top 5 emissores', x: 0, y: 6, w: 4, h: 4 },
+    { id: 'falhas-coleta', type: 'tabela', title: 'Falhas de coleta', x: 4, y: 6, w: 4, h: 4 },
+    {
+        id: 'energia-por-regiao',
+        type: 'distribuicao',
+        chart: 'rosca',
+        title: 'Energia por região',
+        x: 8,
+        y: 6,
+        w: 4,
+        h: 4,
+    },
 ];
 
-export const PAINEL_DEFAULT_WIDGETS: readonly PainelWidget[] = [
-    { id: 'co2e-total', title: 'CO₂e no período', x: 0, y: 0, w: 3, h: 2 },
-    { id: 'energia-total', title: 'Energia no período', x: 3, y: 0, w: 3, h: 2 },
-    { id: 'disponibilidade', title: 'Disponibilidade', x: 6, y: 0, w: 3, h: 2 },
-    { id: 'intensidade-carbono', title: 'Intensidade de carbono', x: 9, y: 0, w: 3, h: 2 },
-    { id: 'co2e-por-regiao', title: 'Emissão de CO₂e por região', x: 0, y: 2, w: 8, h: 4 },
-    { id: 'status-servicos', title: 'Status dos serviços', x: 8, y: 2, w: 4, h: 4 },
-    { id: 'top-emissores', title: 'Top 5 emissores', x: 0, y: 6, w: 4, h: 4 },
-    { id: 'falhas-coleta', title: 'Falhas de coleta', x: 4, y: 6, w: 4, h: 4 },
-    { id: 'energia-por-regiao', title: 'Energia por região', x: 8, y: 6, w: 4, h: 4 },
+// Widgets que não estão na "Visão geral", usados pelos outros templates e
+// disponíveis no catálogo.
+export const PAINEL_EXTRA_WIDGETS: readonly PainelWidget[] = [
+    {
+        id: 'co2e-distribuicao',
+        type: 'distribuicao',
+        chart: 'rosca',
+        title: 'CO₂e por região',
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4,
+    },
+    {
+        id: 'servicos-sem-metricas',
+        type: 'tabela',
+        title: 'Serviços sem métricas',
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4,
+    },
+    {
+        id: 'ultimas-tentativas',
+        type: 'tabela',
+        title: 'Últimas tentativas de coleta',
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4,
+    },
 ];
+
+// Todos os widgets que existem no painel, com o tamanho padrão de cada um.
+export const PAINEL_WIDGET_LIBRARY: readonly PainelWidget[] = [
+    ...PAINEL_DEFAULT_WIDGETS,
+    ...PAINEL_EXTRA_WIDGETS,
+];
+
+// Configuração de quem ainda não salvou um painel.
+export const PAINEL_DEFAULT_CONFIG: PainelConfig = {
+    template: 'visao-geral',
+    widgets: PAINEL_DEFAULT_WIDGETS,
+};
+
+// Descrição de cada widget no catálogo do modo de edição, pelo id do widget.
+const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
+    'co2e-total': 'Total de CO₂e emitido no período e variação contra o período anterior.',
+    'energia-total': 'Total de energia consumida no período e variação.',
+    disponibilidade: 'Disponibilidade média dos serviços monitorados.',
+    'intensidade-carbono': 'Gramas de CO₂e emitidos por kWh consumido.',
+    'co2e-por-regiao': 'Evolução da emissão de CO₂e ao longo do período, por região.',
+    'status-servicos': 'Quantos serviços estão ativos, indisponíveis ou sem métricas.',
+    'top-emissores': 'Os cinco serviços que mais emitiram CO₂e no período.',
+    'falhas-coleta': 'Últimas tentativas de coleta que falharam.',
+    'energia-por-regiao': 'Como o consumo de energia se divide entre as regiões.',
+    'co2e-distribuicao': 'Como a emissão de CO₂e se divide entre as regiões.',
+    'servicos-sem-metricas': 'Serviços que respondem, mas não estão enviando métricas.',
+    'ultimas-tentativas': 'Resultado da tentativa de coleta mais recente de cada serviço.',
+};
+
+// Widgets que o usuário pode adicionar ao painel pelo catálogo.
+export const PAINEL_WIDGET_CATALOG: readonly { widget: PainelWidget; description: string }[] =
+    PAINEL_WIDGET_LIBRARY.map((widget) => ({
+        widget,
+        description: PAINEL_WIDGET_DESCRIPTIONS[widget.id] ?? '',
+    }));

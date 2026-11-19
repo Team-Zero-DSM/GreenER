@@ -15,12 +15,16 @@ export const resetPasswordSchema = z.object({
     token: z.string().regex(/^[a-f0-9]{64}$/),
     password: passwordSchema,
 });
-export const profileSchema = z.object({
+export const profileSchema = z.strictObject({
     name: nameSchema,
     email: emailSchema,
-    currentPassword: passwordSchema.optional(),
+});
+export const changePasswordSchema = z.strictObject({
+    currentPassword: passwordSchema,
+    newPassword: passwordSchema,
 });
 export type AccountCredentials = z.infer<typeof credentialsSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

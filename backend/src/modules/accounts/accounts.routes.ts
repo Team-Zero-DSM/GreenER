@@ -4,6 +4,7 @@ import { AccountsController } from './accounts.controller.js';
 import { AccountsRepository } from './accounts.repository.js';
 import { AccountsService } from './accounts.service.js';
 import {
+    changePasswordSchema,
     credentialsSchema,
     forgotPasswordSchema,
     profileSchema,
@@ -36,3 +37,9 @@ accountsRouter.post(
 
 accountsRouter.get('/profile', requireAccount, controller.profile);
 accountsRouter.patch('/profile', requireAccount, validate(profileSchema), controller.updateProfile);
+accountsRouter.patch(
+    '/profile/password',
+    requireAccount,
+    validate(changePasswordSchema),
+    controller.changePassword,
+);
