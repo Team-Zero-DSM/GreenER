@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+export const collectionSettingsSchema = z.strictObject({
+    intervalSeconds: z.number().int().min(10).max(3600),
+});
+
 export const memberIdSchema = z.strictObject({
     id: z
         .string()

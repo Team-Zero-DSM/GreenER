@@ -6,6 +6,15 @@ import type { ProjectService } from './project.service.js';
 export class ProjectController {
     constructor(private readonly service: ProjectService) {}
 
+    getCollection = async (_req: Request, res: Response) => {
+        res.json(await this.service.collectionSettings());
+    };
+
+    updateCollection = async (req: Request, res: Response) => {
+        const { intervalSeconds } = req.body as { intervalSeconds: number };
+        res.json(await this.service.updateInterval(intervalSeconds, accountFrom(res).id));
+    };
+
     listMembers = async (req: Request, res: Response) => {
         res.json(await this.service.listMembers(req.query as unknown as MembersQuery));
     };
