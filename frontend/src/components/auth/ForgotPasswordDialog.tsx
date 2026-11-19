@@ -1,8 +1,8 @@
-
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
 import { requestPasswordReset } from '@/api/auth';
+import { validateEmail } from '@/lib/validation';
 
 interface ForgotPasswordDialogProps {
     onOpenChange: (open: boolean) => void;
@@ -15,7 +15,6 @@ export function ForgotPasswordDialog({
 }: ForgotPasswordDialogProps) {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
-    // Os estados começam com valores novos a cada montagem.
     const [email, setEmail] = useState(initialEmail.trim());
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,16 +49,10 @@ export function ForgotPasswordDialog({
         setError(null);
 
         const normalizedEmail = email.trim();
+        const emailError = validateEmail(normalizedEmail);
 
-        if (!normalizedEmail) {
-            setError('Informe seu e-mail.');
-            return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(normalizedEmail)) {
-            setError('Informe um endereço de e-mail válido.');
+        if (emailError) {
+            setError(emailError);
             return;
         }
 
@@ -100,10 +93,7 @@ export function ForgotPasswordDialog({
                 {!isSubmitted ? (
                     <>
                         <div className="flex flex-col gap-2">
-                            <h2
-                                id="forgot-password-title"
-                                className="text-xl font-semibold"
-                            >
+                            <h2 id="forgot-password-title" className="text-xl font-semibold">
                                 Esqueceu sua senha?
                             </h2>
 
@@ -111,15 +101,12 @@ export function ForgotPasswordDialog({
                                 id="forgot-password-description"
                                 className="text-sm leading-relaxed text-slate-400"
                             >
-                                Informe o e-mail associado à sua conta.
-                                Enviaremos um link para você redefinir sua senha.
+                                Informe o e-mail associado à sua conta. Enviaremos um link para você
+                                redefinir sua senha.
                             </p>
                         </div>
 
-                        <form
-                            onSubmit={handleSubmit}
-                            className="flex flex-col gap-5"
-                        >
+                        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
                             <AuthInput
                                 id="forgot-password-email"
                                 label="E-mail"
@@ -131,10 +118,7 @@ export function ForgotPasswordDialog({
                             />
 
                             {error && (
-                                <p
-                                    role="alert"
-                                    className="text-sm text-red-400"
-                                >
+                                <p role="alert" className="text-sm text-red-400">
                                     {error}
                                 </p>
                             )}
@@ -181,10 +165,7 @@ export function ForgotPasswordDialog({
                                 </svg>
                             </div>
 
-                            <h2
-                                id="forgot-password-title"
-                                className="text-xl font-semibold"
-                            >
+                            <h2 id="forgot-password-title" className="text-xl font-semibold">
                                 Solicitação recebida
                             </h2>
 
@@ -192,9 +173,8 @@ export function ForgotPasswordDialog({
                                 id="forgot-password-description"
                                 className="text-sm leading-relaxed text-slate-400"
                             >
-                                Se houver uma conta ativa associada a esse
-                                e-mail, você receberá um link para redefinir
-                                sua senha. Verifique também sua caixa de spam.
+                                Se houver uma conta ativa associada a esse e-mail, você receberá um
+                                link para redefinir sua senha. Verifique também sua caixa de spam.
                             </p>
                         </div>
 

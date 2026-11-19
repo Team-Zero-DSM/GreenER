@@ -15,10 +15,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 export default function App() {
     return (
         <Routes>
-            <Route
-                path="/"
-                element={<Navigate to="/login" replace />}
-            />
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route element={<AuthLayout />}>
                 <Route path="/login" element={<AuthPage />} />
             </Route>
@@ -34,10 +31,7 @@ export default function App() {
                     <Route path="/ranking" element={<RankingPage />} />
                     <Route path="/perfil" element={<ProfilePage />} />
                 </Route>
-                <Route
-                    path="*"
-                    element={<Navigate to="/inicio" replace />}
-                />
+                <Route path="*" element={<Navigate to="/inicio" replace />} />
             </Route>
         </Routes>
     );

@@ -1,4 +1,3 @@
-
 import { ChevronRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { NavLink } from 'react-router';
@@ -28,9 +27,7 @@ export function ProfileMenuItem({
         <>
             <div
                 className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${
-                    isDanger
-                        ? 'bg-red-400/10 text-red-400'
-                        : 'bg-emerald-400/10 text-emerald-400'
+                    isDanger ? 'bg-red-400/10 text-red-400' : 'bg-emerald-400/10 text-emerald-400'
                 }`}
             >
                 <Icon className="size-5" aria-hidden="true" />
@@ -45,9 +42,7 @@ export function ProfileMenuItem({
                     {title}
                 </p>
 
-                <p className="text-xs text-muted-foreground">
-                    {description}
-                </p>
+                <p className="text-xs text-muted-foreground">{description}</p>
             </div>
 
             <ChevronRight className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />

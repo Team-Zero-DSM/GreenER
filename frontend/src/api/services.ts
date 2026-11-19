@@ -1,4 +1,3 @@
-
 import { statusInfo } from '@/lib/serviceStatus';
 import type {
     HistoryRange,
@@ -13,9 +12,7 @@ import type {
 
 import { getAuthSession } from '@/api/session';
 
-const API_URL = (
-    import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
-).replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
 
 export class ApiError extends Error {
     constructor(
@@ -53,9 +50,7 @@ async function getErrorMessage(response: Response): Promise<string> {
 }
 
 // Lê a resposta JSON e também permite respostas sem conteúdo (204).
-async function parseResponse<TResponse>(
-    response: Response,
-): Promise<TResponse> {
+async function parseResponse<TResponse>(response: Response): Promise<TResponse> {
     if (response.status === 204) {
         return undefined as TResponse;
     }
@@ -69,10 +64,7 @@ async function parseResponse<TResponse>(
     try {
         return JSON.parse(responseText) as TResponse;
     } catch {
-        throw new ApiError(
-            'A API retornou uma resposta em formato inválido.',
-            response.status,
-        );
+        throw new ApiError('A API retornou uma resposta em formato inválido.', response.status);
     }
 }
 
@@ -102,10 +94,7 @@ async function requestJson<TResponse>(
         const session = getAuthSession();
 
         if (!session?.token) {
-            throw new ApiError(
-                'Sessão não encontrada. Faça login novamente.',
-                401,
-            );
+            throw new ApiError('Sessão não encontrada. Faça login novamente.', 401);
         }
 
         headers.set('Authorization', `Bearer ${session.token}`);
@@ -113,25 +102,16 @@ async function requestJson<TResponse>(
 
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
-    const response = await fetch(
-        `${API_URL}/api/v1${normalizedPath}`,
-        requestOptions,
-    );
+    const response = await fetch(`${API_URL}/api/v1${normalizedPath}`, requestOptions);
 
     if (!response.ok) {
-        throw new ApiError(
-            await getErrorMessage(response),
-            response.status,
-        );
+        throw new ApiError(await getErrorMessage(response), response.status);
     }
 
     return parseResponse<TResponse>(response);
 }
 
-export async function getJson<T>(
-    path: string,
-    options: ApiRequestOptions = {},
-): Promise<T> {
+export async function getJson<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
     return requestJson<T>(path, 'GET', undefined, options);
 }
 
@@ -186,8 +166,7 @@ function toSummary(
                   powerWatts: collection.estimates.powerWatts,
                   energyKwh: collection.estimates.energyKwh,
                   co2eGrams: collection.estimates.co2eGrams,
-                  carbonIntensity:
-                      collection.estimates.carbonIntensityGco2ePerKwh,
+                  carbonIntensity: collection.estimates.carbonIntensityGco2ePerKwh,
                   renewableSharePercent: null,
               }
             : null,
@@ -199,9 +178,7 @@ export interface ServicesQuery {
     active?: boolean;
 }
 
-export async function fetchServices(
-    query: ServicesQuery = {},
-): Promise<ServiceSummary[]> {
+export async function fetchServices(query: ServicesQuery = {}): Promise<ServiceSummary[]> {
     const params = new URLSearchParams();
 
     if (query.regionCode) params.set('regionCode', query.regionCode);
@@ -211,17 +188,12 @@ export async function fetchServices(
 
     const search = params.toString() ? `?${params}` : '';
 
-    const data = await getJson<ServicesListResponse>(
-        `/services${search}`,
-        { authenticated: true },
-    );
+    const data = await getJson<ServicesListResponse>(`/services${search}`, { authenticated: true });
 
     return data.services.map(toSummary);
 }
 
-export async function fetchServiceOverview(
-    id: string,
-): Promise<ServiceOverview> {
+export async function fetchServiceOverview(id: string): Promise<ServiceOverview> {
     const data = await getJson<{
         service: ServiceDto;
         latestCollection: LatestCollection | null;

@@ -1,46 +1,29 @@
 import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
-
-import type {
-    ChangePasswordRequest,
-    ChangePasswordResponse,
-} from '@/types/profile';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import type { ChangePasswordRequest } from '@/types/profile';
 
 interface ProfilePasswordFormProps {
     onBack: () => void;
-    onSubmit: (
-        data: ChangePasswordRequest,
-    ) => Promise<ChangePasswordResponse>;
+    onSubmit: (data: ChangePasswordRequest) => Promise<void>;
     isSubmitting: boolean;
 }
 
 const inputClassName =
     'h-11 w-full rounded-lg border border-input bg-background/60 px-4 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-emerald-400/50 focus-visible:ring-2 focus-visible:ring-emerald-400/15';
 
-export function ProfilePasswordForm({
-    onBack,
-    onSubmit,
-    isSubmitting,
-}: ProfilePasswordFormProps) {
+export function ProfilePasswordForm({ onBack, onSubmit, isSubmitting }: ProfilePasswordFormProps) {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const [showPasswords, setShowPasswords] = useState([
-        false,
-        false,
-        false,
-    ]);
+    const [showPasswords, setShowPasswords] = useState([false, false, false]);
 
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
     function toggleVisibility(index: number) {
-        setShowPasswords((previous) =>
-            previous.map((value, i) =>
-                i === index ? !value : value,
-            ),
-        );
+        setShowPasswords((previous) => previous.map((value, i) => (i === index ? !value : value)));
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -49,28 +32,39 @@ export function ProfilePasswordForm({
         setError(null);
         setSuccess(null);
 
+        // Valida o tamanho mínimo da nova senha.
+        if (newPassword.length < 8) {
+            setError('A nova senha deve possuir pelo menos 8 caracteres.');
+            return;
+        }
+
+        // O bcrypt aceita no máximo 72 bytes.
+        const passwordBytes = new TextEncoder().encode(newPassword).length;
+
+        if (passwordBytes > 72) {
+            setError('A nova senha não pode ultrapassar 72 bytes.');
+            return;
+        }
+
+        // Confirma se as senhas são iguais.
         if (newPassword !== confirmPassword) {
             setError('A confirmação da nova senha não corresponde.');
             return;
         }
 
         try {
-            const response = await onSubmit({
+            await onSubmit({
                 currentPassword,
                 newPassword,
             });
 
-            setSuccess(response.message);
+            setSuccess('Senha alterada com sucesso. Sua sessão continua ativa.');
 
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Não foi possível solicitar a alteração da senha.',
-            );
+            setError(err instanceof Error ? err.message : 'Não foi possível alterar a senha.');
         }
     }
 
@@ -104,9 +98,7 @@ export function ProfilePasswordForm({
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
-                <h3 className="text-base font-semibold">
-                    Segurança da conta
-                </h3>
+                <h3 className="text-base font-semibold">Segurança da conta</h3>
 
                 <p className="text-sm text-muted-foreground">
                     Preencha os campos abaixo para alterar sua senha.
@@ -115,21 +107,25 @@ export function ProfilePasswordForm({
 
             {fields.map((field, index) => (
                 <div key={field.id} className="space-y-2">
-                    <label
-                        htmlFor={field.id}
-                        className="text-sm font-medium"
-                    >
-                        {field.label}
-                    </label>
+                    <div className="flex items-center gap-1.5">
+                        <label htmlFor={field.id} className="text-sm font-medium">
+                            {field.label}
+                        </label>
+
+                        {field.id === 'new-password' && (
+                            <InfoTooltip
+                                content="Utilize pelo menos 8 caracteres e evite senhas comuns."
+                                ariaLabel="Dicas para criar uma senha segura"
+                            />
+                        )}
+                    </div>
 
                     <div className="relative">
                         <input
                             id={field.id}
                             type={showPasswords[index] ? 'text' : 'password'}
                             value={field.value}
-                            onChange={(event) =>
-                                field.onChange(event.target.value)
-                            }
+                            onChange={(event) => field.onChange(event.target.value)}
                             placeholder={field.placeholder}
                             autoComplete={field.autoComplete}
                             className={inputClassName}
@@ -141,11 +137,7 @@ export function ProfilePasswordForm({
                             type="button"
                             onClick={() => toggleVisibility(index)}
                             disabled={isSubmitting}
-                            aria-label={
-                                showPasswords[index]
-                                    ? 'Ocultar senha'
-                                    : 'Mostrar senha'
-                            }
+                            aria-label={showPasswords[index] ? 'Ocultar senha' : 'Mostrar senha'}
                             aria-pressed={showPasswords[index]}
                             className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                         >

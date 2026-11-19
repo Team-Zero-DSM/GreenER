@@ -12,14 +12,15 @@ import { ProfilePasswordForm } from '@/components/profile/ProfilePasswordForm';
 import { ProfileMenuItem } from '@/components/profile/ProfileMenuItem';
 
 import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
 
-import type {
-    UpdateProfileRequest,
-} from '@/types/profile';
+import type { UpdateProfileRequest } from '@/types/profile';
 
 type ProfileSection = 'overview' | 'information' | 'security';
 
 export function ProfilePage() {
+    const { logout } = useAuth();
+
     const {
         profile,
         isLoading,
@@ -31,8 +32,7 @@ export function ProfilePage() {
         savePassword,
     } = useProfile();
 
-    const [activeSection, setActiveSection] =
-        useState<ProfileSection>('overview');
+    const [activeSection, setActiveSection] = useState<ProfileSection>('overview');
 
     async function handleSaveProfile(data: UpdateProfileRequest) {
         await saveProfile(data);
@@ -63,9 +63,7 @@ export function ProfilePage() {
             {!isLoading && error && (
                 <Card className="mx-auto w-full max-w-2xl border border-border/70">
                     <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
-                        <p className="text-sm text-red-400">
-                            {error}
-                        </p>
+                        <p className="text-sm text-red-400">{error}</p>
 
                         <button
                             type="button"
@@ -82,7 +80,6 @@ export function ProfilePage() {
             {!isLoading && !error && profile && (
                 <Card className="mx-auto min-h-[34rem] w-full max-w-2xl border border-border/70 bg-card/80">
                     <CardContent className="space-y-6 p-6 sm:p-8">
-
                         {/* Área fixa: identificação do usuário */}
                         <ProfileInformationCard profile={profile} />
 
@@ -90,7 +87,6 @@ export function ProfilePage() {
 
                         {/* Área dinâmica: opções e formulários */}
                         <div className="min-h-[20rem]">
-
                             {/* Menu principal */}
                             {activeSection === 'overview' && (
                                 <div className="space-y-2">
@@ -98,18 +94,14 @@ export function ProfilePage() {
                                         icon={UserRound}
                                         title="Informações pessoais"
                                         description="Alterar nome e e-mail"
-                                        onClick={() =>
-                                            setActiveSection('information')
-                                        }
+                                        onClick={() => setActiveSection('information')}
                                     />
 
                                     <ProfileMenuItem
                                         icon={ShieldCheck}
                                         title="Segurança da conta"
                                         description="Gerenciar senha de acesso"
-                                        onClick={() =>
-                                            setActiveSection('security')
-                                        }
+                                        onClick={() => setActiveSection('security')}
                                     />
 
                                     {/* Configurações exclusivas do administrador */}
@@ -129,7 +121,7 @@ export function ProfilePage() {
                                             title="Sair da conta"
                                             description="Encerrar sua sessão na plataforma"
                                             tone="danger"
-                                            disabled
+                                            onClick={logout}
                                         />
                                     </div>
                                 </div>
@@ -140,9 +132,7 @@ export function ProfilePage() {
                                 <ProfileInformationForm
                                     profile={profile}
                                     onSave={handleSaveProfile}
-                                    onBack={() =>
-                                        setActiveSection('overview')
-                                    }
+                                    onBack={() => setActiveSection('overview')}
                                     isSaving={isSavingProfile}
                                 />
                             )}
@@ -151,9 +141,7 @@ export function ProfilePage() {
                             {activeSection === 'security' && (
                                 <ProfilePasswordForm
                                     onSubmit={savePassword}
-                                    onBack={() =>
-                                        setActiveSection('overview')
-                                    }
+                                    onBack={() => setActiveSection('overview')}
                                     isSubmitting={isChangingPassword}
                                 />
                             )}

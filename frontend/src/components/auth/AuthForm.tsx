@@ -1,15 +1,12 @@
-
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 import { ResetPasswordDialog } from '@/components/auth/ResetPasswordDialog';
 
-import type {
-    AuthMode,
-    LoginRequest,
-    RegisterRequest,
-} from '@/types/auth';
+import { validateEmail } from '@/lib/validation';
+
+import type { AuthMode, LoginRequest, RegisterRequest } from '@/types/auth';
 
 // Recupera o token do fragmento da URL.
 function getResetTokenFromUrl(): string | null {
@@ -17,9 +14,7 @@ function getResetTokenFromUrl(): string | null {
         return null;
     }
 
-    const params = new URLSearchParams(
-        window.location.hash.slice(1),
-    );
+    const params = new URLSearchParams(window.location.hash.slice(1));
 
     return params.get('token');
 }
@@ -50,17 +45,13 @@ export function AuthForm({
 
     const [error, setError] = useState<string | null>(null);
 
-    const [isForgotPasswordOpen, setIsForgotPasswordOpen] =
-        useState(false);
+    const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
     // Recupera o token na própria inicialização do estado.
-    const [resetToken, setResetToken] = useState<string | null>(
-        getResetTokenFromUrl,
-    );
+    const [resetToken, setResetToken] = useState<string | null>(getResetTokenFromUrl);
 
     // O Dialog já começa aberto quando existe um token na URL.
-    const [isResetPasswordOpen, setIsResetPasswordOpen] =
-        useState(() => Boolean(resetToken));
+    const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(() => Boolean(resetToken));
 
     // Remove o token da barra de endereço sem atualizar o estado.
     useEffect(() => {
@@ -84,9 +75,24 @@ export function AuthForm({
 
         setError(null);
 
+        // Validação do e-mail para login e cadastro.
+        const normalizedEmail = email.trim();
+        const emailError = validateEmail(normalizedEmail);
+
+        if (emailError) {
+            setError(emailError);
+            return;
+        }
+
+        // Login.
         if (isLogin) {
+            if (!password) {
+                setError('Informe sua senha.');
+                return;
+            }
+
             const loginData: LoginRequest = {
-                email: email.trim(),
+                email: normalizedEmail,
                 password,
             };
 
@@ -95,12 +101,14 @@ export function AuthForm({
         }
 
         // Validação do nome.
-        if (!name.trim()) {
+        const normalizedName = name.trim();
+
+        if (!normalizedName) {
             setError('Informe um nome válido.');
             return;
         }
 
-        if (name.trim().length > 100) {
+        if (normalizedName.length > 100) {
             setError('O nome deve possuir no máximo 100 caracteres.');
             return;
         }
@@ -126,14 +134,15 @@ export function AuthForm({
         }
 
         const registerData: RegisterRequest = {
-            name: name.trim(),
-            email: email.trim(),
+            name: normalizedName,
+            email: normalizedEmail,
             password,
         };
 
         await onRegister(registerData);
     }
 
+    // Controla a abertura e o fechamento da redefinição de senha.
     function handleResetDialogChange(open: boolean) {
         setIsResetPasswordOpen(open);
 
@@ -142,6 +151,7 @@ export function AuthForm({
         }
     }
 
+    // Permite solicitar um novo link de recuperação.
     function handleRequestNewLink() {
         setIsResetPasswordOpen(false);
         setResetToken(null);
@@ -150,10 +160,7 @@ export function AuthForm({
 
     return (
         <>
-            <form
-                className="flex flex-col gap-5"
-                onSubmit={handleSubmit}
-            >
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
                 {/* Nome: somente cadastro */}
                 {!isLogin && (
                     <AuthInput
@@ -171,6 +178,7 @@ export function AuthForm({
                 <AuthInput
                     id="auth-email"
                     label="E-mail"
+                    infoTooltip="Use um e-mail válido e atualizado. Ele será usado para recuperar sua conta."
                     type="email"
                     value={email}
                     placeholder="Digite seu e-mail"
@@ -181,6 +189,11 @@ export function AuthForm({
                 {/* Senha */}
                 <AuthInput
                     id="auth-password"
+                    infoTooltip={
+                        !isLogin
+                            ? 'Mínimo de 8 caracteres e evite senhas comuns ou fáceis de adivinhar.'
+                            : undefined
+                    }
                     label="Senha"
                     type="password"
                     value={password}
@@ -215,20 +228,14 @@ export function AuthForm({
 
                 {/* Mensagens de erro */}
                 {(error || externalError) && (
-                    <p
-                        role="alert"
-                        className="text-sm text-red-400"
-                    >
+                    <p role="alert" className="text-sm text-red-400">
                         {error || externalError}
                     </p>
                 )}
 
                 {/* Mensagem de sucesso */}
                 {statusMessage && (
-                    <p
-                        role="status"
-                        className="text-sm text-emerald-400"
-                    >
+                    <p role="status" className="text-sm text-emerald-400">
                         {statusMessage}
                     </p>
                 )}
@@ -244,26 +251,24 @@ export function AuthForm({
                             ? 'Entrando...'
                             : 'Criando conta...'
                         : isLogin
-                            ? 'Entrar'
-                            : 'Criar conta'}
+                          ? 'Entrar'
+                          : 'Criar conta'}
                 </button>
             </form>
 
+            {/* Dialog de recuperação de senha */}
             {isForgotPasswordOpen && (
-    <ForgotPasswordDialog
-        initialEmail={email}
-        onOpenChange={setIsForgotPasswordOpen}
-    />
-)}
+                <ForgotPasswordDialog initialEmail={email} onOpenChange={setIsForgotPasswordOpen} />
+            )}
 
-{isResetPasswordOpen && (
-    <ResetPasswordDialog
-        token={resetToken}
-        onOpenChange={handleResetDialogChange}
-        onRequestNewLink={handleRequestNewLink}
-    />
-)}
-           
+            {/* Dialog de redefinição de senha */}
+            {isResetPasswordOpen && (
+                <ResetPasswordDialog
+                    token={resetToken}
+                    onOpenChange={handleResetDialogChange}
+                    onRequestNewLink={handleRequestNewLink}
+                />
+            )}
         </>
     );
 }
