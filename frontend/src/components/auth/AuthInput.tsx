@@ -1,8 +1,8 @@
-import { useState, type ReactNode } from 'react';
 
-import { Eye, EyeOff } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
 
 interface AuthInputProps {
     id: string;
@@ -29,55 +29,34 @@ export function AuthInput({
     labelAction,
     infoTooltip,
 }: AuthInputProps) {
-    const [showPassword, setShowPassword] = useState(false);
-
-    const isPassword = type === 'password';
-
-    const inputType = isPassword && showPassword ? 'text' : type;
-
     return (
-        <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-1.5">
-                    <label htmlFor={id} className="text-sm font-medium text-foreground">
-                        {label}
-                    </label>
+        <div className="flex flex-col gap-1.5">
+            {/* Ação adicional do campo, como recuperação de senha. */}
+            {labelAction && (
+                <div className="flex items-center justify-end gap-3">
+                    {labelAction}
+                </div>
+            )}
 
-                    {infoTooltip && (
+            {/* Campo compartilhado com rótulo flutuante e tooltip integrado. */}
+            <FloatingLabelInput
+                id={id}
+                label={label}
+                type={type}
+                value={value}
+                placeholder={placeholder}
+                autoComplete={autoComplete}
+                onChange={onChange}
+                required={required}
+                labelAdornment={
+                    infoTooltip ? (
                         <InfoTooltip
                             content={infoTooltip}
                             ariaLabel={`Informações sobre ${label.toLowerCase()}`}
                         />
-                    )}
-                </div>
-
-                {labelAction}
-            </div>
-
-            <div className="relative">
-                <input
-                    id={id}
-                    name={id}
-                    type={inputType}
-                    value={value}
-                    placeholder={placeholder}
-                    autoComplete={autoComplete}
-                    onChange={(event) => onChange(event.target.value)}
-                    required={required}
-                    className="h-11 w-full rounded-lg border border-input bg-background/60 px-4 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-emerald-400/50 focus-visible:ring-2 focus-visible:ring-emerald-400/15"
-                />
-
-                {isPassword && (
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword((previous) => !previous)}
-                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </button>
-                )}
-            </div>
+                    ) : undefined
+                }
+            />
         </div>
     );
 }
