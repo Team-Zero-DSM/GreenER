@@ -12,3 +12,4 @@ const controller = new ReportsController(new ReportsService(new MetricsSnapshotR
 export const reportsRouter = Router();
 reportsRouter.use(requireAccount);
 reportsRouter.post('/preview', validate(reportFiltersSchema), controller.preview);
+reportsRouter.post('/pdf', validate(reportFiltersSchema), controller.exportPdf);
