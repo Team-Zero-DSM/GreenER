@@ -1,10 +1,24 @@
 import type { Request, Response } from 'express';
 import { accountFrom } from '../../shared/middleware/auth.js';
-import type { MemberAccess, MembersQuery } from './project.schema.js';
+import type { CoefficientsInput, MemberAccess, MembersQuery } from './project.schema.js';
 import type { ProjectService } from './project.service.js';
 
 export class ProjectController {
     constructor(private readonly service: ProjectService) {}
+
+    getCoefficients = async (_req: Request, res: Response) => {
+        res.json(await this.service.activeCoefficients());
+    };
+
+    previewCoefficients = async (req: Request, res: Response) => {
+        res.json(await this.service.previewCoefficients(req.body as CoefficientsInput));
+    };
+
+    activateCoefficients = async (req: Request, res: Response) => {
+        res.status(201).json(
+            await this.service.activateCoefficients(req.body as CoefficientsInput),
+        );
+    };
 
     getCollection = async (_req: Request, res: Response) => {
         res.json(await this.service.collectionSettings());
