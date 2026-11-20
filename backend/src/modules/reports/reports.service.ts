@@ -1,9 +1,14 @@
 import type { MetricsSnapshotRepository } from '../analytics/metrics-snapshot.repository.js';
 import type { ReportFilters } from './reports.schema.js';
 import type { Report } from './types/reports.types.js';
+import { createReportPdf } from './reports.pdf.js';
 
 export class ReportsService {
     constructor(private readonly snapshots: MetricsSnapshotRepository) {}
+
+    async exportPdf(filters: ReportFilters) {
+        return createReportPdf(await this.preview(filters));
+    }
 
     async preview({
         title,
