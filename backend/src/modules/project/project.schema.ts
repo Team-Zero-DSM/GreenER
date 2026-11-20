@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+const coefficientSchema = z.number().min(0).max(999999.9999).multipleOf(0.0001);
+
+export const coefficientsSchema = z.strictObject({
+    cpuMaxWatts: coefficientSchema,
+    ramWattsPerGb: coefficientSchema,
+    diskWattsPerGb: coefficientSchema,
+    networkWattsPerGb: coefficientSchema,
+});
+
 export const collectionSettingsSchema = z.strictObject({
     intervalSeconds: z.number().int().min(10).max(3600),
 });
@@ -25,3 +34,4 @@ export const memberAccessSchema = z.strictObject({
 
 export type MembersQuery = z.infer<typeof membersQuerySchema>;
 export type MemberAccess = z.infer<typeof memberAccessSchema>;
+export type CoefficientsInput = z.infer<typeof coefficientsSchema>;

@@ -7,11 +7,11 @@ import type { DiscoveredService } from '../../shared/types/index.js';
 import { pool } from '../../db/connection.js';
 import { ExternalApiError } from '../../shared/errors/external-api-error.js';
 import { CollectionsRepository } from './collections.repository.js';
+import { calculateEmissions } from './collections.estimate.js';
 import { monitoringService } from '../monitoring/monitoring.service.js';
 import type { CollectionStatusFilters } from './collections.schema.js';
 import type {
     ActiveService,
-    Emissions,
     EstimateParameter,
     ProcessedMetrics,
     ServiceStatus,
@@ -291,7 +291,7 @@ export class CollectionsService {
         try {
             const raw = await this.metrics.getMetrics(service.metrics_path);
             const metrics = this.processMetrics(raw);
-            const e = this.calculateEmissions(metrics, params, service.carbon_intensity);
+            const e = calculateEmissions(metrics, params, service.carbon_intensity);
 
             const data = {
                 service_id: service.id,
@@ -365,23 +365,6 @@ export class CollectionsService {
             collectionIntervalSeconds: raw.collection_interval_seconds,
             collectionIntervalHours: raw.collection_interval_seconds / 3600,
         };
-    }
-
-    private calculateEmissions(
-        m: ProcessedMetrics,
-        p: EstimateParameter,
-        carbonIntensity: number,
-    ): Emissions {
-        const cpuWatts = (m.cpuPercent / 100) * p.cpu_max_watts;
-        const memoryWatts = m.memoryGb * p.ram_watts_per_gb;
-        const diskWatts = m.diskGb * p.disk_watts_per_gb;
-        const networkWatts = m.networkGb * p.network_watts_per_gb;
-
-        const powerW = cpuWatts + memoryWatts + diskWatts + networkWatts;
-        const energyKwh = (powerW * m.collectionIntervalHours) / 1000;
-        const co2eG = energyKwh * carbonIntensity;
-
-        return { cpuWatts, memoryWatts, diskWatts, networkWatts, powerW, energyKwh, co2eG };
     }
 
     private statusFromError(err: unknown): ServiceStatus | null {

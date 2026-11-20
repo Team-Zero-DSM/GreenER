@@ -1,13 +1,50 @@
 import type { Pool } from 'pg';
 import { AppError } from '../../shared/errors/AppError.js';
 import { accountColumns } from '../accounts/accounts.repository.js';
-import type { MemberAccess, MembersQuery } from './project.schema.js';
-import type { ProjectMember } from './types/project.types.js';
+import type { CoefficientsInput, MemberAccess, MembersQuery } from './project.schema.js';
+import type { Coefficients, ProjectMember } from './types/project.types.js';
+
+const coefficientColumns = `id, cpu_max_watts::float8 AS "cpuMaxWatts",
+    ram_watts_per_gb::float8 AS "ramWattsPerGb", disk_watts_per_gb::float8 AS "diskWattsPerGb",
+    network_watts_per_gb::float8 AS "networkWattsPerGb"`;
 
 const memberColumns = `${accountColumns}, acesso_ativo AS active`;
 
 export class ProjectRepository {
     constructor(private readonly pool: Pool) {}
+
+    async activeCoefficients() {
+        const { rows } = await this.pool.query<Coefficients>(
+            `SELECT ${coefficientColumns} FROM parametro_estimativa WHERE ativo`,
+        );
+        return rows[0] ?? null;
+    }
+
+    async activateCoefficients({
+        cpuMaxWatts,
+        ramWattsPerGb,
+        diskWattsPerGb,
+        networkWattsPerGb,
+    }: CoefficientsInput) {
+        const client = await this.pool.connect();
+        try {
+            await client.query('BEGIN');
+            await client.query('LOCK TABLE parametro_estimativa IN SHARE ROW EXCLUSIVE MODE');
+            await client.query('UPDATE parametro_estimativa SET ativo = false WHERE ativo');
+            const { rows } = await client.query<Coefficients>(
+                `INSERT INTO parametro_estimativa (cpu_max_watts, ram_watts_per_gb, disk_watts_per_gb, network_watts_per_gb, ativo)
+                 VALUES ($1, $2, $3, $4, true) RETURNING ${coefficientColumns}`,
+                [cpuMaxWatts, ramWattsPerGb, diskWattsPerGb, networkWattsPerGb],
+            );
+            await client.query('COMMIT');
+            return rows[0];
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
 
     async getInterval(): Promise<number | undefined> {
         const { rows } = await this.pool.query<{ intervalSeconds: number }>(

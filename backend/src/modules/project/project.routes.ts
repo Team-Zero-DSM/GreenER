@@ -6,6 +6,7 @@ import { monitoringService } from '../monitoring/monitoring.service.js';
 import { ProjectController } from './project.controller.js';
 import { ProjectRepository } from './project.repository.js';
 import {
+    coefficientsSchema,
     collectionSettingsSchema,
     memberAccessSchema,
     memberIdSchema,
@@ -19,6 +20,13 @@ const controller = new ProjectController(
 
 export const projectRouter = Router();
 projectRouter.use(requireAccount, requireAdmin);
+projectRouter.get('/coefficients', controller.getCoefficients);
+projectRouter.post(
+    '/coefficients/preview',
+    validate(coefficientsSchema),
+    controller.previewCoefficients,
+);
+projectRouter.post('/coefficients', validate(coefficientsSchema), controller.activateCoefficients);
 projectRouter.get('/collection', controller.getCollection);
 projectRouter.patch('/collection', validate(collectionSettingsSchema), controller.updateCollection);
 projectRouter.get('/members', validate(membersQuerySchema, 'query'), controller.listMembers);
