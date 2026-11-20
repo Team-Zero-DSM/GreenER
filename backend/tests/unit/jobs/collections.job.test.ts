@@ -6,6 +6,11 @@ vi.mock('../../../src/modules/collections/collections.service.js', () => ({
     runCollectionRound: vi.fn(),
 }));
 
+vi.mock('../../../src/jobs/collection-interval.js', () => ({
+    fallbackInterval: () => 30,
+    readCollectionInterval: vi.fn(async (previous: number) => previous),
+}));
+
 describe('Rotina periódica de coletas (collections.job)', () => {
     beforeEach(() => {
         vi.stubEnv('COLLECTION_INTERVAL_SECONDS', '30');
