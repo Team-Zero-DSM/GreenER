@@ -9,6 +9,23 @@ const memberColumns = `${accountColumns}, acesso_ativo AS active`;
 export class ProjectRepository {
     constructor(private readonly pool: Pool) {}
 
+    async getInterval(): Promise<number | undefined> {
+        const { rows } = await this.pool.query<{ intervalSeconds: number }>(
+            'SELECT intervalo_coleta_segundos AS "intervalSeconds" FROM configuracao_sistema WHERE id',
+        );
+        return rows[0]?.intervalSeconds;
+    }
+
+    async updateInterval(intervalSeconds: number, actor: string) {
+        await this.pool.query(
+            `INSERT INTO configuracao_sistema (id, intervalo_coleta_segundos, atualizado_por, atualizado_em)
+             VALUES (true, $1, $2, now()) ON CONFLICT (id) DO UPDATE SET
+             intervalo_coleta_segundos = EXCLUDED.intervalo_coleta_segundos,
+             atualizado_por = EXCLUDED.atualizado_por, atualizado_em = now()`,
+            [intervalSeconds, actor],
+        );
+    }
+
     async listMembers({ search, active }: MembersQuery) {
         const { rows } = await this.pool.query<ProjectMember>(
             `SELECT ${memberColumns} FROM usuario
