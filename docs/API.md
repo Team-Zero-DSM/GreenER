@@ -52,6 +52,8 @@ para listagem, detalhe, histórico de métricas e histórico de tentativas.
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
 | `GET` | `/api/v1/rankings` | Classificar serviços por energia ou CO₂e no período. | Não exige. |
 | `POST` | `/api/v1/comparisons` | Comparar os totais e 120 pontos por seleção, com simulação opcional de região. | Não exige. |
+| `GET` | `/api/v1/dashboards/me` | Entregar o painel de monitoramento salvo do usuário, ou `null`. | JWT. |
+| `PUT` | `/api/v1/dashboards/me` | Validar e salvar o painel de monitoramento do usuário. | JWT. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
 por exemplo `billing-api`; não é o BIGINT interno. O parâmetro aceita de 1 a
@@ -346,13 +348,67 @@ métricas associa aos dados de uma coleta.
 As respostas dos endpoints implementados são JSON e representam dados preparados pelo backend para o
 recurso solicitado. As rotas validam `body`, `params` e `query parameters`
 antes de executar os controllers. Dados inválidos de requisição resultam em
-`400`. A resposta `401` está prevista para as futuras rotas protegidas; JWT
-ainda não está implementado. Falhas de negócio e de integração são retornadas como erros explícitos,
+`400`. As rotas protegidas, como `/dashboards/me`, respondem `401` quando o
+JWT falta, é inválido ou expirou. Falhas de negócio e de integração são retornadas como erros explícitos,
 sem respostas com aparência de sucesso ou métricas substituídas por zero.
 
 O frontend deverá apresentar carregamento, sucesso, ausência de dados,
 desatualização e falha ao integrar estas rotas. Os horários reais retornados
 pelo backend não devem ser substituídos pelo horário da requisição.
+
+### 2.6. Painel de monitoramento — implementado
+
+```http
+GET /api/v1/dashboards/me
+PUT /api/v1/dashboards/me
+Authorization: Bearer <token>
+```
+
+Guardam o painel de monitoramento (tela `/painel`) do usuário autenticado. O
+token é o `token` devolvido por `POST /api/v1/auth/login`. Sem token, com token
+inválido, expirado ou de conta desativada, as duas rotas respondem 401 com
+`{ "error": { "message": "Entre na sua conta para continuar." } }`.
+
+Cada usuário tem um painel, gravado na tabela `painel_usuario`
+([migração](../database/migrations/003_painel_usuario.sql)). O `GET` responde
+200 com `{ "dashboard": null }` enquanto o usuário não salvou nenhum painel; o
+frontend então mostra o template Visão geral. O `PUT` cria ou substitui o painel
+e responde 200 com `{ "dashboard": <configuração salva> }`.
+
+Corpo do `PUT` e formato de `dashboard`:
+
+```json
+{
+    "template": "visao-geral",
+    "widgets": [
+        { "id": "co2e-total", "type": "kpi", "title": "CO₂e no período", "x": 0, "y": 0, "w": 3, "h": 2,
+          "palette": "padrao", "alert": { "direction": "acima", "threshold": 500 } },
+        { "id": "co2e-por-regiao", "type": "serie-temporal", "title": "Emissão de CO₂e por região",
+          "chart": "area", "region": "br-sp", "x": 0, "y": 2, "w": 12, "h": 4 }
+    ],
+    "tablet": { "co2e-total": { "x": 0, "y": 0, "w": 3, "h": 2 } },
+    "mobileOrder": ["co2e-por-regiao", "co2e-total"]
+}
+```
+
+| Campo | Regra |
+| --- | --- |
+| `template` | `visao-geral`, `sustentabilidade`, `operacional`, `executivo` ou `em-branco`. |
+| `widgets` | Até 40 widgets, com `id` único (letras minúsculas, números e hífens, até 64). |
+| `widgets[].type` | `kpi`, `serie-temporal`, `distribuicao`, `tabela` ou `status`. |
+| `widgets[].metric` | Opcional. Sem ele, vale a métrica com o mesmo `id` do widget. A métrica precisa existir e ser do mesmo tipo do widget (lista em `backend/src/modules/dashboards/dashboards.catalog.ts`). |
+| `widgets[].title` | Texto de 1 a 60 caracteres. |
+| `widgets[].chart` | Opcional. `linha`, `area` ou `barras` em `serie-temporal`; `pizza`, `rosca` ou `barras-horizontais` em `distribuicao`. Os outros tipos não aceitam. |
+| `widgets[].palette` | Opcional: `padrao`, `oceano`, `solar`, `floresta` ou `contraste`. |
+| `widgets[].region` | Opcional: código da região, de 1 a 64 caracteres. |
+| `widgets[].alert` | Opcional, só em `kpi`: `direction` (`acima` ou `abaixo`) e `threshold` numérico. |
+| `x`, `y`, `w`, `h` | Inteiros. A grade do desktop tem 12 colunas: `x >= 0`, `x + w <= 12`, `y` até 200 e `h` até 24. O tamanho mínimo depende do tipo: `kpi` 2x2, `serie-temporal` 4x3 e os demais 3x3. |
+| `tablet` | Opcional. Posição de cada widget na grade de 6 colunas do tablet, pelo `id`, com as mesmas regras e `x + w <= 6`. Só aceita ids presentes em `widgets`. |
+| `mobileOrder` | Opcional. Ordem dos widgets no celular, sem repetir ids e só com ids presentes em `widgets`. |
+
+Campos desconhecidos ou fora dessas regras retornam 400 com `details`
+indicando o campo, por exemplo `{ "field": "widgets.0", "message": "O widget
+passa da grade de 12 colunas" }`. Falha interna retorna 500.
 
 ## 3. Greener Metrics Aggregator API
 

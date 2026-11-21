@@ -248,6 +248,17 @@ Repita a consulta acima para conferir a estrutura e consulte as coletas
 existentes. Amostras anteriores à migração podem não ter observações de
 tentativa correspondentes.
 
+### Painel de monitoramento em um volume existente
+
+A tabela `painel_usuario` guarda o painel de cada usuário. Em um volume criado
+antes dela, aplique a [migração do painel](./migrations/003_painel_usuario.sql),
+que também pode ser reaplicada:
+
+```powershell
+Get-Content -Raw database/migrations/003_painel_usuario.sql |
+    docker compose exec -T database psql -X -v ON_ERROR_STOP=1 -U postgres -d greener
+```
+
 ### Consultar a estrutura e as coletas existentes
 
 Na raiz do projeto, com os containers ativos:
