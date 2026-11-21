@@ -325,16 +325,43 @@ function formatSeriesLabel(timestamp: string, range: HistoryRange): string {
     const date = new Date(timestamp);
 
     return range === '7d' || range === '30d'
-        ? date.toLocaleDateString('pt-BR', {
+        ? date.toLocaleString('pt-BR', {
               timeZone: 'America/Sao_Paulo',
               day: '2-digit',
               month: '2-digit',
+              // Em 7 dias cabem várias faixas por dia; a hora evita rótulos repetidos.
+              ...(range === '7d' ? { hour: '2-digit' as const } : {}),
           })
         : date.toLocaleTimeString('pt-BR', {
               timeZone: 'America/Sao_Paulo',
               hour: '2-digit',
               minute: '2-digit',
           });
+}
+
+interface SeriesGrid {
+    start: number;
+    stepMs: number;
+}
+
+// Grade de tempo comum: começo e tamanho das faixas do primeiro histórico com pontos.
+function seriesGrid(histories: readonly PainelServiceHistory[]): SeriesGrid | null {
+    const reference = histories.find(({ history }) => history.points.length > 0)?.history;
+    if (!reference) return null;
+
+    const start = new Date(reference.points[0].timestamp).getTime();
+    const second = reference.points[1] ? new Date(reference.points[1].timestamp).getTime() : NaN;
+    const stepMs =
+        reference.bucketSeconds && reference.bucketSeconds > 0
+            ? reference.bucketSeconds * 1000
+            : second - start;
+
+    return Number.isFinite(stepMs) && stepMs > 0 ? { start, stepMs } : null;
+}
+
+function alignToGrid(time: number, grid: SeriesGrid | null): number {
+    if (!grid) return time;
+    return grid.start + Math.round((time - grid.start) / grid.stepMs) * grid.stepMs;
 }
 
 // Soma o valor dos serviços por região em cada faixa de tempo. Ficam no gráfico
@@ -346,16 +373,22 @@ function buildRegionSeries(
     unit: string,
 ): PainelWidgetContent | null {
     const totals = new Map<string, number>();
-    const buckets = new Map<string, Record<string, number>>();
+    const buckets = new Map<number, Record<string, number>>();
+
+    // Cada serviço é buscado num instante um pouco diferente, então as faixas de um
+    // começam alguns milissegundos depois das do outro. Encaixa todas na grade do
+    // primeiro histórico para que a mesma faixa some todas as regiões.
+    const grid = seriesGrid(histories);
 
     for (const { service, history } of histories) {
         const region = service.location?.regionCode ?? 'sem-região';
 
         for (const point of history.points) {
-            const bucket = buckets.get(point.timestamp) ?? {};
+            const time = alignToGrid(new Date(point.timestamp).getTime(), grid);
+            const bucket = buckets.get(time) ?? {};
 
             bucket[region] = (bucket[region] ?? 0) + point[key];
-            buckets.set(point.timestamp, bucket);
+            buckets.set(time, bucket);
             totals.set(region, (totals.get(region) ?? 0) + point[key]);
         }
     }
@@ -368,9 +401,9 @@ function buildRegionSeries(
         .map(([region]) => region);
 
     const points = [...buckets.entries()]
-        .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-        .map(([timestamp, bucket]) => ({
-            label: formatSeriesLabel(timestamp, range),
+        .sort((a, b) => a[0] - b[0])
+        .map(([time, bucket]) => ({
+            label: formatSeriesLabel(new Date(time).toISOString(), range),
             // Região sem coleta na faixa entra como zero para a série não quebrar.
             values: Object.fromEntries(regions.map((region) => [region, bucket[region] ?? 0])),
         }));

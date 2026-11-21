@@ -9,9 +9,26 @@ interface DistributionWidgetProps {
     colors: readonly string[];
 }
 
-const formatValue = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+// Valores pequenos ganham mais casas para não virarem "0".
+const formatValue = (value: number) =>
+    value.toLocaleString('pt-BR', { maximumFractionDigits: Math.abs(value) < 10 ? 2 : 1 });
 
-export function DistributionWidget({ data, chart, colors }: DistributionWidgetProps) {
+// Abaixo de 1 kWh, mostra em Wh (0,02 kWh vira 20 Wh), como a tela Início.
+function displayScale(unit: string, largest: number): { unit: string; factor: number } {
+    if (unit === 'kWh' && largest > 0 && largest < 1) return { unit: 'Wh', factor: 1000 };
+    return { unit, factor: 1 };
+}
+
+export function DistributionWidget({ data: rawData, chart, colors }: DistributionWidgetProps) {
+    const scale = displayScale(
+        rawData.unit,
+        Math.max(0, ...rawData.items.map((item) => item.value)),
+    );
+    const data = {
+        ...rawData,
+        unit: scale.unit,
+        items: rawData.items.map((item) => ({ ...item, value: item.value * scale.factor })),
+    };
     const total = data.items.reduce((sum, item) => sum + item.value, 0);
     const largest = Math.max(...data.items.map((item) => item.value));
     const items = data.items.map((item, index) => ({

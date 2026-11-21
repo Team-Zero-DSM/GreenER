@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect, useMemo } from 'react';
 
 import type { GlobeViewHandle } from '../components/globe/GlobeView';
@@ -13,11 +12,9 @@ import { GlobeView } from '../components/globe/GlobeView';
 import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { StarsBackground } from '../components/globe/StarsBackground';
 
-const RESET_THRESHOLD = 0.02;
+import { useLocation } from 'react-router';
 
-// =============================================================
-// LANDING PAGE
-// =============================================================
+const RESET_THRESHOLD = 0.02;
 
 export function LandingPage() {
     const globeRef = useRef<GlobeViewHandle>(null);
@@ -43,9 +40,19 @@ export function LandingPage() {
     const [autoRotate, setAutoRotate] = useState(true);
     const [force2D, setForce2D] = useState(false);
 
-    // ---------------------------------------------------------
-    // SINCRONIZAÇÃO DO MODO 2D
-    // ---------------------------------------------------------
+    const { hash } = useLocation();
+
+    // Quem chega por /inicio#explorar (ex.: botão "Ver no globo 3D" de Regiões)
+    // já cai na seção de exploração do globo.
+    useEffect(() => {
+        if (hash !== '#explorar') return;
+
+        const frame = requestAnimationFrame(() => {
+            exploreContainerRef.current?.scrollIntoView({ block: 'start' });
+        });
+
+        return () => cancelAnimationFrame(frame);
+    }, [hash]);
 
     useEffect(() => {
         force2DRef.current = force2D;
@@ -112,6 +119,7 @@ export function LandingPage() {
         window.addEventListener('scroll', updateGlobe, {
             passive: true,
         });
+
         window.addEventListener('resize', updateGlobe);
 
         return () => {
@@ -315,6 +323,8 @@ export function LandingPage() {
                             focusTarget={focusTarget}
                             backlit
                             atmosphereIntensity={0.42}
+                            cameraDistanceStart={4.35}
+                            cameraDistanceEnd={4.5}
                         />
                     </div>
                 )}

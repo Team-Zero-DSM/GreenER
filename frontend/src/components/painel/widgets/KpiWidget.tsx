@@ -35,10 +35,12 @@ export function KpiWidget({ data, alerting = false }: KpiWidgetProps) {
         // O widget é um contêiner do CSS: quando fica largo (ex.: template Executivo),
         // o valor e os textos crescem para serem lidos de longe.
         <div className="@container flex flex-1 flex-col justify-end gap-1">
-            <p className="text-xs text-muted-foreground @md:text-sm @xl:text-base">{label}</p>
+            <p className="painel-kpi-label text-xs text-muted-foreground @md:text-sm @xl:text-base">
+                {label}
+            </p>
             <p className="flex flex-wrap items-baseline gap-x-1.5">
                 <span
-                    className={`text-3xl font-bold tracking-tight tabular-nums @md:text-5xl @xl:text-7xl ${
+                    className={`painel-kpi-value text-3xl font-bold tracking-tight tabular-nums @md:text-5xl @xl:text-7xl ${
                         alerting ? 'text-destructive' : ''
                     }`}
                 >
@@ -49,11 +51,11 @@ export function KpiWidget({ data, alerting = false }: KpiWidgetProps) {
                 </span>
             </p>
             {variation === null ? (
-                <p className="text-xs text-muted-foreground @xl:text-sm">
+                <p className="painel-kpi-extra text-xs text-muted-foreground @xl:text-sm">
                     Sem período anterior para comparar
                 </p>
             ) : (
-                <p className="flex flex-wrap items-center gap-x-1 text-xs @xl:text-sm">
+                <p className="painel-kpi-extra flex flex-wrap items-center gap-x-1 text-xs @xl:text-sm">
                     <span
                         className={`inline-flex items-center gap-0.5 font-semibold tabular-nums ${variationColor}`}
                     >

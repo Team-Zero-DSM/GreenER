@@ -1,4 +1,3 @@
-
 import {
     forwardRef,
     useEffect,
@@ -45,6 +44,8 @@ interface GlobeViewProps {
 
     // Personalização visual do globo.
     cameraDistance?: number;
+    cameraDistanceStart?: number;
+    cameraDistanceEnd?: number;
     globeScale?: number;
     verticalOffset?: number;
     backlit?: boolean;
@@ -73,6 +74,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             focusTarget,
             markers,
             cameraDistance = 4.5,
+            cameraDistanceStart,
+            cameraDistanceEnd,
             globeScale,
             verticalOffset = 0,
             backlit = false,
@@ -161,7 +164,16 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-            camera.position.z = cameraDistance;
+
+            // Quando configurado, começa com a câmera um pouco mais próxima.
+            // Sem essas propriedades, mantém a distância padrão de cada tela.
+            const initialCameraDistance =
+                cameraDistanceStart !== undefined &&
+                cameraDistanceEnd !== undefined
+                    ? cameraDistanceStart
+                    : cameraDistance;
+
+            camera.position.z = initialCameraDistance;
 
             const renderer = new THREE.WebGLRenderer({
                 alpha: true,
@@ -699,8 +711,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     0,
                 ).multiplyScalar(0.018);
 
-                const positions = trailGeometry.attributes
-                    .position.array as Float32Array;
+                const positions = trailGeometry.attributes.position
+                    .array as Float32Array;
 
                 // Extremidade posterior superior.
                 positions[0] =
@@ -732,8 +744,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                 trailGeometry.attributes.position.needsUpdate = true;
 
-                const headAttribute =
-                    shootingHeadGeometry.attributes.position;
+                const headAttribute = shootingHeadGeometry.attributes.position;
 
                 headAttribute.setXYZ(
                     0,
@@ -815,7 +826,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 if (commands.resetPosition) {
                     globe.position.set(0, 0, 0);
                     globe.quaternion.identity();
-                    camera.position.z = cameraDistance;
+                    camera.position.z = initialCameraDistance;
                     commands.rotation = 0;
                     commands.zoomFactor = 1;
                     zoomLevelRef.current = 1;
@@ -831,16 +842,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     );
                     commands.zoomFactor = 1;
                 }
-
-                const desiredCameraZ =
-                    (focusTargetRef.current ? 3.0 : cameraDistance) /
-                    zoomLevelRef.current;
-
-                camera.position.z = THREE.MathUtils.lerp(
-                    camera.position.z,
-                    desiredCameraZ,
-                    cameraDamping,
-                );
 
                 // Suaviza o progresso e o alvo definidos pela rolagem.
                 const { progress, target } = stateRef.current;
@@ -871,6 +872,29 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                 const p = smoothProgressRef.current;
                 const smooth = p * p * (3 - 2 * p);
+
+                // A câmera só varia quando a tela fornece uma distância inicial e final.
+                // Na exploração, termina na mesma distância usada anteriormente.
+                const scrollCameraDistance =
+                    cameraDistanceStart !== undefined &&
+                    cameraDistanceEnd !== undefined
+                        ? THREE.MathUtils.lerp(
+                              cameraDistanceStart,
+                              cameraDistanceEnd,
+                              smooth,
+                          )
+                        : cameraDistance;
+
+                const desiredCameraZ =
+                    (focusTargetRef.current ? 3.0 : scrollCameraDistance) /
+                    zoomLevelRef.current;
+
+                camera.position.z = THREE.MathUtils.lerp(
+                    camera.position.z,
+                    desiredCameraZ,
+                    cameraDamping,
+                );
+
                 const { w: width, h: height } = size;
 
                 const startScale = 1.65;
@@ -1004,13 +1028,11 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     if (shootingStarActive) {
                         shootingStarElapsed += delta;
 
-                        const shootingProgress =
-                            THREE.MathUtils.clamp(
-                                shootingStarElapsed /
-                                    shootingStarDuration,
-                                0,
-                                1,
-                            );
+                        const shootingProgress = THREE.MathUtils.clamp(
+                            shootingStarElapsed / shootingStarDuration,
+                            0,
+                            1,
+                        );
 
                         updateShootingStar(shootingProgress);
 
@@ -1076,6 +1098,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
         }, [
             stateRef,
             cameraDistance,
+            cameraDistanceStart,
+            cameraDistanceEnd,
             globeScale,
             verticalOffset,
             backlit,
@@ -1109,12 +1133,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 );
 
                 const markerColor = new THREE.Color(
-    statusStyle(marker.status).color,
-).multiplyScalar(0.6);
+                    statusStyle(marker.status).color,
+                ).multiplyScalar(0.6);
 
-const material = new THREE.MeshBasicMaterial({
-    color: markerColor,
-});
+                const material = new THREE.MeshBasicMaterial({
+                    color: markerColor,
+                });
 
                 const pin = new THREE.Mesh(geometry, material);
                 pin.position.copy(position);

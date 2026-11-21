@@ -93,9 +93,6 @@ export const PAINEL_TEMPLATES: readonly PainelTemplate[] = [
     },
 ];
 
-export const PAINEL_TEMPLATE_OPTIONS: readonly { value: PainelTemplateId; label: string }[] =
-    PAINEL_TEMPLATES.map((template) => ({ value: template.id, label: template.label }));
-
 // Template pelo id. Um id desconhecido (ex.: configuração antiga) cai no primeiro.
 export function getPainelTemplate(id: PainelTemplateId): PainelTemplate {
     return PAINEL_TEMPLATES.find((template) => template.id === id) ?? PAINEL_TEMPLATES[0];

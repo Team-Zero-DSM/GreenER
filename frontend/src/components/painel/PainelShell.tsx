@@ -11,8 +11,12 @@ interface PainelShellProps {
 export function PainelShell({ fullscreen = false, children }: PainelShellProps) {
     return (
         <main
-            className={`w-full space-y-4 p-4 sm:p-6 ${
-                fullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-background' : ''
+            className={`w-full p-4 sm:p-6 ${
+                fullscreen
+                    ? // Tela cheia: a altura da tela é o limite, e a grade ocupa o que
+                      // sobra abaixo do cabeçalho (no celular, a pilha ainda rola).
+                      'fixed inset-0 z-50 flex flex-col gap-4 overflow-y-auto bg-background md:overflow-hidden'
+                    : 'space-y-4'
             }`}
         >
             {children}

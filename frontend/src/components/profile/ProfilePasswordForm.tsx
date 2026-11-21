@@ -6,6 +6,7 @@ import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 
 import type { ChangePasswordRequest } from '@/types/profile';
+import { isCommonPassword } from '@/lib/commonPasswords';
 
 interface ProfilePasswordFormProps {
     onBack: () => void;
@@ -34,6 +35,12 @@ export function ProfilePasswordForm({
         // Verifica o tamanho mínimo da nova senha.
         if (newPassword.length < 8) {
             setError('A nova senha deve possuir pelo menos 8 caracteres.');
+            return;
+        }
+
+        // Recusa senhas comuns, como o backend.
+        if (isCommonPassword(newPassword)) {
+            setError('Essa senha é muito comum. Escolha uma senha mais difícil de adivinhar.');
             return;
         }
 

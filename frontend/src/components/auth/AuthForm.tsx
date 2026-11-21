@@ -7,6 +7,7 @@ import { ResetPasswordDialog } from '@/components/auth/ResetPasswordDialog';
 import { validateEmail } from '@/lib/validation';
 
 import type { AuthMode, LoginRequest, RegisterRequest } from '@/types/auth';
+import { isCommonPassword } from '@/lib/commonPasswords';
 
 // Recupera o token do fragmento da URL.
 function getResetTokenFromUrl(): string | null {
@@ -116,6 +117,12 @@ export function AuthForm({
         // Validação do tamanho da senha.
         if (password.length < 8) {
             setError('A senha deve possuir pelo menos 8 caracteres.');
+            return;
+        }
+
+        // Recusa senhas comuns, como o backend.
+        if (isCommonPassword(password)) {
+            setError('Essa senha é muito comum. Escolha uma senha mais difícil de adivinhar.');
             return;
         }
 
