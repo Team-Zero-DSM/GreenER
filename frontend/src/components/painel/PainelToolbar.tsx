@@ -1,11 +1,11 @@
-import { Check, LayoutTemplate, Maximize, Pencil, Plus, Redo2, Undo2, X } from 'lucide-react';
+import { Check, Maximize, Pencil, Plus, Redo2, Undo2, X } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import { HISTORY_RANGE_OPTIONS } from '@/components/shared/segmentedControlOptions';
 import type { PainelTemplateId } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
 
-import { PAINEL_TEMPLATE_OPTIONS } from './painelTemplates';
+import { PainelTemplatePicker } from './PainelTemplatePicker';
 
 const ICON_BUTTON =
     'inline-flex size-11 items-center justify-center rounded-lg border border-border bg-background/60 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent';
@@ -51,21 +51,7 @@ export function PainelToolbar({
 }: PainelToolbarProps) {
     return (
         <section aria-label="Ferramentas do painel" className="flex flex-wrap items-center gap-3">
-            <label className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-background/60 px-3 text-sm text-muted-foreground">
-                <LayoutTemplate aria-hidden="true" className="size-4 text-primary" />
-                Template:
-                <select
-                    value={template}
-                    onChange={(event) => onTemplateChange(event.target.value as PainelTemplateId)}
-                    className="bg-transparent font-semibold text-foreground outline-none"
-                >
-                    {PAINEL_TEMPLATE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value} className="bg-popover">
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-            </label>
+            <PainelTemplatePicker value={template} onChange={onTemplateChange} />
 
             <SegmentedControl
                 label="Período do painel"

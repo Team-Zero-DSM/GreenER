@@ -307,6 +307,7 @@ export function PainelPage() {
                     editing={editing}
                     onWidgetsChange={changeDraftWidgets}
                     onBeforeChange={pushHistory}
+                    fill={fullscreen.active}
                     onConfigureWidget={(widget) => setSettingsWidgetId(widget.id)}
                 />
             )}

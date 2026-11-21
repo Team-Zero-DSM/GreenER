@@ -46,6 +46,9 @@ interface PainelGridProps {
     // para a página guardar o estado anterior e permitir desfazer.
     onBeforeChange?: () => void;
     onConfigureWidget?: (widget: PainelWidget) => void;
+    // Modo tela cheia: as linhas encolhem ou crescem para todos os widgets caberem
+    // na altura disponível, sem barra de rolagem (desktop e tablet).
+    fill?: boolean;
 }
 
 // Gesto em andamento. As posições são calculadas sempre a partir do início do
@@ -130,6 +133,7 @@ export function PainelGrid({
     onWidgetsChange,
     onBeforeChange,
     onConfigureWidget,
+    fill = false,
 }: PainelGridProps) {
     const gridRef = useRef<HTMLElement>(null);
     const gestureRef = useRef<PainelGesture | null>(null);
@@ -621,12 +625,24 @@ export function PainelGrid({
 
     const activeWidget = activeId ? widgets.find((widget) => widget.id === activeId) : undefined;
 
+    // Na tela cheia, a grade tem exatamente as linhas ocupadas pelos widgets.
+    const fillRows =
+        fill && breakpoint !== 'mobile'
+            ? Math.max(1, ...widgets.map((widget) => widget.y + widget.h))
+            : 0;
+
     return (
         <section
             ref={gridRef}
             aria-label="Widgets do painel"
             data-editing={editing}
-            className="relative grid auto-rows-[4.875rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12"
+            data-fill={fillRows > 0 || undefined}
+            style={
+                fillRows ? { gridTemplateRows: `repeat(${fillRows}, minmax(0, 1fr))` } : undefined
+            }
+            className={`relative grid auto-rows-[4.875rem] grid-cols-1 gap-3 md:grid-cols-6 lg:grid-cols-12 ${
+                fillRows ? 'min-h-0 flex-1' : ''
+            }`}
         >
             {activeWidget && (
                 <>

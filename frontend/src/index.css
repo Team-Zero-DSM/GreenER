@@ -176,6 +176,65 @@
         painel-ghost-pulse 1.6s ease-in-out infinite;
 }
 
+/* Seletor de template: a lista e o cartão de resumo surgem com um leve deslize. */
+@keyframes painel-pop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+}
+
+@keyframes painel-tooltip-in {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+    }
+}
+
+.painel-popover {
+    transform-origin: top left;
+    animation: painel-pop-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.painel-tooltip {
+    animation: painel-tooltip-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Tela cheia: cada widget fica dentro da própria célula, mesmo com pouca altura.
+   O espaçamento diminui em telas baixas, e o conteúdo vira um contêiner de altura
+   para o valor dos indicadores acompanhar o espaço que sobrou. */
+[data-fill] .painel-card {
+    min-height: 0;
+}
+
+[data-fill] .painel-card > :first-child {
+    padding: clamp(0.625rem, 1.5vh, 1rem);
+}
+
+[data-fill] .painel-body {
+    container-type: size;
+    overflow: hidden;
+    margin-top: clamp(0.25rem, 1vh, 0.75rem);
+}
+
+[data-fill] .painel-kpi-value {
+    font-size: clamp(1.25rem, min(42cqh, 16cqw), 4.5rem);
+    line-height: 1;
+}
+
+/* Indicador baixo demais: some primeiro a comparação, depois o rótulo. */
+@container (max-height: 100px) {
+    .painel-kpi-extra {
+        display: none;
+    }
+}
+
+@container (max-height: 60px) {
+    .painel-kpi-label {
+        display: none;
+    }
+}
+
 /* Widget pego pelo usuário: fundo sólido, para a sombra e o encaixe atrás não
    aparecerem através dele. */
 .painel-card[data-active] > :first-child {
@@ -193,11 +252,18 @@
 
 @media (prefers-reduced-motion: reduce) {
     .painel-guides,
-    .painel-ghost {
+    .painel-ghost,
+    .painel-popover,
+    .painel-tooltip {
         animation: none;
     }
 
     [data-editing='true'] .painel-card:not([data-active]):hover {
         translate: none;
     }
+}
+
+/* Tela cheia: sem barras de rolagem dentro dos widgets (ex.: tabelas). */
+[data-fill] .painel-body * {
+    scrollbar-width: none;
 }
