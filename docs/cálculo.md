@@ -57,15 +57,16 @@ O modelo recebe:
 
 Os parâmetros não são valores universais. A referência dos valores iniciais é
 o exemplo do desafio; a tabela abaixo registra sua aplicação. Uma mudança do
-conjunto ativo deve registrar valores e motivo, preservando a comparação com
-o modelo de referência.
+conjunto ativo é feita pela administração, com prévia e inserção de uma nova
+versão, preservando os valores vinculados às coletas anteriores.
 
 ### Valores iniciais utilizados
 
 O [schema](../database/schema.sql) insere um conjunto ativo; o
 [repository](../backend/src/modules/collections/collections.repository.ts)
 consulta o conjunto vigente, que pode ter sido alterado em um banco existente.
-O [serviço](../backend/src/modules/collections/collections.service.ts) aplica as fórmulas.
+O [serviço](../backend/src/modules/collections/collections.service.ts) usa a função
+compartilhada em [collections.estimate.ts](../backend/src/modules/collections/collections.estimate.ts).
 
 | Campo | Valor inicial | Unidade no modelo | Fonte e justificativa |
 |---|---|---|---|
@@ -196,8 +197,27 @@ CO₂e = Energia × 85 ≈ 0.0360329167 g
 
 O exemplo demonstra a matemática do código, não uma coleta real ou validação
 física dos fatores. O histórico soma as amostras armazenadas; não garante
-cobertura contínua do período. Os gráficos atuais do frontend são simulados
-e não devem ser usados para validar essas consultas reais.
+cobertura contínua do período. Painel e relatórios consultam os dados armazenados
+pela API; a prévia de coeficientes abaixo usa uma amostra fixa explicitamente ilustrativa.
+
+### Prévia e ativação de parâmetros
+
+Administradores consultam `GET /api/v1/project/coefficients`, simulam com
+`POST /api/v1/project/coefficients/preview` e ativam uma versão com
+`POST /api/v1/project/coefficients`. Os quatro coeficientes devem estar entre
+0 e 999999,9999, com até quatro casas decimais, conforme `NUMERIC(10,4)`.
+
+A prévia usa CPU de 50%, 4 GB de memória, 20 GB de disco, 1 GB de rede, uma
+hora e intensidade de 100 gCO₂e/kWh. Com os valores iniciais, resulta em
+51,72 W, 0,05172 kWh e 5,172 gCO₂e. Ela chama a mesma função da coleta e não
+grava parâmetros nem representa uma medição real.
+
+A ativação ocorre em transação: a versão anterior fica inativa e uma nova
+linha passa a ser usada nas próximas rodadas. O índice único parcial garante
+no máximo uma versão ativa; o bloqueio da tabela serializa ativações concorrentes.
+Uma rodada em andamento continua usando os parâmetros que já carregou.
+`coleta.parametro_estimativa_id` mantém a referência histórica, e as estimativas
+anteriores não são recalculadas. [Contrato e exemplos](./API.md#27-parâmetros-de-estimativa).
 
 ## 6. Orquestração e armazenamento
 
