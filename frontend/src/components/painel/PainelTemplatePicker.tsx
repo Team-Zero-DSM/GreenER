@@ -136,7 +136,7 @@ export function PainelTemplatePicker({ value, onChange }: PainelTemplatePickerPr
                         openList();
                     }
                 }}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-lg border bg-background/60 px-3 text-sm text-muted-foreground transition-colors hover:bg-white/5 ${
+                className={`inline-flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border bg-background/60 px-3 text-sm text-muted-foreground transition-colors hover:bg-white/5 xl:w-auto ${
                     open ? 'border-emerald-400/50' : 'border-border'
                 }`}
             >
