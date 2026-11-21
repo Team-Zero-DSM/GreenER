@@ -597,7 +597,6 @@ export function DashboardLayout() {
             <div className="relative dark flex min-h-screen flex-col bg-background text-foreground">
 
                 <DashboardHeader
-                    key={pathname}
                     pathname={pathname}
                     monitoringOpen={monitoringOpen}
                     setMonitoringOpen={setMonitoringOpen}
