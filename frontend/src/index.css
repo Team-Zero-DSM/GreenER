@@ -176,6 +176,30 @@
         painel-ghost-pulse 1.6s ease-in-out infinite;
 }
 
+/* Seletor de template: a lista e o cartão de resumo surgem com um leve deslize. */
+@keyframes painel-pop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+}
+
+@keyframes painel-tooltip-in {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+    }
+}
+
+.painel-popover {
+    transform-origin: top left;
+    animation: painel-pop-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.painel-tooltip {
+    animation: painel-tooltip-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Tela cheia: cada widget fica dentro da própria célula, mesmo com pouca altura.
    O espaçamento diminui em telas baixas, e o conteúdo vira um contêiner de altura
    para o valor dos indicadores acompanhar o espaço que sobrou. */
@@ -228,7 +252,9 @@
 
 @media (prefers-reduced-motion: reduce) {
     .painel-guides,
-    .painel-ghost {
+    .painel-ghost,
+    .painel-popover,
+    .painel-tooltip {
         animation: none;
     }
 
