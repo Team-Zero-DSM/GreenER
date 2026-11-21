@@ -1,6 +1,8 @@
+
 import { useLayoutEffect, useRef, useState } from 'react';
+
 import {
-    House,
+    Activity,
     LayoutDashboard,
     Server,
     ArrowLeftRight,
@@ -8,19 +10,14 @@ import {
     ListOrdered,
     UserRound,
 } from 'lucide-react';
+
 import { NavLink, Outlet, useLocation } from 'react-router';
 
 import { MonitoringBar } from '@/components/MonitoringBar';
 import { MonitoringProvider } from '@/contexts/MonitoringProvider';
 
+// Navegação principal.
 const navItems = [
-    { to: '/inicio', label: 'Início', icon: House, prefixes: ['/inicio'] },
-    {
-        to: '/painel',
-        label: 'Painel',
-        icon: LayoutDashboard,
-        prefixes: ['/painel'],
-    },
     {
         to: '/dashboard',
         label: 'Serviços',
@@ -47,36 +44,43 @@ const navItems = [
     },
 ];
 
-const linkClass =
-    'inline-flex min-h-11 items-center gap-1 rounded-lg border px-2 py-2 text-xs whitespace-nowrap transition-colors sm:gap-2 sm:px-3 sm:text-sm';
+// Links minimalistas com indicador inferior animado.
+const navLinkClass =
+    'group relative inline-flex min-h-12 shrink-0 items-center gap-2 rounded-lg px-3 text-[13px] font-semibold uppercase tracking-[0.075em] whitespace-nowrap transition-colors after:absolute after:bottom-1 after:left-3 after:right-3 after:h-[2px] after:origin-center after:scale-x-0 after:rounded-full after:bg-linear-to-r after:from-emerald-300 after:to-cyan-400 after:transition-transform after:duration-200';
 
-const activeClass = 'border-emerald-400/45 bg-emerald-400/10 text-foreground';
-const idleClass = 'border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground';
+const activeClass =
+    'text-emerald-200 after:scale-x-100';
+
+const idleClass =
+    'text-slate-300/80 hover:text-emerald-100 hover:after:scale-x-100';
+
+// Botões de acesso rápido.
+const iconButtonClass =
+    'inline-flex size-11 shrink-0 items-center justify-center rounded-full text-slate-300/80 transition-all hover:bg-white/[0.045] hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70';
 
 interface DashboardHeaderProps {
     pathname: string;
-    monitoringLocked: boolean;
-    setMonitoringLocked: React.Dispatch<React.SetStateAction<boolean>>;
+    monitoringOpen: boolean;
+    setMonitoringOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function DashboardHeader({
     pathname,
-    monitoringLocked,
-    setMonitoringLocked,
+    monitoringOpen,
+    setMonitoringOpen,
 }: DashboardHeaderProps) {
     const headerRef = useRef<HTMLElement>(null);
 
-    const [monitoringHovered, setMonitoringHovered] = useState(false);
-    const [monitoringFocused, setMonitoringFocused] = useState(false);
-
-    const monitoringOpen = monitoringLocked || monitoringHovered || monitoringFocused;
-
+    // Atualiza a altura da header utilizada pelo restante da aplicação.
     useLayoutEffect(() => {
         const header = headerRef.current;
         if (!header) return;
 
         const update = () =>
-            document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+            document.documentElement.style.setProperty(
+                '--header-h',
+                `${header.offsetHeight}px`,
+            );
 
         update();
 
@@ -87,99 +91,297 @@ function DashboardHeader({
     }, []);
 
     return (
-        <div
-            className="sticky top-0 z-50 bg-background"
-            onMouseEnter={() => setMonitoringHovered(true)}
-            onMouseLeave={() => setMonitoringHovered(false)}
-            onFocusCapture={() => setMonitoringFocused(true)}
-            onBlurCapture={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                    setMonitoringFocused(false);
-                }
-            }}
+        <header
+            ref={headerRef}
+            className="relative z-30 w-full bg-transparent"
         >
-            <header ref={headerRef} className="border-b border-border bg-background">
-                <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3 sm:gap-6 sm:px-6">
-                    <NavLink
-                        to="/inicio"
-                        className="bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-xl font-extrabold text-transparent"
-                    >
-                        Green<span className="font-light">ER</span>
-                    </NavLink>
+            <div className="grid h-[104px] w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-4 sm:px-5 lg:px-6 2xl:px-8">
 
-                    <nav
-                        aria-label="Seções do dashboard"
-                        className="flex w-full justify-between gap-1 overflow-x-auto sm:w-auto sm:justify-start"
-                    >
-                        {navItems.map(({ to, label, icon: Icon, prefixes }) => {
-                            const isActive =
-                                pathname === to ||
-                                prefixes.some((prefix) => pathname.startsWith(prefix));
+                {/* Navegação principal à esquerda. */}
+                <nav
+                    aria-label="Seções do dashboard"
+                    className="flex min-w-0 items-center justify-self-start gap-1 lg:gap-2 xl:gap-2.5"
+                >
+                    {navItems.map(({ to, label, icon: Icon, prefixes }) => {
+                        const isActive =
+                            pathname === to ||
+                            prefixes.some((prefix) => pathname.startsWith(prefix));
 
-                            return (
-                                <NavLink
-                                    key={to}
-                                    to={to}
-                                    className={`${linkClass} ${isActive ? activeClass : idleClass}`}
-                                >
-                                    <Icon aria-hidden="true" className="size-4" />
+                        return (
+                            <NavLink
+                                key={to}
+                                to={to}
+                                title={label}
+                                aria-label={label}
+                                className={`${navLinkClass} ${
+                                    isActive ? activeClass : idleClass
+                                }`}
+                            >
+                                <Icon
+                                    aria-hidden="true"
+                                    className={`size-[18px] shrink-0 transition-colors ${
+                                        isActive
+                                            ? 'text-emerald-300'
+                                            : 'text-slate-400 group-hover:text-cyan-200'
+                                    }`}
+                                />
+
+                                <span className="hidden xl:inline">
                                     {label}
-                                </NavLink>
-                            );
-                        })}
-                    </nav>
+                                </span>
+                            </NavLink>
+                        );
+                    })}
+                </nav>
+
+                {/* Módulo central trapezoidal do GreenER. */}
+                <NavLink
+                    to="/inicio"
+                    aria-label="Página inicial GreenER"
+                    className="group relative isolate flex h-full w-[180px] items-center justify-center justify-self-center [filter:drop-shadow(0_12px_26px_rgba(0,0,0,0.28))] sm:w-[220px] lg:w-[260px] 2xl:w-[290px]"
+                >
+                    {/* Forma trapezoidal com base superior maior. */}
+                    <svg
+                        aria-hidden="true"
+                        viewBox="0 0 290 104"
+                        preserveAspectRatio="none"
+                        className="absolute inset-0 h-full w-full overflow-visible"
+                    >
+                        <defs>
+                            <linearGradient
+                                id="greener-header-fill"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                            >
+                                <stop
+                                    offset="0%"
+                                    stopColor="#10283B"
+                                    stopOpacity="0.99"
+                                />
+                                <stop
+                                    offset="100%"
+                                    stopColor="#071522"
+                                    stopOpacity="0.98"
+                                />
+                            </linearGradient>
+
+                            <linearGradient
+                                id="greener-header-border"
+                                x1="0"
+                                y1="0"
+                                x2="1"
+                                y2="1"
+                            >
+                                <stop
+                                    offset="0%"
+                                    stopColor="#6EE7D1"
+                                    stopOpacity="0.42"
+                                />
+                                <stop
+                                    offset="100%"
+                                    stopColor="#22D3EE"
+                                    stopOpacity="0.22"
+                                />
+                            </linearGradient>
+
+                            <radialGradient
+                                id="greener-header-glow"
+                                cx="50%"
+                                cy="0%"
+                                r="90%"
+                            >
+                                <stop
+                                    offset="0%"
+                                    stopColor="#22D3EE"
+                                    stopOpacity="0.10"
+                                />
+                                <stop
+                                    offset="100%"
+                                    stopColor="#22D3EE"
+                                    stopOpacity="0"
+                                />
+                            </radialGradient>
+                        </defs>
+
+                        {/* Fundo do módulo. */}
+                        <path
+                            d="
+                                M 0 0
+                                H 290
+                                L 267 89
+                                Q 264 102 251 102
+                                H 39
+                                Q 26 102 23 89
+                                Z
+                            "
+                            fill="url(#greener-header-fill)"
+                        />
+
+                        <path
+                            d="
+                                M 0 0
+                                H 290
+                                L 267 89
+                                Q 264 102 251 102
+                                H 39
+                                Q 26 102 23 89
+                                Z
+                            "
+                            fill="url(#greener-header-glow)"
+                        />
+
+                        {/* Contorno lateral e inferior, sem linha no topo. */}
+                        <path
+                            d="
+                                M 0 0
+                                L 23 89
+                                Q 26 102 39 102
+                                H 251
+                                Q 264 102 267 89
+                                L 290 0
+                            "
+                            fill="none"
+                            stroke="url(#greener-header-border)"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="transition-opacity duration-300 group-hover:opacity-100"
+                        />
+                    </svg>
+
+                    {/* Nome da aplicação. */}
+                    <span className="relative z-10 bg-linear-to-r from-emerald-300 to-cyan-400 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent transition-opacity group-hover:opacity-85 sm:text-3xl lg:text-[2.6rem]">
+                        Green<span className="font-light">ER</span>
+                    </span>
+                </NavLink>
+
+                {/* Controles da região direita. */}
+                <div className="flex min-w-0 items-center justify-self-end gap-2 sm:gap-3">
+
+                    {/* Switch de monitoramento. */}
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={monitoringOpen}
+                        aria-label="Monitoramento"
+                        aria-controls="monitoring-panel"
+                        onClick={() => setMonitoringOpen((open) => !open)}
+                        title={
+                            monitoringOpen
+                                ? 'Desativar monitoramento'
+                                : 'Ativar monitoramento'
+                        }
+                        className="group inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-300/80 transition-colors hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70"
+                    >
+                        <Activity
+                            aria-hidden="true"
+                            className={`size-[18px] shrink-0 transition-colors ${
+                                monitoringOpen
+                                    ? 'text-emerald-300'
+                                    : 'text-slate-400 group-hover:text-cyan-200'
+                            }`}
+                        />
+
+                        <span className="hidden xl:inline">
+                            Monitoramento
+                        </span>
+
+                        {/* Indicador do switch. */}
+                        <span
+                            aria-hidden="true"
+                            className={`relative h-[21px] w-10 shrink-0 rounded-full border transition-colors duration-200 ${
+                                monitoringOpen
+                                    ? 'border-emerald-300/40 bg-emerald-400/25'
+                                    : 'border-white/15 bg-white/[0.07]'
+                            }`}
+                        >
+                            <span
+                                className={`absolute left-[2px] top-[2px] size-[15px] rounded-full shadow-sm transition-transform duration-200 ${
+                                    monitoringOpen
+                                        ? 'translate-x-[18px] bg-emerald-200'
+                                        : 'translate-x-0 bg-slate-400'
+                                }`}
+                            />
+                        </span>
+                    </button>
+
+                    {/* Separação dos controles de conta. */}
+                    <div
+                        aria-hidden="true"
+                        className="mx-1 h-7 w-px bg-white/10"
+                    />
+
+                    {/* Painel personalizado. */}
                     <NavLink
-                        to="/perfil"
-                        className={`${linkClass} ml-auto ${
-                            pathname === '/perfil' ? activeClass : idleClass
+                        to="/painel"
+                        title="Painel personalizado"
+                        aria-label="Painel personalizado"
+                        className={`${iconButtonClass} ${
+                            pathname === '/painel' ||
+                            pathname.startsWith('/painel/')
+                                ? 'text-emerald-300'
+                                : ''
                         }`}
                     >
-                        <UserRound aria-hidden="true" className="size-4" />
-                        Perfil
+                        <LayoutDashboard
+                            aria-hidden="true"
+                            className="size-[22px]"
+                        />
+                    </NavLink>
+
+                    {/* Perfil do usuário. */}
+                    <NavLink
+                        to="/perfil"
+                        title="Perfil"
+                        aria-label="Perfil"
+                        className={`${iconButtonClass} ${
+                            pathname === '/perfil'
+                                ? 'text-emerald-300'
+                                : ''
+                        }`}
+                    >
+                        <UserRound
+                            aria-hidden="true"
+                            className="size-[22px]"
+                        />
                     </NavLink>
                 </div>
-            </header>
-
-            <div
-                className={`sm:absolute sm:inset-x-0 sm:top-full sm:overflow-hidden ${
-                    monitoringOpen ? 'sm:pointer-events-auto' : 'sm:pointer-events-none'
-                }`}
-            >
-                <div
-                    onClick={() => setMonitoringLocked((locked) => !locked)}
-                    title={
-                        monitoringLocked
-                            ? 'Clique para desafixar a barra de monitoramento'
-                            : 'Clique para fixar a barra de monitoramento'
-                    }
-                    className={`cursor-pointer border-b border-border bg-background sm:transition-[translate,visibility] sm:duration-300 sm:ease-out ${
-                        monitoringOpen
-                            ? 'sm:visible sm:translate-y-0'
-                            : 'sm:invisible sm:-translate-y-full'
-                    } motion-reduce:transition-none`}
-                >
-                    <MonitoringBar />
-                </div>
             </div>
-        </div>
+        </header>
     );
 }
 
 export function DashboardLayout() {
     const { pathname } = useLocation();
-    const isLandingPage = pathname === '/inicio' || pathname === '/inicio/';
 
-    const [monitoringLocked, setMonitoringLocked] = useState(false);
+    const isLandingPage =
+        pathname === '/inicio' || pathname === '/inicio/';
+
+    const [monitoringOpen, setMonitoringOpen] = useState(false);
 
     return (
         <MonitoringProvider>
             <div className="dark flex min-h-screen flex-col bg-background text-foreground">
+
                 <DashboardHeader
-                    key={pathname}
                     pathname={pathname}
-                    monitoringLocked={monitoringLocked}
-                    setMonitoringLocked={setMonitoringLocked}
+                    monitoringOpen={monitoringOpen}
+                    setMonitoringOpen={setMonitoringOpen}
                 />
+
+                {/* Somente o monitoramento acompanha a rolagem. */}
+                {monitoringOpen && (
+                    <div
+                        id="monitoring-panel"
+                        className="sticky top-0 z-40 w-full"
+                    >
+                        <div className="border-b border-border bg-background/95 shadow-lg backdrop-blur-xl">
+                            <MonitoringBar />
+                        </div>
+                    </div>
+                )}
 
                 <div className="flex-1">
                     <Outlet />
