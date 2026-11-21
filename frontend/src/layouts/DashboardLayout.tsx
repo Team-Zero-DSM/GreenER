@@ -7,6 +7,7 @@ import {
     Globe,
     ListOrdered,
     UserRound,
+    ClipboardList,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 
@@ -45,6 +46,12 @@ const navItems = [
         icon: ArrowLeftRight,
         prefixes: ['/comparacao'],
     },
+    {
+        to: '/relatorio',
+        label: 'Relatório',
+        icon: ClipboardList,
+        prefixes: ['/relatorio'],
+    }
 ];
 
 const linkClass =
