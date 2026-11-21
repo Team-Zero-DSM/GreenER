@@ -142,7 +142,7 @@ export function PainelWidgetFrame({
                 )}
             </header>
 
-            <div className="mt-3 flex min-h-0 flex-1 flex-col">
+            <div className="painel-body mt-3 flex min-h-0 flex-1 flex-col">
                 {status === 'loading' && (
                     <div
                         role="status"
