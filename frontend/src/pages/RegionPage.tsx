@@ -20,7 +20,7 @@ export function RegionPage() {
                 description="Intensidade de carbono de cada região e o impacto dos serviços hospedados nela"
                 actions={
                     <Link
-                        to="/#explorar"
+                        to="/inicio#explorar"
                         className="inline-flex shrink-0 items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-cyan-400/50 hover:bg-cyan-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                     >
                         Ver no globo 3D

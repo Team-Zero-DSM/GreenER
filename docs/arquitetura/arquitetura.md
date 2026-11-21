@@ -1,9 +1,10 @@
 # 🏗️ Arquitetura e Modelagem
 
-Os diagramas representam a modelagem do produto e incluem fluxos futuros.
-Não comprovam que mapa, atualização automática, autenticação ou ranking já
-estejam implementados. O estado executável está no [README](../../README.md)
-e o compromisso por sprint no [plano](../plano-de-entregas.md).
+Os diagramas representam a modelagem do produto e podem preceder a implementação
+vigente. Mapa, atualização automática, autenticação e ranking estão integrados;
+as rotas e permissões atuais estão no [contrato da API](../API.md), a estrutura
+do banco no [dicionário](../../database/arquitetura.md) e as entregas do backend
+na [rastreabilidade da Sprint 3](../plano-de-entregas.md#entregas-do-backend-na-sprint-3).
 
 Esta seção reúne os artefatos de modelagem desenvolvidos para o projeto **GreenER**.
 
@@ -78,8 +79,8 @@ Representar a estrutura estática do sistema, evidenciando as principais entidad
 # 🔄 Diagramas de Sequência
 
 Os diagramas de sequência disponíveis estão em `./images/diagramas-de-sequencia/`.
-Consulta com mapa e atualização representa o fluxo-alvo da Sprint 1; ranking
-é planejado para a Sprint 2. Lista, detalhe e histórico já consomem o backend real.
+Consulta com mapa e atualização registra o fluxo da Sprint 1; ranking e comparação
+foram ampliados na Sprint 2. Lista, detalhe e histórico consomem o backend real.
 O globo está integrado; apresentar os serviços associados ao inspecionar uma região
 foi transferido para a Sprint 2 como continuação de T15. Diagramas permanecem
 modelos de referência e não substituem as evidências da implementação.
