@@ -72,10 +72,11 @@ GreenER/
 │   │   ├── db/
 │   │   ├── integrations/
 │   │   ├── jobs/
-│   │   ├── modules/       # services, collections, analytics, regions, monitoring, comparisons, rankings
+│   │   ├── modules/       # services, collections, analytics, regions, monitoring, comparisons, rankings,
+│   │   │                 # accounts, dashboards, project e reports
 │   │   ├── scripts/
 │   │   └── shared/
-│   └── tests/unit/
+│   └── tests/            # unit/ e integration/, com bancos descartáveis
 ├── frontend/
 │   ├── arquitetura.md
 │   ├── .env.example
@@ -92,7 +93,8 @@ GreenER/
 │       └── lib/
 ├── database/
 │   ├── arquitetura.md
-│   └── schema.sql
+│   ├── schema.sql
+│   └── migrations/
 ├── docs/
 │   ├── API.md
 │   ├── cálculo.md
@@ -135,6 +137,16 @@ Confira os valores dos arquivos `.env`. No Docker, o backend acessa o banco por
 
 Para encerrar: `docker compose down`.
 
+O backend exige `METRICS_API_URL` e `CARBON_API_URL` para carregar as rotas de
+coleta. `JWT_SECRET` configura as sessões; em produção, substitua o exemplo
+por um segredo com pelo menos 32 bytes. `CORS_ORIGIN` deve apontar para a origem
+do frontend. Para rodar Node.js fora do Compose, use `DATABASE_HOST=localhost`
+e `DATABASE_PORT=5433`; dentro dele, use `database:5432`.
+
+Uma instalação em banco existente precisa aplicar as
+[migrações preservando os dados](./database/arquitetura.md#migrar-um-volume-existente-para-a-sprint-3).
+O script inicial do Compose é executado somente em volumes vazios.
+
 ### Primeiro administrador
 
 Com o banco configurado e em execução, rode na raiz do projeto:
@@ -150,6 +162,63 @@ Informe nome, e-mail e senha. Se o e-mail já estiver cadastrado, a conta será
 promovida e receberá o nome e a senha informados, com o acesso reativado.
 As sessões e os tokens de recuperação anteriores serão invalidados.
 Se já existir um administrador ativo, o comando será recusado.
+
+### Recuperação de senha
+
+A recuperação usa `POST /api/v1/auth/forgot-password` e
+`POST /api/v1/auth/reset-password`, descritos no [contrato](./docs/API.md#recuperação-de-senha).
+Acrescente ao `backend/.env` os valores reais do seu serviço de e-mail:
+
+```dotenv
+APP_PUBLIC_URL=http://localhost:5173
+SMTP_FROM=GreenER <nao-responda@example.com>
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=usuario-do-servico
+SMTP_PASSWORD=senha-do-servico
+```
+
+`APP_PUBLIC_URL` é a base pública do frontend e precisa usar HTTP ou HTTPS.
+O link enviado abre `/login#token=...`. O token expira em 30 minutos e pode
+ser consumido uma única vez. Os valores acima são exemplos, não credenciais.
+
+`SMTP_HOST` é obrigatório ao usar SMTP. `SMTP_PORT` deve ser inteiro de 1 a
+65535, com padrão 587; porta 465 usa TLS desde a conexão, e as demais usam
+STARTTLS quando disponível, obrigatório em produção. `SMTP_USER` e
+`SMTP_PASSWORD` devem ser preenchidos juntos ou ambos omitidos para um relay
+sem autenticação. Em produção, use a URL HTTPS real do frontend.
+
+Como alternativa, defina `BREVO_API_KEY` para enviar pela API HTTP da Brevo.
+Quando preenchida, ela tem prioridade sobre SMTP; `SMTP_FROM` e
+`APP_PUBLIC_URL` continuam obrigatórios. Recrie o container após alterar o
+arquivo: `docker compose up -d --force-recreate backend`.
+
+### Testes do backend
+
+Em `backend/`, com Node.js 24 e dependências instaladas:
+
+```powershell
+npm ci
+npm run lint
+npm run format:check
+npm run build
+```
+
+Para incluir os testes de integração, na raiz do projeto suba o banco e depois
+execute no diretório do backend:
+
+```powershell
+docker compose up -d --wait database
+Set-Location backend
+$env:TEST_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5433/greener'
+npm test
+```
+
+O usuário da conexão de testes precisa poder criar e remover bancos. Cada
+arquivo de integração cria seu próprio banco descartável com o schema real e
+o remove ao terminar; o envio de e-mail é simulado. Sem `TEST_DATABASE_URL`,
+os testes de integração são ignorados. O helper da API configura suas próprias
+URLs locais para funcionar também no CI sem o `.env` de desenvolvimento.
 
 ---
 
@@ -177,6 +246,10 @@ Disponíveis na versão integrada:
 - Comparação de serviços com simulação de emissões em outra região.
 - Atualização automática após as rodadas de coleta, sem recarregar a página.
 - Execução de frontend, backend e banco com Docker Compose.
+- Cadastro, login JWT, perfil, alteração e recuperação de senha.
+- Painel pessoal com configuração persistida por usuário.
+- Administração de usuários, intervalo de coleta e versões dos coeficientes.
+- Prévia de relatórios por período e exportação em PDF com linha, barras ou tabela.
 
 O ranking de impacto ambiental já possui rota pública no backend
 (`GET /api/v1/rankings`) e integração com a página de ranking da interface.
@@ -189,11 +262,10 @@ Pendências e entregas futuras:
   histórico de status das coletas e ampliação das visualizações regionais.
   Escopo e acompanhamento no [registro da Sprint 2](./docs/sprint-2/sprint-2.md)
   e no [plano de entregas](./docs/plano-de-entregas.md).
-- **Sprint 3:** autenticação JWT e simulação de cenários avançados,
-  com delimitação em relação às opções regionais previstas na comparação da Sprint 2.
-- **Proposta para a Sprint 3:** configuração do intervalo de coleta pela área
-  autenticada. O [plano de entregas](./docs/plano-de-entregas.md) registra o
-  critério de aceite.
+- **Sprint 3:** delimitação de cenários avançados adicionais às opções regionais
+  já disponíveis na comparação. Autenticação e configurações administrativas
+  estão implementadas; contratos e evidências do backend estão no
+  [plano de entregas](./docs/plano-de-entregas.md#entregas-do-backend-na-sprint-3).
 
 Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
 Persistência, histórico e globo não acrescentam automaticamente outras histórias.
