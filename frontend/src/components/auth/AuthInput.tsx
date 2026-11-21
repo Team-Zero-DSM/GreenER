@@ -1,4 +1,3 @@
-
 import type { ReactNode } from 'react';
 
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
