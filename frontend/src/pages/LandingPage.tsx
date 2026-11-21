@@ -1,23 +1,39 @@
 import { useRef, useState, useEffect, useMemo } from 'react';
+
 import type { GlobeViewHandle } from '../components/globe/GlobeView';
+
 import { ExploreSection } from '../components/landing/ExploreSection';
+
 import { fetchRegionsLast24Hours } from '@/api/regions';
 import { useApiQuery } from '@/hooks/useApiQuery';
+import { useServices } from '@/hooks/useServices';
+
 import { GlobeView } from '../components/globe/GlobeView';
 import { GlobeMap2D } from '../components/globe/GlobeView2d';
-import { useServices } from '@/hooks/useServices';
 import { StarsBackground } from '../components/globe/StarsBackground';
+
 import { useLocation } from 'react-router';
 
 const RESET_THRESHOLD = 0.02;
 
 export function LandingPage() {
     const globeRef = useRef<GlobeViewHandle>(null);
+
     const exploreContainerRef = useRef<HTMLDivElement>(null);
     const globeTargetRef = useRef<HTMLDivElement>(null);
     const globeLayerRef = useRef<HTMLDivElement>(null);
+
     const prevProgressRef = useRef(0);
-    const globeState = useRef({ progress: 0, target: { x: 0, y: 0 }, lon: -90 });
+
+    const globeState = useRef({
+        progress: 0,
+        target: {
+            x: 0,
+            y: 0,
+        },
+        lon: -90,
+    });
+
     const force2DRef = useRef(false);
 
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
@@ -30,15 +46,21 @@ export function LandingPage() {
     // já cai na seção de exploração do globo.
     useEffect(() => {
         if (hash !== '#explorar') return;
+
         const frame = requestAnimationFrame(() => {
             exploreContainerRef.current?.scrollIntoView({ block: 'start' });
         });
+
         return () => cancelAnimationFrame(frame);
     }, [hash]);
 
     useEffect(() => {
         force2DRef.current = force2D;
     }, [force2D]);
+
+    // ---------------------------------------------------------
+    // POSICIONAMENTO DO GLOBO DURANTE A ROLAGEM
+    // ---------------------------------------------------------
 
     useEffect(() => {
         const updateGlobe = () => {
@@ -54,7 +76,11 @@ export function LandingPage() {
 
             const progress = Math.max(
                 0,
-                Math.min(1, (window.innerHeight - sectionRect.top) / (window.innerHeight * 0.7)),
+                Math.min(
+                    1,
+                    (window.innerHeight - sectionRect.top) /
+                        (window.innerHeight * 0.7),
+                ),
             );
 
             const previous = prevProgressRef.current;
@@ -66,7 +92,10 @@ export function LandingPage() {
                 setSelectedCode(null);
             }
 
-            if (previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
+            if (
+                previous > RESET_THRESHOLD &&
+                progress <= RESET_THRESHOLD
+            ) {
                 setSelectedCode(null);
                 globeRef.current?.resetView();
             }
@@ -74,14 +103,23 @@ export function LandingPage() {
             prevProgressRef.current = progress;
 
             globeState.current.target = {
-                x: targetRect.left + targetRect.width / 2 - layerRect.left,
-                y: targetRect.top + targetRect.height / 2 - layerRect.top,
+                x:
+                    targetRect.left +
+                    targetRect.width / 2 -
+                    layerRect.left,
+                y:
+                    targetRect.top +
+                    targetRect.height / 2 -
+                    layerRect.top,
             };
         };
 
         updateGlobe();
 
-        window.addEventListener('scroll', updateGlobe, { passive: true });
+        window.addEventListener('scroll', updateGlobe, {
+            passive: true,
+        });
+
         window.addEventListener('resize', updateGlobe);
 
         return () => {
@@ -90,19 +128,31 @@ export function LandingPage() {
         };
     }, []);
 
+    // ---------------------------------------------------------
+    // DADOS DOS SERVIÇOS E DAS REGIÕES
+    // ---------------------------------------------------------
+
     const { services, error } = useServices();
+
     const {
         data: regions,
         error: regionsError,
         isLoading: regionsLoading,
     } = useApiQuery(fetchRegionsLast24Hours);
 
+    // ---------------------------------------------------------
+    // MARCADORES GEOGRÁFICOS
+    // ---------------------------------------------------------
+
     const markers = useMemo(
         () =>
             services.flatMap((service) => {
                 const location = service.location;
 
-                if (location?.latitude == null || location.longitude == null) {
+                if (
+                    location?.latitude == null ||
+                    location.longitude == null
+                ) {
                     return [];
                 }
 
@@ -119,10 +169,33 @@ export function LandingPage() {
         [services],
     );
 
+    // ---------------------------------------------------------
+    // REGIÃO SELECIONADA
+    // ---------------------------------------------------------
+
     const selectedRegion = useMemo(
-        () => regions?.find((region) => region.code === selectedCode) ?? null,
+        () =>
+            regions?.find(
+                (region) => region.code === selectedCode,
+            ) ?? null,
         [regions, selectedCode],
     );
+
+    const focusTarget = useMemo(
+        () =>
+            selectedRegion?.latitude != null &&
+            selectedRegion.longitude != null
+                ? {
+                      latitude: selectedRegion.latitude,
+                      longitude: selectedRegion.longitude,
+                  }
+                : null,
+        [selectedRegion],
+    );
+
+    // ---------------------------------------------------------
+    // CONTROLES DO GLOBO
+    // ---------------------------------------------------------
 
     const rotateLeft = () => {
         globeRef.current?.rotateLeft();
@@ -140,6 +213,10 @@ export function LandingPage() {
         globeRef.current?.zoom(factor);
     };
 
+    // ---------------------------------------------------------
+    // TRATAMENTO DE ERROS
+    // ---------------------------------------------------------
+
     if (error || regionsError) {
         return (
             <main className="p-6 text-foreground">
@@ -148,13 +225,16 @@ export function LandingPage() {
         );
     }
 
-    const focusTarget =
-        selectedRegion?.latitude != null && selectedRegion.longitude != null
-            ? { latitude: selectedRegion.latitude, longitude: selectedRegion.longitude }
-            : null;
+    // ---------------------------------------------------------
+    // RENDERIZAÇÃO
+    // ---------------------------------------------------------
 
     return (
         <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
+            {/* =================================================
+                APRESENTAÇÃO INICIAL
+            ================================================= */}
+
             <section
                 id="sobre"
                 className="relative z-10 flex min-h-svh flex-col justify-center px-6 pt-[var(--header-h,4rem)] pb-32 md:px-12"
@@ -179,8 +259,9 @@ export function LandingPage() {
                             event.preventDefault();
 
                             exploreContainerRef.current?.scrollIntoView({
-                                behavior: window.matchMedia('(prefers-reduced-motion: reduce)')
-                                    .matches
+                                behavior: window.matchMedia(
+                                    '(prefers-reduced-motion: reduce)',
+                                ).matches
                                     ? 'auto'
                                     : 'smooth',
                                 block: 'start',
@@ -193,13 +274,34 @@ export function LandingPage() {
                 </div>
             </section>
 
+            {/* =================================================
+                CAMADA DO GLOBO 3D E DO FUNDO ESPACIAL
+            ================================================= */}
+
             <div
                 ref={globeLayerRef}
                 className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-h,4rem)] z-0"
             >
+                {!force2D && (
+                    <>
+                        {/* Halo atmosférico suave atrás do planeta. */}
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_52%,rgba(14,165,233,0.12)_0%,rgba(14,165,233,0.045)_34%,transparent_68%)]"
+                        />
+
+                        {/* Escurecimento sutil das extremidades. */}
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,transparent_45%,rgba(5,8,22,0.18)_100%)]"
+                        />
+                    </>
+                )}
+
                 {force2D ? (
                     <div className="relative h-full w-full">
                         <StarsBackground />
+
                         <div className="relative h-full w-full">
                             <GlobeMap2D
                                 ref={globeRef}
@@ -211,15 +313,26 @@ export function LandingPage() {
                         </div>
                     </div>
                 ) : (
-                    <GlobeView
-                        ref={globeRef}
-                        autoRotate={autoRotate}
-                        stateRef={globeState}
-                        markers={markers}
-                        focusTarget={focusTarget}
-                    />
+                    <div className="absolute inset-0">
+                        <GlobeView
+                            ref={globeRef}
+                            autoRotate={autoRotate}
+                            rotationSpeed={0.1}
+                            stateRef={globeState}
+                            markers={markers}
+                            focusTarget={focusTarget}
+                            backlit
+                            atmosphereIntensity={0.42}
+                            cameraDistanceStart={4.35}
+                            cameraDistanceEnd={4.5}
+                        />
+                    </div>
                 )}
             </div>
+
+            {/* =================================================
+                EXPLORAÇÃO DAS REGIÕES
+            ================================================= */}
 
             <div
                 ref={exploreContainerRef}
@@ -228,8 +341,11 @@ export function LandingPage() {
             >
                 <div className="min-w-0">
                     {regionsLoading && (
-                        <p className="text-white/60">Carregando totais das últimas 24 horas...</p>
+                        <p className="text-white/60">
+                            Carregando totais das últimas 24 horas...
+                        </p>
                     )}
+
                     <ExploreSection
                         rotateLeft={rotateLeft}
                         rotateRight={rotateRight}
@@ -247,7 +363,10 @@ export function LandingPage() {
                     />
                 </div>
 
-                <div ref={globeTargetRef} className="min-w-0"></div>
+                <div
+                    ref={globeTargetRef}
+                    className="min-w-0"
+                />
             </div>
         </main>
     );
