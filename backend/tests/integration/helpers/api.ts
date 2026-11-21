@@ -8,6 +8,10 @@ export async function startTestApi(database: TestDatabase) {
     process.env.JWT_SECRET = 'segredo-dos-testes';
     process.env.NODE_ENV = 'test';
 
+    // As rotas exigem estas URLs ao iniciar, mas os testes não fazem coletas externas.
+    process.env.METRICS_API_URL = 'http://127.0.0.1:1';
+    process.env.CARBON_API_URL = 'http://127.0.0.1:1';
+
     const { app } = await import('../../../src/app.js');
     const { pool } = await import('../../../src/db/connection.js');
     const server = app.listen(0, '127.0.0.1');
