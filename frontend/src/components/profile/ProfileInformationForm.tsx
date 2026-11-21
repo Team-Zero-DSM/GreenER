@@ -1,6 +1,13 @@
+
 import { useState, type FormEvent } from 'react';
+
+import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
-import type { UserProfile, UpdateProfileRequest } from '@/types/profile';
+
+import type {
+    UserProfile,
+    UpdateProfileRequest,
+} from '@/types/profile';
 
 interface ProfileInformationFormProps {
     profile: UserProfile;
@@ -9,17 +16,15 @@ interface ProfileInformationFormProps {
     isSaving: boolean;
 }
 
-const inputClassName =
-    'h-11 w-full rounded-lg border border-input bg-background/60 px-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-emerald-400/50 focus-visible:ring-2 focus-visible:ring-emerald-400/15';
-
 export function ProfileInformationForm({
     profile,
     onSave,
     onBack,
     isSaving,
 }: ProfileInformationFormProps) {
-    const [name, setName] = useState(profile.name);
-    const [email, setEmail] = useState(profile.email);
+    // Os valores atuais aparecem como placeholders.
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -28,66 +33,60 @@ export function ProfileInformationForm({
 
         try {
             await onSave({
-                name: name.trim(),
-                email: email.trim(),
+                // Preserva os valores atuais caso não sejam alterados.
+                name: name.trim() || profile.name,
+                email: email.trim() || profile.email,
             });
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Não foi possível atualizar o perfil.');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Não foi possível atualizar o perfil.',
+            );
         }
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-1">
-                <h3 className="text-base font-semibold">Informações pessoais</h3>
+                <h3 className="text-base font-semibold">
+                    Informações pessoais
+                </h3>
 
                 <p className="text-sm text-muted-foreground">
                     Atualize seu nome e endereço de e-mail.
                 </p>
             </div>
 
-            <div className="space-y-2">
-                <label htmlFor="profile-name" className="text-sm font-medium">
-                    Nome
-                </label>
+            {/* Nome atual como placeholder. */}
+            <FloatingLabelInput
+                id="profile-name"
+                label="Nome"
+                type="text"
+                value={name}
+                onChange={setName}
+                placeholder={profile.name}
+                autoComplete="name"
+                disabled={isSaving}
+            />
 
-                <input
-                    id="profile-name"
-                    type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    placeholder="Digite seu nome"
-                    autoComplete="name"
-                    className={inputClassName}
-                    disabled={isSaving}
-                    required
-                />
-            </div>
-
-            <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
-                    <label htmlFor="profile-email" className="text-sm font-medium">
-                        E-mail
-                    </label>
-
+            {/* E-mail atual como placeholder. */}
+            <FloatingLabelInput
+                id="profile-email"
+                label="E-mail"
+                type="email"
+                value={email}
+                onChange={setEmail}
+                placeholder={profile.email}
+                autoComplete="email"
+                disabled={isSaving}
+                labelAdornment={
                     <InfoTooltip
                         content="Use um e-mail atualizado. Ele será utilizado para recuperar o acesso à sua conta."
                         ariaLabel="Informações sobre o uso do e-mail"
                     />
-                </div>
-
-                <input
-                    id="profile-email"
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="Digite seu e-mail"
-                    autoComplete="email"
-                    className={inputClassName}
-                    disabled={isSaving}
-                    required
-                />
-            </div>
+                }
+            />
 
             {error && (
                 <p role="alert" className="text-sm text-red-400">
@@ -95,6 +94,7 @@ export function ProfileInformationForm({
                 </p>
             )}
 
+            {/* Ações do formulário. */}
             <div className="flex flex-wrap justify-end gap-2 border-t border-border/70 pt-4">
                 <button
                     type="button"

@@ -315,7 +315,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             if (backlit) {
                 const fillLight = new THREE.DirectionalLight(
                     '#a5d9ef',
-                    1.1,
+                    2.0,
                 );
                 fillLight.position.set(3, 1, 4);
                 scene.add(fillLight);
