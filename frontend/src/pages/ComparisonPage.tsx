@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { Info } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { useMonitoring } from '@/contexts/monitoring';
 import { PageShell } from '@/components/shared/PageShell';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -28,6 +29,10 @@ import type { HistoryRange } from '@/types/service';
 import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
 
 export function ComparisonPage() {
+    // Intervalo real de coleta do projeto, usado para estimar coletas ausentes.
+    const { status } = useMonitoring();
+    const intervaloColetaSegundos = status?.collectionIntervalSeconds;
+
     // Configurações da comparação.
     const [periodo, setPeriodo] = useState<HistoryRange>('24h');
 
@@ -137,8 +142,8 @@ export function ComparisonPage() {
             return null;
         }
 
-        return prepararDadosComparacao(respostaComparacao);
-    }, [respostaComparacao]);
+        return prepararDadosComparacao(respostaComparacao, intervaloColetaSegundos);
+    }, [respostaComparacao, intervaloColetaSegundos]);
 
     // Preserva os serviços da última comparação.
     // Atualiza somente suas cores quando o usuário as altera.
