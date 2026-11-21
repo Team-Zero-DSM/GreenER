@@ -36,8 +36,11 @@ export class AccountsService {
         const token = randomBytes(32).toString('hex');
         const recipient = await this.repository.issueReset(email, digest(token));
         if (recipient)
-            void send(recipient, token).catch(() =>
-                console.error('[auth] Falha no envio da redefinição.'),
+            void send(recipient, token).catch((error: unknown) =>
+                console.error(
+                    '[auth] Falha no envio da redefinição:',
+                    error instanceof Error ? error.message : error,
+                ),
             );
     }
 

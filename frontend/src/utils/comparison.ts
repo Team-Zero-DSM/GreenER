@@ -1,7 +1,8 @@
 import type { ComparisonPoint, ComparisonResponse, ComparisonSeries } from '@/types/comparison';
 
 // Intervalo entre as coletas do GreenER.
-const INTERVALO_COLETA_MS = 30_000;
+// Intervalo usado só quando o backend ainda não informou o intervalo real de coleta.
+const INTERVALO_COLETA_PADRAO_SEGUNDOS = 30;
 
 type ComparisonMetricKey = 'energyKwh' | 'co2eGrams';
 
@@ -62,6 +63,7 @@ function arredondar(valor: number): number {
 function calcularAmostrasEsperadas(
     resposta: ComparisonResponse,
     quantidadePontos: number,
+    intervaloColetaSegundos: number,
 ): number | null {
     if (quantidadePontos === 0) {
         return null;
@@ -76,7 +78,7 @@ function calcularAmostrasEsperadas(
 
     const duracaoPorPonto = (fim - inicio) / quantidadePontos;
 
-    return Math.max(1, Math.round(duracaoPorPonto / INTERVALO_COLETA_MS));
+    return Math.max(1, Math.round(duracaoPorPonto / (intervaloColetaSegundos * 1000)));
 }
 
 // Obtém a quantidade de coletas registradas no ponto.
@@ -316,7 +318,19 @@ function calcularTotal(
 }
 
 // Prepara todas as séries antes de enviá-las ao gráfico e ao resumo.
-export function prepararDadosComparacao(resposta: ComparisonResponse): PreparedComparisonResponse {
+// O intervalo de coleta vem do backend (configuração do projeto). Sem ele, a estimativa
+// preencheria coletas que nunca existiram e inflaria os totais.
+export function prepararDadosComparacao(
+    resposta: ComparisonResponse,
+    intervaloColetaSegundos?: number,
+): PreparedComparisonResponse {
+    const intervalo =
+        intervaloColetaSegundos !== undefined &&
+        Number.isFinite(intervaloColetaSegundos) &&
+        intervaloColetaSegundos > 0
+            ? intervaloColetaSegundos
+            : INTERVALO_COLETA_PADRAO_SEGUNDOS;
+
     return {
         ...resposta,
 
@@ -363,7 +377,11 @@ export function prepararDadosComparacao(resposta: ComparisonResponse): PreparedC
                 };
             }
 
-            const amostrasEsperadas = calcularAmostrasEsperadas(resposta, serie.points.length);
+            const amostrasEsperadas = calcularAmostrasEsperadas(
+                resposta,
+                serie.points.length,
+                intervalo,
+            );
 
             // Processa energia e emissões separadamente.
             const energia = prepararMetrica(serie.points, 'energyKwh', amostrasEsperadas);

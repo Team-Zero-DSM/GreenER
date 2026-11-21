@@ -93,6 +93,8 @@ export interface HistoryPoint {
 export interface ServiceHistory {
     range: HistoryRange;
     period: { from: string; to: string };
+    // Tamanho de cada faixa do histórico, em segundos.
+    bucketSeconds?: number;
     summary: {
         sampleCount: number;
         energyKwh: number | null;

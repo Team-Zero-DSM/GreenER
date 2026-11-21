@@ -7,6 +7,7 @@ import { GlobeView } from '../components/globe/GlobeView';
 import { GlobeMap2D } from '../components/globe/GlobeView2d';
 import { useServices } from '@/hooks/useServices';
 import { StarsBackground } from '../components/globe/StarsBackground';
+import { useLocation } from 'react-router';
 
 const RESET_THRESHOLD = 0.02;
 
@@ -22,6 +23,18 @@ export function LandingPage() {
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
     const [autoRotate, setAutoRotate] = useState(true);
     const [force2D, setForce2D] = useState(false);
+
+    const { hash } = useLocation();
+
+    // Quem chega por /inicio#explorar (ex.: botão "Ver no globo 3D" de Regiões)
+    // já cai na seção de exploração do globo.
+    useEffect(() => {
+        if (hash !== '#explorar') return;
+        const frame = requestAnimationFrame(() => {
+            exploreContainerRef.current?.scrollIntoView({ block: 'start' });
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [hash]);
 
     useEffect(() => {
         force2DRef.current = force2D;

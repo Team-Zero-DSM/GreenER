@@ -109,7 +109,8 @@ function DashboardHeader({
 
                     <nav
                         aria-label="Seções do dashboard"
-                        className="flex w-full justify-between gap-1 overflow-x-auto sm:w-auto sm:justify-start"
+                        // No celular as seis seções ficam em duas linhas de três, todas visíveis.
+                        className="grid w-full grid-cols-3 gap-1 [&>a]:justify-center sm:flex sm:w-auto sm:justify-start"
                     >
                         {navItems.map(({ to, label, icon: Icon, prefixes }) => {
                             const isActive =
