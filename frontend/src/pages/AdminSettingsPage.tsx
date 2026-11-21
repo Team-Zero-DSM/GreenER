@@ -1,38 +1,30 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { Calculator, Check, Gauge, Settings, Users } from 'lucide-react';
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { Calculator, Check, Gauge, Settings, Users, X } from 'lucide-react';
 import { Link } from 'react-router';
 
+import {
+    activateEstimate,
+    getCollectionSettings,
+    getEstimateCoefficients,
+    getProjectMembers,
+    previewEstimate,
+    updateCollectionSettings,
+    updateProjectMember,
+    type CollectionSettings,
+    type EstimateCoefficients,
+    type EstimateInputs,
+    type EstimatePreview,
+    type ProjectMember,
+} from '@/api/project';
+import { useMonitoring } from '@/contexts/monitoring';
 import { useProfile } from '@/hooks/useProfile';
 import type { ProfileRole } from '@/types/profile';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageShell } from '@/components/shared/PageShell';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface AdminUser {
-    id: number;
-    name: string;
-    email: string;
-    role: ProfileRole;
-    linked: boolean;
-}
-
-const initialUsers: AdminUser[] = [
-    { id: 1, name: 'Pedro', email: 'pedro@exemplo.com', role: 'admin', linked: true },
-    { id: 2, name: 'Vitor', email: 'vitor@exemplo.com', role: 'visualizador', linked: true },
-];
-
-const initialEstimates = {
-    cpuMaxWatts: '100',
-    memoryWattsPerGb: '0.375',
-    diskWattsPerGb: '0.01',
-    networkWattsPerGb: '0.02',
-};
+type Feedback = { type: 'success' | 'error'; message: string } | null;
+type EstimateField = keyof EstimateInputs;
 
 function AdminSection({
     id,
@@ -68,18 +60,38 @@ function AdminSection({
     );
 }
 
+function FeedbackMessage({ feedback }: { feedback: Feedback }) {
+    if (!feedback) return null;
+    const isError = feedback.type === 'error';
+    const Icon = isError ? X : Check;
+
+    return (
+        <p
+            role={isError ? 'alert' : 'status'}
+            className={`flex items-start gap-2 text-sm ${isError ? 'text-destructive' : 'text-primary'}`}
+        >
+            <Icon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+            <span>{feedback.message}</span>
+        </p>
+    );
+}
+
 function SettingField({
     label,
     value,
     onChange,
     min = 0,
     step = 'any',
+    max,
+    disabled = false,
 }: {
     label: string;
     value: string;
     onChange: (value: string) => void;
     min?: number;
     step?: number | 'any';
+    max?: number;
+    disabled?: boolean;
 }) {
     return (
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
@@ -87,60 +99,288 @@ function SettingField({
             <input
                 type="number"
                 min={min}
+                max={max}
                 step={step}
                 value={value}
+                disabled={disabled}
                 onChange={(event) => onChange(event.target.value)}
-                className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
             />
         </label>
     );
 }
 
-function DemoFeedback({ children }: { children: ReactNode }) {
-    return (
-        <p role="status" className="flex items-start gap-2 text-sm text-primary">
-            <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-            <span>{children}</span>
-        </p>
-    );
+function formatDate(value: string | null | undefined): string {
+    if (!value) return 'Nenhuma rodada concluída';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Data indisponível';
+    return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+    }).format(date);
+}
+
+function toInputs(coefficients: EstimateCoefficients | null): Record<EstimateField, string> {
+    return {
+        cpuMaxWatts: coefficients ? String(coefficients.cpuMaxWatts) : '',
+        ramWattsPerGb: coefficients ? String(coefficients.ramWattsPerGb) : '',
+        diskWattsPerGb: coefficients ? String(coefficients.diskWattsPerGb) : '',
+        networkWattsPerGb: coefficients ? String(coefficients.networkWattsPerGb) : '',
+    };
+}
+
+function toNumbers(values: Record<EstimateField, string>): EstimateInputs | null {
+    const numbers: EstimateInputs = {
+        cpuMaxWatts: Number(values.cpuMaxWatts),
+        ramWattsPerGb: Number(values.ramWattsPerGb),
+        diskWattsPerGb: Number(values.diskWattsPerGb),
+        networkWattsPerGb: Number(values.networkWattsPerGb),
+    };
+    const rawValues = Object.values(values);
+    if (
+        rawValues.some((value) => value.trim() === '') ||
+        Object.values(numbers).some((value) => !Number.isFinite(value) || value < 0)
+    ) {
+        return null;
+    }
+    return numbers;
+}
+
+function formatNumber(value: number): string {
+    return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 4 }).format(value);
 }
 
 export function AdminSettingsPage() {
     const { profile, isLoading, error, reload } = useProfile();
-    const [collectionInterval, setCollectionInterval] = useState('300');
-    const [estimateValues, setEstimateValues] = useState(initialEstimates);
-    const [previewReady, setPreviewReady] = useState(false);
+    const { status: monitoringStatus, error: monitoringError } = useMonitoring();
+
+    const [collectionSettings, setCollectionSettings] = useState<CollectionSettings | null>(null);
+    const [collectionInterval, setCollectionInterval] = useState('');
+    const [isLoadingCollection, setIsLoadingCollection] = useState(true);
+    const [isSavingCollection, setIsSavingCollection] = useState(false);
+    const [collectionFeedback, setCollectionFeedback] = useState<Feedback>(null);
+
+    const [activeCoefficients, setActiveCoefficients] = useState<EstimateCoefficients | null>(null);
+    const [estimateValues, setEstimateValues] = useState<Record<EstimateField, string>>({
+        cpuMaxWatts: '',
+        ramWattsPerGb: '',
+        diskWattsPerGb: '',
+        networkWattsPerGb: '',
+    });
+    const [estimatePreview, setEstimatePreview] = useState<EstimatePreview | null>(null);
+    const [isLoadingCoefficients, setIsLoadingCoefficients] = useState(true);
+    const [isPreviewing, setIsPreviewing] = useState(false);
+    const [isActivating, setIsActivating] = useState(false);
+    const [estimateFeedback, setEstimateFeedback] = useState<Feedback>(null);
+
     const [search, setSearch] = useState('');
-    const [users, setUsers] = useState(initialUsers);
-    const [feedback, setFeedback] = useState<string | null>(null);
+    const [submittedSearch, setSubmittedSearch] = useState('');
+    const [users, setUsers] = useState<ProjectMember[]>([]);
+    const [roleDrafts, setRoleDrafts] = useState<Record<string, ProfileRole>>({});
+    const [savingMemberId, setSavingMemberId] = useState<string | null>(null);
+    const [isLoadingMembers, setIsLoadingMembers] = useState(true);
+    const [membersFeedback, setMembersFeedback] = useState<Feedback>(null);
 
-    const visibleUsers = useMemo(() => {
-        const query = search.trim().toLocaleLowerCase('pt-BR');
-        if (!query) return users;
-        return users.filter(
-            (user) =>
-                user.name.toLocaleLowerCase('pt-BR').includes(query) ||
-                user.email.toLocaleLowerCase('pt-BR').includes(query),
-        );
-    }, [search, users]);
+    useEffect(() => {
+        if (isLoading || profile?.role !== 'admin') return;
+        let cancelled = false;
+        getCollectionSettings()
+            .then((settings) => {
+                if (cancelled) return;
+                setCollectionSettings(settings);
+                setCollectionInterval(String(settings.intervalSeconds));
+            })
+            .catch((requestError: unknown) => {
+                if (!cancelled) {
+                    setCollectionFeedback({
+                        type: 'error',
+                        message:
+                            requestError instanceof Error
+                                ? requestError.message
+                                : 'Não foi possível carregar as configurações da coleta.',
+                    });
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setIsLoadingCollection(false);
+            });
 
-    function showDemoFeedback(message: string) {
-        setFeedback(message);
-    }
+        getEstimateCoefficients()
+            .then((coefficients) => {
+                if (cancelled) return;
+                setActiveCoefficients(coefficients);
+                setEstimateValues(toInputs(coefficients));
+            })
+            .catch((requestError: unknown) => {
+                if (!cancelled) {
+                    setEstimateFeedback({
+                        type: 'error',
+                        message:
+                            requestError instanceof Error
+                                ? requestError.message
+                                : 'Não foi possível carregar os parâmetros ativos.',
+                    });
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setIsLoadingCoefficients(false);
+            });
 
-    function handleSaveInterval(event: FormEvent<HTMLFormElement>) {
+        return () => {
+            cancelled = true;
+        };
+    }, [isLoading, profile?.role]);
+
+    useEffect(() => {
+        if (isLoading || profile?.role !== 'admin') return;
+        let cancelled = false;
+        getProjectMembers(submittedSearch)
+            .then((members) => {
+                if (cancelled) return;
+                setUsers(members);
+                setRoleDrafts({});
+            })
+            .catch((requestError: unknown) => {
+                if (!cancelled) {
+                    setMembersFeedback({
+                        type: 'error',
+                        message:
+                            requestError instanceof Error
+                                ? requestError.message
+                                : 'Não foi possível carregar os usuários.',
+                    });
+                }
+            })
+            .finally(() => {
+                if (!cancelled) setIsLoadingMembers(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isLoading, profile?.role, submittedSearch]);
+
+    const numericEstimateValues = useMemo(() => toNumbers(estimateValues), [estimateValues]);
+
+    async function handleSaveInterval(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        showDemoFeedback('Intervalo atualizado apenas nesta demonstração; nada foi salvo no servidor.');
+        const interval = Number(collectionInterval);
+        if (!Number.isInteger(interval) || interval < 10 || interval > 3600) {
+            setCollectionFeedback({
+                type: 'error',
+                message: 'Informe um intervalo inteiro entre 10 e 3.600 segundos.',
+            });
+            return;
+        }
+
+        setIsSavingCollection(true);
+        setCollectionFeedback(null);
+        try {
+            await updateCollectionSettings(interval);
+            const settings = await getCollectionSettings();
+            setCollectionSettings(settings);
+            setCollectionInterval(String(settings.intervalSeconds));
+            setCollectionFeedback({ type: 'success', message: 'Intervalo salvo com sucesso.' });
+        } catch (requestError) {
+            setCollectionFeedback({
+                type: 'error',
+                message:
+                    requestError instanceof Error
+                        ? requestError.message
+                        : 'Não foi possível salvar o intervalo.',
+            });
+        } finally {
+            setIsSavingCollection(false);
+        }
     }
 
-    function handleSimulateEstimates(event: FormEvent<HTMLFormElement>) {
+    async function handlePreview(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setPreviewReady(true);
-        showDemoFeedback('Prévia demonstrativa atualizada com os parâmetros informados.');
+        if (!numericEstimateValues) {
+            setEstimateFeedback({
+                type: 'error',
+                message:
+                    'Preencha todos os parâmetros com valores numéricos iguais ou maiores que zero.',
+            });
+            return;
+        }
+
+        setIsPreviewing(true);
+        setEstimateFeedback(null);
+        try {
+            const preview = await previewEstimate(numericEstimateValues);
+            setEstimatePreview(preview);
+            setEstimateFeedback({
+                type: 'success',
+                message: 'Simulação calculada com a amostra de uma hora.',
+            });
+        } catch (requestError) {
+            setEstimateFeedback({
+                type: 'error',
+                message:
+                    requestError instanceof Error
+                        ? requestError.message
+                        : 'Não foi possível simular os parâmetros.',
+            });
+        } finally {
+            setIsPreviewing(false);
+        }
     }
 
-    function handleActivateEstimates() {
-        showDemoFeedback('Ativação demonstrativa: os parâmetros ainda não foram enviados ao servidor.');
+    async function handleActivateEstimate() {
+        if (!estimatePreview || !numericEstimateValues) return;
+        setIsActivating(true);
+        setEstimateFeedback(null);
+        try {
+            const coefficients = await activateEstimate(numericEstimateValues);
+            setActiveCoefficients(coefficients);
+            setEstimatePreview(null);
+            setEstimateFeedback({
+                type: 'success',
+                message: 'Novos parâmetros ativados com sucesso.',
+            });
+        } catch (requestError) {
+            setEstimateFeedback({
+                type: 'error',
+                message:
+                    requestError instanceof Error
+                        ? requestError.message
+                        : 'Não foi possível ativar os parâmetros.',
+            });
+        } finally {
+            setIsActivating(false);
+        }
+    }
+
+    async function saveMember(member: ProjectMember, role: ProfileRole, active: boolean) {
+        setSavingMemberId(member.id);
+        setMembersFeedback(null);
+        try {
+            const updated = await updateProjectMember(member.id, { role, active });
+            setUsers((current) => current.map((user) => (user.id === updated.id ? updated : user)));
+            setRoleDrafts((current) => {
+                const next = { ...current };
+                delete next[member.id];
+                return next;
+            });
+            setMembersFeedback({
+                type: 'success',
+                message:
+                    active === member.active
+                        ? `Papel de ${member.name} atualizado.`
+                        : `Acesso de ${member.name} atualizado.`,
+            });
+        } catch (requestError) {
+            setMembersFeedback({
+                type: 'error',
+                message:
+                    requestError instanceof Error
+                        ? requestError.message
+                        : `Não foi possível atualizar ${member.name}.`,
+            });
+        } finally {
+            setSavingMemberId(null);
+        }
     }
 
     if (isLoading) {
@@ -174,7 +414,7 @@ export function AdminSettingsPage() {
                         <button
                             type="button"
                             onClick={reload}
-                            className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85"
+                            className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground"
                         >
                             Tentar novamente
                         </button>
@@ -195,7 +435,7 @@ export function AdminSettingsPage() {
                     <CardContent className="py-6">
                         <Link
                             to="/perfil"
-                            className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm font-medium hover:bg-muted"
                         >
                             Voltar ao perfil
                         </Link>
@@ -237,14 +477,6 @@ export function AdminSettingsPage() {
                 ))}
             </nav>
 
-            {feedback && (
-                <Card className="border border-primary/25 bg-primary/[0.06]">
-                    <CardContent className="py-3">
-                        <DemoFeedback>{feedback}</DemoFeedback>
-                    </CardContent>
-                </Card>
-            )}
-
             <AdminSection
                 id="coleta"
                 icon={Gauge}
@@ -254,21 +486,30 @@ export function AdminSettingsPage() {
                 <div className="grid gap-3 rounded-xl border border-border bg-muted/40 p-4 sm:grid-cols-2">
                     <div>
                         <p className="text-xs text-muted-foreground">Intervalo em uso</p>
-                        <p className="mt-1 font-semibold tabular-nums">300 s</p>
+                        <p className="mt-1 font-semibold tabular-nums">
+                            {monitoringStatus?.collectionIntervalSeconds != null
+                                ? `${monitoringStatus.collectionIntervalSeconds} s`
+                                : collectionSettings
+                                  ? `${collectionSettings.effectiveIntervalSeconds} s`
+                                  : '—'}
+                        </p>
                     </div>
                     <div>
-                        <p className="text-xs text-muted-foreground">Última atualização</p>
+                        <p className="text-xs text-muted-foreground">Última rodada concluída</p>
                         <p className="mt-1 font-medium">
-                            {new Intl.DateTimeFormat('pt-BR', {
-                                dateStyle: 'short',
-                                timeStyle: 'short',
-                            }).format(new Date())}
+                            {formatDate(
+                                monitoringStatus?.lastRoundFinishedAt ??
+                                    collectionSettings?.lastRoundAt,
+                            )}
                         </p>
                     </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                    Defina a pausa entre as rodadas, de 10 a 3.600 segundos.
-                </p>
+                <FeedbackMessage feedback={collectionFeedback} />
+                {monitoringError && (
+                    <p role="alert" className="text-sm text-destructive">
+                        Falha ao atualizar o monitoramento: {monitoringError}
+                    </p>
+                )}
                 <form onSubmit={handleSaveInterval} className="flex flex-col items-start gap-4">
                     <label className="flex w-full max-w-sm flex-col gap-2 text-sm font-medium">
                         <span>Intervalo entre rodadas (s)</span>
@@ -279,15 +520,17 @@ export function AdminSettingsPage() {
                             step={1}
                             required
                             value={collectionInterval}
+                            disabled={isLoadingCollection || isSavingCollection}
                             onChange={(event) => setCollectionInterval(event.target.value)}
-                            className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                            className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
                         />
                     </label>
                     <button
                         type="submit"
-                        className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        disabled={isLoadingCollection || isSavingCollection}
+                        className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 disabled:cursor-wait disabled:opacity-60"
                     >
-                        Salvar intervalo
+                        {isSavingCollection ? 'Salvando...' : 'Salvar intervalo'}
                     </button>
                 </form>
             </AdminSection>
@@ -298,107 +541,160 @@ export function AdminSettingsPage() {
                 title="Parâmetros de estimativa"
                 description="Defina os coeficientes usados no cálculo do impacto ambiental."
                 action={
-                    <span className="inline-flex min-h-8 w-fit items-center rounded-full border border-primary/30 bg-primary/10 px-3 text-xs font-medium text-primary">
-                        Conjunto #1 ativo
-                    </span>
+                    activeCoefficients && (
+                        <span className="inline-flex min-h-8 w-fit items-center rounded-full border border-primary/30 bg-primary/10 px-3 text-xs font-medium text-primary">
+                            Conjunto #{activeCoefficients.id} ativo
+                        </span>
+                    )
                 }
             >
-                <p className="text-sm text-muted-foreground">
-                    O novo conjunto vale para as próximas coletas. O histórico conserva os
-                    coeficientes já usados.
-                </p>
-                <form onSubmit={handleSimulateEstimates} className="space-y-5">
+                <FeedbackMessage feedback={estimateFeedback} />
+                <form onSubmit={handlePreview} className="space-y-5">
                     <div className="grid gap-4 sm:grid-cols-2">
                         <SettingField
                             label="Potência máxima da CPU (W)"
                             value={estimateValues.cpuMaxWatts}
+                            min={0}
+                            max={999999.9999}
+                            step={0.0001}
+                            disabled={isLoadingCoefficients || isPreviewing || isActivating}
                             onChange={(value) => {
-                                setEstimateValues((current) => ({ ...current, cpuMaxWatts: value }));
-                                setPreviewReady(false);
+                                setEstimateValues((current) => ({
+                                    ...current,
+                                    cpuMaxWatts: value,
+                                }));
+                                setEstimatePreview(null);
+                                setEstimateFeedback(null);
                             }}
                         />
                         <SettingField
                             label="Potência da RAM por GB (W/GB)"
-                            value={estimateValues.memoryWattsPerGb}
+                            value={estimateValues.ramWattsPerGb}
+                            min={0}
+                            max={999999.9999}
+                            step={0.0001}
+                            disabled={isLoadingCoefficients || isPreviewing || isActivating}
                             onChange={(value) => {
                                 setEstimateValues((current) => ({
                                     ...current,
-                                    memoryWattsPerGb: value,
+                                    ramWattsPerGb: value,
                                 }));
-                                setPreviewReady(false);
+                                setEstimatePreview(null);
+                                setEstimateFeedback(null);
                             }}
                         />
                         <SettingField
                             label="Potência do disco por GB (W/GB)"
                             value={estimateValues.diskWattsPerGb}
+                            min={0}
+                            max={999999.9999}
+                            step={0.0001}
+                            disabled={isLoadingCoefficients || isPreviewing || isActivating}
                             onChange={(value) => {
-                                setEstimateValues((current) => ({ ...current, diskWattsPerGb: value }));
-                                setPreviewReady(false);
+                                setEstimateValues((current) => ({
+                                    ...current,
+                                    diskWattsPerGb: value,
+                                }));
+                                setEstimatePreview(null);
+                                setEstimateFeedback(null);
                             }}
                         />
                         <SettingField
                             label="Potência da rede por GB (W/GB)"
                             value={estimateValues.networkWattsPerGb}
+                            min={0}
+                            max={999999.9999}
+                            step={0.0001}
+                            disabled={isLoadingCoefficients || isPreviewing || isActivating}
                             onChange={(value) => {
                                 setEstimateValues((current) => ({
                                     ...current,
                                     networkWattsPerGb: value,
                                 }));
-                                setPreviewReady(false);
+                                setEstimatePreview(null);
+                                setEstimateFeedback(null);
                             }}
                         />
                     </div>
-                    <div className="flex flex-col gap-4 rounded-xl border border-primary/20 bg-primary/[0.05] p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="space-y-1">
-                            <h3 className="font-medium">Prévia da estimativa</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Compare os valores ativos e os preenchidos usando a mesma amostra de
-                                1 hora.
-                            </p>
-                            {previewReady && (
-                                <p className="pt-1 text-sm text-primary">
-                                    Parâmetros prontos para uma prévia demonstrativa.
-                                </p>
-                            )}
+                    {estimatePreview && (
+                        <div className="grid gap-4 rounded-xl border border-primary/20 bg-primary/[0.05] p-4 sm:grid-cols-2">
+                            <div>
+                                <h3 className="mb-2 font-medium">Parâmetros ativos</h3>
+                                {estimatePreview.current ? (
+                                    <dl className="space-y-1 text-sm text-muted-foreground">
+                                        <div>
+                                            Potência: {formatNumber(estimatePreview.current.powerW)}{' '}
+                                            W
+                                        </div>
+                                        <div>
+                                            Energia (1 h):{' '}
+                                            {formatNumber(estimatePreview.current.energyKwh)} kWh
+                                        </div>
+                                        <div>
+                                            Emissões: {formatNumber(estimatePreview.current.co2eG)}{' '}
+                                            gCO₂e
+                                        </div>
+                                    </dl>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        Não há parâmetros ativos.
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="mb-2 font-medium">Novos parâmetros</h3>
+                                <dl className="space-y-1 text-sm text-muted-foreground">
+                                    <div>
+                                        Potência: {formatNumber(estimatePreview.proposed.powerW)} W
+                                    </div>
+                                    <div>
+                                        Energia (1 h):{' '}
+                                        {formatNumber(estimatePreview.proposed.energyKwh)} kWh
+                                    </div>
+                                    <div>
+                                        Emissões: {formatNumber(estimatePreview.proposed.co2eG)}{' '}
+                                        gCO₂e
+                                    </div>
+                                </dl>
+                            </div>
                         </div>
-                        <button
-                            type="submit"
-                            className="min-h-11 shrink-0 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            Simular cálculo
-                        </button>
-                    </div>
-                </form>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-muted-foreground">
-                        Simule os parâmetros preenchidos para liberar a ativação.
-                    </p>
+                    )}
                     <button
-                        type="button"
-                        disabled={!previewReady}
-                        onClick={handleActivateEstimates}
-                        className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium transition enabled:hover:border-primary/40 enabled:hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
+                        type="submit"
+                        disabled={isLoadingCoefficients || isPreviewing || isActivating}
+                        className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 disabled:cursor-wait disabled:opacity-60"
                     >
-                        Ativar novos valores
+                        {isPreviewing ? 'Simulando...' : 'Simular cálculo'}
                     </button>
-                </div>
+                </form>
+                <button
+                    type="button"
+                    disabled={!estimatePreview || isActivating || isPreviewing}
+                    onClick={() => void handleActivateEstimate()}
+                    className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium transition enabled:hover:border-primary/40 enabled:hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                    {isActivating ? 'Ativando...' : 'Ativar novos valores'}
+                </button>
             </AdminSection>
 
             <AdminSection
                 id="usuarios"
                 icon={Users}
                 title="Acesso de usuários"
-                description="Pesquise usuários, altere papéis e gerencie vínculos de conta."
+                description="Pesquise usuários, altere papéis e gerencie o acesso às contas."
                 action={
                     <span className="inline-flex min-h-8 w-fit items-center rounded-full border border-border px-3 text-xs text-muted-foreground">
-                        {users.length} contas de demonstração
+                        {users.length} usuário(s)
                     </span>
                 }
             >
+                <FeedbackMessage feedback={membersFeedback} />
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
-                        showDemoFeedback('Busca executada nos usuários de demonstração.');
+                        if (submittedSearch !== search) setIsLoadingMembers(true);
+                        setSubmittedSearch(search);
+                        setMembersFeedback(null);
                     }}
                     className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
                 >
@@ -409,88 +705,95 @@ export function AdminSettingsPage() {
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Nome ou e-mail"
-                            className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                            className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                         />
                     </label>
                     <button
                         type="submit"
-                        className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-muted"
                     >
                         Buscar
                     </button>
                 </form>
-
                 <div className="divide-y divide-border/70">
-                    {visibleUsers.map((user) => (
-                        <article
-                            key={user.id}
-                            className="grid gap-x-8 gap-y-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start"
-                        >
-                            <div className="min-w-0 space-y-1">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <h3 className="font-semibold">{user.name}</h3>
-                                    <span
-                                        className={`inline-flex min-h-6 items-center rounded-full border px-2 text-xs ${
-                                            user.linked
-                                                ? 'border-primary/30 bg-primary/10 text-primary'
-                                                : 'border-border text-muted-foreground'
-                                        }`}
-                                    >
-                                        {user.linked ? 'Vinculado' : 'Desvinculado'}
-                                    </span>
-                                </div>
-                                <p className="break-all text-sm text-muted-foreground">{user.email}</p>
-                            </div>
-
-                            <div className="flex flex-wrap items-end gap-2 sm:col-start-1 sm:row-start-2">
-                                <label className="flex min-w-0 flex-col gap-2 text-sm font-medium sm:w-52">
-                                    <span>Papel</span>
-                                    <select
-                                        value={user.role}
-                                        onChange={(event) => {
-                                            const role = event.target.value as ProfileRole;
-                                            setUsers((current) =>
-                                                current.map((item) =>
-                                                    item.id === user.id ? { ...item, role } : item,
-                                                ),
-                                            );
-                                        }}
-                                        className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    >
-                                        <option value="admin">Admin</option>
-                                        <option value="visualizador">Visualizador</option>
-                                    </select>
-                                </label>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        showDemoFeedback(
-                                            `Papel de ${user.name} atualizado apenas nesta demonstração.`,
-                                        )
-                                    }
-                                    className="min-h-11 rounded-lg border border-border px-3 text-sm font-medium transition hover:border-primary/40 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    {isLoadingMembers && (
+                        <p className="py-5 text-sm text-muted-foreground">Carregando usuários...</p>
+                    )}
+                    {!isLoadingMembers &&
+                        users.map((member) => {
+                            const role = roleDrafts[member.id] ?? member.role;
+                            const roleChanged = role !== member.role;
+                            const isSaving = savingMemberId === member.id;
+                            return (
+                                <article
+                                    key={member.id}
+                                    className="grid gap-x-8 gap-y-4 py-4 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start"
                                 >
-                                    Salvar papel
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2 sm:col-start-2 sm:row-start-1 sm:justify-end">
-                                <button
-                                    type="button"
-                                    disabled={!user.linked}
-                                    onClick={() =>
-                                        showDemoFeedback(
-                                            `Desvinculação de ${user.name} está apenas representada nesta tela.`,
-                                        )
-                                    }
-                                    className="min-h-10 rounded-lg border border-destructive/30 px-3 text-sm font-medium text-destructive transition hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                    Desvincular
-                                </button>
-                            </div>
-                        </article>
-                    ))}
-
-                    {visibleUsers.length === 0 && (
+                                    <div className="min-w-0 space-y-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="font-semibold">{member.name}</h3>
+                                            <span
+                                                className={`inline-flex min-h-6 items-center rounded-full border px-2 text-xs ${member.active ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border text-muted-foreground'}`}
+                                            >
+                                                {member.active ? 'Vinculado' : 'Desvinculado'}
+                                            </span>
+                                        </div>
+                                        <p className="break-all text-sm text-muted-foreground">
+                                            {member.email}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col items-start gap-2 sm:col-start-1 sm:row-start-2 sm:flex-row sm:items-end">
+                                        <label className="flex w-full min-w-0 flex-col gap-2 text-sm font-medium sm:w-52">
+                                            <span>Papel</span>
+                                            <select
+                                                value={role}
+                                                disabled={isSaving}
+                                                onChange={(event) =>
+                                                    setRoleDrafts((current) => ({
+                                                        ...current,
+                                                        [member.id]: event.target
+                                                            .value as ProfileRole,
+                                                    }))
+                                                }
+                                                className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                                            >
+                                                <option value="admin">Admin</option>
+                                                <option value="visualizador">Visualizador</option>
+                                            </select>
+                                        </label>
+                                        <button
+                                            type="button"
+                                            disabled={!roleChanged || isSaving}
+                                            onClick={() =>
+                                                void saveMember(member, role, member.active)
+                                            }
+                                            className="min-h-11 rounded-lg border border-border px-3 text-sm font-medium transition enabled:hover:border-primary/40 enabled:hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
+                                        >
+                                            {isSaving && roleChanged
+                                                ? 'Salvando...'
+                                                : 'Salvar papel'}
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 sm:col-start-2 sm:row-start-1 sm:justify-end">
+                                        <button
+                                            type="button"
+                                            disabled={isSaving}
+                                            onClick={() =>
+                                                void saveMember(member, member.role, !member.active)
+                                            }
+                                            className={`min-h-10 rounded-lg border px-3 text-sm font-medium transition disabled:cursor-wait disabled:opacity-60 ${member.active ? 'border-destructive/30 text-destructive hover:bg-destructive/10' : 'border-primary/30 text-primary hover:bg-primary/10'}`}
+                                        >
+                                            {isSaving && !roleChanged
+                                                ? 'Salvando...'
+                                                : member.active
+                                                  ? 'Desvincular'
+                                                  : 'Vincular'}
+                                        </button>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    {!isLoadingMembers && users.length === 0 && (
                         <p className="py-8 text-center text-sm text-muted-foreground">
                             Nenhum usuário encontrado.
                         </p>
