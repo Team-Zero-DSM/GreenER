@@ -12,7 +12,6 @@ import {
 } from '@/components/painel/painelLayoutResponsivo';
 import { getPainelTemplate } from '@/components/painel/painelTemplates';
 import { PainelShell } from '@/components/painel/PainelShell';
-import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import { PainelWidgetSettings } from '@/components/painel/PainelWidgetSettings';
@@ -238,7 +237,6 @@ export function PainelPage() {
                             personalizável.
                         </p>
                     )}
-                    <PainelUpdateInfo />
                 </header>
 
                 {fullscreen.active ? (

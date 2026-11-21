@@ -1,3 +1,4 @@
+
 import { useRef, useState, useEffect, useMemo } from 'react';
 
 import type { GlobeViewHandle } from '../components/globe/GlobeView';
@@ -42,13 +43,14 @@ export function LandingPage() {
 
     const { hash } = useLocation();
 
-    // Quem chega por /inicio#explorar (ex.: botão "Ver no globo 3D" de Regiões)
-    // já cai na seção de exploração do globo.
+    // Quem chega por /inicio#explorar já cai na seção de exploração.
     useEffect(() => {
         if (hash !== '#explorar') return;
 
         const frame = requestAnimationFrame(() => {
-            exploreContainerRef.current?.scrollIntoView({ block: 'start' });
+            exploreContainerRef.current?.scrollIntoView({
+                block: 'start',
+            });
         });
 
         return () => cancelAnimationFrame(frame);
@@ -219,7 +221,7 @@ export function LandingPage() {
 
     if (error || regionsError) {
         return (
-            <main className="p-6 text-foreground">
+            <main className="relative min-h-screen bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] p-6 text-foreground">
                 Não foi possível carregar os dados dos serviços ou das regiões.
             </main>
         );
@@ -230,7 +232,8 @@ export function LandingPage() {
     // ---------------------------------------------------------
 
     return (
-        <main className="relative bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
+        <main className="relative min-h-full bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
+
             {/* =================================================
                 APRESENTAÇÃO INICIAL
             ================================================= */}
@@ -280,7 +283,7 @@ export function LandingPage() {
 
             <div
                 ref={globeLayerRef}
-                className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-h,4rem)] z-0"
+                className="pointer-events-none fixed inset-x-0 bottom-0 top-0 z-0"
             >
                 {!force2D && (
                     <>
@@ -323,7 +326,7 @@ export function LandingPage() {
                             focusTarget={focusTarget}
                             backlit
                             atmosphereIntensity={0.42}
-                            cameraDistanceStart={4.35}
+                            cameraDistanceStart={4.55}
                             cameraDistanceEnd={4.5}
                         />
                     </div>
@@ -337,7 +340,7 @@ export function LandingPage() {
             <div
                 ref={exploreContainerRef}
                 id="explorar"
-                className="scroll-mt-24 grid grid-cols-1 gap-6 px-6 pt-2 pb-0 md:grid-cols-[minmax(0,560px)_minmax(0,1fr)]"
+                className="relative z-10 grid scroll-mt-24 grid-cols-1 gap-6 px-6 pt-2 pb-0 md:grid-cols-[minmax(0,560px)_minmax(0,1fr)]"
             >
                 <div className="min-w-0">
                     {regionsLoading && (
