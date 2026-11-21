@@ -7,7 +7,6 @@ import {
 } from 'react';
 
 import * as THREE from 'three';
-
 import type { RefObject } from 'react';
 
 import { statusStyle } from '@/utils/statusStyle';
@@ -26,8 +25,17 @@ export interface GlobeState {
     lon: number;
 }
 
+export interface GlobeMarker {
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    status: string;
+}
+
 interface GlobeViewProps {
     autoRotate?: boolean;
+    rotationSpeed?: number;
     stateRef: RefObject<GlobeState>;
     focusTarget: {
         latitude: number;
@@ -40,14 +48,7 @@ interface GlobeViewProps {
     globeScale?: number;
     verticalOffset?: number;
     backlit?: boolean;
-}
-
-export interface GlobeMarker {
-    id: string;
-    name: string;
-    latitude: number;
-    longitude: number;
-    status: string;
+    atmosphereIntensity?: number;
 }
 
 // Configuração do campo de estrelas.
@@ -58,8 +59,8 @@ const STAR_MAX_RADIUS = 28;
 // Configuração das estrelas cadentes.
 const SHOOTING_STAR_Z = -14;
 const SHOOTING_STAR_INITIAL_DELAY = 7;
-const SHOOTING_STAR_MIN_INTERVAL = 11;
-const SHOOTING_STAR_MAX_INTERVAL = 21;
+const SHOOTING_STAR_MIN_INTERVAL = 7;
+const SHOOTING_STAR_MAX_INTERVAL = 9;
 const SHOOTING_STAR_MIN_DURATION = 0.75;
 const SHOOTING_STAR_MAX_DURATION = 1.15;
 
@@ -67,6 +68,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
     function GlobeView(
         {
             autoRotate = true,
+            rotationSpeed = 0.2,
             stateRef,
             focusTarget,
             markers,
@@ -74,11 +76,13 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             globeScale,
             verticalOffset = 0,
             backlit = false,
+            atmosphereIntensity = 1,
         },
         ref,
     ) {
         const containerRef = useRef<HTMLDivElement>(null);
         const autoRotateRef = useRef(autoRotate);
+        const rotationSpeedRef = useRef(rotationSpeed);
 
         const markersGroupRef = useRef<THREE.Group | null>(null);
         const focusQuaternionRef = useRef<THREE.Quaternion | null>(null);
@@ -86,8 +90,11 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
         const zoomLevelRef = useRef(1);
         const wasFocusedRef = useRef(false);
-
         const reducedMotionRef = useRef(false);
+
+        // Valores suavizados para acompanhar a rolagem sem saltos.
+        const smoothProgressRef = useRef(0);
+        const smoothTargetRef = useRef({ x: 0, y: 0 });
 
         const commandsRef = useRef({
             rotation: 0,
@@ -120,10 +127,14 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             [],
         );
 
-        // Atualiza a rotação automática sem reconstruir a cena.
+        // Atualiza os controles sem reconstruir a cena.
         useEffect(() => {
             autoRotateRef.current = autoRotate;
         }, [autoRotate]);
+
+        useEffect(() => {
+            rotationSpeedRef.current = rotationSpeed;
+        }, [rotationSpeed]);
 
         // Respeita a preferência de movimento reduzido do dispositivo.
         useEffect(() => {
@@ -136,7 +147,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             };
 
             reducedMotionRef.current = mediaQuery.matches;
-
             mediaQuery.addEventListener('change', handleChange);
 
             return () => {
@@ -147,13 +157,10 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
         // Inicialização e renderização da cena 3D.
         useEffect(() => {
             const container = containerRef.current;
-
             if (!container) return;
 
             const scene = new THREE.Scene();
-
             const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-
             camera.position.z = cameraDistance;
 
             const renderer = new THREE.WebGLRenderer({
@@ -161,17 +168,22 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 antialias: true,
             });
 
-            const pixelRatio = Math.min(window.devicePixelRatio, 2);
-
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
             renderer.setPixelRatio(pixelRatio);
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.outputColorSpace = THREE.SRGBColorSpace;
-
             container.appendChild(renderer.domElement);
+
+            // Inicializa os valores suavizados com o estado atual da página.
+            smoothProgressRef.current = THREE.MathUtils.clamp(
+                stateRef.current.progress,
+                0,
+                1,
+            );
+            smoothTargetRef.current = { ...stateRef.current.target };
 
             // Grupo principal do planeta.
             const globe = new THREE.Group();
-
             scene.add(globe);
 
             globe.quaternion.setFromAxisAngle(
@@ -181,16 +193,13 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             );
 
             const markersGroup = new THREE.Group();
-
             globe.add(markersGroup);
-
             markersGroupRef.current = markersGroup;
 
             // Construção da superfície terrestre.
             const earthTexture = new THREE.TextureLoader().load(
                 '/textures/earth.png',
             );
-
             earthTexture.colorSpace = THREE.SRGBColorSpace;
 
             const earthMaterial = new THREE.MeshStandardMaterial({
@@ -203,7 +212,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 new THREE.SphereGeometry(1, 64, 64),
                 earthMaterial,
             );
-
             globe.add(earth);
 
             // Atmosfera com iluminação de contraluz.
@@ -215,6 +223,15 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
             const atmosphereMaterial: THREE.Material = backlit
                 ? new THREE.ShaderMaterial({
+                      uniforms: {
+                          uAtmosphereIntensity: {
+                              value: THREE.MathUtils.clamp(
+                                  atmosphereIntensity,
+                                  0,
+                                  1,
+                              ),
+                          },
+                      },
                       vertexShader: `
                         varying vec3 vNormal;
                         varying vec3 vViewPosition;
@@ -231,6 +248,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         }
                     `,
                       fragmentShader: `
+                        uniform float uAtmosphereIntensity;
+
                         varying vec3 vNormal;
                         varying vec3 vViewPosition;
 
@@ -251,7 +270,7 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                             gl_FragColor = vec4(
                                 atmosphereColor,
-                                rim * 1.3
+                                rim * 1.3 * uAtmosphereIntensity
                             );
                         }
                     `,
@@ -272,39 +291,33 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 atmosphereGeometry,
                 atmosphereMaterial,
             );
-
             globe.add(atmosphere);
 
             // Iluminação da cena.
             const ambientLight = new THREE.AmbientLight(
                 '#ffffff',
-                backlit ? 0.2 : 1.5,
+                backlit ? 0.9 : 1.5,
             );
-
             scene.add(ambientLight);
 
             const sunlight = new THREE.DirectionalLight(
                 backlit ? '#a5e7ff' : '#e0f2fe',
                 backlit ? 4.5 : 2.5,
             );
-
             sunlight.position.set(
                 backlit ? -4 : 3,
                 2,
                 backlit ? -5 : 4,
             );
-
             scene.add(sunlight);
 
-            // Luz frontal suave para preservar os detalhes geográficos.
+            // Luz frontal para preservar e clarear os detalhes geográficos.
             if (backlit) {
                 const fillLight = new THREE.DirectionalLight(
-                    '#7eaecb',
-                    0.42,
+                    '#a5d9ef',
+                    1.1,
                 );
-
                 fillLight.position.set(3, 1, 4);
-
                 scene.add(fillLight);
             }
 
@@ -319,7 +332,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             const starTwinkleSpeeds = new Float32Array(STAR_COUNT);
             const starColors = new Float32Array(STAR_COUNT * 3);
 
-            // Tons mais claros para destacar as estrelas no fundo escuro.
             const whiteBlue = new THREE.Color('#eff8ff');
             const cyanBlue = new THREE.Color('#8be1ff');
 
@@ -328,43 +340,31 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     STAR_MIN_RADIUS +
                     Math.random() * (STAR_MAX_RADIUS - STAR_MIN_RADIUS);
 
-                // Distribui as estrelas no hemisfério posterior,
-                // mantendo o planeta à frente delas.
+                // Distribui as estrelas no hemisfério posterior.
                 const zDirection = -(0.3 + Math.random() * 0.7);
-
                 const angle = Math.random() * Math.PI * 2;
-
                 const horizontalRadius = Math.sqrt(
                     1 - zDirection * zDirection,
                 );
 
                 starPositions[i * 3] =
                     radius * horizontalRadius * Math.cos(angle);
-
                 starPositions[i * 3 + 1] =
                     radius * horizontalRadius * Math.sin(angle);
+                starPositions[i * 3 + 2] = radius * zDirection;
 
-                starPositions[i * 3 + 2] =
-                    radius * zDirection;
-
-                // Uma pequena parcela terá tamanho e destaque maiores.
                 const highlighted = Math.random() < 0.08;
 
                 starSizes[i] = highlighted
                     ? 1.6 + Math.random() * 0.7
                     : 0.75 + Math.random() * 0.75;
 
-                // A opacidade mínima fica maior para evitar estrelas apagadas.
                 starOpacities[i] = highlighted
                     ? 0.72 + Math.random() * 0.26
                     : 0.35 + Math.random() * 0.35;
 
-                // Cada estrela possui uma fase independente.
                 starPhases[i] = Math.random() * Math.PI * 2;
-
-                // Frequências individuais para evitar piscadas sincronizadas.
-                starTwinkleSpeeds[i] =
-                    0.45 + Math.random() * 0.9;
+                starTwinkleSpeeds[i] = 0.45 + Math.random() * 0.9;
 
                 const color =
                     Math.random() < 0.72 ? whiteBlue : cyanBlue;
@@ -375,44 +375,36 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             }
 
             const starsGeometry = new THREE.BufferGeometry();
-
             starsGeometry.setAttribute(
                 'position',
                 new THREE.BufferAttribute(starPositions, 3),
             );
-
             starsGeometry.setAttribute(
                 'aSize',
                 new THREE.BufferAttribute(starSizes, 1),
             );
-
             starsGeometry.setAttribute(
                 'aOpacity',
                 new THREE.BufferAttribute(starOpacities, 1),
             );
-
             starsGeometry.setAttribute(
                 'aPhase',
                 new THREE.BufferAttribute(starPhases, 1),
             );
-
             starsGeometry.setAttribute(
                 'aTwinkleSpeed',
                 new THREE.BufferAttribute(starTwinkleSpeeds, 1),
             );
-
             starsGeometry.setAttribute(
                 'aColor',
                 new THREE.BufferAttribute(starColors, 3),
             );
 
-            // Shader de cintilação individual das estrelas.
             const starsMaterial = new THREE.ShaderMaterial({
                 uniforms: {
                     uTime: { value: 0 },
                     uPixelRatio: { value: pixelRatio },
                 },
-
                 vertexShader: `
                     uniform float uTime;
                     uniform float uPixelRatio;
@@ -435,51 +427,39 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                                 uTime * aTwinkleSpeed + aPhase
                             );
 
-                        // Mantém as estrelas visíveis mesmo no ponto mínimo
-                        // da cintilação.
                         vOpacity = aOpacity * (0.62 + 0.38 * twinkle);
-
                         vColor = aColor;
 
-                        // Tamanho aparente ajustado pela distância.
                         gl_PointSize =
                             aSize *
                             uPixelRatio *
                             (40.0 / max(-mvPosition.z, 1.0));
 
-                        gl_Position =
-                            projectionMatrix * mvPosition;
+                        gl_Position = projectionMatrix * mvPosition;
                     }
                 `,
-
                 fragmentShader: `
                     varying float vOpacity;
                     varying vec3 vColor;
 
                     void main() {
-                        vec2 centered =
-                            gl_PointCoord - vec2(0.5);
-
+                        vec2 centered = gl_PointCoord - vec2(0.5);
                         float distanceToCenter = length(centered);
 
-                        float halo =
-                            1.0 - smoothstep(
-                                0.05,
-                                0.5,
-                                distanceToCenter
-                            );
+                        float halo = 1.0 - smoothstep(
+                            0.05,
+                            0.5,
+                            distanceToCenter
+                        );
 
-                        float core =
-                            1.0 - smoothstep(
-                                0.0,
-                                0.16,
-                                distanceToCenter
-                            );
+                        float core = 1.0 - smoothstep(
+                            0.0,
+                            0.16,
+                            distanceToCenter
+                        );
 
-                        // Halo suave e núcleo mais brilhante.
                         float alpha =
-                            (halo * 0.48 + core * 1.2) *
-                            vOpacity;
+                            (halo * 0.48 + core * 1.2) * vOpacity;
 
                         if (alpha < 0.015) discard;
 
@@ -489,7 +469,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         #include <colorspace_fragment>
                     }
                 `,
-
                 transparent: true,
                 depthWrite: false,
                 depthTest: true,
@@ -497,13 +476,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 toneMapped: false,
             });
 
-            const stars = new THREE.Points(
-                starsGeometry,
-                starsMaterial,
-            );
-
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
             stars.frustumCulled = false;
-
             scene.add(stars);
 
             // =========================================================
@@ -511,11 +485,9 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             // =========================================================
 
             const shootingStarGroup = new THREE.Group();
-
             shootingStarGroup.visible = false;
 
             const trailPositions = new Float32Array(12);
-
             const trailGeometry = new THREE.BufferGeometry();
 
             trailGeometry.setAttribute(
@@ -525,7 +497,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     3,
                 ).setUsage(THREE.DynamicDrawUsage),
             );
-
             trailGeometry.setAttribute(
                 'aTrailProgress',
                 new THREE.BufferAttribute(
@@ -533,7 +504,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     1,
                 ),
             );
-
             trailGeometry.setAttribute(
                 'aTrailSide',
                 new THREE.BufferAttribute(
@@ -541,14 +511,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     1,
                 ),
             );
-
             trailGeometry.setIndex([0, 1, 2, 2, 1, 3]);
 
             const trailMaterial = new THREE.ShaderMaterial({
                 uniforms: {
                     uOpacity: { value: 0 },
                 },
-
                 vertexShader: `
                     attribute float aTrailProgress;
                     attribute float aTrailSide;
@@ -566,7 +534,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                             vec4(position, 1.0);
                     }
                 `,
-
                 fragmentShader: `
                     uniform float uOpacity;
 
@@ -574,24 +541,19 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     varying float vTrailSide;
 
                     void main() {
-                        float sideFade =
-                            1.0 - smoothstep(
-                                0.12,
-                                1.0,
-                                abs(vTrailSide)
-                            );
+                        float sideFade = 1.0 - smoothstep(
+                            0.12,
+                            1.0,
+                            abs(vTrailSide)
+                        );
 
-                        float tailFade =
-                            smoothstep(
-                                0.0,
-                                0.9,
-                                vTrailProgress
-                            );
+                        float tailFade = smoothstep(
+                            0.0,
+                            0.9,
+                            vTrailProgress
+                        );
 
-                        float alpha =
-                            sideFade *
-                            tailFade *
-                            uOpacity;
+                        float alpha = sideFade * tailFade * uOpacity;
 
                         vec3 trailColor = mix(
                             vec3(0.12, 0.48, 0.9),
@@ -599,16 +561,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                             vTrailProgress
                         );
 
-                        gl_FragColor = vec4(
-                            trailColor,
-                            alpha
-                        );
+                        gl_FragColor = vec4(trailColor, alpha);
 
                         #include <tonemapping_fragment>
                         #include <colorspace_fragment>
                     }
                 `,
-
                 transparent: true,
                 depthWrite: false,
                 depthTest: true,
@@ -617,16 +575,10 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 toneMapped: false,
             });
 
-            const trail = new THREE.Mesh(
-                trailGeometry,
-                trailMaterial,
-            );
-
+            const trail = new THREE.Mesh(trailGeometry, trailMaterial);
             trail.frustumCulled = false;
 
-            // Geometria da ponta luminosa.
             const shootingHeadGeometry = new THREE.BufferGeometry();
-
             const headPositions = new Float32Array(3);
 
             shootingHeadGeometry.setAttribute(
@@ -637,7 +589,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 ).setUsage(THREE.DynamicDrawUsage),
             );
 
-            // Halo externo da estrela cadente.
             const shootingGlowMaterial = new THREE.PointsMaterial({
                 color: '#38bdf8',
                 size: 0.24,
@@ -653,7 +604,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 shootingGlowMaterial,
             );
 
-            // Núcleo branco da estrela cadente.
             const shootingCoreMaterial = new THREE.PointsMaterial({
                 color: '#effaff',
                 size: 0.085,
@@ -672,15 +622,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             shootingStarGroup.add(trail);
             shootingStarGroup.add(shootingGlow);
             shootingStarGroup.add(shootingCore);
-
             scene.add(shootingStarGroup);
 
             // Estado da animação das estrelas cadentes.
             let elapsedSeconds = 0;
-
             let nextShootingStarAt =
-                SHOOTING_STAR_INITIAL_DELAY +
-                Math.random() * 6;
+                SHOOTING_STAR_INITIAL_DELAY + Math.random() * 2;
 
             let shootingStarActive = false;
             let shootingStarElapsed = 0;
@@ -694,7 +641,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             const shootingTailPosition = new THREE.Vector3();
             const shootingPerpendicular = new THREE.Vector3();
 
-            // Inicia uma nova estrela cadente em uma posição visível.
             const spawnShootingStar = () => {
                 const visibleHeight =
                     2 *
@@ -703,20 +649,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     ) *
                     (camera.position.z - SHOOTING_STAR_Z);
 
-                const visibleWidth =
-                    visibleHeight * camera.aspect;
-
+                const visibleWidth = visibleHeight * camera.aspect;
                 const startsOnRight = Math.random() < 0.5;
 
                 shootingStart.set(
-                    (startsOnRight ? 1 : -1) *
-                        visibleWidth *
-                        0.46,
-
-                    (Math.random() - 0.5) *
-                        visibleHeight *
-                        0.65,
-
+                    (startsOnRight ? 1 : -1) * visibleWidth * 0.46,
+                    (Math.random() - 0.5) * visibleHeight * 0.65,
                     SHOOTING_STAR_Z,
                 );
 
@@ -733,19 +671,13 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         (SHOOTING_STAR_MAX_DURATION -
                             SHOOTING_STAR_MIN_DURATION);
 
-                shootingStarDistance =
-                    3.8 + Math.random() * 1.6;
-
-                shootingStarTrailLength =
-                    1.2 + Math.random() * 0.8;
-
+                shootingStarDistance = 3.8 + Math.random() * 1.6;
+                shootingStarTrailLength = 1.2 + Math.random() * 0.8;
                 shootingStarElapsed = 0;
                 shootingStarActive = true;
-
                 shootingStarGroup.visible = true;
             };
 
-            // Atualiza o rastro e a ponta luminosa.
             const updateShootingStar = (progress: number) => {
                 shootingHeadPosition
                     .copy(shootingStart)
@@ -772,46 +704,30 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                 // Extremidade posterior superior.
                 positions[0] =
-                    shootingTailPosition.x +
-                    shootingPerpendicular.x;
-
+                    shootingTailPosition.x + shootingPerpendicular.x;
                 positions[1] =
-                    shootingTailPosition.y +
-                    shootingPerpendicular.y;
-
+                    shootingTailPosition.y + shootingPerpendicular.y;
                 positions[2] = SHOOTING_STAR_Z;
 
                 // Extremidade posterior inferior.
                 positions[3] =
-                    shootingTailPosition.x -
-                    shootingPerpendicular.x;
-
+                    shootingTailPosition.x - shootingPerpendicular.x;
                 positions[4] =
-                    shootingTailPosition.y -
-                    shootingPerpendicular.y;
-
+                    shootingTailPosition.y - shootingPerpendicular.y;
                 positions[5] = SHOOTING_STAR_Z;
 
                 // Extremidade dianteira superior.
                 positions[6] =
-                    shootingHeadPosition.x +
-                    shootingPerpendicular.x;
-
+                    shootingHeadPosition.x + shootingPerpendicular.x;
                 positions[7] =
-                    shootingHeadPosition.y +
-                    shootingPerpendicular.y;
-
+                    shootingHeadPosition.y + shootingPerpendicular.y;
                 positions[8] = SHOOTING_STAR_Z;
 
                 // Extremidade dianteira inferior.
                 positions[9] =
-                    shootingHeadPosition.x -
-                    shootingPerpendicular.x;
-
+                    shootingHeadPosition.x - shootingPerpendicular.x;
                 positions[10] =
-                    shootingHeadPosition.y -
-                    shootingPerpendicular.y;
-
+                    shootingHeadPosition.y - shootingPerpendicular.y;
                 positions[11] = SHOOTING_STAR_Z;
 
                 trailGeometry.attributes.position.needsUpdate = true;
@@ -825,12 +741,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     shootingHeadPosition.y,
                     SHOOTING_STAR_Z,
                 );
-
                 headAttribute.needsUpdate = true;
 
-                // Faz a estrela desaparecer suavemente nas extremidades.
-                trailMaterial.uniforms.uOpacity.value =
-                    Math.sin(Math.PI * progress);
+                const fade = Math.sin(Math.PI * progress);
+                trailMaterial.uniforms.uOpacity.value = fade;
+                shootingGlowMaterial.opacity = 0.4 * fade;
+                shootingCoreMaterial.opacity = 0.95 * fade;
             };
 
             // =========================================================
@@ -850,7 +766,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                 camera.aspect = size.w / size.h;
                 camera.updateProjectionMatrix();
-
                 renderer.setSize(size.w, size.h);
             });
 
@@ -861,11 +776,9 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
             const restQuaternion = new THREE.Quaternion();
             const inverse = new THREE.Quaternion();
-
             const localFront = new THREE.Vector3();
             const forward = new THREE.Vector3(0, 0, 1);
             const viewDirection = new THREE.Vector3();
-
             const aim = new THREE.Quaternion();
             const desired = new THREE.Quaternion();
 
@@ -882,30 +795,31 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                 previousTime = time;
 
+                // Fatores exponenciais: movimento consistente em diferentes FPS.
+                const cameraDamping = 1 - Math.exp(-4 * delta);
+                const scrollDamping = 1 - Math.exp(-6 * delta);
+                const positionDamping = 1 - Math.exp(-7 * delta);
+                const focusDamping = 1 - Math.exp(-3.5 * delta);
+                const returnDamping = 1 - Math.exp(-3 * delta);
+                const manualRotationDamping = 1 - Math.exp(-7 * delta);
+
                 const commands = commandsRef.current;
 
                 if (commands.reset) {
                     commands.rotation = 0;
                     commands.zoomFactor = 1;
-
                     zoomLevelRef.current = 1;
-
                     commands.reset = false;
                 }
 
                 if (commands.resetPosition) {
                     globe.position.set(0, 0, 0);
                     globe.quaternion.identity();
-
                     camera.position.z = cameraDistance;
-
                     commands.rotation = 0;
                     commands.zoomFactor = 1;
-
                     zoomLevelRef.current = 1;
-
                     wasFocusedRef.current = false;
-
                     commands.resetPosition = false;
                 }
 
@@ -915,7 +829,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         0.6,
                         2,
                     );
-
                     commands.zoomFactor = 1;
                 }
 
@@ -926,21 +839,42 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 camera.position.z = THREE.MathUtils.lerp(
                     camera.position.z,
                     desiredCameraZ,
-                    Math.min(delta * 3, 1),
+                    cameraDamping,
                 );
 
-                // Controle de escala e posicionamento.
+                // Suaviza o progresso e o alvo definidos pela rolagem.
                 const { progress, target } = stateRef.current;
 
-                const p = THREE.MathUtils.clamp(progress, 0, 1);
+                const targetProgress = THREE.MathUtils.clamp(
+                    progress,
+                    0,
+                    1,
+                );
 
+                smoothProgressRef.current = THREE.MathUtils.lerp(
+                    smoothProgressRef.current,
+                    targetProgress,
+                    scrollDamping,
+                );
+
+                smoothTargetRef.current.x = THREE.MathUtils.lerp(
+                    smoothTargetRef.current.x,
+                    target.x,
+                    scrollDamping,
+                );
+
+                smoothTargetRef.current.y = THREE.MathUtils.lerp(
+                    smoothTargetRef.current.y,
+                    target.y,
+                    scrollDamping,
+                );
+
+                const p = smoothProgressRef.current;
                 const smooth = p * p * (3 - 2 * p);
-
                 const { w: width, h: height } = size;
 
                 const startScale = 1.65;
                 const endScale = 1.45;
-
                 const currentScale =
                     globeScale ??
                     THREE.MathUtils.lerp(
@@ -959,27 +893,38 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     camera.position.z;
 
                 const horizontalOffset = 60;
-
                 const targetX =
-                    ((target.x - horizontalOffset - width / 2) /
+                    ((smoothTargetRef.current.x - horizontalOffset - width / 2) /
                         height) *
                     visibleHeight;
 
                 const targetY =
-                    -((target.y - height / 2) / height) *
+                    -((smoothTargetRef.current.y - height / 2) / height) *
                     visibleHeight;
 
-                globe.position.x = THREE.MathUtils.lerp(
+                const desiredGlobeX = THREE.MathUtils.lerp(
                     0,
                     targetX,
                     smooth,
                 );
 
-                globe.position.y =
+                const desiredGlobeY =
                     THREE.MathUtils.lerp(0, targetY, smooth) +
                     verticalOffset;
 
-                // Direcionamento do planeta para uma região.
+                globe.position.x = THREE.MathUtils.lerp(
+                    globe.position.x,
+                    desiredGlobeX,
+                    positionDamping,
+                );
+
+                globe.position.y = THREE.MathUtils.lerp(
+                    globe.position.y,
+                    desiredGlobeY,
+                    positionDamping,
+                );
+
+                // Direcionamento suave do planeta para uma região.
                 if (focusQuaternionRef.current) {
                     if (!wasFocusedRef.current) {
                         restQuaternion.copy(globe.quaternion);
@@ -1000,14 +945,14 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                     globe.quaternion.slerp(
                         desired,
-                        Math.min(delta * 2.5, 1),
+                        focusDamping,
                     );
 
                     commands.rotation = 0;
                 } else if (wasFocusedRef.current) {
                     globe.quaternion.slerp(
                         restQuaternion,
-                        Math.min(delta * 2, 1),
+                        returnDamping,
                     );
 
                     if (
@@ -1017,24 +962,27 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         wasFocusedRef.current = false;
                     }
                 } else {
+                    // Rotação manual com desaceleração suave.
                     const rotationStep =
-                        commands.rotation * Math.min(delta * 6, 1);
+                        commands.rotation * manualRotationDamping;
 
                     globe.rotateY(rotationStep);
-
                     commands.rotation -= rotationStep;
 
                     if (Math.abs(commands.rotation) < 0.001) {
                         commands.rotation = 0;
                     }
 
-                    if (autoRotateRef.current) {
-                        globe.rotateY(delta * 0.2);
+                    // Rotação automática independente da taxa de quadros.
+                    if (
+                        autoRotateRef.current &&
+                        !reducedMotionRef.current
+                    ) {
+                        globe.rotateY(delta * rotationSpeedRef.current);
                     }
                 }
 
                 inverse.copy(globe.quaternion).invert();
-
                 localFront.copy(forward).applyQuaternion(inverse);
 
                 stateRef.current.lon = THREE.MathUtils.radToDeg(
@@ -1044,11 +992,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 // Animação das estrelas e estrelas cadentes.
                 if (!reducedMotionRef.current) {
                     elapsedSeconds += delta;
-
-                    // Atualiza a cintilação individual das estrelas.
                     starsMaterial.uniforms.uTime.value = elapsedSeconds;
 
-                    // Agenda uma estrela cadente quando necessário.
                     if (
                         !shootingStarActive &&
                         elapsedSeconds >= nextShootingStarAt
@@ -1071,7 +1016,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
                         if (shootingProgress >= 1) {
                             shootingStarActive = false;
-
                             shootingStarGroup.visible = false;
 
                             nextShootingStarAt =
@@ -1083,7 +1027,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         }
                     }
                 } else {
-                    // Impede eventos luminosos estáticos ao reduzir movimento.
                     shootingStarGroup.visible = false;
                     shootingStarActive = false;
                 }
@@ -1099,8 +1042,14 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
 
             return () => {
                 cancelAnimationFrame(animationId);
-
                 resizeObserver.disconnect();
+
+                markersGroup.children.forEach((pin) => {
+                    if (pin instanceof THREE.Mesh) {
+                        pin.material.dispose();
+                    }
+                });
+                markersGroup.clear();
 
                 earth.geometry.dispose();
                 earthMaterial.dispose();
@@ -1130,12 +1079,12 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             globeScale,
             verticalOffset,
             backlit,
+            atmosphereIntensity,
         ]);
 
         // Atualização dos marcadores geográficos.
         useEffect(() => {
             const group = markersGroupRef.current;
-
             if (!group) return;
 
             group.clear();
@@ -1149,10 +1098,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             markers.forEach((marker) => {
                 const latitude =
                     (marker.latitude * Math.PI) / 180;
-
                 const longitude =
                     (marker.longitude * Math.PI) / 180;
-
                 const radius = 1.015;
 
                 const position = new THREE.Vector3(
@@ -1161,14 +1108,16 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     -radius * Math.cos(latitude) * Math.sin(longitude),
                 );
 
-                const material = new THREE.MeshBasicMaterial({
-                    color: statusStyle(marker.status).color,
-                });
+                const markerColor = new THREE.Color(
+    statusStyle(marker.status).color,
+).multiplyScalar(0.6);
+
+const material = new THREE.MeshBasicMaterial({
+    color: markerColor,
+});
 
                 const pin = new THREE.Mesh(geometry, material);
-
                 pin.position.copy(position);
-
                 pin.userData = {
                     id: marker.id,
                     name: marker.name,
@@ -1186,7 +1135,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                 });
 
                 group.clear();
-
                 geometry.dispose();
             };
         }, [markers]);
@@ -1203,7 +1151,6 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             const latitude = THREE.MathUtils.degToRad(
                 focusTarget.latitude,
             );
-
             const longitude = THREE.MathUtils.degToRad(
                 focusTarget.longitude,
             );
