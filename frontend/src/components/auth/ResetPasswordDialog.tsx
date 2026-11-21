@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
 import { resetPassword } from '@/api/auth';
+import { isCommonPassword } from '@/lib/commonPasswords';
 
 interface ResetPasswordDialogProps {
     token: string | null;
@@ -59,6 +60,12 @@ export function ResetPasswordDialog({
 
         if (password.length < 8) {
             setError('A senha deve possuir pelo menos 8 caracteres.');
+            return;
+        }
+
+        // Recusa senhas comuns, como o backend.
+        if (isCommonPassword(password)) {
+            setError('Essa senha é muito comum. Escolha uma senha mais difícil de adivinhar.');
             return;
         }
 
