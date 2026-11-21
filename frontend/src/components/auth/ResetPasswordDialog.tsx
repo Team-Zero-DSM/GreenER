@@ -1,8 +1,8 @@
-
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
 import { resetPassword } from '@/api/auth';
+import { isCommonPassword } from '@/lib/commonPasswords';
 
 interface ResetPasswordDialogProps {
     token: string | null;
@@ -23,9 +23,7 @@ export function ResetPasswordDialog({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const isTokenValid = Boolean(
-        token && /^[a-f0-9]{64}$/.test(token),
-    );
+    const isTokenValid = Boolean(token && /^[a-f0-9]{64}$/.test(token));
 
     // Abre o Dialog quando o componente é montado.
     useEffect(() => {
@@ -62,6 +60,12 @@ export function ResetPasswordDialog({
 
         if (password.length < 8) {
             setError('A senha deve possuir pelo menos 8 caracteres.');
+            return;
+        }
+
+        // Recusa senhas comuns, como o backend.
+        if (isCommonPassword(password)) {
+            setError('Essa senha é muito comum. Escolha uma senha mais difícil de adivinhar.');
             return;
         }
 
@@ -114,10 +118,7 @@ export function ResetPasswordDialog({
                 {!isTokenValid ? (
                     <>
                         <div className="flex flex-col gap-2">
-                            <h2
-                                id="reset-password-title"
-                                className="text-xl font-semibold"
-                            >
+                            <h2 id="reset-password-title" className="text-xl font-semibold">
                                 Link inválido
                             </h2>
 
@@ -125,9 +126,8 @@ export function ResetPasswordDialog({
                                 id="reset-password-description"
                                 className="text-sm leading-relaxed text-slate-400"
                             >
-                                Não foi possível identificar um token válido
-                                no link de recuperação. Solicite um novo link
-                                para continuar.
+                                Não foi possível identificar um token válido no link de recuperação.
+                                Solicite um novo link para continuar.
                             </p>
                         </div>
 
@@ -159,10 +159,7 @@ export function ResetPasswordDialog({
                                 </svg>
                             </div>
 
-                            <h2
-                                id="reset-password-title"
-                                className="text-xl font-semibold"
-                            >
+                            <h2 id="reset-password-title" className="text-xl font-semibold">
                                 Senha redefinida!
                             </h2>
 
@@ -170,9 +167,8 @@ export function ResetPasswordDialog({
                                 id="reset-password-description"
                                 className="text-sm leading-relaxed text-slate-400"
                             >
-                                Sua senha foi alterada com sucesso.
-                                Agora você pode entrar na sua conta utilizando
-                                a nova senha.
+                                Sua senha foi alterada com sucesso. Agora você pode entrar na sua
+                                conta utilizando a nova senha.
                             </p>
                         </div>
 
@@ -187,10 +183,7 @@ export function ResetPasswordDialog({
                 ) : (
                     <>
                         <div className="flex flex-col gap-2">
-                            <h2
-                                id="reset-password-title"
-                                className="text-xl font-semibold"
-                            >
+                            <h2 id="reset-password-title" className="text-xl font-semibold">
                                 Redefinir senha
                             </h2>
 
@@ -202,10 +195,7 @@ export function ResetPasswordDialog({
                             </p>
                         </div>
 
-                        <form
-                            onSubmit={handleSubmit}
-                            className="flex flex-col gap-5"
-                        >
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                             <AuthInput
                                 id="reset-new-password"
                                 label="Nova senha"
@@ -227,10 +217,7 @@ export function ResetPasswordDialog({
                             />
 
                             {error && (
-                                <p
-                                    role="alert"
-                                    className="text-sm text-red-400"
-                                >
+                                <p role="alert" className="text-sm text-red-400">
                                     {error}
                                 </p>
                             )}
@@ -241,9 +228,7 @@ export function ResetPasswordDialog({
                                     disabled={isSubmitting}
                                     className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    {isSubmitting
-                                        ? 'Redefinindo senha...'
-                                        : 'Redefinir senha'}
+                                    {isSubmitting ? 'Redefinindo senha...' : 'Redefinir senha'}
                                 </button>
 
                                 <button

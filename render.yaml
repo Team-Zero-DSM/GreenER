@@ -1,0 +1,29 @@
+# Blueprint do Render para o backend do GreenER (o front fica no Vercel e o banco no Supabase).
+services:
+    - type: web
+      name: greener-backend
+      runtime: node
+      plan: free
+      rootDir: backend
+      buildCommand: npm ci --include=dev && npm run build
+      startCommand: npm start
+      healthCheckPath: /health
+      envVars:
+          - key: NODE_VERSION
+            value: '24'
+          - key: NODE_ENV
+            value: production
+          - key: DATABASE_URL
+            sync: false
+          - key: DATABASE_SSL
+            value: 'true'
+          - key: JWT_SECRET
+            generateValue: true
+          - key: CORS_ORIGIN
+            sync: false
+          - key: METRICS_API_URL
+            value: https://metrics.unilaunch.org
+          - key: CARBON_API_URL
+            value: https://carbon.unilaunch.org
+          - key: COLLECTION_INTERVAL_SECONDS
+            value: '30'

@@ -7,10 +7,7 @@ export function ProtectedRoute() {
     // Aguarda a verificação da sessão antes de decidir o acesso.
     if (isInitializing) {
         return (
-            <div
-                className="flex min-h-screen items-center justify-center"
-                role="status"
-            >
+            <div className="flex min-h-screen items-center justify-center" role="status">
                 Verificando autenticação...
             </div>
         );

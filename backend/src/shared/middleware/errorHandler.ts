@@ -20,16 +20,27 @@ export function errorHandler(err: unknown, _req: Request, res: Response, next: N
         res.status(400).json({
             error: {
                 message: 'Dados inválidos',
-                details: [{ field: 'body', message: 'O body deve conter um objeto JSON válido' }],
+                details: [
+                    {
+                        field: 'body',
+                        message: 'O body deve conter um objeto JSON válido',
+                    },
+                ],
             },
         });
         return;
     }
 
     if (err instanceof ZodError) {
+        const hasInvalidEmail = err.issues.some(
+            (issue) => issue.path[0] === 'email' && issue.code === 'invalid_format',
+        );
+
         res.status(400).json({
             error: {
-                message: 'Dados inválidos',
+                message: hasInvalidEmail
+                    ? 'E-mail inválido. Confira se o endereço está completo (ex.: nome@dominio.com).'
+                    : 'Dados inválidos',
                 details: err.issues.map((issue) => ({
                     field: issue.path.join('.'),
                     message: issue.message,
@@ -41,8 +52,16 @@ export function errorHandler(err: unknown, _req: Request, res: Response, next: N
 
     if (err instanceof DatabaseError) {
         if (err.code === '23505') {
+            const emailConstraints = ['usuario_email_key', 'ux_usuario_email_lower'];
+
+            const isDuplicateEmail = emailConstraints.includes(err.constraint ?? '');
+
             res.status(409).json({
-                error: { message: 'Registro duplicado' },
+                error: {
+                    message: isDuplicateEmail
+                        ? 'Este e-mail já está cadastrado. Utilize outro endereço.'
+                        : 'Registro duplicado',
+                },
             });
             return;
         }

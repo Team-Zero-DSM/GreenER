@@ -1,17 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import {
-    getMyProfile,
-    updateMyProfile,
-    changeMyPassword,
-} from '@/api/profile';
+import { getMyProfile, updateMyProfile, changeMyPassword } from '@/api/profile';
 
-import type {
-    UserProfile,
-    UpdateProfileRequest,
-    ChangePasswordRequest,
-    ChangePasswordResponse,
-} from '@/types/profile';
+import { useAuth } from '@/hooks/useAuth';
+
+import type { UserProfile, UpdateProfileRequest, ChangePasswordRequest } from '@/types/profile';
 
 interface ProfileState {
     profile: UserProfile | null;
@@ -20,12 +13,12 @@ interface ProfileState {
 }
 
 function getErrorMessage(error: unknown): string {
-    return error instanceof Error
-        ? error.message
-        : 'Ocorreu um erro inesperado.';
+    return error instanceof Error ? error.message : 'Ocorreu um erro inesperado.';
 }
 
 export function useProfile() {
+    const { setSession } = useAuth();
+
     const [state, setState] = useState<ProfileState>({
         profile: null,
         isLoading: true,
@@ -83,35 +76,46 @@ export function useProfile() {
             setIsSavingProfile(true);
 
             try {
-                const updatedProfile = await updateMyProfile(data);
+                const session = await updateMyProfile(data);
 
+                // Armazena o novo JWT e atualiza o usuário global.
+                setSession(session);
+
+                // Atualiza os dados apresentados na página de perfil.
                 setState((previous) => ({
                     ...previous,
-                    profile: updatedProfile,
+                    profile: session.user,
                 }));
 
-                return updatedProfile;
+                return session.user;
             } finally {
                 setIsSavingProfile(false);
             }
         },
-        [],
+        [setSession],
     );
 
-    // Solicita a alteração da senha.
+    // Altera a senha e atualiza a sessão.
     const savePassword = useCallback(
-        async (
-            data: ChangePasswordRequest,
-        ): Promise<ChangePasswordResponse> => {
+        async (data: ChangePasswordRequest): Promise<void> => {
             setIsChangingPassword(true);
 
             try {
-                return await changeMyPassword(data);
+                const session = await changeMyPassword(data);
+
+                // O backend invalidou os tokens anteriores.
+                // Armazenamos a nova sessão para manter o usuário autenticado.
+                setSession(session);
+
+                setState((previous) => ({
+                    ...previous,
+                    profile: session.user,
+                }));
             } finally {
                 setIsChangingPassword(false);
             }
         },
-        [],
+        [setSession],
     );
 
     return {

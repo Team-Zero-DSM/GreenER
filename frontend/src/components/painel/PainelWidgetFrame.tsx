@@ -1,4 +1,4 @@
-import { useState, type PointerEvent, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CircleAlert, Ellipsis, GripVertical, Inbox } from 'lucide-react';
 
 import type { PainelWidgetAction, PainelWidgetStatus } from '@/types/painel';
@@ -19,8 +19,9 @@ interface PainelWidgetFrameProps {
     alerting?: boolean;
     // Realça o contêiner enquanto ele é arrastado.
     active?: boolean;
-    // Quando informado, o título vira a área por onde o widget é arrastado.
-    onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Mostra a alça de arrastar ao lado do título. O gesto em si é tratado pelo
+    // widget inteiro, na grade.
+    showGrip?: boolean;
     children?: ReactNode;
 }
 
@@ -37,32 +38,33 @@ export function PainelWidgetFrame({
     editing = false,
     alerting = false,
     active = false,
-    onMoveStart,
+    showGrip = false,
     children,
 }: PainelWidgetFrameProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
         <div
-            className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-colors ${
+            className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-[border-color,box-shadow,background-color] duration-200 ${
                 alerting
                     ? 'border-destructive/70 bg-destructive/5'
                     : editing
                       ? 'border-dashed border-emerald-400/45'
                       : 'border-border'
-            } ${active ? 'shadow-lg ring-2 shadow-black/40 ring-primary' : ''}`}
+            } ${
+                active
+                    ? 'shadow-2xl ring-2 shadow-emerald-950/60 ring-primary'
+                    : editing
+                      ? 'group-hover/card:border-emerald-300/70 group-hover/card:shadow-lg group-hover/card:shadow-black/30'
+                      : ''
+            }`}
         >
             <header className="flex items-start justify-between gap-2">
                 <div
-                    onPointerDown={onMoveStart}
-                    title={onMoveStart ? 'Arraste para mover o widget' : undefined}
-                    className={`flex min-w-0 flex-1 items-start gap-1.5 ${
-                        onMoveStart
-                            ? `touch-none select-none ${active ? 'cursor-grabbing' : 'cursor-grab'}`
-                            : ''
-                    }`}
+                    title={showGrip ? 'Arraste para mover o widget' : undefined}
+                    className="flex min-w-0 flex-1 items-start gap-1.5"
                 >
-                    {onMoveStart && (
+                    {showGrip && (
                         <GripVertical
                             aria-hidden="true"
                             className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -140,7 +142,7 @@ export function PainelWidgetFrame({
                 )}
             </header>
 
-            <div className="mt-3 flex min-h-0 flex-1 flex-col">
+            <div className="painel-body mt-3 flex min-h-0 flex-1 flex-col">
                 {status === 'loading' && (
                     <div
                         role="status"

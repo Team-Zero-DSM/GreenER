@@ -8,6 +8,8 @@ import { comparisonsRouter } from './modules/comparisons/comparisons.routes.js';
 import { rankingsRouter } from './modules/rankings/rankings.routes.js';
 import { accountsRouter } from './modules/accounts/accounts.routes.js';
 import { dashboardsRouter } from './modules/dashboards/dashboards.routes.js';
+import { projectRouter } from './modules/project/project.routes.js';
+import { reportsRouter } from './modules/reports/reports.routes.js';
 
 const router = Router();
 router.use('/services', servicesRouter);
@@ -20,5 +22,7 @@ router.use('/collections', collectionsRouter);
 router.use('/comparisons', comparisonsRouter);
 router.use('/rankings', rankingsRouter);
 router.use('/dashboards', dashboardsRouter);
+router.use('/project', projectRouter);
+router.use('/reports', reportsRouter);
 router.use(accountsRouter);
 export default router;

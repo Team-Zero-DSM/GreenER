@@ -1,26 +1,13 @@
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-    type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { AuthContext } from './auth';
 
-import {
-    saveAuthSession,
-    getAuthSession,
-    clearAuthSession,
-} from '@/api/session';
+import { saveAuthSession, getAuthSession, clearAuthSession } from '@/api/session';
 
 import { getCurrentUser } from '@/api/auth';
 import { ApiError } from '@/api/services';
 
-import type {
-    AuthenticatedUser,
-    AuthSession,
-} from '@/types/auth';
+import type { AuthenticatedUser, AuthSession } from '@/types/auth';
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -55,9 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
 
             try {
-                const currentUser = await getCurrentUser(
-                    storedSession.token,
-                );
+                const currentUser = await getCurrentUser(storedSession.token);
 
                 if (!active) return;
 
@@ -105,9 +90,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
         [user, isInitializing, setSession, logout],
     );
 
-    return (
-        <AuthContext.Provider value={contextValue}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
