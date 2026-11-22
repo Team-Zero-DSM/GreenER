@@ -12,9 +12,6 @@ import type { HistoryRange } from '@/types/service';
 export function RankingPage() {
     const [criterion, setCriterion] = useState<RankingCriterion>('co2eGrams');
     const [range, setRange] = useState<HistoryRange>('24h');
-    // A requisição leva o critério e o período escolhidos. Gráfico e tabela usam o critério
-    // devolvido pelo backend, para não misturar a ordem antiga com o destaque novo
-    // enquanto a próxima resposta não chega.
     const { data: ranking, error, isLoading } = useRanking(criterion, range);
 
     return (

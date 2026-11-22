@@ -6,6 +6,7 @@ import type { ServiceSummary } from '@/types/service';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useServices } from '@/hooks/useServices';
 import { useRegions } from '@/hooks/useRegions';
+import { DROPDOWN_SURFACE_CLASS_NAME } from '@/components/shared/dropdownStyles';
 
 import { AvailableServicesPicker } from './AvailableServicesPicker';
 import { ComparisonServiceCard } from './ComparisonServiceCard';
@@ -244,7 +245,7 @@ export function ComparisonServiceSelector({ onSelectionsChange }: ComparisonServ
                         <div
                             ref={servicosPickerRef}
                             id="servicos-disponiveis"
-                            className="absolute left-0 top-full z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-2 text-slate-100 shadow-2xl shadow-black/40"
+                            className={`absolute left-0 top-full z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto text-foreground ${DROPDOWN_SURFACE_CLASS_NAME}`}
                         >
                             {isLoading ? (
                                 <p className="px-3 py-4 text-sm text-muted-foreground">

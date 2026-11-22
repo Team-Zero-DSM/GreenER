@@ -1,4 +1,5 @@
 import { ArrowLeftRight } from 'lucide-react';
+import { PRIMARY_ACTION_BUTTON_CLASS_NAME } from '@/components/shared/actionButtonStyles';
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import {
     HISTORY_RANGE_OPTIONS,
@@ -47,11 +48,7 @@ export function ComparisonControls({
                 type="button"
                 onClick={onComparar}
                 disabled={!podeComparar}
-                className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition-colors ${
-                    podeComparar
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                        : 'cursor-not-allowed bg-muted text-muted-foreground'
-                }`}
+                className={`${PRIMARY_ACTION_BUTTON_CLASS_NAME} min-h-12 w-full px-6 text-sm xl:w-auto`}
             >
                 <ArrowLeftRight aria-hidden="true" className="size-5" />
                 <span>Comparar</span>
