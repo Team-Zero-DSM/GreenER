@@ -1,4 +1,5 @@
 import { statusInfo } from '@/lib/serviceStatus';
+import { statusStyle } from '@/utils/statusStyle';
 import type { ServiceStatus } from '@/types/service';
 
 interface ServiceStatusBadgeProps {
@@ -11,7 +12,7 @@ export function ServiceStatusBadge({ status }: ServiceStatusBadgeProps) {
     return (
         <span
             title={info.description}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap ${info.className}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium whitespace-nowrap ${statusStyle(status).badge}`}
         >
             <span aria-hidden="true">{info.icon}</span>
             {info.label}
