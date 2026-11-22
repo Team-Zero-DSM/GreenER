@@ -1,28 +1,17 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { AuthForm } from '@/components/auth/AuthForm';
 import { AnimatedContent } from '@/components/shared/AnimatedContent';
 
 import { registerAccount, loginAccount } from '@/api/auth';
-import { ApiError } from '@/api/services';
+import { ApiError } from '@/api/client';
 
 import { useAuth } from '@/hooks/useAuth';
 
-import type {
-    AuthMode,
-    LoginRequest,
-    RegisterRequest,
-} from '@/types/auth';
+import type { AuthMode, LoginRequest, RegisterRequest } from '@/types/auth';
 
 export function AuthPage() {
     const navigate = useNavigate();
@@ -115,10 +104,7 @@ export function AuthPage() {
 
     return (
         <Card className="w-full min-w-0 border border-border/70 bg-card/80">
-            <AnimatedContent
-                animationKey={mode}
-                className="min-w-0"
-            >
+            <AnimatedContent animationKey={mode} className="min-w-0">
                 <div className="flex min-w-0 flex-col gap-(--card-spacing)">
                     {/* Cabeçalho do formulário. */}
                     <CardHeader className="px-5 py-3 sm:px-6 sm:py-6">
@@ -147,9 +133,7 @@ export function AuthPage() {
                         {/* Alternância entre login e cadastro. */}
                         <div className="border-t border-border/70 pt-5 text-center">
                             <p className="text-sm text-muted-foreground">
-                                {isLogin
-                                    ? 'Ainda não possui uma conta?'
-                                    : 'Já possui uma conta?'}
+                                {isLogin ? 'Ainda não possui uma conta?' : 'Já possui uma conta?'}
                             </p>
 
                             <button
