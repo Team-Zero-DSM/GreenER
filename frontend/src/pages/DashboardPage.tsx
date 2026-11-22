@@ -82,17 +82,6 @@ export function DashboardPage() {
                                 onChange={setFilters}
                             />
 
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <span className="tabular-nums">{visibleServices.length}</span>
-                                    <span>de {services.length} serviços</span>
-                                </div>
-
-                                <p className="text-xs text-muted-foreground">
-                                    Energia e CO₂e referentes à última coleta
-                                </p>
-                            </div>
-
                             {visibleServices.length === 0 ? (
                                 <div className="rounded-xl border border-white/10 bg-card px-4 py-10 text-center">
                                     <p className="text-sm text-muted-foreground">

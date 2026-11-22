@@ -455,7 +455,7 @@ export function AdminSettingsPage() {
             <PageHeader
                 title={
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xl leading-tight sm:text-3xl">
-                        <span>Configuração do projeto</span>
+                        <span>Configurações do sistema</span>
                         <span className="inline-flex min-h-7 shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 text-[11px] font-medium tracking-normal text-primary sm:min-h-8 sm:px-3 sm:text-xs">
                             <Settings aria-hidden="true" className="size-3.5" />
                             Admin
@@ -464,25 +464,6 @@ export function AdminSettingsPage() {
                 }
                 description="Gerencie coleta, estimativas ambientais e acesso ao GreenER."
             />
-
-            <nav
-                aria-label="Seções de configuração"
-                className="grid grid-cols-3 gap-1 rounded-2xl border border-border/70 bg-card/45 p-1 sm:flex sm:w-full sm:rounded-none sm:border-0 sm:border-b sm:border-border/70 sm:bg-transparent sm:p-0 sm:pb-4"
-            >
-                {[
-                    { id: 'coleta', label: 'Coleta' },
-                    { id: 'estimativas', label: 'Estimativas' },
-                    { id: 'usuarios', label: 'Usuários' },
-                ].map((item) => (
-                    <a
-                        key={item.id}
-                        href={`#${item.id}`}
-                        className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-transparent px-2 text-xs font-medium text-muted-foreground transition hover:border-primary/30 hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-10 sm:w-auto sm:rounded-lg sm:border-border sm:bg-card sm:px-4 sm:text-sm"
-                    >
-                        {item.label}
-                    </a>
-                ))}
-            </nav>
 
             <AdminSection
                 id="coleta"

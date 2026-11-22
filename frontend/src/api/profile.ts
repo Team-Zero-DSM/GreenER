@@ -1,4 +1,4 @@
-import { getJson, patchJson } from '@/api/services';
+import { getJson, patchJson } from '@/api/client';
 
 import type { AuthSession } from '@/types/auth';
 

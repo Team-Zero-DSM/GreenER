@@ -62,7 +62,7 @@ function AttemptBadge({
         : 'Sem tentativas';
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${service.result === 'success' ? 'bg-primary/10 text-primary' : service.result === 'pending' ? 'bg-white/5 text-muted-foreground' : 'bg-amber-400/10 text-amber-300'}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${service.result === 'success' ? 'border-primary/15 bg-primary/[0.08] text-primary' : service.result === 'pending' ? 'border-border/70 bg-muted/40 text-muted-foreground' : 'border-amber-400/20 bg-amber-400/[0.08] text-amber-300'}`}
         >
             <Icon size={13} className="shrink-0" aria-hidden="true" />
             {label}
@@ -349,14 +349,19 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                 ))}
             </div>
             <div aria-busy={isUpdating} className="overflow-hidden rounded-xl border bg-card">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-4 sm:px-5 sm:py-5">
                     <div>
-                        <h2 className="text-lg font-semibold">Acompanhamento das coletas</h2>
+                        <h2 className="text-base font-semibold sm:text-lg">
+                            Acompanhamento das coletas
+                        </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Última tentativa e última coleta com sucesso de cada serviço.
                         </p>
                     </div>
-                    <span role="status" className="text-xs text-muted-foreground">
+                    <span
+                        role="status"
+                        className="rounded-full border border-border/70 bg-background/40 px-3 py-1.5 text-xs font-medium text-muted-foreground tabular-nums"
+                    >
                         {isUpdating
                             ? 'Atualizando serviços...'
                             : `${data.pagination.total} serviços encontrados`}
@@ -409,11 +414,18 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                     )}
                 </div>
                 <div className="hidden overflow-x-auto lg:block">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full min-w-[960px] table-fixed text-left text-sm">
                         <caption className="sr-only">
                             Status reais de coleta por serviço. Horários de Brasília.
                         </caption>
-                        <thead className="border-b bg-background/25 text-xs text-muted-foreground">
+                        <colgroup>
+                            <col className="w-[24%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[23%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[13%]" />
+                        </colgroup>
+                        <thead className="border-b border-border/60 bg-muted/25 text-[11px] text-muted-foreground">
                             <tr>
                                 {[
                                     'Serviço',
@@ -425,40 +437,51 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                                     <th
                                         scope="col"
                                         key={label}
-                                        className="whitespace-nowrap px-5 py-3 font-medium"
+                                        className="whitespace-nowrap px-5 py-3.5 font-semibold uppercase tracking-[0.06em]"
                                     >
                                         {label}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody className="divide-y divide-border/50">
                             {data.items.map((service) => (
                                 <Fragment key={service.externalId}>
-                                    <tr className="hover:bg-white/[0.025]">
-                                        <td className="px-5 py-4">
-                                            <p className="font-medium">{service.name}</p>
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                {[service.location.city, service.location.country]
-                                                    .filter(Boolean)
-                                                    .join(' · ')}
+                                    <tr className="group transition-colors duration-150 hover:bg-muted/25">
+                                        <td className="px-5 py-3.5">
+                                            <p className="truncate font-medium text-foreground">
+                                                {service.name}
                                             </p>
-                                            <p className="mt-1 font-mono text-xs text-muted-foreground">
-                                                {service.location.regionCode}
-                                            </p>
+                                            <div className="mt-1.5 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+                                                <span className="truncate">
+                                                    {[
+                                                        service.location.city,
+                                                        service.location.country,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' · ')}
+                                                </span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="size-1 shrink-0 rounded-full bg-border"
+                                                />
+                                                <span className="shrink-0 font-mono text-[11px]">
+                                                    {service.location.regionCode}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="whitespace-nowrap px-5 py-4 tabular-nums">
+                                        <td className="whitespace-nowrap px-5 py-3.5 text-sm text-muted-foreground tabular-nums">
                                             {service.latestAttempt
                                                 ? formatTimestamp(service.latestAttempt.observedAt)
                                                 : 'Sem registro'}
                                         </td>
-                                        <td className="px-5 py-4">
+                                        <td className="px-5 py-3.5">
                                             <AttemptBadge service={service} />
                                         </td>
-                                        <td className="whitespace-nowrap px-5 py-4 tabular-nums">
+                                        <td className="whitespace-nowrap px-5 py-3.5 text-sm text-muted-foreground tabular-nums">
                                             {formatTimestamp(service.lastSuccessfulCollectionAt)}
                                         </td>
-                                        <td className="px-5 py-4">
+                                        <td className="px-5 py-3.5">
                                             <button
                                                 type="button"
                                                 aria-label={`${expanded === service.externalId ? 'Fechar' : 'Ver'} histórico de ${service.name}`}
@@ -471,7 +494,7 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                                                             : service.externalId,
                                                     )
                                                 }
-                                                className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-xs font-medium text-primary hover:bg-primary/10"
+                                                className="inline-flex min-h-10 items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-transparent px-3 text-xs font-semibold text-primary transition-colors hover:border-primary/15 hover:bg-primary/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                                             >
                                                 {expanded === service.externalId
                                                     ? 'Fechar'
@@ -683,26 +706,6 @@ export function CollectionStatusPanel() {
                             setQuery({
                                 ...query,
                                 result: value as CollectionStatusQuery['result'],
-                                page: 1,
-                            })
-                        }
-                    />
-                </div>
-
-                <div className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
-                    <span>Por página</span>
-
-                    <CollectionFilterSelect
-                        label="Quantidade por página"
-                        value={String(query.limit)}
-                        options={[3, 10, 20, 50].map((limit) => ({
-                            value: String(limit),
-                            label: String(limit),
-                        }))}
-                        onChange={(value) =>
-                            setQuery({
-                                ...query,
-                                limit: Number(value),
                                 page: 1,
                             })
                         }
