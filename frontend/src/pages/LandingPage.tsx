@@ -38,8 +38,13 @@ export function LandingPage() {
     const force2DRef = useRef(false);
 
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
-    const [autoRotate, setAutoRotate] = useState(true);
+    const [manualAutoRotate, setManualAutoRotate] = useState(true);
     const [force2D, setForce2D] = useState(false);
+
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    const autoRotate = isMobile
+        ? true
+        : selectedCode === null && manualAutoRotate;
 
     const { hash } = useLocation();
 
@@ -340,22 +345,23 @@ export function LandingPage() {
             <div
                 ref={exploreContainerRef}
                 id="explorar"
-                className="relative z-10 grid scroll-mt-24 grid-cols-1 gap-6 px-6 pt-2 pb-0 md:grid-cols-[minmax(0,560px)_minmax(0,1fr)]"
+                className="relative z-10 grid h-svh min-h-0 scroll-mt-0 grid-cols-1 items-stretch gap-6 overflow-hidden px-4 pt-5 pb-0 sm:px-6 md:grid-cols-[minmax(0,560px)_minmax(0,1fr)]"
             >
-                <div className="min-w-0">
+                <div className="flex min-h-0 min-w-0 flex-col">
                     {regionsLoading && (
                         <p className="text-white/60">
                             Carregando totais das últimas 24 horas...
                         </p>
                     )}
 
+                    <div className="min-h-0 flex-1">
                     <ExploreSection
                         rotateLeft={rotateLeft}
                         rotateRight={rotateRight}
                         dataSource="internal"
                         selectedCode={selectedCode}
                         autoRotate={autoRotate}
-                        setAutoRotate={setAutoRotate}
+                        setAutoRotate={setManualAutoRotate}
                         force2D={force2D}
                         setForce2D={setForce2D}
                         backToRegions={backToRegions}
@@ -364,6 +370,7 @@ export function LandingPage() {
                         services={services}
                         onSelectRegion={setSelectedCode}
                     />
+                    </div>
                 </div>
 
                 <div
