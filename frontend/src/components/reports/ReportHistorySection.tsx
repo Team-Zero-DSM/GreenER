@@ -1,5 +1,5 @@
 import { ReportHistoryChart } from '@/components/reports/ReportHistoryChart';
-import { fmtCo2, fmtEnergy, fmtNum } from '@/lib/reports/format';
+import { fmtCo2, fmtDate, fmtEnergy, fmtNum } from '@/lib/reports/format';
 import { RANGE_LABEL } from '@/lib/reports/historyRanges';
 import type { ReportChartOptions, ReportHistory } from '@/types/report';
 
@@ -24,6 +24,12 @@ export function ReportHistorySection({ options, history }: Props) {
     const { status, data, error, onRetry } = history;
     const loading = status === 'loading';
 
+    const period = data
+        ? data.custom
+            ? `${fmtDate(data.from)} a ${fmtDate(data.to)}`
+            : RANGE_LABEL[data.range]
+        : '';
+
     return (
         <section className="mt-8 break-inside-avoid">
             <h3 className="font-serif text-lg font-bold">Histórico de energia e CO₂e</h3>
@@ -44,11 +50,11 @@ export function ReportHistorySection({ options, history }: Props) {
             ) : (
                 <div className={`transition-opacity ${loading ? 'opacity-60' : ''}`}>
                     <p className="mb-3 mt-1 text-sm text-[#5b6b6e]">
-                        {RANGE_LABEL[options.range]}, somando {data.serviceCount}{' '}
-                        {plural(data.serviceCount, 'serviço', 'serviços')}: {fmtEnergy(data.totalEnergyKwh)} e{' '}
-                        {fmtCo2(data.totalCo2eGrams)} de CO₂e.
+                        {period}, somando {data.serviceCount} {plural(data.serviceCount, 'serviço', 'serviços')}:{' '}
+                        {fmtEnergy(data.totalEnergyKwh)} e {fmtCo2(data.totalCo2eGrams)} de CO₂e.
                         {data.failedCount > 0 &&
                             ` ${data.failedCount} ${plural(data.failedCount, 'serviço ficou', 'serviços ficaram')} sem histórico.`}
+                        {data.truncated && ' O histórico guarda só os últimos 30 dias, então o período foi limitado a isso.'}
                     </p>
                     <div className="grid gap-5">
                         <figure>
@@ -62,7 +68,7 @@ export function ReportHistorySection({ options, history }: Props) {
                                 range={data.range}
                                 formatAxis={fmtNum}
                                 formatValue={fmtEnergy}
-                                ariaLabel={`Energia por intervalo, ${RANGE_LABEL[data.range].toLowerCase()}. Pico de ${fmtEnergy(
+                                ariaLabel={`Energia por intervalo, ${period.toLowerCase()}. Pico de ${fmtEnergy(
                                     Math.max(0, ...data.points.map((p) => p.energyKwh)),
                                 )}.`}
                             />
@@ -78,7 +84,7 @@ export function ReportHistorySection({ options, history }: Props) {
                                 range={data.range}
                                 formatAxis={fmtNum}
                                 formatValue={(v) => `${fmtNum(v)} g`}
-                                ariaLabel={`CO₂e por intervalo, ${RANGE_LABEL[data.range].toLowerCase()}. Pico de ${fmtNum(
+                                ariaLabel={`CO₂e por intervalo, ${period.toLowerCase()}. Pico de ${fmtNum(
                                     Math.max(0, ...data.points.map((p) => p.co2eGrams)),
                                 )} g.`}
                             />

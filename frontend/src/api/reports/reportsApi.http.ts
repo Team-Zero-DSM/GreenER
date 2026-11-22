@@ -21,8 +21,8 @@ export const httpReportsApi: ReportsApi = {
     const raw = await postJson<ReportFilters, unknown>('/reports/preview', filters, { authenticated: true });
     return toReportData(raw);
   },
-  getHistory(serviceIds, range, signal) {
-    return loadReportHistory(serviceIds, range, signal);
+  getHistory(serviceIds, query, signal) {
+    return loadReportHistory(serviceIds, query, signal);
   },
   async downloadPdf(filters: ReportFilters) {
     const session = getAuthSession();

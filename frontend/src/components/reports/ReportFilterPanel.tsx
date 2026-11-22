@@ -2,16 +2,17 @@ import { ChartCard } from '@/components/charts/ChartCard';
 import { buttonClass } from '@/components/reports/reportStyles';
 import { HISTORY_RANGES, RANGE_LABEL } from '@/lib/reports/historyRanges';
 import { statusInfo } from '@/lib/serviceStatus';
-import type { ChartType, ReportChartOptions, ReportFilters, ReportRegion } from '@/types/report';
-import type { HistoryRange, ServiceStatus } from '@/types/service';
-import { STATUS_ORDER } from '@/utils/reportStatusMeta';
+import type { ChartType, RegionSection, ReportChartOptions, ReportFilters } from '@/types/report';
+import type { HistoryRange } from '@/types/service';
+import { REPORT_STATUSES } from '@/utils/reportStatusMeta';
 
 interface Props {
     filters: ReportFilters;
-    regions: ReportRegion[];
-    regionsError: boolean;
+    catalog: RegionSection[];
+    excludedServiceIds: string[];
     chart: ReportChartOptions;
     onChange: (next: ReportFilters) => void;
+    onExcludedChange: (next: string[]) => void;
     onChartChange: (next: ReportChartOptions) => void;
     onClear: () => void;
 }
@@ -29,71 +30,143 @@ const legendClass = 'mb-2 text-sm font-semibold text-foreground';
 const fieldClass =
     'rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-foreground [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
 const toggleBase =
-    'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
+    'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50';
 const togglePressed = 'border-cyan-400/60 bg-cyan-400/15 text-foreground';
 const toggleIdle = 'border-white/15 text-muted-foreground hover:border-cyan-400/50 hover:bg-cyan-400/10';
 
-export function ReportFiltersPanel({ filters, regions, regionsError, chart, onChange, onChartChange, onClear }: Props) {
+export function ReportFiltersPanel({
+    filters,
+    catalog,
+    excludedServiceIds,
+    chart,
+    onChange,
+    onExcludedChange,
+    onChartChange,
+    onClear,
+}: Props) {
+    const excluded = new Set(excludedServiceIds);
+    const allIds = catalog.flatMap((s) => s.services.map((x) => x.id));
+    const selectedCount = allIds.filter((id) => !excluded.has(id)).length;
+
+    const setMany = (ids: string[], select: boolean) =>
+        onExcludedChange(
+            select ? excludedServiceIds.filter((id) => !ids.includes(id)) : [...new Set([...excludedServiceIds, ...ids])],
+        );
+
     const activeCount =
-        filters.regionCodes.length + filters.statuses.length + (filters.from ? 1 : 0) + (filters.to ? 1 : 0);
+        filters.statuses.length +
+        (filters.from ? 1 : 0) +
+        (filters.to ? 1 : 0) +
+        (selectedCount < allIds.length ? 1 : 0);
     const subtitle =
         activeCount === 0
-            ? 'Sem nenhum filtro marcado, o relatório inclui tudo'
+            ? 'Sem nenhum filtro, o relatório inclui tudo'
             : `${activeCount} ${activeCount === 1 ? 'filtro ativo' : 'filtros ativos'}`;
+    const rangeHint = filters.from
+        ? 'Usando o período do filtro “Última atualização”.'
+        : filters.to
+          ? 'Termina na data “Até” do filtro.'
+          : null;
 
     return (
         <aside aria-label="Filtros do relatório" className="min-w-0 self-start lg:sticky lg:top-4 print:hidden">
             <ChartCard title="Filtros" subtitle={subtitle}>
                 <div className="grid gap-6">
                     <fieldset>
-                        <legend className={legendClass}>Regiões</legend>
-                        {regionsError && (
-                            <p role="alert" className="mb-2 text-sm text-destructive">
-                                Não foi possível carregar as regiões.
+                        <legend className={legendClass}>
+                            Serviços ({selectedCount} de {allIds.length})
+                        </legend>
+                        {allIds.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                Os serviços aparecem aqui quando o relatório carregar.
                             </p>
+                        ) : (
+                            <div className="grid gap-2">
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        className={`${toggleBase} ${toggleIdle}`}
+                                        disabled={selectedCount === allIds.length}
+                                        onClick={() => onExcludedChange([])}
+                                    >
+                                        Todos
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${toggleBase} ${toggleIdle}`}
+                                        disabled={selectedCount === 0}
+                                        onClick={() => onExcludedChange(allIds)}
+                                    >
+                                        Nenhum
+                                    </button>
+                                </div>
+                                <div className="max-h-72 overflow-y-auto rounded-lg border border-white/10 p-3">
+                                    {catalog.map((section) => {
+                                        const ids = section.services.map((s) => s.id);
+                                        const selectedHere = ids.filter((id) => !excluded.has(id)).length;
+                                        const all = selectedHere === ids.length;
+                                        const some = selectedHere > 0 && !all;
+                                        return (
+                                            <div key={section.region.code} className="mb-3 last:mb-0">
+                                                <label className="mb-1 flex cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="size-4 accent-cyan-400"
+                                                        checked={all}
+                                                        ref={(el) => {
+                                                            if (el) el.indeterminate = some;
+                                                        }}
+                                                        onChange={() => setMany(ids, !all)}
+                                                    />
+                                                    {section.region.name}
+                                                </label>
+                                                <ul className="grid gap-1.5 pl-6">
+                                                    {section.services.map((service) => (
+                                                        <li key={service.id}>
+                                                            <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="size-4 accent-cyan-400"
+                                                                    checked={!excluded.has(service.id)}
+                                                                    onChange={() =>
+                                                                        onExcludedChange(toggle(excludedServiceIds, service.id))
+                                                                    }
+                                                                />
+                                                                {service.name}
+                                                            </label>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         )}
-                        <ul className="grid gap-2">
-                            {regions.map((region) => (
-                                <li key={region.code}>
-                                    <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-                                        <input
-                                            type="checkbox"
-                                            className="size-4 accent-cyan-400"
-                                            checked={filters.regionCodes.includes(region.code)}
-                                            onChange={() =>
-                                                onChange({ ...filters, regionCodes: toggle(filters.regionCodes, region.code) })
-                                            }
-                                        />
-                                        {region.name}
-                                    </label>
-                                </li>
-                            ))}
-                        </ul>
                     </fieldset>
 
                     <fieldset>
                         <legend className={legendClass}>Status</legend>
-                        <div className="flex flex-wrap gap-2">
-                            {STATUS_ORDER.map((status: ServiceStatus) => {
-                                const pressed = filters.statuses.includes(status);
-                                return (
-                                    <button
-                                        key={status}
-                                        type="button"
-                                        aria-pressed={pressed}
-                                        onClick={() => onChange({ ...filters, statuses: toggle(filters.statuses, status) })}
-                                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
-                                            pressed
-                                                ? `border-transparent ${statusInfo[status].className}`
-                                                : 'border-white/15 text-muted-foreground hover:border-cyan-400/50 hover:bg-cyan-400/10'
-                                        }`}
-                                    >
-                                        <span aria-hidden="true">{statusInfo[status].icon}</span>
-                                        {statusInfo[status].label}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        <ul className="grid gap-2">
+                            {REPORT_STATUSES.map((status) => (
+                                <li key={status}>
+                                    <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                                        <input
+                                            type="checkbox"
+                                            className="size-4 accent-cyan-400"
+                                            checked={filters.statuses.includes(status)}
+                                            onChange={() => onChange({ ...filters, statuses: toggle(filters.statuses, status) })}
+                                        />
+                                        <span
+                                            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo[status].className}`}
+                                        >
+                                            <span aria-hidden="true">{statusInfo[status].icon}</span>
+                                            {statusInfo[status].label}
+                                        </span>
+                                    </label>
+                                </li>
+                            ))}
+                        </ul>
                     </fieldset>
 
                     <fieldset>
@@ -155,7 +228,8 @@ export function ReportFiltersPanel({ filters, regions, regionsError, chart, onCh
                                 <label className="grid gap-1 text-sm text-muted-foreground">
                                     Período
                                     <select
-                                        className={fieldClass}
+                                        className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-50`}
+                                        disabled={Boolean(filters.from)}
                                         value={chart.range}
                                         onChange={(e) => onChartChange({ ...chart, range: e.target.value as HistoryRange })}
                                     >
@@ -165,6 +239,7 @@ export function ReportFiltersPanel({ filters, regions, regionsError, chart, onCh
                                             </option>
                                         ))}
                                     </select>
+                                    {rangeHint && <span className="text-xs">{rangeHint}</span>}
                                 </label>
                             </div>
                         )}

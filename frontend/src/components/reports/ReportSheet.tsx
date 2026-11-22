@@ -1,15 +1,12 @@
 import { useId } from 'react';
 import { ReportHistorySection, type HistoryView } from '@/components/reports/ReportHistorySection';
-import { fmtCo2, fmtEnergy } from '@/lib/reports/format';
-import type { RegionSection, ReportChartOptions, ReportData, ReportRegion } from '@/types/report';
+import { fmtCo2, fmtDate, fmtDateTime, fmtEnergy } from '@/lib/reports/format';
+import type { RegionSection, ReportChartOptions, ReportData } from '@/types/report';
 import type { ServiceStatus } from '@/types/service';
 import { STATUS_META, STATUS_ORDER } from '@/utils/reportStatusMeta';
 
-const dateFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' });
-const dateTimeFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' });
-
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
-const day = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00`));
+const day = (iso: string) => fmtDate(`${iso}T00:00:00`);
 
 function describePeriod(from: string, to: string) {
     if (from && to) return `${day(from)} a ${day(to)}`;
@@ -18,7 +15,6 @@ function describePeriod(from: string, to: string) {
     return 'Todo o período';
 }
 
-// A folha é clara de propósito (é o que vai para o PDF), então não usa as cores do tema escuro.
 const PRINT_CSS = `
 @page { size: A4; margin: 14mm; }
 @media print {
@@ -87,7 +83,7 @@ function SectionTable({ section }: { section: RegionSection }) {
                                 </td>
                                 <td className={`${td} ${num}`}>{fmtEnergy(s.energyKwh)}</td>
                                 <td className={`${td} ${num}`}>{fmtCo2(s.co2eGrams)}</td>
-                                <td className={`${td} ${num}`}>{dateFmt.format(new Date(s.updatedAt))}</td>
+                                <td className={`${td} ${num}`}>{fmtDate(s.updatedAt)}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -99,17 +95,16 @@ function SectionTable({ section }: { section: RegionSection }) {
 
 interface Props {
     data: ReportData;
-    regions: ReportRegion[];
+    totalCount: number;
     loading: boolean;
     chart: ReportChartOptions;
     history: HistoryView;
 }
 
-export function ReportSheet({ data, regions, loading, chart, history }: Props) {
+export function ReportSheet({ data, totalCount, loading, chart, history }: Props) {
     const { filters } = data;
-    const regionNames = filters.regionCodes.length
-        ? filters.regionCodes.map((code) => regions.find((r) => r.code === code)?.name ?? code).join(', ')
-        : 'Todas as regiões';
+    const servicesLabel =
+        data.total === totalCount ? `Todos (${totalCount})` : `${data.total} de ${totalCount} selecionados`;
     const statusNames = filters.statuses.length
         ? filters.statuses.map((s) => STATUS_META[s].label).join(', ')
         : 'Todos';
@@ -131,13 +126,13 @@ export function ReportSheet({ data, regions, loading, chart, history }: Props) {
                     <h2 className="font-serif text-2xl font-bold leading-tight sm:text-3xl">
                         Relatório de serviços por região
                     </h2>
-                    <p className="mt-1.5 text-sm text-[#5b6b6e]">Gerado em {dateTimeFmt.format(new Date(data.generatedAt))}</p>
+                    <p className="mt-1.5 text-sm text-[#5b6b6e]">Gerado em {fmtDateTime(data.generatedAt)}</p>
                 </header>
 
                 <dl className="my-6 grid gap-1.5 border-y border-[#d6dcd8] py-3.5 text-sm">
                     <div className="flex gap-3">
-                        <dt className="w-24 shrink-0 text-[#5b6b6e]">Regiões</dt>
-                        <dd>{regionNames}</dd>
+                        <dt className="w-24 shrink-0 text-[#5b6b6e]">Serviços</dt>
+                        <dd>{servicesLabel}</dd>
                     </div>
                     <div className="flex gap-3">
                         <dt className="w-24 shrink-0 text-[#5b6b6e]">Status</dt>

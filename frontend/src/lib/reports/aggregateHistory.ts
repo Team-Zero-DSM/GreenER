@@ -1,8 +1,16 @@
-import type { ReportHistory } from '@/types/report';
-import type { HistoryRange, ServiceHistory } from '@/types/service';
+import type { HistoryQuery, ReportHistory } from '@/types/report';
+import type { ServiceHistory } from '@/types/service';
 import { RANGE_MS } from './historyRanges';
 
-const BUCKETS = 48;
+const MAX_BUCKETS = 48;
+const MIN_BUCKETS = 6;
+
+interface Options {
+  query: HistoryQuery;
+  failedCount: number;
+  maxPoints: number;
+  now?: number;
+}
 
 function sumNullable(values: Array<number | null>): number | null {
   let total: number | null = null;
@@ -14,39 +22,65 @@ function sumNullable(values: Array<number | null>): number | null {
 
 export function aggregateHistory(
   histories: ServiceHistory[],
-  range: HistoryRange,
-  failedCount: number,
-  now: number = Date.now(),
+  { query, failedCount, maxPoints, now = Date.now() }: Options,
 ): ReportHistory {
-  const froms = histories.map((h) => Date.parse(h.period.from)).filter(Number.isFinite);
-  const tos = histories.map((h) => Date.parse(h.period.to)).filter(Number.isFinite);
-  const to = tos.length ? Math.max(...tos) : now;
-  const from = froms.length ? Math.min(...froms) : to - RANGE_MS[range];
-  const step = Math.max(to - from, 1) / BUCKETS;
+  const { range, window, truncated } = query;
 
-  const points = Array.from({ length: BUCKETS }, (_, i) => ({
+  let from: number;
+  let to: number;
+  if (window) {
+    from = window.from;
+    to = window.to;
+  } else {
+    const froms = histories.map((h) => Date.parse(h.period.from)).filter(Number.isFinite);
+    const tos = histories.map((h) => Date.parse(h.period.to)).filter(Number.isFinite);
+    to = tos.length ? Math.max(...tos) : now;
+    from = froms.length ? Math.min(...froms) : to - RANGE_MS[range];
+  }
+
+  const span = Math.max(to - from, 1);
+  const apiBucket = RANGE_MS[range] / maxPoints;
+  const count = Math.min(MAX_BUCKETS, Math.max(MIN_BUCKETS, Math.floor(span / (2 * apiBucket))));
+  const step = span / count;
+
+  const points = Array.from({ length: count }, (_, i) => ({
     time: from + i * step,
     energyKwh: 0,
     co2eGrams: 0,
   }));
 
   for (const h of histories) {
-    for (const p of h.points) {
+    for (const p of h.points ?? []) {
       const t = Date.parse(p.timestamp);
       if (!Number.isFinite(t)) continue;
-      const i = Math.min(BUCKETS - 1, Math.max(0, Math.floor((t - from) / step)));
+      if (window && (t < from || t > to)) continue;
+      const i = Math.min(count - 1, Math.max(0, Math.floor((t - from) / step)));
       points[i].energyKwh += p.energyKwh || 0;
       points[i].co2eGrams += p.co2eGrams || 0;
     }
   }
 
+  const hasData = histories.length > 0;
+  const totalEnergyKwh = window
+    ? hasData
+      ? points.reduce((a, p) => a + p.energyKwh, 0)
+      : null
+    : sumNullable(histories.map((h) => h.summary.energyKwh));
+  const totalCo2eGrams = window
+    ? hasData
+      ? points.reduce((a, p) => a + p.co2eGrams, 0)
+      : null
+    : sumNullable(histories.map((h) => h.summary.co2eGrams));
+
   return {
     range,
     from,
     to,
+    custom: Boolean(window),
+    truncated,
     points,
-    totalEnergyKwh: sumNullable(histories.map((h) => h.summary.energyKwh)),
-    totalCo2eGrams: sumNullable(histories.map((h) => h.summary.co2eGrams)),
+    totalEnergyKwh,
+    totalCo2eGrams,
     serviceCount: histories.length,
     failedCount,
   };

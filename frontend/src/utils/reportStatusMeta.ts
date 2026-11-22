@@ -14,3 +14,5 @@ const COLORS: Record<ServiceStatus, string> = {
 export const STATUS_META = Object.fromEntries(
   STATUS_ORDER.map((s) => [s, { label: statusInfo[s].label, icon: statusInfo[s].icon, color: COLORS[s] }]),
 ) as Record<ServiceStatus, { label: string; icon: string; color: string }>;
+
+export const REPORT_STATUSES: ServiceStatus[] = ['available', 'metrics_missing', 'unavailable'];

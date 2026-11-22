@@ -1,3 +1,3 @@
-export type ReportsSource = 'mock' | 'services' | 'backend';
+export type ReportsSource = 'services' | 'backend';
 
 export const REPORTS_SOURCE: ReportsSource = 'services';

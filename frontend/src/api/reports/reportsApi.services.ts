@@ -34,8 +34,8 @@ export const servicesReportsApi: ReportsApi = {
     throwIfAborted(signal);
     return buildReport(services.map(toReportService), toReportRegions(regions), filters);
   },
-  getHistory(serviceIds, range, signal) {
-    return loadReportHistory(serviceIds, range, signal);
+  getHistory(serviceIds, query, signal) {
+    return loadReportHistory(serviceIds, query, signal);
   },
   async downloadPdf() {
     window.print();

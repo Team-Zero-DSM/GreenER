@@ -7,7 +7,7 @@ import type {
   ReportTotals,
   StatusCounts,
 } from '@/types/report';
-import { STATUS_ORDER } from '@/utils/reportStatusMeta';
+import { REPORT_STATUSES, STATUS_ORDER } from '@/utils/reportStatusMeta';
 
 function emptyCounts(): StatusCounts {
   return Object.fromEntries(STATUS_ORDER.map((s) => [s, 0])) as StatusCounts;
@@ -22,7 +22,7 @@ function sum(list: ReportService[], pick: (s: ReportService) => number | null): 
   return total;
 }
 
-function summarize(list: ReportService[]): ReportTotals {
+export function summarize(list: ReportService[]): ReportTotals {
   const byStatus = emptyCounts();
   for (const s of list) byStatus[s.status] += 1;
   return {
@@ -39,16 +39,14 @@ export function buildReport(
   filters: ReportFilters,
   now: Date = new Date(),
 ): ReportData {
-  const regionSet = new Set(filters.regionCodes);
-  const statusSet = new Set(filters.statuses);
+  const statusSet = new Set(filters.statuses.length > 0 ? filters.statuses : REPORT_STATUSES);
   const from = filters.from ? new Date(`${filters.from}T00:00:00`).getTime() : -Infinity;
   const to = filters.to ? new Date(`${filters.to}T23:59:59.999`).getTime() : Infinity;
 
   const matches = services.filter((s) => {
     const t = new Date(s.updatedAt).getTime();
     return (
-      (regionSet.size === 0 || regionSet.has(s.regionCode)) &&
-      (statusSet.size === 0 || statusSet.has(s.status)) &&
+      statusSet.has(s.status) &&
       t >= from &&
       t <= to
     );

@@ -16,7 +16,6 @@ export interface ReportService {
 }
 
 export interface ReportFilters {
-  regionCodes: string[];
   statuses: ServiceStatus[];
   from: string;
   to: string;
@@ -60,9 +59,22 @@ export interface ReportHistory {
   range: HistoryRange;
   from: number;
   to: number;
+  custom: boolean;
+  truncated: boolean;
   points: ReportHistoryPoint[];
   totalEnergyKwh: number | null;
   totalCo2eGrams: number | null;
   serviceCount: number;
   failedCount: number;
+}
+
+export interface HistoryWindow {
+  from: number;
+  to: number;
+}
+
+export interface HistoryQuery {
+  range: HistoryRange;
+  window?: HistoryWindow;
+  truncated: boolean;
 }
