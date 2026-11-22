@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { Calculator, Check, Gauge, Settings, Users, X } from 'lucide-react';
+import { Calculator, Check, Gauge, Search, Settings, Users, X } from 'lucide-react';
 import { Link } from 'react-router';
 
 import {
@@ -19,6 +19,14 @@ import {
 import { useMonitoring } from '@/contexts/monitoring';
 import { useProfile } from '@/hooks/useProfile';
 import type { ProfileRole } from '@/types/profile';
+import {
+    ACCENT_ACTION_BUTTON_CLASS_NAME,
+    DANGER_ACTION_BUTTON_CLASS_NAME,
+    PRIMARY_ACTION_BUTTON_CLASS_NAME,
+    SECONDARY_ACTION_BUTTON_CLASS_NAME,
+} from '@/components/shared/actionButtonStyles';
+import { DropdownSelect } from '@/components/shared/DropdownSelect';
+import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageShell } from '@/components/shared/PageShell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -94,19 +102,16 @@ function SettingField({
     disabled?: boolean;
 }) {
     return (
-        <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-            <span>{label}</span>
-            <input
-                type="number"
-                min={min}
-                max={max}
-                step={step}
-                value={value}
-                disabled={disabled}
-                onChange={(event) => onChange(event.target.value)}
-                className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-            />
-        </label>
+        <FloatingLabelInput
+            label={label}
+            type="number"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            disabled={disabled}
+            onChange={onChange}
+        />
     );
 }
 
@@ -414,7 +419,7 @@ export function AdminSettingsPage() {
                         <button
                             type="button"
                             onClick={reload}
-                            className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground"
+                            className={`${PRIMARY_ACTION_BUTTON_CLASS_NAME} min-h-11 px-4 text-sm`}
                         >
                             Tentar novamente
                         </button>
@@ -435,7 +440,7 @@ export function AdminSettingsPage() {
                     <CardContent className="py-6">
                         <Link
                             to="/perfil"
-                            className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm font-medium hover:bg-muted"
+                            className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-11 px-4 text-sm`}
                         >
                             Voltar ao perfil
                         </Link>
@@ -448,19 +453,21 @@ export function AdminSettingsPage() {
     return (
         <PageShell>
             <PageHeader
-                title="Configuração do projeto"
-                description="Gerencie coleta, estimativas ambientais e acesso ao GreenER."
-                actions={
-                    <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 text-xs font-medium text-primary">
-                        <Settings aria-hidden="true" className="size-3.5" />
-                        Admin
+                title={
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xl leading-tight sm:text-3xl">
+                        <span>Configuração do projeto</span>
+                        <span className="inline-flex min-h-7 shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 text-[11px] font-medium tracking-normal text-primary sm:min-h-8 sm:px-3 sm:text-xs">
+                            <Settings aria-hidden="true" className="size-3.5" />
+                            Admin
+                        </span>
                     </span>
                 }
+                description="Gerencie coleta, estimativas ambientais e acesso ao GreenER."
             />
 
             <nav
                 aria-label="Seções de configuração"
-                className="flex flex-wrap gap-2 border-b border-border/70 pb-4"
+                className="grid grid-cols-3 gap-1 rounded-2xl border border-border/70 bg-card/45 p-1 sm:flex sm:w-full sm:rounded-none sm:border-0 sm:border-b sm:border-border/70 sm:bg-transparent sm:p-0 sm:pb-4"
             >
                 {[
                     { id: 'coleta', label: 'Coleta' },
@@ -470,7 +477,7 @@ export function AdminSettingsPage() {
                     <a
                         key={item.id}
                         href={`#${item.id}`}
-                        className="inline-flex min-h-10 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-muted-foreground transition hover:border-primary/40 hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-transparent px-2 text-xs font-medium text-muted-foreground transition hover:border-primary/30 hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-10 sm:w-auto sm:rounded-lg sm:border-border sm:bg-card sm:px-4 sm:text-sm"
                     >
                         {item.label}
                     </a>
@@ -510,25 +517,26 @@ export function AdminSettingsPage() {
                         Falha ao atualizar o monitoramento: {monitoringError}
                     </p>
                 )}
-                <form onSubmit={handleSaveInterval} className="flex flex-col items-start gap-4">
-                    <label className="flex w-full max-w-sm flex-col gap-2 text-sm font-medium">
-                        <span>Intervalo entre rodadas (s)</span>
-                        <input
-                            type="number"
-                            min={10}
-                            max={3600}
-                            step={1}
-                            required
-                            value={collectionInterval}
-                            disabled={isLoadingCollection || isSavingCollection}
-                            onChange={(event) => setCollectionInterval(event.target.value)}
-                            className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-                        />
-                    </label>
+                <form
+                    onSubmit={handleSaveInterval}
+                    className="flex flex-col items-center gap-4 sm:items-start"
+                >
+                    <FloatingLabelInput
+                        className="w-full max-w-sm"
+                        label="Intervalo entre rodadas (s)"
+                        type="number"
+                        min={10}
+                        max={3600}
+                        step={1}
+                        required
+                        value={collectionInterval}
+                        disabled={isLoadingCollection || isSavingCollection}
+                        onChange={setCollectionInterval}
+                    />
                     <button
                         type="submit"
                         disabled={isLoadingCollection || isSavingCollection}
-                        className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 disabled:cursor-wait disabled:opacity-60"
+                        className={`${PRIMARY_ACTION_BUTTON_CLASS_NAME} min-h-11 px-4 text-sm`}
                     >
                         {isSavingCollection ? 'Salvando...' : 'Salvar intervalo'}
                     </button>
@@ -617,22 +625,29 @@ export function AdminSettingsPage() {
                         />
                     </div>
                     {estimatePreview && (
-                        <div className="grid gap-4 rounded-xl border border-primary/20 bg-primary/[0.05] p-4 sm:grid-cols-2">
-                            <div>
-                                <h3 className="mb-2 font-medium">Parâmetros ativos</h3>
+                        <div className="grid gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] p-3 sm:grid-cols-2 sm:gap-4 sm:p-4">
+                            <section className="min-w-0 rounded-lg border border-border/70 bg-background/35 p-3">
+                                <h3 className="mb-3 text-sm font-semibold">Parâmetros ativos</h3>
                                 {estimatePreview.current ? (
-                                    <dl className="space-y-1 text-sm text-muted-foreground">
-                                        <div>
-                                            Potência: {formatNumber(estimatePreview.current.powerW)}{' '}
-                                            W
+                                    <dl className="space-y-2 text-sm">
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <dt className="text-muted-foreground">Potência</dt>
+                                            <dd className="text-right font-medium tabular-nums">
+                                                {formatNumber(estimatePreview.current.powerW)} W
+                                            </dd>
                                         </div>
-                                        <div>
-                                            Energia (1 h):{' '}
-                                            {formatNumber(estimatePreview.current.energyKwh)} kWh
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <dt className="text-muted-foreground">Energia (1 h)</dt>
+                                            <dd className="text-right font-medium tabular-nums">
+                                                {formatNumber(estimatePreview.current.energyKwh)}{' '}
+                                                kWh
+                                            </dd>
                                         </div>
-                                        <div>
-                                            Emissões: {formatNumber(estimatePreview.current.co2eG)}{' '}
-                                            gCO₂e
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <dt className="text-muted-foreground">Emissões</dt>
+                                            <dd className="text-right font-medium tabular-nums">
+                                                {formatNumber(estimatePreview.current.co2eG)} gCO₂e
+                                            </dd>
                                         </div>
                                     </dl>
                                 ) : (
@@ -640,41 +655,52 @@ export function AdminSettingsPage() {
                                         Não há parâmetros ativos.
                                     </p>
                                 )}
-                            </div>
-                            <div>
-                                <h3 className="mb-2 font-medium">Novos parâmetros</h3>
-                                <dl className="space-y-1 text-sm text-muted-foreground">
-                                    <div>
-                                        Potência: {formatNumber(estimatePreview.proposed.powerW)} W
+                            </section>
+                            <section className="min-w-0 rounded-lg border border-primary/20 bg-primary/[0.035] p-3">
+                                <h3 className="mb-3 text-sm font-semibold text-primary">
+                                    Novos parâmetros
+                                </h3>
+                                <dl className="space-y-2 text-sm">
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <dt className="text-muted-foreground">Potência</dt>
+                                        <dd className="text-right font-medium tabular-nums">
+                                            {formatNumber(estimatePreview.proposed.powerW)} W
+                                        </dd>
                                     </div>
-                                    <div>
-                                        Energia (1 h):{' '}
-                                        {formatNumber(estimatePreview.proposed.energyKwh)} kWh
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <dt className="text-muted-foreground">Energia (1 h)</dt>
+                                        <dd className="text-right font-medium tabular-nums">
+                                            {formatNumber(estimatePreview.proposed.energyKwh)} kWh
+                                        </dd>
                                     </div>
-                                    <div>
-                                        Emissões: {formatNumber(estimatePreview.proposed.co2eG)}{' '}
-                                        gCO₂e
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <dt className="text-muted-foreground">Emissões</dt>
+                                        <dd className="text-right font-medium tabular-nums">
+                                            {formatNumber(estimatePreview.proposed.co2eG)} gCO₂e
+                                        </dd>
                                     </div>
                                 </dl>
-                            </div>
+                            </section>
                         </div>
                     )}
-                    <button
-                        type="submit"
-                        disabled={isLoadingCoefficients || isPreviewing || isActivating}
-                        className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/85 disabled:cursor-wait disabled:opacity-60"
-                    >
-                        {isPreviewing ? 'Simulando...' : 'Simular cálculo'}
-                    </button>
+                    <div className="flex w-full items-center justify-between gap-2 sm:justify-start sm:gap-3">
+                        <button
+                            type="submit"
+                            disabled={isLoadingCoefficients || isPreviewing || isActivating}
+                            className={`${PRIMARY_ACTION_BUTTON_CLASS_NAME} min-h-11 min-w-0 px-3 text-xs sm:px-4 sm:text-sm`}
+                        >
+                            {isPreviewing ? 'Simulando...' : 'Simular cálculo'}
+                        </button>
+                        <button
+                            type="button"
+                            disabled={!estimatePreview || isActivating || isPreviewing}
+                            onClick={() => void handleActivateEstimate()}
+                            className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-11 min-w-0 px-3 text-xs sm:px-4 sm:text-sm`}
+                        >
+                            {isActivating ? 'Ativando...' : 'Ativar novos valores'}
+                        </button>
+                    </div>
                 </form>
-                <button
-                    type="button"
-                    disabled={!estimatePreview || isActivating || isPreviewing}
-                    onClick={() => void handleActivateEstimate()}
-                    className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium transition enabled:hover:border-primary/40 enabled:hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                    {isActivating ? 'Ativando...' : 'Ativar novos valores'}
-                </button>
             </AdminSection>
 
             <AdminSection
@@ -696,24 +722,30 @@ export function AdminSettingsPage() {
                         setSubmittedSearch(search);
                         setMembersFeedback(null);
                     }}
-                    className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
+                    className="w-full"
                 >
-                    <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm font-medium">
-                        <span>Buscar usuário</span>
-                        <input
-                            type="search"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Nome ou e-mail"
-                            className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                        />
-                    </label>
-                    <button
-                        type="submit"
-                        className="min-h-11 rounded-lg border border-border px-4 text-sm font-medium transition hover:bg-muted"
-                    >
-                        Buscar
-                    </button>
+                    <div className="flex min-w-0 flex-1 flex-col text-sm font-medium">
+                        <span className="relative block">
+                            <FloatingLabelInput
+                                id="project-member-search"
+                                label="Buscar usuário"
+                                labelAlwaysFloating
+                                type="search"
+                                value={search}
+                                onChange={setSearch}
+                                placeholder="Nome ou e-mail"
+                                inputClassName="pr-12"
+                            />
+                            <button
+                                type="submit"
+                                aria-label="Buscar usuários"
+                                title="Buscar usuários"
+                                className="absolute top-[18px] right-1 inline-flex size-9 items-center justify-center rounded-lg border border-transparent text-muted-foreground transition-colors hover:border-primary/20 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+                            >
+                                <Search aria-hidden="true" className="size-4" />
+                            </button>
+                        </span>
+                    </div>
                 </form>
                 <div className="divide-y divide-border/70">
                     {isLoadingMembers && (
@@ -742,46 +774,80 @@ export function AdminSettingsPage() {
                                             {member.email}
                                         </p>
                                     </div>
-                                    <div className="flex flex-col items-start gap-2 sm:col-start-1 sm:row-start-2 sm:flex-row sm:items-end">
-                                        <label className="flex w-full min-w-0 flex-col gap-2 text-sm font-medium sm:w-52">
+                                    <div className="flex flex-col items-start gap-3 sm:col-start-1 sm:row-start-2 sm:flex-row sm:items-end">
+                                        <label className="flex w-full min-w-0 flex-col gap-3 text-sm font-medium sm:w-52">
                                             <span>Papel</span>
-                                            <select
+                                            <DropdownSelect
                                                 value={role}
                                                 disabled={isSaving}
-                                                onChange={(event) =>
+                                                onChange={(value) =>
                                                     setRoleDrafts((current) => ({
                                                         ...current,
-                                                        [member.id]: event.target
-                                                            .value as ProfileRole,
+                                                        [member.id]: value as ProfileRole,
                                                     }))
                                                 }
-                                                className="min-h-11 w-full rounded-lg border border-input bg-background/70 px-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-                                            >
-                                                <option value="admin">Admin</option>
-                                                <option value="visualizador">Visualizador</option>
-                                            </select>
+                                                options={[
+                                                    { value: 'admin', label: 'Admin' },
+                                                    {
+                                                        value: 'visualizador',
+                                                        label: 'Visualizador',
+                                                    },
+                                                ]}
+                                            />
                                         </label>
+                                        <div className="flex w-full items-center justify-between gap-2 sm:hidden">
+                                            <button
+                                                type="button"
+                                                disabled={!roleChanged || isSaving}
+                                                onClick={() =>
+                                                    void saveMember(member, role, member.active)
+                                                }
+                                                className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-11 shrink-0 whitespace-nowrap px-3 text-sm`}
+                                            >
+                                                {isSaving && roleChanged
+                                                    ? 'Salvando...'
+                                                    : 'Salvar papel'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                disabled={isSaving}
+                                                onClick={() =>
+                                                    void saveMember(
+                                                        member,
+                                                        member.role,
+                                                        !member.active,
+                                                    )
+                                                }
+                                                className={`${member.active ? DANGER_ACTION_BUTTON_CLASS_NAME : ACCENT_ACTION_BUTTON_CLASS_NAME} min-h-11 px-3 text-sm`}
+                                            >
+                                                {isSaving && !roleChanged
+                                                    ? 'Salvando...'
+                                                    : member.active
+                                                      ? 'Desvincular'
+                                                      : 'Vincular'}
+                                            </button>
+                                        </div>
                                         <button
                                             type="button"
                                             disabled={!roleChanged || isSaving}
                                             onClick={() =>
                                                 void saveMember(member, role, member.active)
                                             }
-                                            className="min-h-11 rounded-lg border border-border px-3 text-sm font-medium transition enabled:hover:border-primary/40 enabled:hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
+                                            className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} hidden min-h-11 shrink-0 whitespace-nowrap px-3 text-sm sm:inline-flex`}
                                         >
                                             {isSaving && roleChanged
                                                 ? 'Salvando...'
                                                 : 'Salvar papel'}
                                         </button>
                                     </div>
-                                    <div className="flex flex-wrap gap-2 sm:col-start-2 sm:row-start-1 sm:justify-end">
+                                    <div className="hidden flex-wrap justify-center gap-4 sm:col-start-2 sm:row-start-1 sm:flex sm:justify-end">
                                         <button
                                             type="button"
                                             disabled={isSaving}
                                             onClick={() =>
                                                 void saveMember(member, member.role, !member.active)
                                             }
-                                            className={`min-h-10 rounded-lg border px-3 text-sm font-medium transition disabled:cursor-wait disabled:opacity-60 ${member.active ? 'border-destructive/30 text-destructive hover:bg-destructive/10' : 'border-primary/30 text-primary hover:bg-primary/10'}`}
+                                            className={`${member.active ? DANGER_ACTION_BUTTON_CLASS_NAME : ACCENT_ACTION_BUTTON_CLASS_NAME} min-h-11 px-3 text-sm`}
                                         >
                                             {isSaving && !roleChanged
                                                 ? 'Salvando...'
