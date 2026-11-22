@@ -6,7 +6,6 @@ import {
     ChevronDown,
     ChevronRight,
     Clock3,
-    Search,
     TriangleAlert,
     X,
 } from 'lucide-react';
@@ -19,6 +18,12 @@ import {
     type CollectionStatusQuery,
 } from '@/api/collection-status';
 import { useApiQuery } from '@/hooks/useApiQuery';
+import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+    getDropdownTriggerClassName,
+} from '@/components/shared/dropdownStyles';
 
 const typeLabels: Record<string, string> = {
     success: 'Coleta realizada',
@@ -572,11 +577,7 @@ function CollectionFilterSelect({ label, value, options, onChange }: CollectionF
                 aria-label={label}
                 aria-expanded={open}
                 onClick={() => setOpen((current) => !current)}
-                className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors ${
-                    open
-                        ? 'border-emerald-400/50 bg-emerald-400/[0.05] text-foreground'
-                        : 'border-input bg-secondary text-foreground hover:border-emerald-400/30'
-                }`}
+                className={getDropdownTriggerClassName(open)}
             >
                 <span className="truncate">{selected?.label ?? value}</span>
 
@@ -591,7 +592,7 @@ function CollectionFilterSelect({ label, value, options, onChange }: CollectionF
             {open && (
                 <div
                     ref={pickerRef}
-                    className="absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto rounded-lg border border-border bg-background p-2 shadow-xl shadow-black/40"
+                    className={`absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto ${DROPDOWN_SURFACE_CLASS_NAME}`}
                 >
                     <div className="flex flex-col gap-1">
                         {options.map((option) => {
@@ -606,11 +607,7 @@ function CollectionFilterSelect({ label, value, options, onChange }: CollectionF
                                         onChange(option.value);
                                         setOpen(false);
                                     }}
-                                    className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2.5 text-left text-sm transition-colors ${
-                                        selected
-                                            ? 'bg-emerald-400/10 font-medium text-emerald-300'
-                                            : 'text-foreground/80 hover:bg-emerald-400/[0.07] hover:text-emerald-200'
-                                    }`}
+                                    className={`${getDropdownOptionClassName(selected)} justify-between`}
                                 >
                                     <span>{option.label}</span>
 
@@ -653,23 +650,15 @@ export function CollectionStatusPanel() {
                 }}
                 className="relative z-20 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap"
             >
-                <label className="group col-span-2 flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-input bg-secondary/60 px-3 transition-colors focus-within:border-emerald-400/50 focus-within:bg-secondary focus-within:ring-2 focus-within:ring-emerald-400/10 sm:min-w-56">
-                    <Search
-                        size={17}
-                        className="shrink-0 text-muted-foreground transition-colors group-focus-within:text-emerald-300"
-                        aria-hidden="true"
-                    />
-
-                    <input
-                        type="search"
-                        aria-label="Buscar serviço"
-                        maxLength={100}
-                        placeholder="Buscar por nome ou identificador..."
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        className="min-h-11 w-full min-w-0 border-0 bg-transparent py-2.5 text-sm text-foreground outline-none ring-0 placeholder:text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                    />
-                </label>
+                <FloatingLabelInput
+                    className="col-span-2 min-w-0 flex-1 sm:min-w-56"
+                    label="Buscar serviço"
+                    type="search"
+                    maxLength={100}
+                    placeholder="Buscar por nome ou identificador..."
+                    value={draft}
+                    onChange={setDraft}
+                />
 
                 <button
                     type="submit"

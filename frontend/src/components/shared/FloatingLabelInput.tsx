@@ -10,7 +10,7 @@ import {
 
 import { Eye, EyeOff } from 'lucide-react';
 
-export type FloatingLabelInputType = 'text' | 'email' | 'password' | 'number';
+export type FloatingLabelInputType = 'text' | 'email' | 'password' | 'number' | 'search';
 
 interface FloatingLabelInputProps extends Omit<
     InputHTMLAttributes<HTMLInputElement>,
@@ -24,6 +24,7 @@ interface FloatingLabelInputProps extends Omit<
     className?: string;
     inputClassName?: string;
     labelAdornment?: ReactNode;
+    labelAlwaysFloating?: boolean;
 }
 
 const FIELD_HEIGHT = 48;
@@ -46,6 +47,7 @@ export function FloatingLabelInput({
     className,
     inputClassName,
     labelAdornment,
+    labelAlwaysFloating = false,
     'aria-describedby': ariaDescribedBy,
     'aria-invalid': ariaInvalid,
     ...inputProps
@@ -66,7 +68,7 @@ export function FloatingLabelInput({
     const [labelWidth, setLabelWidth] = useState(0);
 
     const isPassword = type === 'password';
-    const isFloating = isFocused || value.length > 0;
+    const isFloating = labelAlwaysFloating || isFocused || value.length > 0;
 
     const inputType = isPassword && showPassword ? 'text' : type;
 

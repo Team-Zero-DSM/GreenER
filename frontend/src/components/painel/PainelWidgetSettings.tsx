@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/shared/SegmentedControl';
+import { DropdownSelect } from '@/components/shared/DropdownSelect';
+import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
 import type {
     PainelChartType,
     PainelSourceGetter,
@@ -42,8 +44,6 @@ const CHART_OPTIONS: Partial<
 };
 
 const FIELD_LABEL = 'block text-sm font-medium';
-const FIELD_INPUT =
-    'mt-1.5 min-h-11 w-full rounded-lg border border-border bg-background/60 px-3 text-sm outline-none focus:border-emerald-400/60';
 
 // Painel lateral de configuração de um widget, aberto pelo menu do próprio widget.
 export function PainelWidgetSettings({
@@ -140,36 +140,33 @@ export function PainelWidgetSettings({
                         </p>
                     </section>
 
-                    <label className={FIELD_LABEL}>
-                        Título
-                        <input
+                    <div className={FIELD_LABEL}>
+                        <FloatingLabelInput
+                            label="Título"
                             type="text"
                             value={form.title}
                             maxLength={60}
-                            onChange={(event) => setForm({ ...form, title: event.target.value })}
-                            className={FIELD_INPUT}
+                            onChange={(value) => setForm({ ...form, title: value })}
                         />
                         {!title && (
                             <span className="mt-1.5 block text-xs font-normal text-destructive">
                                 Informe um título para o widget.
                             </span>
                         )}
-                    </label>
+                    </div>
 
                     <label className={FIELD_LABEL}>
                         Métrica
-                        <select
+                        <DropdownSelect
                             value={metricId}
                             disabled={metrics.length < 2}
-                            onChange={(event) => changeMetric(event.target.value)}
-                            className={`${FIELD_INPUT} disabled:cursor-not-allowed disabled:opacity-60`}
-                        >
-                            {metrics.map((metric) => (
-                                <option key={metric.id} value={metric.id} className="bg-popover">
-                                    {metric.label}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={changeMetric}
+                            className="mt-1.5"
+                            options={metrics.map((metric) => ({
+                                value: metric.id,
+                                label: metric.label,
+                            }))}
+                        />
                         <span className="mt-1.5 block text-xs font-normal text-muted-foreground">
                             {metrics.length < 2
                                 ? 'Este tipo de widget tem uma única métrica.'
@@ -236,22 +233,15 @@ export function PainelWidgetSettings({
 
                     <label className={FIELD_LABEL}>
                         Filtrar por região
-                        <select
+                        <DropdownSelect
                             value={form.region ?? ''}
-                            onChange={(event) =>
-                                setForm({ ...form, region: event.target.value || undefined })
-                            }
-                            className={FIELD_INPUT}
-                        >
-                            <option value="" className="bg-popover">
-                                Todas as regiões
-                            </option>
-                            {regionCodes.map((code) => (
-                                <option key={code} value={code} className="bg-popover">
-                                    {code}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(value) => setForm({ ...form, region: value || undefined })}
+                            className="mt-1.5"
+                            options={[
+                                { value: '', label: 'Todas as regiões' },
+                                ...regionCodes.map((code) => ({ value: code, label: code })),
+                            ]}
+                        />
                     </label>
 
                     {widget.type === 'kpi' && (
@@ -279,47 +269,40 @@ export function PainelWidgetSettings({
                                 <div className="grid grid-cols-2 gap-2">
                                     <label className="text-xs text-muted-foreground">
                                         Quando o valor estiver
-                                        <select
+                                        <DropdownSelect
                                             value={form.alert.direction}
-                                            onChange={(event) =>
+                                            onChange={(value) =>
                                                 setForm({
                                                     ...form,
                                                     alert: {
-                                                        direction: event.target.value as
-                                                            'acima' | 'abaixo',
+                                                        direction: value as 'acima' | 'abaixo',
                                                         threshold: form.alert?.threshold ?? 0,
                                                     },
                                                 })
                                             }
-                                            className={`${FIELD_INPUT} text-foreground`}
-                                        >
-                                            <option value="acima" className="bg-popover">
-                                                Acima de
-                                            </option>
-                                            <option value="abaixo" className="bg-popover">
-                                                Abaixo de
-                                            </option>
-                                        </select>
-                                    </label>
-
-                                    <label className="text-xs text-muted-foreground">
-                                        Limite
-                                        <input
-                                            type="number"
-                                            step="any"
-                                            value={form.alert.threshold}
-                                            onChange={(event) =>
-                                                setForm({
-                                                    ...form,
-                                                    alert: {
-                                                        direction: form.alert?.direction ?? 'acima',
-                                                        threshold: Number(event.target.value) || 0,
-                                                    },
-                                                })
-                                            }
-                                            className={`${FIELD_INPUT} text-foreground`}
+                                            className="mt-1.5"
+                                            options={[
+                                                { value: 'acima', label: 'Acima de' },
+                                                { value: 'abaixo', label: 'Abaixo de' },
+                                            ]}
                                         />
                                     </label>
+
+                                    <FloatingLabelInput
+                                        label="Limite"
+                                        type="number"
+                                        step="any"
+                                        value={String(form.alert.threshold)}
+                                        onChange={(value) =>
+                                            setForm({
+                                                ...form,
+                                                alert: {
+                                                    direction: form.alert?.direction ?? 'acima',
+                                                    threshold: Number(value) || 0,
+                                                },
+                                            })
+                                        }
+                                    />
                                 </div>
                             )}
 

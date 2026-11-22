@@ -1,3 +1,8 @@
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+} from '@/components/shared/dropdownStyles';
+
 interface ComparisonColorPickerProps {
     cores: string[];
     corAtual: string;
@@ -22,7 +27,7 @@ export function ComparisonColorPicker({
     onFechar,
 }: ComparisonColorPickerProps) {
     return (
-        <div className="rounded-lg border border-border bg-background p-2">
+        <div className={DROPDOWN_SURFACE_CLASS_NAME}>
             <div className="flex flex-col gap-1">
                 {cores.map((cor) => {
                     const selecionada = cor === corAtual;
@@ -40,9 +45,7 @@ export function ComparisonColorPicker({
                                 emUso ? ', atualmente usada por outro serviço' : ''
                             }`}
                             aria-pressed={selecionada}
-                            className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-secondary ${
-                                selecionada ? 'bg-secondary' : ''
-                            }`}
+                            className={`${getDropdownOptionClassName(selecionada)} gap-3`}
                         >
                             <span
                                 className={`size-5 shrink-0 rounded-full border border-border ${
