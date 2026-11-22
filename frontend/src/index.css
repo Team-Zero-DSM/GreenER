@@ -200,9 +200,12 @@
     animation: painel-tooltip-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Tela cheia: cada widget fica dentro da própria célula, mesmo com pouca altura.
-   O espaçamento diminui em telas baixas, e o conteúdo vira um contêiner de altura
-   para o valor dos indicadores acompanhar o espaço que sobrou. */
+/* O corpo do widget é um contêiner de tamanho para que KPIs e conteúdo visual
+   respondam ao espaço real da célula, em todos os templates e tamanhos de tela. */
+.painel-body {
+    container-type: size;
+}
+
 [data-fill] .painel-card {
     min-height: 0;
 }
@@ -212,24 +215,27 @@
 }
 
 [data-fill] .painel-body {
-    container-type: size;
     overflow: hidden;
     margin-top: clamp(0.25rem, 1vh, 0.75rem);
 }
 
-[data-fill] .painel-kpi-value {
-    font-size: clamp(1.25rem, min(42cqh, 16cqw), 4.5rem);
+[data-painel-id] .painel-kpi-value {
+    font-size: clamp(1.5rem, min(42cqh, 16cqw), 4.5rem);
     line-height: 1;
 }
 
-/* Indicador baixo demais: some primeiro a comparação, depois o rótulo. */
-@container (max-height: 100px) {
+[data-painel-id] .painel-kpi-unit {
+    font-size: clamp(0.75rem, min(18cqh, 5cqw), 1.5rem);
+}
+
+/* Só oculta os textos auxiliares quando o espaço vertical realmente fica curto. */
+@container (max-height: 56px) {
     .painel-kpi-extra {
         display: none;
     }
 }
 
-@container (max-height: 60px) {
+@container (max-height: 38px) {
     .painel-kpi-label {
         display: none;
     }

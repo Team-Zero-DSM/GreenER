@@ -1,6 +1,10 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Check, ChevronDown, LayoutTemplate } from 'lucide-react';
 
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+} from '@/components/shared/dropdownStyles';
 import type { PainelTemplateId } from '@/types/painel';
 
 import { PAINEL_TEMPLATES, getPainelTemplate, type PainelTemplate } from './painelTemplates';
@@ -136,8 +140,10 @@ export function PainelTemplatePicker({ value, onChange }: PainelTemplatePickerPr
                         openList();
                     }
                 }}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-lg border bg-background/60 px-3 text-sm text-muted-foreground transition-colors hover:bg-white/5 ${
-                    open ? 'border-emerald-400/50' : 'border-border'
+                className={`inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border px-3 text-sm text-muted-foreground outline-none transition-colors hover:border-primary/30 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary/15 xl:w-auto ${
+                    open
+                        ? 'border-primary/50 bg-primary/5 ring-2 ring-primary/10'
+                        : 'border-border/60 bg-card/55'
                 }`}
             >
                 <LayoutTemplate aria-hidden="true" className="size-4 text-primary" />
@@ -162,7 +168,7 @@ export function PainelTemplatePicker({ value, onChange }: PainelTemplatePickerPr
                         }
                         onKeyDown={handleListKeyDown}
                         onPointerLeave={() => setHighlighted(null)}
-                        className="w-64 rounded-xl border border-white/10 bg-popover/85 p-1.5 shadow-2xl shadow-black/50 backdrop-blur-xl"
+                        className={`w-64 ${DROPDOWN_SURFACE_CLASS_NAME}`}
                     >
                         {PAINEL_TEMPLATES.map((template, index) => {
                             const selected = template.id === value;
@@ -181,8 +187,10 @@ export function PainelTemplatePicker({ value, onChange }: PainelTemplatePickerPr
                                     tabIndex={active ? 0 : -1}
                                     onPointerEnter={() => setHighlighted(index)}
                                     onClick={() => select(template.id)}
-                                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors ${
-                                        active ? 'bg-emerald-400/10 text-foreground' : ''
+                                    className={`${getDropdownOptionClassName(selected)} min-h-14 cursor-pointer gap-3 px-3 py-2.5 ${
+                                        active && !selected
+                                            ? 'bg-primary/[0.06] text-foreground'
+                                            : ''
                                     }`}
                                 >
                                     <span className="min-w-0 flex-1">

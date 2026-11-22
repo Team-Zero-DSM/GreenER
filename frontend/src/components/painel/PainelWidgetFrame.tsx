@@ -1,6 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { CircleAlert, Ellipsis, GripVertical, Inbox } from 'lucide-react';
 
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+} from '@/components/shared/dropdownStyles';
 import type { PainelWidgetAction, PainelWidgetStatus } from '@/types/painel';
 
 interface PainelWidgetFrameProps {
@@ -110,7 +114,7 @@ export function PainelWidgetFrame({
                             aria-haspopup="menu"
                             aria-expanded={menuOpen}
                             onClick={() => setMenuOpen((open) => !open)}
-                            className="-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            className={`-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${menuOpen ? 'border-primary/20 bg-primary/10 text-primary' : 'border-transparent text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground'}`}
                         >
                             <Ellipsis aria-hidden="true" className="size-4" />
                         </button>
@@ -118,7 +122,7 @@ export function PainelWidgetFrame({
                         {menuOpen && (
                             <ul
                                 role="menu"
-                                className="absolute right-0 z-10 mt-1 min-w-44 rounded-lg border border-border bg-popover p-1 shadow-lg"
+                                className={`absolute right-0 z-10 mt-2 min-w-44 ${DROPDOWN_SURFACE_CLASS_NAME}`}
                             >
                                 {actions.map((action) => (
                                     <li key={action.label} role="none">
@@ -130,7 +134,7 @@ export function PainelWidgetFrame({
                                                 action.onSelect?.();
                                                 setMenuOpen(false);
                                             }}
-                                            className="w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:text-muted-foreground/60 disabled:hover:bg-transparent"
+                                            className={`${getDropdownOptionClassName(false)} disabled:cursor-not-allowed disabled:text-muted-foreground/60 disabled:hover:bg-transparent`}
                                         >
                                             {action.label}
                                         </button>
