@@ -648,10 +648,10 @@ export function CollectionStatusPanel() {
                     event.preventDefault();
                     setQuery({ ...query, search: draft.trim(), page: 1 });
                 }}
-                className="relative z-20 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap"
+                className="relative z-20 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center"
             >
                 <FloatingLabelInput
-                    className="col-span-2 min-w-0 flex-1 sm:min-w-56"
+                    className="col-span-2 min-w-0 flex-1 sm:min-w-56 sm:-translate-y-1.5"
                     label="Buscar serviço"
                     type="search"
                     maxLength={100}
