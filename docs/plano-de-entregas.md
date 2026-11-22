@@ -16,9 +16,9 @@ As situações abaixo descrevem evidências e pendências, não uma nota atribu�
   Sprint 1; o histórico de status das coletas é uma ampliação da Sprint 2.
   Globo integrado na Sprint 1; saldo de T15 transferido para a Sprint 2:
   apresentar os serviços associados ao inspecionar uma região, com Gabriel.
-- Configuração do intervalo pela aplicação fica para depois, com sprint e
-  responsável ainda a definir. Até a entrega final, sua alocação deve ser
-  conciliada com os requisitos obrigatórios de configuração do desafio.
+- A configuração administrativa do intervalo foi implementada na Sprint 3
+  pelas tasks #163 e #164. A tabela abaixo relaciona as entregas do backend
+  aos contratos, User Stories e evidências de validação.
 
 ## Sprint 1 — Monitoramento, persistência, histórico e visualização
 
@@ -153,8 +153,30 @@ alternativas. A comparação entre serviços em períodos equivalentes foi aloca
 relação à configuração regional/cenários já prevista em #83/#84, evitando contar
 a mesma entrega nas duas sprints. Manter as funcionalidades das entregas anteriores.
 
-O planejamento detalhado será registrado no início da sprint. Não existe
-implementação de autenticação funcional nem evidência de Sprint 3 concluída.
+Autenticação, configurações administrativas, painel persistido e relatórios
+estão implementados no backend. A tabela seguinte registra as entregas técnicas;
+seleção formal de histórias, aceite e cerimônias seguem seus registros próprios.
+
+### Entregas do backend na Sprint 3
+
+| Tasks | Entrega e User Stories | Implementação e evidência |
+|---|---|---|
+| [#156](https://github.com/Team-Zero-DSM/GreenER/issues/156), [#157](https://github.com/Team-Zero-DSM/GreenER/issues/157), [#158](https://github.com/Team-Zero-DSM/GreenER/issues/158) | Banco de contas, JWT, cadastro e login — US15 (#151). | [PR #174](https://github.com/Team-Zero-DSM/GreenER/pull/174), [#177](https://github.com/Team-Zero-DSM/GreenER/pull/177), [#181](https://github.com/Team-Zero-DSM/GreenER/pull/181); [contrato](./API.md#23-autenticação-e-perfil). |
+| [#159](https://github.com/Team-Zero-DSM/GreenER/issues/159), [#160](https://github.com/Team-Zero-DSM/GreenER/issues/160) | Perfil, alteração e recuperação de senha — US15 (#151). | [PR #186](https://github.com/Team-Zero-DSM/GreenER/pull/186), [#185](https://github.com/Team-Zero-DSM/GreenER/pull/185), [#194](https://github.com/Team-Zero-DSM/GreenER/pull/194); [guia de e-mail](../README.md#recuperação-de-senha). |
+| [#161](https://github.com/Team-Zero-DSM/GreenER/issues/161), [#162](https://github.com/Team-Zero-DSM/GreenER/issues/162) | Primeiro administrador e gerenciamento de usuários — US15 (#151). | [PR #199](https://github.com/Team-Zero-DSM/GreenER/pull/199), [#203](https://github.com/Team-Zero-DSM/GreenER/pull/203); [contrato](./API.md#28-gerenciamento-de-usuários). |
+| [#163](https://github.com/Team-Zero-DSM/GreenER/issues/163), [#164](https://github.com/Team-Zero-DSM/GreenER/issues/164) | Persistência e aplicação do intervalo — US03 (#2), US15 (#151), US16 (#155). | [PR #204](https://github.com/Team-Zero-DSM/GreenER/pull/204), [#205](https://github.com/Team-Zero-DSM/GreenER/pull/205); [contrato](./API.md#24-configuração-de-monitoramento--implementada). |
+| [#165](https://github.com/Team-Zero-DSM/GreenER/issues/165) | Consulta, prévia e ativação de coeficientes — US06 (#153), US15 (#151). | [PR #206](https://github.com/Team-Zero-DSM/GreenER/pull/206); [cálculo compartilhado](./cálculo.md#prévia-e-ativação-de-parâmetros). |
+| [#148](https://github.com/Team-Zero-DSM/GreenER/issues/148) | Persistência do painel pessoal — US17. | [PR #198](https://github.com/Team-Zero-DSM/GreenER/pull/198); [GET/PUT /dashboards/me](./API.md#26-painel-de-monitoramento--implementado). |
+| [#167](https://github.com/Team-Zero-DSM/GreenER/issues/167), [#168](https://github.com/Team-Zero-DSM/GreenER/issues/168) | Prévia e PDF — US10 (#154), apoiada pelos indicadores da US07 (#75). | [PR #207](https://github.com/Team-Zero-DSM/GreenER/pull/207), [#208](https://github.com/Team-Zero-DSM/GreenER/pull/208); [contrato](./API.md#29-relatórios-e-exportação-em-pdf). |
+| [#169](https://github.com/Team-Zero-DSM/GreenER/issues/169) | Validação dos fluxos acima e migração — US03, US06, US07, US08, US10, US15 e US16. | [PR #211](https://github.com/Team-Zero-DSM/GreenER/pull/211); [suíte](../backend/tests/), [CI aprovado](https://github.com/Team-Zero-DSM/GreenER/actions/runs/44851909389). |
+| [#170](https://github.com/Team-Zero-DSM/GreenER/issues/170) | Documentação técnica dessas entregas. | Atualização de API, backend, banco, cálculo e execução neste conjunto de documentos. |
+
+Na validação da #169, 111 testes passaram com PostgreSQL 17, incluindo 48 casos
+adicionados para os fluxos da Sprint 3. Backend, frontend e construção Docker
+passaram no CI vinculado. A suíte cria bancos descartáveis e simula o envio de
+e-mail; verifica fluxos básicos e preservação de dados nas migrações 002/003.
+Essa evidência não comprova entrega real de SMTP/Brevo, desempenho sob carga ou
+aceite formal das User Stories.
 
 ### Matriz da Sprint 3
 
@@ -170,8 +192,8 @@ implementação de autenticação funcional nem evidência de Sprint 3 concluíd
 | ES08 | RNF08 | Documentação compatível com a entrega | Conferir links, comandos, contratos e limites | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
 | ES09 | RNF12 | Participação verificável dos cinco integrantes | Conferir artefatos por integrante, além de commits | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
 | DW01 | RP01, RP02; RNF09 interno | React/TS, Node/TS e separação das partes | Conferir código e dependências usadas | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| DW06 | RP06; RNF05 interno | Login JWT e proteção no backend | Validar login, rejeição de token e acesso autorizado | [PREENCHER] | Módulo auth e verificações a implementar | Planejado para a Sprint 3 |
-| DW03, DW06 | Configuração de monitoramento | Consultar e alterar o intervalo de coleta pela área autenticada | Validar valores de 10 a 3.600 segundos, rejeitar alterações sem autorização e verificar se o intervalo salvo é aplicado pelo agendador e persiste após reiniciar | Equipe de backend, a confirmar no planejamento | [Contrato previsto](./API.md#24-configuração-de-monitoramento--planejada) | Proposta para a Sprint 3, após autenticação |
+| DW06 | RP06; RNF05 interno | Login JWT e proteção no backend | Validar login, rejeição de token e acesso autorizado | Backend; autoria nos PRs vinculados | [Entregas e testes](#entregas-do-backend-na-sprint-3) | Implementado e validado na #169 |
+| DW03, DW06 | Configuração de monitoramento | Consultar e alterar o intervalo de coleta pela área autenticada | Validar valores de 10 a 3.600 segundos, autorização, persistência e aplicação pelo agendador | Backend; autoria nos PRs vinculados | [Contrato implementado](./API.md#24-configuração-de-monitoramento--implementada), PRs #204/#205/#211 | Implementado e validado na #169 |
 | DW02, DW03, DW07 | Recursos das sprints anteriores | Preservar integrações, API e execução | Revalidar comportamento e regressões | Equipe | Código e verificações da entrega | Planejado e cumulativo |
 | DW04, DW05 | Cenários regionais; RF15 cumulativo | Simulações avançadas e preservação da comparação da Sprint 2 | Delimitar cenários adicionais e conferir resultados com dados reais | A definir | Issues e PRs a definir; #83/#84 como limite do escopo anterior | Planejado; delimitação pendente |
 | BD01–BD04 | RP03; histórico e análises | Consultas e modelo para cenários adicionais | Conferir filtros e relacionamentos por período | A definir | SQL e evidências a definir | Planejado e cumulativo |
@@ -181,14 +203,14 @@ implementação de autenticação funcional nem evidência de Sprint 3 concluíd
 
 | Item | Decisão confirmada | Reflexo no planejamento |
 |---|---|---|
-| Autenticação | Sprint 3. | Removida da entrega da Sprint 1; continua no backlog do produto. |
+| Autenticação | Implementada na Sprint 3. | Banco, cadastro, login, perfil e recuperação vinculados às tasks #156–#162 e aos testes da #169. |
 | Persistência e histórico de métricas | Entregas técnicas da Sprint 1. | Relacionados às tarefas de backend/banco e BD01–BD04; não incluem automaticamente a US10 na seleção. |
 | Histórico de status | Ampliação da Sprint 2 vinculada a US04/US05. | #89–#91; preservação dos dados verificada em banco de teste com schema da Sprint 1. |
 | Comparação entre serviços | Sprint 2, vinculada às issues #76, #82–#86 e #93. | Tela de comparação integrada à API pelo [PR #129](https://github.com/Team-Zero-DSM/GreenER/pull/129). |
 | Cenários regionais | #83/#84 já preveem opções regionais na comparação da Sprint 2. | Delimitar o que será simulação avançada adicional da Sprint 3 antes de fechar seu backlog. |
 | Indicadores consolidados | US07 fechada na Sprint 2. A [validação](./sprint-2/evidencias-dod.md#validação-da-us07) cobre os cards regionais e os quatro totais do ambiente no banco. | A [demonstração](https://www.youtube.com/watch?v=jaLqoq2bONs&t=280s) apresenta a tela de visão geral no plano da Sprint 3. |
 | Mapa/globo | Globo integrado na Sprint 1. Continuação de T15 na Sprint 2, com Gabriel. | A #32 identifica o saldo e o PR #118 fornece evidência da listagem regional para a review. |
-| Intervalo pela aplicação | Proposta para a Sprint 3, após autenticação. | Confirmar a alocação e o responsável na planning. O intervalo salvo deve controlar o agendador de coletas. |
+| Intervalo pela aplicação | Implementado na Sprint 3. | #163 persiste a configuração e #164 aplica o valor no agendador; #169 valida os fluxos básicos. |
 | Parâmetros ambientais | Valores iniciais correspondem ao exemplo do modelo simplificado do desafio. | Fonte, unidades e aplicação registradas em [cálculo.md](./cálculo.md); não representam calibração de hardware real. |
 
 As decisões acima orientam o planejamento das entregas.

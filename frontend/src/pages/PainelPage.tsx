@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Minimize } from 'lucide-react';
 
 import { PainelConfirmDialog } from '@/components/painel/PainelConfirmDialog';
@@ -12,7 +12,6 @@ import {
 } from '@/components/painel/painelLayoutResponsivo';
 import { getPainelTemplate } from '@/components/painel/painelTemplates';
 import { PainelShell } from '@/components/painel/PainelShell';
-import { PainelUpdateInfo } from '@/components/painel/PainelUpdateInfo';
 import { PainelToolbar } from '@/components/painel/PainelToolbar';
 import { PainelWidgetCatalog } from '@/components/painel/PainelWidgetCatalog';
 import { PainelWidgetSettings } from '@/components/painel/PainelWidgetSettings';
@@ -22,6 +21,28 @@ import { usePainelData } from '@/hooks/usePainelData';
 import { usePainelFullscreen } from '@/hooks/usePainelFullscreen';
 import type { PainelConfig, PainelTemplateId, PainelWidget } from '@/types/painel';
 import type { HistoryRange } from '@/types/service';
+
+// Quantas alterações o "Desfazer" consegue voltar.
+const HISTORY_LIMIT = 50;
+
+interface PainelHistory {
+    past: PainelConfig[];
+    future: PainelConfig[];
+}
+
+const EMPTY_HISTORY: PainelHistory = { past: [], future: [] };
+
+function sameConfig(a: PainelConfig, b: PainelConfig): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+
+// Atalhos de teclado não valem enquanto o usuário digita num campo.
+function isTyping(target: EventTarget | null): boolean {
+    return (
+        target instanceof HTMLElement &&
+        (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+    );
+}
 
 function sameLayout(a: readonly PainelWidget[], b: readonly PainelWidget[]): boolean {
     return JSON.stringify(a) === JSON.stringify(b);
@@ -39,6 +60,8 @@ export function PainelPage() {
     const [settingsWidgetId, setSettingsWidgetId] = useState<string | null>(null);
     // Template escolhido no seletor que ainda espera a confirmação do usuário.
     const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
+    // Histórico do modo de edição, para desfazer e refazer alterações.
+    const [history, setHistory] = useState<PainelHistory>(EMPTY_HISTORY);
 
     const { getSource, regionCodes } = usePainelData(range);
 
@@ -58,8 +81,75 @@ export function PainelPage() {
         setDraft(setLayoutWidgets(current, breakpoint, widgets));
     }
 
+    // Guarda o estado atual antes de uma alteração, para o "Desfazer" voltar a ele.
+    // Uma alteração nova apaga o que havia para refazer.
+    const draftRef = useRef(draft);
+    useEffect(() => {
+        draftRef.current = draft;
+    });
+
+    const pushHistory = useCallback(() => {
+        const snapshot = draftRef.current;
+        if (!snapshot) return;
+
+        setHistory((previous) => {
+            const last = previous.past[previous.past.length - 1];
+            if (last && sameConfig(last, snapshot)) return { past: previous.past, future: [] };
+
+            return { past: [...previous.past, snapshot].slice(-HISTORY_LIMIT), future: [] };
+        });
+    }, []);
+
+    // Volta (ou avança) no histórico, pulando estados iguais ao atual, como o de um
+    // arraste cancelado.
+    const travel = useCallback((direction: 'undo' | 'redo') => {
+        const present = draftRef.current;
+        if (!present) return;
+
+        setHistory((previous) => {
+            const from = direction === 'undo' ? [...previous.past] : [...previous.future];
+            const to = direction === 'undo' ? [...previous.future] : [...previous.past];
+            let target = from.pop();
+
+            while (target && sameConfig(target, present)) target = from.pop();
+            if (!target) return previous;
+
+            to.push(present);
+            setDraft(target);
+
+            return direction === 'undo' ? { past: from, future: to } : { past: to, future: from };
+        });
+    }, []);
+
+    const canUndo = history.past.some((entry) => !draft || !sameConfig(entry, draft));
+    const canRedo = history.future.length > 0;
+
+    // Ctrl+Z desfaz; Ctrl+Shift+Z ou Ctrl+Y refazem (Cmd no Mac).
+    useEffect(() => {
+        if (!editing) return;
+
+        function handleShortcut(event: globalThis.KeyboardEvent) {
+            if (!(event.ctrlKey || event.metaKey) || event.altKey || isTyping(event.target)) return;
+
+            const key = event.key.toLowerCase();
+
+            if (key === 'z') {
+                event.preventDefault();
+                travel(event.shiftKey ? 'redo' : 'undo');
+            } else if (key === 'y') {
+                event.preventDefault();
+                travel('redo');
+            }
+        }
+
+        window.addEventListener('keydown', handleShortcut);
+        return () => window.removeEventListener('keydown', handleShortcut);
+    }, [editing, travel]);
+
     // Coloca um widget do catálogo no primeiro espaço livre do arranjo em uso.
     function addCatalogWidget(widget: PainelWidget) {
+        pushHistory();
+
         if (breakpoint === 'mobile') {
             // No celular o widget novo entra no fim da pilha.
             changeDraftWidgets([...layoutWidgets, widget]);
@@ -86,6 +176,7 @@ export function PainelPage() {
         const next: PainelConfig = { template: id, widgets: getPainelTemplate(id).widgets };
 
         if (editing) {
+            pushHistory();
             setDraft(next);
         } else {
             void saveConfig(next);
@@ -113,6 +204,7 @@ export function PainelPage() {
         };
 
         if (editing) {
+            pushHistory();
             setDraft(next);
         } else {
             void saveConfig(next);
@@ -128,6 +220,7 @@ export function PainelPage() {
         }
 
         setDraft(null);
+        setHistory(EMPTY_HISTORY);
         setCatalogOpen(false);
     }
 
@@ -144,7 +237,6 @@ export function PainelPage() {
                             personalizável.
                         </p>
                     )}
-                    <PainelUpdateInfo />
                 </header>
 
                 {fullscreen.active ? (
@@ -163,8 +255,14 @@ export function PainelPage() {
                         editing={editing}
                         onTemplateChange={requestTemplate}
                         onRangeChange={setRange}
+                        canUndo={canUndo}
+                        canRedo={canRedo}
+                        onUndo={() => travel('undo')}
+                        onRedo={() => travel('redo')}
                         onStartEditing={() => {
-                            if (!isLoading) setDraft(config);
+                            if (isLoading) return;
+                            setHistory(EMPTY_HISTORY);
+                            setDraft(config);
                         }}
                         onAddWidget={() => setCatalogOpen(true)}
                         onSave={() => finishEditing(true)}
@@ -182,7 +280,7 @@ export function PainelPage() {
                     <strong className="font-semibold text-foreground">Modo de edição.</strong>{' '}
                     {breakpoint === 'mobile'
                         ? 'Use as setas de cada widget para subir ou descer na ordem. A ordem do celular não muda o arranjo do desktop e do tablet.'
-                        : 'Arraste um widget pelo título para mudar a posição e use a alça do canto para redimensionar. Os demais widgets se reorganizam sozinhos, e cada tamanho de tela guarda o seu arranjo.'}
+                        : 'Arraste qualquer widget para mover e puxe as bordas ou o canto para redimensionar. Os demais se reorganizam sozinhos. As setas do teclado também funcionam, e Ctrl+Z desfaz.'}
                 </p>
             )}
 
@@ -206,6 +304,8 @@ export function PainelPage() {
                     getSource={getSource}
                     editing={editing}
                     onWidgetsChange={changeDraftWidgets}
+                    onBeforeChange={pushHistory}
+                    fill={fullscreen.active}
                     onConfigureWidget={(widget) => setSettingsWidgetId(widget.id)}
                 />
             )}

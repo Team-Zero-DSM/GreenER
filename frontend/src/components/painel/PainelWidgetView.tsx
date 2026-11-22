@@ -1,4 +1,4 @@
-import type { PointerEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import type {
     PainelWidget,
@@ -58,7 +58,8 @@ interface PainelWidgetViewProps {
     headerExtra?: ReactNode;
     editing?: boolean;
     active?: boolean;
-    onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Mostra a alça de arrastar no cabeçalho (modo de edição no desktop e no tablet).
+    showGrip?: boolean;
 }
 
 // Desenha um widget (contêiner e conteúdo) a partir da configuração dele e da
@@ -71,7 +72,7 @@ export function PainelWidgetView({
     headerExtra,
     editing = false,
     active = false,
-    onMoveStart,
+    showGrip = false,
 }: PainelWidgetViewProps) {
     const content = source?.status === 'ready' ? renderWidgetContent(widget, source.content) : null;
     const alerting =
@@ -106,7 +107,7 @@ export function PainelWidgetView({
                 errorMessage={source?.errorMessage}
                 editing={editing}
                 active={active}
-                onMoveStart={onMoveStart}
+                showGrip={showGrip}
                 actions={actions}
                 headerExtra={headerExtra}
             >

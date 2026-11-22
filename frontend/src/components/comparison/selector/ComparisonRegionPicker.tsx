@@ -1,4 +1,8 @@
 import type { Region } from '@/types/api';
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+} from '@/components/shared/dropdownStyles';
 
 interface ComparisonRegionPickerProps {
     regioes: Region[];
@@ -18,7 +22,7 @@ export function ComparisonRegionPicker({
     onFechar,
 }: ComparisonRegionPickerProps) {
     return (
-        <div className="rounded-lg border border-border bg-background p-2">
+        <div className={DROPDOWN_SURFACE_CLASS_NAME}>
             <div className="flex flex-col gap-1">
                 {/* Utilizar a região original do serviço. */}
                 <button
@@ -28,9 +32,7 @@ export function ComparisonRegionPicker({
                         onFechar();
                     }}
                     aria-pressed={regiaoAtual === null}
-                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-secondary ${
-                        regiaoAtual === null ? 'bg-secondary' : ''
-                    }`}
+                    className={`${getDropdownOptionClassName(regiaoAtual === null)} gap-3`}
                 >
                     <span className="flex-1">Usar região original</span>
                 </button>
@@ -60,9 +62,7 @@ export function ComparisonRegionPicker({
                                     onFechar();
                                 }}
                                 aria-pressed={selecionada}
-                                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-secondary ${
-                                    selecionada ? 'bg-secondary' : ''
-                                }`}
+                                className={`${getDropdownOptionClassName(selecionada)} gap-3`}
                             >
                                 <span className="flex flex-1 flex-col">
                                     <span className="font-medium">

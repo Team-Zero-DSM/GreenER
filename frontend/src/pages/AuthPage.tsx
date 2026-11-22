@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { AuthForm } from '@/components/auth/AuthForm';
+import { AnimatedContent } from '@/components/shared/AnimatedContent';
 
 import { registerAccount, loginAccount } from '@/api/auth';
-
 import { ApiError } from '@/api/services';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -103,44 +103,51 @@ export function AuthPage() {
     }
 
     return (
-        <Card className="w-full border border-border/70 bg-card/80">
-            <CardHeader>
-                <CardTitle className="text-2xl">
-                    {isLogin ? 'Acesse sua conta' : 'Crie sua conta'}
-                </CardTitle>
+        <Card className="w-full min-w-0 border border-border/70 bg-card/80">
+            <AnimatedContent animationKey={mode} className="min-w-0">
+                <div className="flex min-w-0 flex-col gap-(--card-spacing)">
+                    {/* Cabeçalho do formulário. */}
+                    <CardHeader className="px-5 py-3 sm:px-6 sm:py-6">
+                        <CardTitle className="text-xl font-semibold sm:text-2xl">
+                            {isLogin ? 'Acesse sua conta' : 'Crie sua conta'}
+                        </CardTitle>
 
-                <CardDescription>
-                    {isLogin
-                        ? 'Entre com suas credenciais para acessar o GreenER.'
-                        : 'Preencha seus dados para começar a utilizar o GreenER.'}
-                </CardDescription>
-            </CardHeader>
+                        <CardDescription className="text-sm leading-relaxed">
+                            {isLogin
+                                ? 'Entre com suas credenciais para acessar o GreenER.'
+                                : 'Preencha seus dados para começar a utilizar o GreenER.'}
+                        </CardDescription>
+                    </CardHeader>
 
-            <CardContent className="space-y-6">
-                <AuthForm
-                    mode={mode}
-                    onLogin={handleLogin}
-                    onRegister={handleRegister}
-                    statusMessage={feedback}
-                    externalError={formError}
-                    isSubmitting={isSubmitting}
-                />
+                    {/* Campos e ações. */}
+                    <CardContent className="space-y-4 px-5 pb-4 pt-0 sm:space-y-6 sm:px-6 sm:pb-6">
+                        <AuthForm
+                            mode={mode}
+                            onLogin={handleLogin}
+                            onRegister={handleRegister}
+                            statusMessage={feedback}
+                            externalError={formError}
+                            isSubmitting={isSubmitting}
+                        />
 
-                <div className="border-t border-border/70 pt-5 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        {isLogin ? 'Ainda não possui uma conta?' : 'Já possui uma conta?'}
-                    </p>
+                        {/* Alternância entre login e cadastro. */}
+                        <div className="border-t border-border/70 pt-5 text-center">
+                            <p className="text-sm text-muted-foreground">
+                                {isLogin ? 'Ainda não possui uma conta?' : 'Já possui uma conta?'}
+                            </p>
 
-                    <button
-                        type="button"
-                        onClick={handleModeChange}
-                        disabled={isSubmitting}
-                        className="mt-2 text-sm font-semibold text-emerald-400 transition-colors hover:text-emerald-300 disabled:opacity-60"
-                    >
-                        {isLogin ? 'Criar conta' : 'Entrar'}
-                    </button>
+                            <button
+                                type="button"
+                                onClick={handleModeChange}
+                                disabled={isSubmitting}
+                                className="mt-2 min-h-11 text-sm font-semibold text-emerald-400 transition-colors hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {isLogin ? 'Criar conta' : 'Entrar'}
+                            </button>
+                        </div>
+                    </CardContent>
                 </div>
-            </CardContent>
+            </AnimatedContent>
         </Card>
     );
 }

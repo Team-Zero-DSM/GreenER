@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { startCollectionJob, stopCollectionJob } from '../../../src/jobs/collections.job.js';
 import { runCollectionRound } from '../../../src/modules/collections/collections.service.js';
+import { readCollectionInterval } from '../../../src/jobs/collection-interval.js';
 
 vi.mock('../../../src/modules/collections/collections.service.js', () => ({
     runCollectionRound: vi.fn(),
@@ -16,13 +17,13 @@ describe('Rotina periódica de coletas (collections.job)', () => {
         vi.stubEnv('COLLECTION_INTERVAL_SECONDS', '30');
         vi.useFakeTimers();
         vi.clearAllMocks();
+        vi.mocked(readCollectionInterval).mockImplementation(async (previous) => previous);
     });
 
     afterEach(() => {
         stopCollectionJob();
         vi.useRealTimers();
         vi.unstubAllEnvs();
-        vi.useRealTimers();
     });
 
     it('deve realizar múltiplas coletas periodicamente sem depender de reinicialização da aplicação', async () => {
@@ -53,5 +54,36 @@ describe('Rotina periódica de coletas (collections.job)', () => {
 
         await vi.advanceTimersByTimeAsync(60_000);
         expect(runCollectionRound).toHaveBeenCalledTimes(1);
+    });
+
+    it('deve aplicar o intervalo de sessenta segundos retornado pela configuração', async () => {
+        vi.mocked(runCollectionRound).mockResolvedValue(1);
+        vi.mocked(readCollectionInterval).mockResolvedValue(60);
+
+        startCollectionJob();
+        await vi.advanceTimersByTimeAsync(0);
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(runCollectionRound).toHaveBeenCalledTimes(1);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(runCollectionRound).toHaveBeenCalledTimes(2);
+    });
+
+    it('deve aplicar um novo intervalo na próxima rodada', async () => {
+        vi.mocked(runCollectionRound).mockResolvedValue(1);
+        vi.mocked(readCollectionInterval).mockResolvedValue(30);
+
+        startCollectionJob();
+        await vi.advanceTimersByTimeAsync(0);
+        vi.mocked(readCollectionInterval).mockResolvedValue(60);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(runCollectionRound).toHaveBeenCalledTimes(2);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(runCollectionRound).toHaveBeenCalledTimes(2);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(runCollectionRound).toHaveBeenCalledTimes(3);
     });
 });

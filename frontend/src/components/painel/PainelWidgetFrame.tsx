@@ -1,6 +1,10 @@
-import { useState, type PointerEvent, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CircleAlert, Ellipsis, GripVertical, Inbox } from 'lucide-react';
 
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+} from '@/components/shared/dropdownStyles';
 import type { PainelWidgetAction, PainelWidgetStatus } from '@/types/painel';
 
 interface PainelWidgetFrameProps {
@@ -19,8 +23,9 @@ interface PainelWidgetFrameProps {
     alerting?: boolean;
     // Realça o contêiner enquanto ele é arrastado.
     active?: boolean;
-    // Quando informado, o título vira a área por onde o widget é arrastado.
-    onMoveStart?: (event: PointerEvent<HTMLElement>) => void;
+    // Mostra a alça de arrastar ao lado do título. O gesto em si é tratado pelo
+    // widget inteiro, na grade.
+    showGrip?: boolean;
     children?: ReactNode;
 }
 
@@ -37,32 +42,33 @@ export function PainelWidgetFrame({
     editing = false,
     alerting = false,
     active = false,
-    onMoveStart,
+    showGrip = false,
     children,
 }: PainelWidgetFrameProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
         <div
-            className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-colors ${
+            className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-[border-color,box-shadow,background-color] duration-200 ${
                 alerting
                     ? 'border-destructive/70 bg-destructive/5'
                     : editing
                       ? 'border-dashed border-emerald-400/45'
                       : 'border-border'
-            } ${active ? 'shadow-lg ring-2 shadow-black/40 ring-primary' : ''}`}
+            } ${
+                active
+                    ? 'shadow-2xl ring-2 shadow-emerald-950/60 ring-primary'
+                    : editing
+                      ? 'group-hover/card:border-emerald-300/70 group-hover/card:shadow-lg group-hover/card:shadow-black/30'
+                      : ''
+            }`}
         >
             <header className="flex items-start justify-between gap-2">
                 <div
-                    onPointerDown={onMoveStart}
-                    title={onMoveStart ? 'Arraste para mover o widget' : undefined}
-                    className={`flex min-w-0 flex-1 items-start gap-1.5 ${
-                        onMoveStart
-                            ? `touch-none select-none ${active ? 'cursor-grabbing' : 'cursor-grab'}`
-                            : ''
-                    }`}
+                    title={showGrip ? 'Arraste para mover o widget' : undefined}
+                    className="flex min-w-0 flex-1 items-start gap-1.5"
                 >
-                    {onMoveStart && (
+                    {showGrip && (
                         <GripVertical
                             aria-hidden="true"
                             className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -108,7 +114,7 @@ export function PainelWidgetFrame({
                             aria-haspopup="menu"
                             aria-expanded={menuOpen}
                             onClick={() => setMenuOpen((open) => !open)}
-                            className="-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            className={`-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${menuOpen ? 'border-primary/20 bg-primary/10 text-primary' : 'border-transparent text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground'}`}
                         >
                             <Ellipsis aria-hidden="true" className="size-4" />
                         </button>
@@ -116,7 +122,7 @@ export function PainelWidgetFrame({
                         {menuOpen && (
                             <ul
                                 role="menu"
-                                className="absolute right-0 z-10 mt-1 min-w-44 rounded-lg border border-border bg-popover p-1 shadow-lg"
+                                className={`absolute right-0 z-10 mt-2 min-w-44 ${DROPDOWN_SURFACE_CLASS_NAME}`}
                             >
                                 {actions.map((action) => (
                                     <li key={action.label} role="none">
@@ -128,7 +134,7 @@ export function PainelWidgetFrame({
                                                 action.onSelect?.();
                                                 setMenuOpen(false);
                                             }}
-                                            className="w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:text-muted-foreground/60 disabled:hover:bg-transparent"
+                                            className={`${getDropdownOptionClassName(false)} disabled:cursor-not-allowed disabled:text-muted-foreground/60 disabled:hover:bg-transparent`}
                                         >
                                             {action.label}
                                         </button>
@@ -140,7 +146,7 @@ export function PainelWidgetFrame({
                 )}
             </header>
 
-            <div className="mt-3 flex min-h-0 flex-1 flex-col">
+            <div className="painel-body mt-3 flex min-h-0 flex-1 flex-col">
                 {status === 'loading' && (
                     <div
                         role="status"
