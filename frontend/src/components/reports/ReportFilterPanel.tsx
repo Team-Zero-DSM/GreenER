@@ -1,6 +1,8 @@
 import { AnimatedContent } from '@/components/shared/AnimatedContent';
 import { ChartCard } from '@/components/charts/ChartCard';
-import { buttonClass } from '@/components/reports/reportStyles';
+import { DropdownSelect } from '@/components/shared/DropdownSelect';
+import { SegmentedControl } from '@/components/shared/SegmentedControl';
+import { SECONDARY_ACTION_BUTTON_CLASS_NAME } from '@/components/shared/actionButtonStyles';
 import { HISTORY_RANGES, RANGE_LABEL } from '@/lib/reports/historyRanges';
 import { ServiceStatusBadge } from '@/components/services/ServiceStatusBadge';
 import type { ChartType, RegionSection, ReportChartOptions, ReportFilters } from '@/types/report';
@@ -36,14 +38,13 @@ const CHART_TYPES: { value: ChartType; label: string }[] = [
     { value: 'bar', label: 'Barras' },
 ];
 
-const legendClass = 'mb-2 text-sm font-semibold text-foreground';
+const legendClass = 'mb-3 flex items-center gap-2 text-sm font-semibold text-foreground';
 const fieldClass =
-    'rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-foreground [color-scheme:dark] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
+    'min-h-12 w-full rounded-xl border border-border/60 bg-card/55 px-3 py-2 text-sm text-foreground [color-scheme:dark] outline-none transition-colors hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10';
 const toggleBase =
-    'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50';
-const togglePressed = 'border-cyan-400/60 bg-cyan-400/15 text-foreground';
+    'min-h-10 rounded-xl border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50';
 const toggleIdle =
-    'border-white/15 text-muted-foreground hover:border-cyan-400/50 hover:bg-cyan-400/10';
+    'border-border/60 bg-card/55 text-muted-foreground hover:border-primary/30 hover:bg-primary/[0.05] hover:text-foreground';
 
 export function ReportFiltersPanel({
     filters,
@@ -93,10 +94,13 @@ export function ReportFiltersPanel({
             className="min-w-0 self-start lg:sticky lg:top-4 print:hidden"
         >
             <ChartCard title="Filtros" subtitle={subtitle}>
-                <div className="grid gap-6">
-                    <fieldset>
+                <div className="grid gap-5">
+                    <fieldset className="rounded-xl border border-border/60 bg-card/30 p-3.5">
                         <legend className={legendClass}>
-                            Serviços ({selectedCount} de {allIds.length})
+                            Serviços
+                            <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                {selectedCount} de {allIds.length}
+                            </span>
                         </legend>
 
                         {allIds.length === 0 ? (
@@ -104,8 +108,8 @@ export function ReportFiltersPanel({
                                 Os serviços aparecem aqui quando o relatório carregar.
                             </p>
                         ) : (
-                            <div className="grid gap-2">
-                                <div className="flex gap-2">
+                            <div className="grid gap-3">
+                                <div className="grid grid-cols-2 gap-2">
                                     <button
                                         type="button"
                                         className={`${toggleBase} ${toggleIdle}`}
@@ -125,7 +129,7 @@ export function ReportFiltersPanel({
                                     </button>
                                 </div>
 
-                                <div className="max-h-72 overflow-y-auto rounded-lg border border-white/10 p-3">
+                                <div className="max-h-72 overflow-y-auto rounded-xl border border-border/60 bg-background/20 p-2.5 scrollbar-thin">
                                     {catalog.map((section) => {
                                         const ids = section.services.map((s) => s.id);
                                         const selectedHere = ids.filter(
@@ -137,12 +141,12 @@ export function ReportFiltersPanel({
                                         return (
                                             <div
                                                 key={section.region.code}
-                                                className="mb-3 last:mb-0"
+                                                className="mb-2 rounded-lg border border-transparent p-2 last:mb-0 hover:border-border/50 hover:bg-card/35"
                                             >
-                                                <label className="mb-1 flex cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
+                                                <label className="mb-1.5 flex cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
                                                     <input
                                                         type="checkbox"
-                                                        className="size-4 accent-cyan-400"
+                                                        className="size-4 accent-primary"
                                                         checked={all}
                                                         ref={(el) => {
                                                             if (el) el.indeterminate = some;
@@ -152,13 +156,13 @@ export function ReportFiltersPanel({
                                                     {section.region.name}
                                                 </label>
 
-                                                <ul className="grid gap-1.5 pl-6">
+                                                <ul className="grid gap-1 pl-6">
                                                     {section.services.map((service) => (
                                                         <li key={service.id}>
-                                                            <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                                                            <label className="flex cursor-pointer items-center gap-2 rounded-md py-1 text-sm text-foreground transition-colors hover:text-primary">
                                                                 <input
                                                                     type="checkbox"
-                                                                    className="size-4 accent-cyan-400"
+                                                                    className="size-4 shrink-0 accent-primary"
                                                                     checked={
                                                                         !excluded.has(service.id)
                                                                     }
@@ -174,7 +178,7 @@ export function ReportFiltersPanel({
                                                                 {service.name}
                                                             </label>
                                                         </li>
-                                                    ))}
+                                                   ))}
                                                 </ul>
                                             </div>
                                         );
@@ -184,16 +188,16 @@ export function ReportFiltersPanel({
                         )}
                     </fieldset>
 
-                    <fieldset>
+                    <fieldset className="rounded-xl border border-border/60 bg-card/30 p-3.5">
                         <legend className={legendClass}>Status</legend>
 
                         <ul className="grid gap-2">
                             {REPORT_STATUSES.map((status) => (
                                 <li key={status}>
-                                    <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                                    <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-primary/[0.05]">
                                         <input
                                             type="checkbox"
-                                            className="size-4 accent-cyan-400"
+                                            className="size-4 accent-primary"
                                             checked={filters.statuses.includes(status)}
                                             onChange={() =>
                                                 onChange({
@@ -210,7 +214,7 @@ export function ReportFiltersPanel({
                         </ul>
                     </fieldset>
 
-                    <fieldset>
+                    <fieldset className="rounded-xl border border-border/60 bg-card/30 p-3.5">
                         <legend className={legendClass}>Última atualização</legend>
 
                         <div className="grid gap-3">
@@ -241,20 +245,20 @@ export function ReportFiltersPanel({
 
                     <button
                         type="button"
-                        className={buttonClass}
+                        className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-11 w-full px-4 py-2 text-sm`}
                         onClick={onClear}
                         disabled={activeCount === 0}
                     >
                         Limpar filtros
                     </button>
 
-                    <fieldset className="border-t border-white/10 pt-5">
+                    <fieldset className="rounded-xl border border-border/60 bg-card/30 p-3.5">
                         <legend className={legendClass}>Gráfico de histórico</legend>
 
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1.5 text-sm text-foreground">
                             <input
                                 type="checkbox"
-                                className="size-4 accent-cyan-400"
+                                className="size-4 accent-primary"
                                 checked={chart.enabled}
                                 onChange={(e) =>
                                     onChartChange({
@@ -272,45 +276,34 @@ export function ReportFiltersPanel({
                         >
                             {chart.enabled && (
                                 <div className="grid gap-3">
-                                    <div
-                                        role="group"
-                                        aria-label="Tipo de gráfico"
-                                        className="flex gap-2"
-                                    >
-                                        {CHART_TYPES.map(({ value, label }) => (
-                                            <button
-                                                key={value}
-                                                type="button"
-                                                aria-pressed={chart.type === value}
-                                                onClick={() =>
-                                                    onChartChange({ ...chart, type: value })
-                                                }
-                                                className={`${toggleBase} ${chart.type === value ? togglePressed : toggleIdle}`}
-                                            >
-                                                {label}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <SegmentedControl
+                                        label="Tipo de gráfico"
+                                        value={chart.type}
+                                        options={CHART_TYPES}
+                                        className="!flex !w-full !justify-stretch"
+                                        buttonClassName="!flex-1"
+                                        onChange={(type) =>
+                                            onChartChange({ ...chart, type })
+                                        }
+                                    />
 
                                     <label className="grid gap-1 text-sm text-muted-foreground">
                                         Período
-                                        <select
-                                            className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-50`}
-                                            disabled={Boolean(filters.from)}
+                                        <DropdownSelect
                                             value={chart.range}
-                                            onChange={(e) =>
+                                            options={HISTORY_RANGES.map((range) => ({
+                                                value: range,
+                                                label: RANGE_LABEL[range],
+                                            }))}
+                                            disabled={Boolean(filters.from)}
+                                            ariaLabel="Período do gráfico de histórico"
+                                            onChange={(range) =>
                                                 onChartChange({
                                                     ...chart,
-                                                    range: e.target.value as HistoryRange,
+                                                    range: range as HistoryRange,
                                                 })
                                             }
-                                        >
-                                            {HISTORY_RANGES.map((range) => (
-                                                <option key={range} value={range}>
-                                                    {RANGE_LABEL[range]}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        />
                                         {rangeHint && <span className="text-xs">{rangeHint}</span>}
                                     </label>
                                 </div>

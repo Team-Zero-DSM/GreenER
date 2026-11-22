@@ -45,12 +45,6 @@ const navItems = [
         icon: ArrowLeftRight,
         prefixes: ['/comparacao'],
     },
-    {
-        to: '/relatorio',
-        label: 'Relatório',
-        icon: ClipboardList,
-        prefixes: ['/relatorio'],
-    },
 ];
 
 // Links com indicador inferior animado.
@@ -64,7 +58,7 @@ const idleClass =
 
 // Botões de acesso rápido do desktop.
 const iconButtonClass =
-    'inline-flex size-[54px] shrink-0 items-center justify-center rounded-full border border-transparent text-slate-300/80 transition-all duration-200 hover:border-emerald-300/35 hover:bg-emerald-400/[0.10] hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(52,211,153,0.20)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70';
+    'inline-flex size-[54px] shrink-0 items-center justify-center gap-2 rounded-full border border-transparent text-slate-300/80 transition-all duration-200 hover:border-emerald-300/35 hover:bg-emerald-400/[0.10] hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(52,211,153,0.20)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 3xl:size-auto 3xl:rounded-lg 3xl:px-3.5 3xl:py-2 3xl:text-[13px] 3xl:font-semibold 3xl:tracking-[0.075em]';
 
 const iconButtonActiveClass =
     'border-emerald-300/30 bg-emerald-400/10 text-emerald-200 shadow-[inset_0_0_14px_rgba(52,211,153,0.08)]';
@@ -193,14 +187,14 @@ function DashboardHeader({
                             >
                                 <Icon
                                     aria-hidden="true"
-                                    className={`size-[19px] shrink-0 transition-colors xl:size-5 ${
+                                    className={`size-[19px] shrink-0 transition-colors ${
                                         isActive
                                             ? 'text-emerald-300'
                                             : 'text-slate-400 group-hover:text-cyan-200'
                                     }`}
                                 />
 
-                                <span className="hidden xl:inline">{label}</span>
+                                <span className="hidden 3xl:inline">{label}</span>
                             </NavLink>
                         );
                     })}
@@ -307,7 +301,7 @@ function DashboardHeader({
                             }`}
                         />
 
-                        <span className="hidden xl:inline">Monitoramento</span>
+                        <span className="hidden 3xl:inline">Monitoramento</span>
 
                         <span
                             aria-hidden="true"
@@ -329,30 +323,49 @@ function DashboardHeader({
 
                     <div aria-hidden="true" className="mx-0.5 h-6 w-px bg-white/10 sm:mx-1" />
 
+                    {/* Relatório. */}
+                    <NavLink
+                        to="/relatorio"
+                        aria-label="Relatório"
+                        title="Relatório"
+                        className={`${iconButtonClass} ${
+                            pathname === '/relatorio' || pathname.startsWith('/relatorio/')
+                                ? iconButtonActiveClass
+                                : ''
+                        }`}
+                    >
+                        <ClipboardList aria-hidden="true" className="size-7 3xl:size-[19px]" />
+                        <span className="hidden 3xl:inline">Relatório</span>
+                    </NavLink>
+
                     {/* Painel personalizado. */}
                     <NavLink
                         to="/painel"
                         aria-label="Painel personalizado"
+                        title="Painel personalizado"
                         className={`${iconButtonClass} ${
                             pathname === '/painel' || pathname.startsWith('/painel/')
                                 ? iconButtonActiveClass
                                 : ''
                         }`}
                     >
-                        <LayoutDashboard aria-hidden="true" className="size-7" />
+                        <LayoutDashboard aria-hidden="true" className="size-7 3xl:size-[19px]" />
+                        <span className="hidden 3xl:inline">Painel</span>
                     </NavLink>
 
                     {/* Perfil do usuário. */}
                     <NavLink
                         to="/perfil"
                         aria-label="Perfil"
+                        title="Perfil"
                         className={`${iconButtonClass} ${
                             pathname === '/perfil' || pathname.startsWith('/perfil/')
                                 ? iconButtonActiveClass
                                 : ''
                         }`}
                     >
-                        <UserRound aria-hidden="true" className="size-7" />
+                        <UserRound aria-hidden="true" className="size-7 3xl:size-[19px]" />
+                        <span className="hidden 3xl:inline">Perfil</span>
                     </NavLink>
                 </div>
 
@@ -461,6 +474,20 @@ function DashboardHeader({
                         </button>
 
                         <div className="my-1 h-px bg-white/10" />
+
+                        {/* Relatório. */}
+                        <NavLink
+                            to="/relatorio"
+                            onClick={() => setMobileMenu(null)}
+                            className={`${mobileMenuItemClass} ${
+                                pathname === '/relatorio' || pathname.startsWith('/relatorio/')
+                                    ? 'bg-emerald-400/10 text-emerald-200'
+                                    : 'text-slate-200 hover:bg-white/[0.05] hover:text-emerald-100'
+                            }`}
+                        >
+                            <ClipboardList aria-hidden="true" className="size-5 shrink-0" />
+                            <span>Relatório</span>
+                        </NavLink>
 
                         {/* Painel personalizado. */}
                         <NavLink
