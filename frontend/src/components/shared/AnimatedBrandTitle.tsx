@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 
 interface Particle {
@@ -17,11 +16,9 @@ interface Particle {
 const ANIMATION_DURATION = 1900;
 const SAMPLE_SPACING = 3;
 
-const clamp = (value: number, min = 0, max = 1) =>
-    Math.min(Math.max(value, min), max);
+const clamp = (value: number, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 
-const easeOutCubic = (value: number) =>
-    1 - Math.pow(1 - value, 3);
+const easeOutCubic = (value: number) => 1 - Math.pow(1 - value, 3);
 
 export function AnimatedBrandTitle() {
     const titleRef = useRef<HTMLHeadingElement>(null);
@@ -43,9 +40,7 @@ export function AnimatedBrandTitle() {
 
         if (!context) return;
 
-        const motionQuery = window.matchMedia(
-            '(prefers-reduced-motion: reduce)',
-        );
+        const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
         let reducedMotion = motionQuery.matches;
         let animationFinished = false;
@@ -82,17 +77,11 @@ export function AnimatedBrandTitle() {
             previousWidth = width;
             previousHeight = height;
 
-            pixelRatio = Math.min(
-                window.devicePixelRatio || 1,
-                2,
-            );
+            pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
             // A área de desenho fica maior que o próprio título.
             // Isso permite visualizar as partículas desde o início.
-            const bleed = Math.max(
-                220,
-                Math.ceil(height * 1.8),
-            );
+            const bleed = Math.max(220, Math.ceil(height * 1.8));
 
             const canvasWidth = width + bleed * 2;
             const canvasHeight = height + bleed * 2;
@@ -120,12 +109,7 @@ export function AnimatedBrandTitle() {
             bufferContext.scale(pixelRatio, pixelRatio);
             bufferContext.textBaseline = 'alphabetic';
 
-            const gradient = bufferContext.createLinearGradient(
-                bleed,
-                0,
-                bleed + width,
-                0,
-            );
+            const gradient = bufferContext.createLinearGradient(bleed, 0, bleed + width, 0);
 
             gradient.addColorStop(0, '#6ee7b7');
             gradient.addColorStop(1, '#22d3ee');
@@ -133,10 +117,7 @@ export function AnimatedBrandTitle() {
             bufferContext.fillStyle = gradient;
 
             // Desenha cada segmento respeitando seu peso tipográfico.
-            const drawTextSegment = (
-                element: HTMLElement,
-                text: string,
-            ) => {
+            const drawTextSegment = (element: HTMLElement, text: string) => {
                 const elementBounds = element.getBoundingClientRect();
                 const style = window.getComputedStyle(element);
 
@@ -149,35 +130,20 @@ export function AnimatedBrandTitle() {
 
                 const metrics = bufferContext.measureText(text);
 
-                const ascent =
-                    metrics.actualBoundingBoxAscent || 60;
+                const ascent = metrics.actualBoundingBoxAscent || 60;
 
-                const descent =
-                    metrics.actualBoundingBoxDescent || 15;
+                const descent = metrics.actualBoundingBoxDescent || 15;
 
-                const x =
-                    elementBounds.left -
-                    bounds.left +
-                    bleed;
+                const x = elementBounds.left - bounds.left + bleed;
 
-                const centerY =
-                    elementBounds.top -
-                    bounds.top +
-                    elementBounds.height / 2 +
-                    bleed;
+                const centerY = elementBounds.top - bounds.top + elementBounds.height / 2 + bleed;
 
-                const baselineY =
-                    centerY + (ascent - descent) / 2;
+                const baselineY = centerY + (ascent - descent) / 2;
 
-                const letterSpacing =
-                    Number.parseFloat(style.letterSpacing) || 0;
+                const letterSpacing = Number.parseFloat(style.letterSpacing) || 0;
 
                 if (Math.abs(letterSpacing) < 0.1) {
-                    bufferContext.fillText(
-                        text,
-                        x,
-                        baselineY,
-                    );
+                    bufferContext.fillText(text, x, baselineY);
 
                     return;
                 }
@@ -185,50 +151,28 @@ export function AnimatedBrandTitle() {
                 let cursorX = x;
 
                 for (const character of text) {
-                    bufferContext.fillText(
-                        character,
-                        cursorX,
-                        baselineY,
-                    );
+                    bufferContext.fillText(character, cursorX, baselineY);
 
-                    cursorX +=
-                        bufferContext.measureText(character).width +
-                        letterSpacing;
+                    cursorX += bufferContext.measureText(character).width + letterSpacing;
                 }
             };
 
             drawTextSegment(green, 'Green');
             drawTextSegment(er, 'ER');
 
-            const image = bufferContext.getImageData(
-                0,
-                0,
-                buffer.width,
-                buffer.height,
-            );
+            const image = bufferContext.getImageData(0, 0, buffer.width, buffer.height);
 
             const data = image.data;
 
-            const samplingStep = Math.max(
-                3,
-                Math.round(SAMPLE_SPACING * pixelRatio),
-            );
+            const samplingStep = Math.max(3, Math.round(SAMPLE_SPACING * pixelRatio));
 
             const nextParticles: Particle[] = [];
 
             // Quanto maior o bleed, maior a distância de dispersão.
             const spreadRadius = bleed;
 
-            for (
-                let y = 0;
-                y < buffer.height;
-                y += samplingStep
-            ) {
-                for (
-                    let x = 0;
-                    x < buffer.width;
-                    x += samplingStep
-                ) {
+            for (let y = 0; y < buffer.height; y += samplingStep) {
+                for (let x = 0; x < buffer.width; x += samplingStep) {
                     const index = (y * buffer.width + x) * 4;
                     const alpha = data[index + 3] / 255;
 
@@ -239,19 +183,15 @@ export function AnimatedBrandTitle() {
 
                     const angle = Math.random() * Math.PI * 2;
 
-                    const distance =
-                        spreadRadius *
-                        (0.68 + Math.random() * 0.25);
+                    const distance = spreadRadius * (0.68 + Math.random() * 0.25);
 
                     nextParticles.push({
                         targetX,
                         targetY,
 
-                        startX:
-                            targetX + Math.cos(angle) * distance,
+                        startX: targetX + Math.cos(angle) * distance,
 
-                        startY:
-                            targetY + Math.sin(angle) * distance,
+                        startY: targetY + Math.sin(angle) * distance,
 
                         color: `rgb(${data[index]}, ${data[index + 1]}, ${data[index + 2]})`,
 
@@ -280,81 +220,46 @@ export function AnimatedBrandTitle() {
 
         // Desenha todas as partículas no Canvas.
         const renderParticles = (time: number) => {
-            context.setTransform(
-                pixelRatio,
-                0,
-                0,
-                pixelRatio,
-                0,
-                0,
-            );
+            context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
-            context.clearRect(
-                0,
-                0,
-                canvas.width / pixelRatio,
-                canvas.height / pixelRatio,
-            );
+            context.clearRect(0, 0, canvas.width / pixelRatio, canvas.height / pixelRatio);
 
             context.globalCompositeOperation = 'lighter';
 
             const elapsed = time - animationStartedAt;
 
-            const progress = clamp(
-                elapsed / ANIMATION_DURATION,
-            );
+            const progress = clamp(elapsed / ANIMATION_DURATION);
 
             for (const particle of particles) {
-                const localProgress = clamp(
-                    (progress - particle.delay) /
-                        (1 - particle.delay),
-                );
+                const localProgress = clamp((progress - particle.delay) / (1 - particle.delay));
 
                 const eased = easeOutCubic(localProgress);
 
-                const arcOffset =
-                    Math.sin(eased * Math.PI) *
-                    particle.arc *
-                    (1 - eased);
+                const arcOffset = Math.sin(eased * Math.PI) * particle.arc * (1 - eased);
 
                 const x =
-                    particle.startX +
-                    (particle.targetX - particle.startX) * eased +
-                    arcOffset;
+                    particle.startX + (particle.targetX - particle.startX) * eased + arcOffset;
 
                 const y =
                     particle.startY +
                     (particle.targetY - particle.startY) * eased +
                     arcOffset * 0.35;
 
-                const opacity =
-                    particle.alpha * (0.55 + eased * 0.45);
+                const opacity = particle.alpha * (0.55 + eased * 0.45);
 
                 // Brilho externo.
                 context.globalAlpha = opacity * 0.18;
                 context.fillStyle = particle.color;
 
                 context.beginPath();
-                context.arc(
-                    x,
-                    y,
-                    particle.size * 2.8,
-                    0,
-                    Math.PI * 2,
-                );
+                context.arc(x, y, particle.size * 2.8, 0, Math.PI * 2);
                 context.fill();
 
                 // Núcleo da partícula.
                 context.globalAlpha = opacity;
 
                 context.beginPath();
-                context.arc(
-                    x,
-                    y,
-                    particle.size,
-                    0,
-                    Math.PI * 2,
-                );
+                context.arc(x, y, particle.size, 0, Math.PI * 2);
                 context.fill();
 
                 // Pequenos brilhos em algumas partículas.
@@ -416,9 +321,7 @@ export function AnimatedBrandTitle() {
             animationFrame = requestAnimationFrame(animate);
         };
 
-        const handleMotionChange = (
-            event: MediaQueryListEvent,
-        ) => {
+        const handleMotionChange = (event: MediaQueryListEvent) => {
             reducedMotion = event.matches;
 
             if (reducedMotion) {
@@ -464,10 +367,7 @@ export function AnimatedBrandTitle() {
 
             window.removeEventListener('resize', handleResize);
 
-            motionQuery.removeEventListener(
-                'change',
-                handleMotionChange,
-            );
+            motionQuery.removeEventListener('change', handleMotionChange);
         };
     }, []);
 

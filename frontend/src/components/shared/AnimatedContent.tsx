@@ -1,10 +1,4 @@
-
-import {
-    useLayoutEffect,
-    useRef,
-    useState,
-    type ReactNode,
-} from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 interface AnimatedContentProps {
     children: ReactNode;
@@ -12,11 +6,7 @@ interface AnimatedContentProps {
     className?: string;
 }
 
-export function AnimatedContent({
-    children,
-    animationKey,
-    className = '',
-}: AnimatedContentProps) {
+export function AnimatedContent({ children, animationKey, className = '' }: AnimatedContentProps) {
     const contentRef = useRef<HTMLDivElement>(null);
     const previousKeyRef = useRef(animationKey);
 
@@ -53,9 +43,7 @@ export function AnimatedContent({
         if (!content) return;
 
         // Respeita a preferência por movimento reduzido.
-        if (
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             return;
         }
 
@@ -82,11 +70,7 @@ export function AnimatedContent({
     return (
         <div
             className={`w-full overflow-hidden transition-[height] duration-300 ease-in-out motion-reduce:transition-none ${className}`}
-            style={
-                height !== null
-                    ? { height: `${height}px` }
-                    : undefined
-            }
+            style={height !== null ? { height: `${height}px` } : undefined}
         >
             <div ref={contentRef}>{children}</div>
         </div>

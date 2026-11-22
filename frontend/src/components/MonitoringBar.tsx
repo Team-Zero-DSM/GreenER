@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type ReactNode } from 'react';
 
 import { Clock3 } from 'lucide-react';
@@ -20,21 +19,13 @@ function secondsBetween(from: number, to: number) {
 function Item({ label, children }: { label: string; children: ReactNode }) {
     return (
         <span className="whitespace-nowrap">
-            {label}:{' '}
-            <strong className="font-semibold text-foreground">
-                {children}
-            </strong>
+            {label}: <strong className="font-semibold text-foreground">{children}</strong>
         </span>
     );
 }
 
 export function MonitoringBar() {
-    const {
-        status,
-        nextCollectionAt,
-        error,
-        screenUpdatedAt,
-    } = useMonitoring();
+    const { status, nextCollectionAt, error, screenUpdatedAt } = useMonitoring();
 
     const [now, setNow] = useState(() => Date.now());
 
@@ -45,10 +36,7 @@ export function MonitoringBar() {
         return () => clearInterval(timer);
     }, []);
 
-    const remaining =
-        nextCollectionAt === null
-            ? null
-            : secondsBetween(now, nextCollectionAt);
+    const remaining = nextCollectionAt === null ? null : secondsBetween(now, nextCollectionAt);
 
     const nextCollection = status?.running
         ? 'em andamento'
@@ -64,7 +52,6 @@ export function MonitoringBar() {
         <div className="w-fit max-w-full py-2.5 text-xs text-muted-foreground sm:py-3">
             <div className="w-fit max-w-full px-3 sm:px-4">
                 <div className="flex w-fit max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-3 sm:justify-start sm:gap-x-6">
-
                     {/* Estado da conexão. */}
                     <span
                         title={error ?? undefined}
@@ -74,10 +61,7 @@ export function MonitoringBar() {
                                 : 'border-destructive/30 bg-destructive/[0.06] text-destructive'
                         }`}
                     >
-                        <span
-                            aria-hidden="true"
-                            className="size-1.5 rounded-full bg-current"
-                        />
+                        <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
 
                         {connected
                             ? 'Conectado'
@@ -90,9 +74,7 @@ export function MonitoringBar() {
                         <>
                             {/* Informações completas para desktop. */}
                             <div className="hidden w-fit max-w-full flex-wrap items-center gap-x-6 gap-y-2 sm:flex">
-                                <Item label="Próxima coleta">
-                                    {nextCollection}
-                                </Item>
+                                <Item label="Próxima coleta">{nextCollection}</Item>
 
                                 <Item label="Intervalo de coleta">
                                     {status.collectionIntervalSeconds} s
@@ -103,19 +85,14 @@ export function MonitoringBar() {
                                 </Item>
 
                                 <Item label="APIs UniLaunch">
-                                    Métricas{' '}
-                                    {dependencyLabel[status.dependencies.metricsDiscovery]}{' '}
-                                    · Carbono{' '}
-                                    {dependencyLabel[status.dependencies.carbon]}
+                                    Métricas {dependencyLabel[status.dependencies.metricsDiscovery]}{' '}
+                                    · Carbono {dependencyLabel[status.dependencies.carbon]}
                                 </Item>
                             </div>
 
                             {/* Informação compacta para mobile. */}
                             <div className="flex items-center gap-1.5 whitespace-nowrap text-slate-300 sm:hidden">
-                                <Clock3
-                                    aria-hidden="true"
-                                    className="size-3.5 text-cyan-300"
-                                />
+                                <Clock3 aria-hidden="true" className="size-3.5 text-cyan-300" />
 
                                 <span>{nextCollection}</span>
                             </div>

@@ -1,4 +1,3 @@
-
 import { useRef, useState, useEffect, useMemo } from 'react';
 
 import type { GlobeViewHandle } from '../components/globe/GlobeView';
@@ -42,9 +41,7 @@ export function LandingPage() {
     const [force2D, setForce2D] = useState(false);
 
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    const autoRotate = isMobile
-        ? true
-        : selectedCode === null && manualAutoRotate;
+    const autoRotate = isMobile ? true : selectedCode === null && manualAutoRotate;
 
     const { hash } = useLocation();
 
@@ -83,11 +80,7 @@ export function LandingPage() {
 
             const progress = Math.max(
                 0,
-                Math.min(
-                    1,
-                    (window.innerHeight - sectionRect.top) /
-                        (window.innerHeight * 0.7),
-                ),
+                Math.min(1, (window.innerHeight - sectionRect.top) / (window.innerHeight * 0.7)),
             );
 
             const previous = prevProgressRef.current;
@@ -99,10 +92,7 @@ export function LandingPage() {
                 setSelectedCode(null);
             }
 
-            if (
-                previous > RESET_THRESHOLD &&
-                progress <= RESET_THRESHOLD
-            ) {
+            if (previous > RESET_THRESHOLD && progress <= RESET_THRESHOLD) {
                 setSelectedCode(null);
                 globeRef.current?.resetView();
             }
@@ -110,14 +100,8 @@ export function LandingPage() {
             prevProgressRef.current = progress;
 
             globeState.current.target = {
-                x:
-                    targetRect.left +
-                    targetRect.width / 2 -
-                    layerRect.left,
-                y:
-                    targetRect.top +
-                    targetRect.height / 2 -
-                    layerRect.top,
+                x: targetRect.left + targetRect.width / 2 - layerRect.left,
+                y: targetRect.top + targetRect.height / 2 - layerRect.top,
             };
         };
 
@@ -156,10 +140,7 @@ export function LandingPage() {
             services.flatMap((service) => {
                 const location = service.location;
 
-                if (
-                    location?.latitude == null ||
-                    location.longitude == null
-                ) {
+                if (location?.latitude == null || location.longitude == null) {
                     return [];
                 }
 
@@ -181,17 +162,13 @@ export function LandingPage() {
     // ---------------------------------------------------------
 
     const selectedRegion = useMemo(
-        () =>
-            regions?.find(
-                (region) => region.code === selectedCode,
-            ) ?? null,
+        () => regions?.find((region) => region.code === selectedCode) ?? null,
         [regions, selectedCode],
     );
 
     const focusTarget = useMemo(
         () =>
-            selectedRegion?.latitude != null &&
-            selectedRegion.longitude != null
+            selectedRegion?.latitude != null && selectedRegion.longitude != null
                 ? {
                       latitude: selectedRegion.latitude,
                       longitude: selectedRegion.longitude,
@@ -238,7 +215,6 @@ export function LandingPage() {
 
     return (
         <main className="relative min-h-full bg-[radial-gradient(ellipse_at_50%_120%,#0c1d45_0%,#090d1b_60%)] pt-0 pb-0 text-foreground">
-
             {/* =================================================
                 APRESENTAÇÃO INICIAL
             ================================================= */}
@@ -267,9 +243,8 @@ export function LandingPage() {
                             event.preventDefault();
 
                             exploreContainerRef.current?.scrollIntoView({
-                                behavior: window.matchMedia(
-                                    '(prefers-reduced-motion: reduce)',
-                                ).matches
+                                behavior: window.matchMedia('(prefers-reduced-motion: reduce)')
+                                    .matches
                                     ? 'auto'
                                     : 'smooth',
                                 block: 'start',
@@ -349,34 +324,29 @@ export function LandingPage() {
             >
                 <div className="flex min-h-0 min-w-0 flex-col">
                     {regionsLoading && (
-                        <p className="text-white/60">
-                            Carregando totais das últimas 24 horas...
-                        </p>
+                        <p className="text-white/60">Carregando totais das últimas 24 horas...</p>
                     )}
 
                     <div className="min-h-0 flex-1">
-                    <ExploreSection
-                        rotateLeft={rotateLeft}
-                        rotateRight={rotateRight}
-                        dataSource="internal"
-                        selectedCode={selectedCode}
-                        autoRotate={autoRotate}
-                        setAutoRotate={setManualAutoRotate}
-                        force2D={force2D}
-                        setForce2D={setForce2D}
-                        backToRegions={backToRegions}
-                        zoom={zoom}
-                        regions={regions ?? []}
-                        services={services}
-                        onSelectRegion={setSelectedCode}
-                    />
+                        <ExploreSection
+                            rotateLeft={rotateLeft}
+                            rotateRight={rotateRight}
+                            dataSource="internal"
+                            selectedCode={selectedCode}
+                            autoRotate={autoRotate}
+                            setAutoRotate={setManualAutoRotate}
+                            force2D={force2D}
+                            setForce2D={setForce2D}
+                            backToRegions={backToRegions}
+                            zoom={zoom}
+                            regions={regions ?? []}
+                            services={services}
+                            onSelectRegion={setSelectedCode}
+                        />
                     </div>
                 </div>
 
-                <div
-                    ref={globeTargetRef}
-                    className="min-w-0"
-                />
+                <div ref={globeTargetRef} className="min-w-0" />
             </div>
         </main>
     );

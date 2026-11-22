@@ -44,9 +44,7 @@ export function KpiWidget({ data, alerting = false }: KpiWidgetProps) {
                 >
                     {formattedValue}
                 </span>
-                <span className="painel-kpi-unit text-sm text-muted-foreground">
-                    {unit}
-                </span>
+                <span className="painel-kpi-unit text-sm text-muted-foreground">{unit}</span>
             </p>
             {variation === null ? (
                 <p className="painel-kpi-extra line-clamp-1 text-xs text-muted-foreground">

@@ -1,13 +1,9 @@
-
 import { useState, type FormEvent } from 'react';
 
 import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 
-import type {
-    UserProfile,
-    UpdateProfileRequest,
-} from '@/types/profile';
+import type { UserProfile, UpdateProfileRequest } from '@/types/profile';
 
 interface ProfileInformationFormProps {
     profile: UserProfile;
@@ -38,20 +34,14 @@ export function ProfileInformationForm({
                 email: email.trim() || profile.email,
             });
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Não foi possível atualizar o perfil.',
-            );
+            setError(err instanceof Error ? err.message : 'Não foi possível atualizar o perfil.');
         }
     }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-1">
-                <h3 className="text-base font-semibold">
-                    Informações pessoais
-                </h3>
+                <h3 className="text-base font-semibold">Informações pessoais</h3>
 
                 <p className="text-sm text-muted-foreground">
                     Atualize seu nome e endereço de e-mail.

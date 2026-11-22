@@ -1,4 +1,3 @@
-
 import { UserRound } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -8,9 +7,7 @@ interface ProfileInformationCardProps {
     profile: UserProfile;
 }
 
-export function ProfileInformationCard({
-    profile,
-}: ProfileInformationCardProps) {
+export function ProfileInformationCard({ profile }: ProfileInformationCardProps) {
     return (
         <div className="flex items-center gap-4 py-2 sm:gap-5 sm:py-3">
             {/* Avatar do usuário. */}
@@ -29,9 +26,7 @@ export function ProfileInformationCard({
                         variant="outline"
                         className="border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
                     >
-                        {profile.role === 'admin'
-                            ? 'Administrador'
-                            : 'Visualizador'}
+                        {profile.role === 'admin' ? 'Administrador' : 'Visualizador'}
                     </Badge>
                 </div>
 

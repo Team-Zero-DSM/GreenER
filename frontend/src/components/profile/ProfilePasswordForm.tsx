@@ -1,4 +1,3 @@
-
 import { useState, type FormEvent } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
@@ -14,11 +13,7 @@ interface ProfilePasswordFormProps {
     isSubmitting: boolean;
 }
 
-export function ProfilePasswordForm({
-    onBack,
-    onSubmit,
-    isSubmitting,
-}: ProfilePasswordFormProps) {
+export function ProfilePasswordForm({ onBack, onSubmit, isSubmitting }: ProfilePasswordFormProps) {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -64,28 +59,20 @@ export function ProfilePasswordForm({
                 newPassword,
             });
 
-            setSuccess(
-                'Senha alterada com sucesso. Sua sessão continua ativa.',
-            );
+            setSuccess('Senha alterada com sucesso. Sua sessão continua ativa.');
 
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Não foi possível alterar a senha.',
-            );
+            setError(err instanceof Error ? err.message : 'Não foi possível alterar a senha.');
         }
     }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-1">
-                <h3 className="text-base font-semibold">
-                    Segurança da conta
-                </h3>
+                <h3 className="text-base font-semibold">Segurança da conta</h3>
 
                 <p className="text-sm text-muted-foreground">
                     Preencha os campos abaixo para alterar sua senha.

@@ -1,11 +1,6 @@
-
 import { useEffect, useRef, useState } from 'react';
 
-import {
-    GlobeView,
-    type GlobeMarker,
-    type GlobeState,
-} from './GlobeView';
+import { GlobeView, type GlobeMarker, type GlobeState } from './GlobeView';
 
 const EMPTY_MARKERS: GlobeMarker[] = [];
 
@@ -28,9 +23,7 @@ export function AuthGlobeBackground() {
         lon: -90,
     });
 
-    const [viewport, setViewport] = useState<ViewportSize>(
-        getViewportSize,
-    );
+    const [viewport, setViewport] = useState<ViewportSize>(getViewportSize);
 
     const [reduceMotion, setReduceMotion] = useState(
         () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -51,9 +44,7 @@ export function AuthGlobeBackground() {
 
     // Respeita a preferência por movimento reduzido.
     useEffect(() => {
-        const mediaQuery = window.matchMedia(
-            '(prefers-reduced-motion: reduce)',
-        );
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
         const handleChange = (event: MediaQueryListEvent) => {
             setReduceMotion(event.matches);
@@ -92,18 +83,12 @@ export function AuthGlobeBackground() {
     }[viewport];
 
     return (
-        <div
-            aria-hidden="true"
-            className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-        >
+        <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
             {/* Brilho atmosférico atrás do planeta. */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_96%,rgba(14,165,233,0.14),transparent_55%)] sm:bg-[radial-gradient(ellipse_at_50%_88%,rgba(14,165,233,0.16),transparent_50%)]" />
 
             {/* Cena 3D ocupando toda a tela. */}
-            <div
-                className="absolute inset-0"
-                style={{ opacity: globeSettings.opacity }}
-            >
+            <div className="absolute inset-0" style={{ opacity: globeSettings.opacity }}>
                 <GlobeView
                     autoRotate={!reduceMotion}
                     rotationSpeed={0.2}

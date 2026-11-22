@@ -81,7 +81,10 @@ export function ExploreSection({
         <section className="relative z-10 h-full min-h-0 min-w-0" aria-labelledby="explore-title">
             <div className="flex h-full min-h-0 flex-col gap-4">
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-                    <h2 id="explore-title" className="min-w-0 break-words text-xl font-bold leading-tight text-white md:text-2xl">
+                    <h2
+                        id="explore-title"
+                        className="min-w-0 break-words text-xl font-bold leading-tight text-white md:text-2xl"
+                    >
                         {showingServices
                             ? `Serviços de ${selectedRegion ? regionTitle(selectedRegion) : selectedCode}`
                             : 'Regiões monitoradas'}

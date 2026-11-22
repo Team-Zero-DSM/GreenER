@@ -25,7 +25,10 @@ export function TableWidget({ data }: TableWidgetProps) {
                 </thead>
                 <tbody>
                     {data.rows.map((row) => (
-                        <tr key={row.id} className="group border-b border-border/60 last:border-b-0">
+                        <tr
+                            key={row.id}
+                            className="group border-b border-border/60 last:border-b-0"
+                        >
                             {data.columns.map((column) => (
                                 <td
                                     key={column.key}
