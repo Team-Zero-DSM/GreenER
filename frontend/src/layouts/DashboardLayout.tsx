@@ -51,7 +51,7 @@ const navItems = [
         label: 'Relatório',
         icon: ClipboardList,
         prefixes: ['/relatorio'],
-    }
+    },
 ];
 
 const linkClass =

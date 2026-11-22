@@ -36,7 +36,13 @@ export function ReportsPage() {
               .join('\n')
         : '';
     const serviceIds = useMemo(() => (idsKey ? idsKey.split('\n') : []), [idsKey]);
-    const history = useReportHistory(serviceIds, chart.range, filters.from, filters.to, chart.enabled);
+    const history = useReportHistory(
+        serviceIds,
+        chart.range,
+        filters.from,
+        filters.to,
+        chart.enabled,
+    );
 
     const canExport = status === 'ready' && report !== null && report.total > 0;
 
@@ -112,7 +118,9 @@ export function ReportsPage() {
                         <p className="text-muted-foreground">Gerando prévia...</p>
                     ) : catalog.total === 0 && status === 'ready' ? (
                         <div className="grid justify-items-start gap-3">
-                            <p className="text-muted-foreground">Nenhum serviço encontrado com esses filtros.</p>
+                            <p className="text-muted-foreground">
+                                Nenhum serviço encontrado com esses filtros.
+                            </p>
                             <button type="button" className={buttonClass} onClick={clearAll}>
                                 Limpar filtros
                             </button>
@@ -120,7 +128,11 @@ export function ReportsPage() {
                     ) : report.total === 0 ? (
                         <div className="grid justify-items-start gap-3">
                             <p className="text-muted-foreground">Nenhum serviço selecionado.</p>
-                            <button type="button" className={buttonClass} onClick={() => setExcludedServiceIds([])}>
+                            <button
+                                type="button"
+                                className={buttonClass}
+                                onClick={() => setExcludedServiceIds([])}
+                            >
                                 Selecionar todos
                             </button>
                         </div>

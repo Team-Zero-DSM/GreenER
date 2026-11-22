@@ -32,7 +32,8 @@ const fieldClass =
 const toggleBase =
     'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed disabled:opacity-50';
 const togglePressed = 'border-cyan-400/60 bg-cyan-400/15 text-foreground';
-const toggleIdle = 'border-white/15 text-muted-foreground hover:border-cyan-400/50 hover:bg-cyan-400/10';
+const toggleIdle =
+    'border-white/15 text-muted-foreground hover:border-cyan-400/50 hover:bg-cyan-400/10';
 
 export function ReportFiltersPanel({
     filters,
@@ -50,7 +51,9 @@ export function ReportFiltersPanel({
 
     const setMany = (ids: string[], select: boolean) =>
         onExcludedChange(
-            select ? excludedServiceIds.filter((id) => !ids.includes(id)) : [...new Set([...excludedServiceIds, ...ids])],
+            select
+                ? excludedServiceIds.filter((id) => !ids.includes(id))
+                : [...new Set([...excludedServiceIds, ...ids])],
         );
 
     const activeCount =
@@ -69,7 +72,10 @@ export function ReportFiltersPanel({
           : null;
 
     return (
-        <aside aria-label="Filtros do relatório" className="min-w-0 self-start lg:sticky lg:top-4 print:hidden">
+        <aside
+            aria-label="Filtros do relatório"
+            className="min-w-0 self-start lg:sticky lg:top-4 print:hidden"
+        >
             <ChartCard title="Filtros" subtitle={subtitle}>
                 <div className="grid gap-6">
                     <fieldset>
@@ -103,11 +109,16 @@ export function ReportFiltersPanel({
                                 <div className="max-h-72 overflow-y-auto rounded-lg border border-white/10 p-3">
                                     {catalog.map((section) => {
                                         const ids = section.services.map((s) => s.id);
-                                        const selectedHere = ids.filter((id) => !excluded.has(id)).length;
+                                        const selectedHere = ids.filter(
+                                            (id) => !excluded.has(id),
+                                        ).length;
                                         const all = selectedHere === ids.length;
                                         const some = selectedHere > 0 && !all;
                                         return (
-                                            <div key={section.region.code} className="mb-3 last:mb-0">
+                                            <div
+                                                key={section.region.code}
+                                                className="mb-3 last:mb-0"
+                                            >
                                                 <label className="mb-1 flex cursor-pointer items-center gap-2 text-xs font-semibold text-muted-foreground">
                                                     <input
                                                         type="checkbox"
@@ -127,9 +138,16 @@ export function ReportFiltersPanel({
                                                                 <input
                                                                     type="checkbox"
                                                                     className="size-4 accent-cyan-400"
-                                                                    checked={!excluded.has(service.id)}
+                                                                    checked={
+                                                                        !excluded.has(service.id)
+                                                                    }
                                                                     onChange={() =>
-                                                                        onExcludedChange(toggle(excludedServiceIds, service.id))
+                                                                        onExcludedChange(
+                                                                            toggle(
+                                                                                excludedServiceIds,
+                                                                                service.id,
+                                                                            ),
+                                                                        )
                                                                     }
                                                                 />
                                                                 {service.name}
@@ -155,12 +173,19 @@ export function ReportFiltersPanel({
                                             type="checkbox"
                                             className="size-4 accent-cyan-400"
                                             checked={filters.statuses.includes(status)}
-                                            onChange={() => onChange({ ...filters, statuses: toggle(filters.statuses, status) })}
+                                            onChange={() =>
+                                                onChange({
+                                                    ...filters,
+                                                    statuses: toggle(filters.statuses, status),
+                                                })
+                                            }
                                         />
                                         <span
                                             className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo[status].className}`}
                                         >
-                                            <span aria-hidden="true">{statusInfo[status].icon}</span>
+                                            <span aria-hidden="true">
+                                                {statusInfo[status].icon}
+                                            </span>
                                             {statusInfo[status].label}
                                         </span>
                                     </label>
@@ -195,7 +220,12 @@ export function ReportFiltersPanel({
                         </div>
                     </fieldset>
 
-                    <button type="button" className={buttonClass} onClick={onClear} disabled={activeCount === 0}>
+                    <button
+                        type="button"
+                        className={buttonClass}
+                        onClick={onClear}
+                        disabled={activeCount === 0}
+                    >
                         Limpar filtros
                     </button>
 
@@ -206,13 +236,19 @@ export function ReportFiltersPanel({
                                 type="checkbox"
                                 className="size-4 accent-cyan-400"
                                 checked={chart.enabled}
-                                onChange={(e) => onChartChange({ ...chart, enabled: e.target.checked })}
+                                onChange={(e) =>
+                                    onChartChange({ ...chart, enabled: e.target.checked })
+                                }
                             />
                             Incluir no relatório
                         </label>
                         {chart.enabled && (
                             <div className="mt-3 grid gap-3">
-                                <div role="group" aria-label="Tipo de gráfico" className="flex gap-2">
+                                <div
+                                    role="group"
+                                    aria-label="Tipo de gráfico"
+                                    className="flex gap-2"
+                                >
                                     {CHART_TYPES.map(({ value, label }) => (
                                         <button
                                             key={value}
@@ -231,7 +267,12 @@ export function ReportFiltersPanel({
                                         className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-50`}
                                         disabled={Boolean(filters.from)}
                                         value={chart.range}
-                                        onChange={(e) => onChartChange({ ...chart, range: e.target.value as HistoryRange })}
+                                        onChange={(e) =>
+                                            onChartChange({
+                                                ...chart,
+                                                range: e.target.value as HistoryRange,
+                                            })
+                                        }
                                     >
                                         {HISTORY_RANGES.map((range) => (
                                             <option key={range} value={range}>

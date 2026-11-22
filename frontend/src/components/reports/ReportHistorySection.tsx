@@ -36,7 +36,9 @@ export function ReportHistorySection({ options, history }: Props) {
 
             {status === 'error' ? (
                 <div role="alert" className="mt-2 grid justify-items-start gap-2">
-                    <p className="text-sm text-[#b5483d]">{error ?? 'Não foi possível carregar o histórico.'}</p>
+                    <p className="text-sm text-[#b5483d]">
+                        {error ?? 'Não foi possível carregar o histórico.'}
+                    </p>
                     <button
                         type="button"
                         onClick={onRetry}
@@ -50,17 +52,24 @@ export function ReportHistorySection({ options, history }: Props) {
             ) : (
                 <div className={`transition-opacity ${loading ? 'opacity-60' : ''}`}>
                     <p className="mb-3 mt-1 text-sm text-[#5b6b6e]">
-                        {period}, somando {data.serviceCount} {plural(data.serviceCount, 'serviço', 'serviços')}:{' '}
+                        {period}, somando {data.serviceCount}{' '}
+                        {plural(data.serviceCount, 'serviço', 'serviços')}:{' '}
                         {fmtEnergy(data.totalEnergyKwh)} e {fmtCo2(data.totalCo2eGrams)} de CO₂e.
                         {data.failedCount > 0 &&
                             ` ${data.failedCount} ${plural(data.failedCount, 'serviço ficou', 'serviços ficaram')} sem histórico.`}
-                        {data.truncated && ' O histórico guarda só os últimos 30 dias, então o período foi limitado a isso.'}
+                        {data.truncated &&
+                            ' O histórico guarda só os últimos 30 dias, então o período foi limitado a isso.'}
                     </p>
                     <div className="grid gap-5">
                         <figure>
-                            <figcaption className="mb-1 text-sm font-semibold">Energia por intervalo (kWh)</figcaption>
+                            <figcaption className="mb-1 text-sm font-semibold">
+                                Energia por intervalo (kWh)
+                            </figcaption>
                             <ReportHistoryChart
-                                points={data.points.map((p) => ({ time: p.time, value: p.energyKwh }))}
+                                points={data.points.map((p) => ({
+                                    time: p.time,
+                                    value: p.energyKwh,
+                                }))}
                                 from={data.from}
                                 to={data.to}
                                 type={options.type}
@@ -74,9 +83,14 @@ export function ReportHistorySection({ options, history }: Props) {
                             />
                         </figure>
                         <figure>
-                            <figcaption className="mb-1 text-sm font-semibold">CO₂e por intervalo (g)</figcaption>
+                            <figcaption className="mb-1 text-sm font-semibold">
+                                CO₂e por intervalo (g)
+                            </figcaption>
                             <ReportHistoryChart
-                                points={data.points.map((p) => ({ time: p.time, value: p.co2eGrams }))}
+                                points={data.points.map((p) => ({
+                                    time: p.time,
+                                    value: p.co2eGrams,
+                                }))}
                                 from={data.from}
                                 to={data.to}
                                 type={options.type}

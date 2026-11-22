@@ -46,7 +46,17 @@ function niceMax(v: number) {
 const GRID = [0, 0.5, 1];
 
 // SVG simples, sem biblioteca: renderiza igual na tela e no PDF.
-export function ReportHistoryChart({ points, from, to, type, color, range, formatAxis, formatValue, ariaLabel }: Props) {
+export function ReportHistoryChart({
+    points,
+    from,
+    to,
+    type,
+    color,
+    range,
+    formatAxis,
+    formatValue,
+    ariaLabel,
+}: Props) {
     const innerW = W - PAD.left - PAD.right;
     const innerH = H - PAD.top - PAD.bottom;
     const n = points.length;
@@ -58,15 +68,26 @@ export function ReportHistoryChart({ points, from, to, type, color, range, forma
     const xCenter = (i: number) => PAD.left + colW * i + colW / 2;
     const barW = Math.max(colW * 0.7, 1);
 
-    const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${xCenter(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
+    const line = points
+        .map((p, i) => `${i === 0 ? 'M' : 'L'}${xCenter(i).toFixed(1)},${y(p.value).toFixed(1)}`)
+        .join(' ');
     const area =
-        n > 0 ? `${line} L${xCenter(n - 1).toFixed(1)},${baseline} L${xCenter(0).toFixed(1)},${baseline} Z` : '';
+        n > 0
+            ? `${line} L${xCenter(n - 1).toFixed(1)},${baseline} L${xCenter(0).toFixed(1)},${baseline} Z`
+            : '';
 
     return (
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="h-auto w-full">
             {GRID.map((f) => (
                 <g key={f}>
-                    <line x1={PAD.left} x2={W - PAD.right} y1={y(max * f)} y2={y(max * f)} stroke="#d6dcd8" strokeWidth={1} />
+                    <line
+                        x1={PAD.left}
+                        x2={W - PAD.right}
+                        y1={y(max * f)}
+                        y2={y(max * f)}
+                        stroke="#d6dcd8"
+                        strokeWidth={1}
+                    />
                     <text
                         x={PAD.left - 6}
                         y={y(max * f)}
@@ -83,7 +104,14 @@ export function ReportHistoryChart({ points, from, to, type, color, range, forma
             {type === 'line' ? (
                 <>
                     <path d={area} fill={color} fillOpacity={0.12} />
-                    <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+                    <path
+                        d={line}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={2}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                    />
                 </>
             ) : (
                 points.map((p, i) => (
@@ -114,7 +142,14 @@ export function ReportHistoryChart({ points, from, to, type, color, range, forma
 
             {/* Colunas invisíveis: mostram o valor do intervalo ao passar o mouse. */}
             {points.map((p, i) => (
-                <rect key={`hit-${p.time}`} x={PAD.left + colW * i} y={PAD.top} width={colW} height={innerH} fill="transparent">
+                <rect
+                    key={`hit-${p.time}`}
+                    x={PAD.left + colW * i}
+                    y={PAD.top}
+                    width={colW}
+                    height={innerH}
+                    fill="transparent"
+                >
                     <title>{`${fullFmt.format(new Date(p.time))}: ${formatValue(p.value)}`}</title>
                 </rect>
             ))}

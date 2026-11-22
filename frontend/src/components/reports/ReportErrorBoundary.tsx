@@ -45,7 +45,9 @@ export class ReportErrorBoundary extends Component<Props, State> {
                     type="button"
                     onClick={() => this.setState({ error: null })}
                     className={
-                        paper ? 'rounded border border-[#17262a]/30 px-3 py-1 text-sm hover:bg-black/5' : buttonClass
+                        paper
+                            ? 'rounded border border-[#17262a]/30 px-3 py-1 text-sm hover:bg-black/5'
+                            : buttonClass
                     }
                 >
                     Tentar de novo

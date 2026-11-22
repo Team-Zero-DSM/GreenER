@@ -43,7 +43,10 @@ function SectionTable({ section }: { section: RegionSection }) {
     const titleId = useId();
     return (
         <section className="mt-8 break-inside-avoid">
-            <h3 id={titleId} className="mb-2 flex items-baseline justify-between gap-3 font-serif text-lg font-bold">
+            <h3
+                id={titleId}
+                className="mb-2 flex items-baseline justify-between gap-3 font-serif text-lg font-bold"
+            >
                 {section.region.name}
                 <span className="font-sans text-sm font-normal text-[#5b6b6e]">
                     {section.total} {plural(section.total, 'serviço', 'serviços')}
@@ -51,7 +54,10 @@ function SectionTable({ section }: { section: RegionSection }) {
                 </span>
             </h3>
             <div className="overflow-x-auto">
-                <table aria-labelledby={titleId} className="w-full min-w-[480px] border-collapse text-sm">
+                <table
+                    aria-labelledby={titleId}
+                    className="w-full min-w-[480px] border-collapse text-sm"
+                >
                     <thead>
                         <tr>
                             <th scope="col" className={th}>
@@ -104,13 +110,19 @@ interface Props {
 export function ReportSheet({ data, totalCount, loading, chart, history }: Props) {
     const { filters } = data;
     const servicesLabel =
-        data.total === totalCount ? `Todos (${totalCount})` : `${data.total} de ${totalCount} selecionados`;
+        data.total === totalCount
+            ? `Todos (${totalCount})`
+            : `${data.total} de ${totalCount} selecionados`;
     const statusNames = filters.statuses.length
         ? filters.statuses.map((s) => STATUS_META[s].label).join(', ')
         : 'Todos';
     const present = STATUS_ORDER.filter((s) => data.byStatus[s] > 0);
-    const barLabel = present.map((s) => `${data.byStatus[s]} ${STATUS_META[s].label.toLowerCase()}`).join(', ');
-    const hasMissingMetrics = data.sections.some((sec) => sec.services.some((s) => s.energyKwh === null));
+    const barLabel = present
+        .map((s) => `${data.byStatus[s]} ${STATUS_META[s].label.toLowerCase()}`)
+        .join(', ');
+    const hasMissingMetrics = data.sections.some((sec) =>
+        sec.services.some((s) => s.energyKwh === null),
+    );
 
     return (
         <>
@@ -126,7 +138,9 @@ export function ReportSheet({ data, totalCount, loading, chart, history }: Props
                     <h2 className="font-serif text-2xl font-bold leading-tight sm:text-3xl">
                         Relatório de serviços por região
                     </h2>
-                    <p className="mt-1.5 text-sm text-[#5b6b6e]">Gerado em {fmtDateTime(data.generatedAt)}</p>
+                    <p className="mt-1.5 text-sm text-[#5b6b6e]">
+                        Gerado em {fmtDateTime(data.generatedAt)}
+                    </p>
                 </header>
 
                 <dl className="my-6 grid gap-1.5 border-y border-[#d6dcd8] py-3.5 text-sm">
@@ -145,12 +159,16 @@ export function ReportSheet({ data, totalCount, loading, chart, history }: Props
                 </dl>
 
                 <p className="mb-3 font-serif text-lg">
-                    {data.total} {plural(data.total, 'serviço', 'serviços')} em {data.sections.length}{' '}
-                    {plural(data.sections.length, 'região', 'regiões')}.
+                    {data.total} {plural(data.total, 'serviço', 'serviços')} em{' '}
+                    {data.sections.length} {plural(data.sections.length, 'região', 'regiões')}.
                     {data.energyKwh !== null &&
                         ` Somando a última coleta de cada serviço: ${fmtEnergy(data.energyKwh)} e ${fmtCo2(data.co2eGrams)} de CO₂e.`}
                 </p>
-                <div role="img" aria-label={barLabel} className="flex h-2.5 overflow-hidden rounded-full bg-[#d6dcd8]">
+                <div
+                    role="img"
+                    aria-label={barLabel}
+                    className="flex h-2.5 overflow-hidden rounded-full bg-[#d6dcd8]"
+                >
                     {present.map((s) => (
                         <span
                             key={s}
@@ -169,7 +187,8 @@ export function ReportSheet({ data, totalCount, loading, chart, history }: Props
                 </ul>
                 <p className="mt-3 text-sm text-[#5b6b6e]">
                     Energia e CO₂e das tabelas se referem à última coleta de cada serviço.
-                    {hasMissingMetrics && ' Serviços sem métricas aparecem com “—” e não entram nos totais.'}
+                    {hasMissingMetrics &&
+                        ' Serviços sem métricas aparecem com “—” e não entram nos totais.'}
                 </p>
 
                 {chart.enabled && <ReportHistorySection options={chart} history={history} />}
