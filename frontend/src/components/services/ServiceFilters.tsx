@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
+import { CardContent } from '@/components/ui/card';
 import {
     DROPDOWN_SURFACE_CLASS_NAME,
     getDropdownOptionClassName,
@@ -86,17 +85,18 @@ function FilterSelect({ value, options, onChange }: FilterSelectProps) {
 
 export function ServiceFilters({ filters, countries, onChange }: ServiceFiltersProps) {
     return (
-        <Card aria-label="Filtros" className="relative z-20 overflow-visible">
+
             <CardContent className="relative grid gap-4 overflow-visible sm:grid-cols-2 lg:grid-cols-4">
-                <div className={`${fieldClass} sm:pt-3`}>
-                    <FloatingLabelInput
-                        label="Buscar"
+                <label className={fieldClass}>
+                    Buscar serviço
+                    <input
                         type="search"
                         placeholder="Nome ou ID"
                         value={filters.search}
-                        onChange={(value) => onChange({ ...filters, search: value })}
+                        onChange={(event) => onChange({ ...filters, search: event.target.value })}
+                        className="min-h-12 w-full rounded-xl border border-border/60 bg-transparent px-3 text-sm font-normal text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10"
                     />
-                </div>
+                </label>
 
                 <label className={fieldClass}>
                     Estado
@@ -153,6 +153,5 @@ export function ServiceFilters({ filters, countries, onChange }: ServiceFiltersP
                     />
                 </label>
             </CardContent>
-        </Card>
     );
 }

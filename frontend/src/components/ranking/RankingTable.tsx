@@ -13,13 +13,15 @@ const rankingColumns: {
     label: string;
     criterion?: RankingCriterion;
     className?: string;
+    width: string;
+    align?: 'left' | 'right';
 }[] = [
-    { label: '#' },
-    { label: 'Serviço' },
-    { label: 'Região', className: 'hidden sm:table-cell' },
-    { label: 'Energia', criterion: 'energyKwh' },
-    { label: 'CO₂e', criterion: 'co2eGrams' },
-    { label: 'Coletas' },
+    { label: '#', width: '6%' },
+    { label: 'Serviço', width: '28%' },
+    { label: 'Região', className: 'hidden sm:table-cell', width: '16%' },
+    { label: 'Energia', criterion: 'energyKwh', width: '16%', align: 'right' },
+    { label: 'CO₂e', criterion: 'co2eGrams', width: '20%', align: 'right' },
+    { label: 'Coletas', width: '14%', align: 'right' },
 ];
 
 const sortLabels: Record<RankingCriterion, string> = {
@@ -36,7 +38,7 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
             >
                 <div className="overflow-hidden rounded-xl border border-border/60 bg-background/20">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-lg text-sm sm:min-w-xl">
+                        <table className="w-full min-w-lg table-fixed border-collapse text-sm sm:min-w-xl">
                             <thead>
                                 <tr>
                                     {rankingColumns.map((column) => {
@@ -47,11 +49,14 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                                 key={column.label}
                                                 scope="col"
                                                 aria-sort={isSorted ? 'descending' : undefined}
-                                                className={`whitespace-nowrap border-b border-border/60 px-4 py-3 text-left text-[10px] font-medium uppercase tracking-[0.08em] ${
+                                                style={{ width: column.width }}
+                                                className={`whitespace-nowrap border-b border-border/60 px-4 py-3 ${column.align === 'right' ? 'text-right' : 'text-left'} text-[10px] font-medium uppercase tracking-[0.08em] ${
                                                     column.className ?? ''
                                                 } ${isSorted ? 'text-foreground' : 'text-muted-foreground'}`}
                                             >
-                                                <span className="inline-flex items-center gap-1.5">
+                                                <span
+                                                    className={`inline-flex w-full items-center gap-1.5 ${column.align === 'right' ? 'justify-end' : ''}`}
+                                                >
                                                     {column.label}
                                                     {isSorted && (
                                                         <ArrowDown
@@ -79,14 +84,14 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                             }`}
                                         >
                                             {/* Posição. */}
-                                            <td className="border-b border-border/45 px-4 py-3 tabular-nums last:border-b-0">
+                                            <td className="border-b border-border/45 px-4 py-3 tabular-nums">
                                                 <RankingPosition
                                                     position={hasData ? item.position : null}
                                                 />
                                             </td>
 
                                             {/* Serviço. */}
-                                            <td className="border-b border-border/45 px-4 py-3 last:border-b-0">
+                                            <td className="border-b border-border/45 px-4 py-3">
                                                 <span className="font-medium text-foreground">
                                                     {item.name}
                                                 </span>
@@ -103,26 +108,26 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                             </td>
 
                                             {/* Região. */}
-                                            <td className="hidden border-b border-border/45 px-4 py-3 text-muted-foreground last:border-b-0 sm:table-cell">
+                                            <td className="hidden border-b border-border/45 px-4 py-3 text-muted-foreground sm:table-cell">
                                                 {item.region.code}
                                             </td>
 
                                             {/* Energia. */}
                                             <td
-                                                className={`whitespace-nowrap border-b border-border/45 px-4 py-3 text-right tabular-nums last:border-b-0 ${criterion === 'energyKwh' ? 'font-medium text-foreground' : 'text-muted-foreground'}`}
+                                                className={`whitespace-nowrap border-b border-border/45 px-4 py-3 text-right tabular-nums ${criterion === 'energyKwh' ? 'font-medium text-foreground' : 'text-muted-foreground'}`}
                                             >
                                                 {formatEnergy(item.energyKwh)}
                                             </td>
 
                                             {/* Emissões. */}
                                             <td
-                                                className={`whitespace-nowrap border-b border-border/45 px-4 py-3 text-right tabular-nums last:border-b-0 ${criterion === 'co2eGrams' ? 'font-medium text-foreground' : 'text-muted-foreground'}`}
+                                                className={`whitespace-nowrap border-b border-border/45 px-4 py-3 text-right tabular-nums ${criterion === 'co2eGrams' ? 'font-medium text-foreground' : 'text-muted-foreground'}`}
                                             >
                                                 {formatCo2e(item.co2eGrams)}
                                             </td>
 
                                             {/* Coletas. */}
-                                            <td className="border-b border-border/45 px-4 py-3 text-right tabular-nums text-muted-foreground last:border-b-0">
+                                            <td className="border-b border-border/45 px-4 py-3 text-right tabular-nums text-muted-foreground">
                                                 {item.sampleCount.toLocaleString('pt-BR')}
                                             </td>
                                         </tr>
