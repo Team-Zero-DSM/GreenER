@@ -885,9 +885,14 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                           )
                         : cameraDistance;
 
+                // Em telas estreitas, afasta um pouco a câmera ao focar uma região.
+                const isMobile = size.w < 640;
+                const focusCameraDistance = isMobile ? 4.4 : 3.0;
+
                 const desiredCameraZ =
-                    (focusTargetRef.current ? 3.0 : scrollCameraDistance) /
-                    zoomLevelRef.current;
+                    (focusTargetRef.current
+                        ? focusCameraDistance
+                        : scrollCameraDistance) / zoomLevelRef.current;
 
                 camera.position.z = THREE.MathUtils.lerp(
                     camera.position.z,
@@ -907,7 +912,14 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                         smooth,
                     );
 
-                globe.scale.setScalar(currentScale);
+                // Reduz o planeta proporcionalmente em telas menores,
+                // preservando a escala original em telas a partir de 700px.
+                const responsiveScale = Math.min(
+                    1,
+                    Math.max(0.72, width / 700),
+                );
+
+                globe.scale.setScalar(currentScale * responsiveScale);
 
                 const visibleHeight =
                     2 *
@@ -916,7 +928,8 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
                     ) *
                     camera.position.z;
 
-                const horizontalOffset = 60;
+                // No celular, centraliza o alvo sem o deslocamento do desktop.
+                const horizontalOffset = width < 768 ? 0 : 60;
                 const targetX =
                     ((smoothTargetRef.current.x - horizontalOffset - width / 2) /
                         height) *
@@ -1163,33 +1176,52 @@ export const GlobeView = forwardRef<GlobeViewHandle, GlobeViewProps>(
             };
         }, [markers]);
 
-        // Atualização do foco geográfico.
+        // Atualização do foco geográfico. No mobile, a seleção de uma
+        // região não deve girar o globo nem aproximar a câmera para focá-la.
         useEffect(() => {
-            focusTargetRef.current = focusTarget;
+            const mobileQuery = window.matchMedia('(max-width: 767px)');
 
-            if (!focusTarget) {
-                focusQuaternionRef.current = null;
-                return;
-            }
+            const updateFocus = () => {
+                if (mobileQuery.matches) {
+                    focusTargetRef.current = null;
+                    focusQuaternionRef.current = null;
+                    wasFocusedRef.current = false;
+                    return;
+                }
 
-            const latitude = THREE.MathUtils.degToRad(
-                focusTarget.latitude,
-            );
-            const longitude = THREE.MathUtils.degToRad(
-                focusTarget.longitude,
-            );
+                focusTargetRef.current = focusTarget;
 
-            const yRotation = new THREE.Quaternion().setFromAxisAngle(
-                new THREE.Vector3(0, 1, 0),
-                -Math.PI / 2 - longitude,
-            );
+                if (!focusTarget) {
+                    focusQuaternionRef.current = null;
+                    return;
+                }
 
-            const xRotation = new THREE.Quaternion().setFromAxisAngle(
-                new THREE.Vector3(1, 0, 0),
-                latitude,
-            );
+                const latitude = THREE.MathUtils.degToRad(
+                    focusTarget.latitude,
+                );
+                const longitude = THREE.MathUtils.degToRad(
+                    focusTarget.longitude,
+                );
 
-            focusQuaternionRef.current = xRotation.multiply(yRotation);
+                const yRotation = new THREE.Quaternion().setFromAxisAngle(
+                    new THREE.Vector3(0, 1, 0),
+                    -Math.PI / 2 - longitude,
+                );
+
+                const xRotation = new THREE.Quaternion().setFromAxisAngle(
+                    new THREE.Vector3(1, 0, 0),
+                    latitude,
+                );
+
+                focusQuaternionRef.current = xRotation.multiply(yRotation);
+            };
+
+            updateFocus();
+            mobileQuery.addEventListener('change', updateFocus);
+
+            return () => {
+                mobileQuery.removeEventListener('change', updateFocus);
+            };
         }, [focusTarget]);
 
         return (
