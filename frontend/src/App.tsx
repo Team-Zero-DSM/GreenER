@@ -12,6 +12,7 @@ import { AuthLayout } from '@/layouts/AuthLayout';
 import { AdminSettingsPage } from '@/pages/AdminSettingsPage';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import ReportsPage from '@/pages/ReportsPage';
 
 export default function App() {
     return (
@@ -30,6 +31,7 @@ export default function App() {
                     <Route path="/comparacao" element={<ComparisonPage />} />
                     <Route path="/regioes" element={<RegionPage />} />
                     <Route path="/ranking" element={<RankingPage />} />
+                    <Route path="/relatorio" element={<ReportsPage />} />
                     <Route path="/perfil" element={<ProfilePage />} />
                     <Route path="/configuracoes" element={<AdminSettingsPage />} />
                 </Route>

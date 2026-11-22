@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
     Activity,
     ArrowLeftRight,
+    ClipboardList,
     Globe,
     LayoutDashboard,
     ListOrdered,
@@ -43,6 +44,12 @@ const navItems = [
         label: 'Comparação',
         icon: ArrowLeftRight,
         prefixes: ['/comparacao'],
+    },
+    {
+        to: '/relatorio',
+        label: 'Relatório',
+        icon: ClipboardList,
+        prefixes: ['/relatorio'],
     },
 ];
 
