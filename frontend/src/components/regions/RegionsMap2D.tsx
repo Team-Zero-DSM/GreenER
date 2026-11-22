@@ -159,16 +159,15 @@ function placeLabels(regions: Region[], size: MapSize): MapPoint[] {
                         height: label.height,
                     }),
                 );
-                const coversAnotherMarker = positioned.some(
+                const coversMarker = positioned.some(
                     (other) =>
-                        other.region.code !== point.region.code &&
                         other.x >= candidate.left - MARKER_RADIUS &&
                         other.x <= candidate.left + candidate.width + MARKER_RADIUS &&
                         other.y >= candidate.top - MARKER_RADIUS &&
                         other.y <= candidate.top + candidate.height + MARKER_RADIUS,
                 );
 
-                if (!overlapsLabel && !coversAnotherMarker) {
+                if (!overlapsLabel && !coversMarker) {
                     best = { x: candidate.left, y: candidate.top };
                     break;
                 }
@@ -203,9 +202,8 @@ function placeLabels(regions: Region[], size: MapSize): MapPoint[] {
                             height: label.height,
                         }),
                     );
-                    const coversAnotherMarker = positioned.some(
+                    const coversMarker = positioned.some(
                         (other) =>
-                            other.region.code !== point.region.code &&
                             other.x >= candidate.left - MARKER_RADIUS &&
                             other.x <= candidate.left + candidate.width + MARKER_RADIUS &&
                             other.y >= candidate.top - MARKER_RADIUS &&
@@ -216,7 +214,7 @@ function placeLabels(regions: Region[], size: MapSize): MapPoint[] {
                         top + LABEL_HEIGHT / 2 - point.y,
                     );
 
-                    if (!overlapsLabel && !coversAnotherMarker && distance < closestDistance) {
+                    if (!overlapsLabel && !coversMarker && distance < closestDistance) {
                         closestDistance = distance;
                         best = { x: left, y: top };
                     }
@@ -226,10 +224,14 @@ function placeLabels(regions: Region[], size: MapSize): MapPoint[] {
 
         // Em telas excepcionalmente pequenas não há área física para todos os rótulos.
         // Ainda assim, o marcador mantém o nome completo no atributo title.
+        const fallbackX =
+            point.x + 12 + point.labelWidth <= size.width - MAP_PADDING
+                ? point.x + 12
+                : point.x - point.labelWidth - 12;
         best ??= {
             x: Math.max(
                 MAP_PADDING,
-                Math.min(size.width - point.labelWidth - MAP_PADDING, point.x + 12),
+                Math.min(size.width - point.labelWidth - MAP_PADDING, fallbackX),
             ),
             y: Math.max(
                 MAP_PADDING,

@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { formatRankingValue } from '@/components/ranking/formatRankingValue';
+import { RankingPosition } from '@/components/ranking/RankingPosition';
 import { ChartCard } from '@/components/charts/ChartCard';
 import type { RankingCriterion, RankingItem } from '@/types/ranking';
 
@@ -38,8 +39,8 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
                                         aria-label={`Ver ${item.name}: ${formatRankingValue(criterion, item[criterion])}`}
                                         className="group grid grid-cols-[1.75rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl border border-border/50 bg-background/20 px-3 py-2.5 text-sm transition-[border-color,background-color] duration-200 hover:border-primary/20 hover:bg-muted/30 sm:grid-cols-[2rem_minmax(6rem,8rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-x-4 sm:py-3"
                                     >
-                                        <span className="col-start-1 row-start-1 inline-flex size-6 items-center justify-center rounded-md bg-muted/60 text-[11px] font-medium tabular-nums text-muted-foreground sm:col-start-1 sm:row-start-1">
-                                            {item.position ?? '—'}
+                                        <span className="col-start-1 row-start-1 sm:col-start-1 sm:row-start-1">
+                                            <RankingPosition position={item.position} />
                                         </span>
 
                                         <span className="col-start-2 row-start-1 min-w-0 truncate font-medium text-foreground sm:col-start-2 sm:row-start-1">

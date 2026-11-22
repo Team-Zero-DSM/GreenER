@@ -1,4 +1,5 @@
 import { formatCo2e, formatEnergy } from '@/components/ranking/formatRankingValue';
+import { RankingPosition } from '@/components/ranking/RankingPosition';
 import { ChartCard } from '@/components/charts/ChartCard';
 import type { RankingCriterion, RankingItem } from '@/types/ranking';
 import { ArrowDown } from 'lucide-react';
@@ -79,15 +80,9 @@ export function RankingTable({ criterion, items }: RankingTableProps) {
                                         >
                                             {/* Posição. */}
                                             <td className="border-b border-border/45 px-4 py-3 tabular-nums last:border-b-0">
-                                                <span
-                                                    className={`inline-flex size-7 items-center justify-center rounded-lg text-xs font-medium ${
-                                                        hasData
-                                                            ? 'bg-primary/8 text-foreground ring-1 ring-inset ring-primary/15'
-                                                            : 'bg-muted/60 text-muted-foreground'
-                                                    }`}
-                                                >
-                                                    {item.position ?? '—'}
-                                                </span>
+                                                <RankingPosition
+                                                    position={hasData ? item.position : null}
+                                                />
                                             </td>
 
                                             {/* Serviço. */}
