@@ -146,16 +146,27 @@ Os títulos, links, responsáveis do planejamento, estimativas e situações das
 
 **10/11/2026 a 23/11/2026**
 
-**Objetivo e entrega:** implementar autenticação JWT e proteção das áreas
-correspondentes e desenvolver simulações avançadas de impacto em regiões
-alternativas. A comparação entre serviços em períodos equivalentes foi alocada
-à Sprint 2 no GitHub (#76, #82–#86 e #93). Delimitar as simulações avançadas em
-relação à configuração regional/cenários já prevista em #83/#84, evitando contar
-a mesma entrega nas duas sprints. Manter as funcionalidades das entregas anteriores.
+**Objetivo e entrega:** implementar autenticação JWT e perfil, painel de
+monitoramento personalizável, administração de usuários, configuração da coleta
+e das estimativas, relatórios e exportação em PDF, preservando as funcionalidades
+anteriores e aprimorando a interface.
 
-Autenticação, configurações administrativas, painel persistido e relatórios
-estão implementados no backend. A tabela seguinte registra as entregas técnicas;
-seleção formal de histórias, aceite e cerimônias seguem seus registros próprios.
+O [registro da Sprint 3](./sprint-3/sprint-3.md) e as
+[evidências da DoD](./sprint-3/evidencias-dod.md) consolidam a situação de
+**22/11/2026**: 35 tarefas, sendo 33 fechadas e duas abertas (#175 e #176).
+O campo `Estimate` do [Projects](https://github.com/orgs/Team-Zero-DSM/projects/3/views/10)
+totaliza **151 pontos preenchidos: 141 em Done e 10 pendentes** (5 em Backlog
+na #175 e 5 em In progress na #176). #195 e #196 permanecem sem estimativa.
+US15 (#151) e US17 (#142) são as histórias presentes no milestone e estão
+fechadas. As demais histórias relacionadas às tarefas são identificadas no registro.
+
+A previsão original de cenários avançados permanece como contexto do planejamento.
+A comparação regional já era contemplada na Sprint 2 (#76, #82–#86 e #93);
+não foi identificada tarefa específica de uma nova simulação avançada no milestone
+da Sprint 3. Essa funcionalidade não foi contada novamente como entrega.
+
+As tabelas seguintes relacionam as entregas do backend e do frontend.
+Aceite formal e cerimônias dependem dos registros da equipe.
 
 ### Entregas do backend na Sprint 3
 
@@ -169,7 +180,7 @@ seleção formal de histórias, aceite e cerimônias seguem seus registros próp
 | [#148](https://github.com/Team-Zero-DSM/GreenER/issues/148) | Persistência do painel pessoal — US17. | [PR #198](https://github.com/Team-Zero-DSM/GreenER/pull/198); [GET/PUT /dashboards/me](./API.md#26-painel-de-monitoramento--implementado). |
 | [#167](https://github.com/Team-Zero-DSM/GreenER/issues/167), [#168](https://github.com/Team-Zero-DSM/GreenER/issues/168) | Prévia e PDF — US10 (#154), apoiada pelos indicadores da US07 (#75). | [PR #207](https://github.com/Team-Zero-DSM/GreenER/pull/207), [#208](https://github.com/Team-Zero-DSM/GreenER/pull/208); [contrato](./API.md#29-relatórios-e-exportação-em-pdf). |
 | [#169](https://github.com/Team-Zero-DSM/GreenER/issues/169) | Validação dos fluxos acima e migração — US03, US06, US07, US08, US10, US15 e US16. | [PR #211](https://github.com/Team-Zero-DSM/GreenER/pull/211); [suíte](../backend/tests/), [CI aprovado](https://github.com/Team-Zero-DSM/GreenER/actions/runs/44851909389). |
-| [#170](https://github.com/Team-Zero-DSM/GreenER/issues/170) | Documentação técnica dessas entregas. | Atualização de API, backend, banco, cálculo e execução neste conjunto de documentos. |
+| [#170](https://github.com/Team-Zero-DSM/GreenER/issues/170) | Documentação técnica dessas entregas. | [PR #214](https://github.com/Team-Zero-DSM/GreenER/pull/214); API, backend, banco, cálculo e execução. |
 
 Na validação da #169, 111 testes passaram com PostgreSQL 17, incluindo 48 casos
 adicionados para os fluxos da Sprint 3. Backend, frontend e construção Docker
@@ -178,26 +189,39 @@ e-mail; verifica fluxos básicos e preservação de dados nas migrações 002/00
 Essa evidência não comprova entrega real de SMTP/Brevo, desempenho sob carga ou
 aceite formal das User Stories.
 
+### Entregas do frontend na Sprint 3
+
+| Tasks | Entrega | Evidências |
+|---|---|---|
+| #136–#141, #183 | Autenticação e perfil: estrutura, formulários, integração e refinamento visual. | PRs #152, #178, #180, #184, #189, #200 e #215; [rastreabilidade](./sprint-3/evidencias-dod.md#evidências-e-limites-de-conclusão). |
+| #143–#150 | Painel personalizável: widgets, templates, edição, configuração persistida, dados reais e responsividade. | PRs #171, #188, #190–#193, #197 e #198; evoluções #210/#212. |
+| #172 | Tela administrativa integrada à coleta, estimativas e gerenciamento de acessos. | [PR #213](https://github.com/Team-Zero-DSM/GreenER/pull/213). |
+| #173, #196 | Padrão visual e responsividade da página inicial. | PRs #219 e #218; cabeçalho complementar no #216. |
+| #195 | Seleção de dados, prévia e exportação de relatórios. | [PR #217](https://github.com/Team-Zero-DSM/GreenER/pull/217). |
+| #175, #176 | Tema claro e refatoração final do frontend. | Issues abertas em 22/11; conclusão não registrada. |
+
 ### Matriz da Sprint 3
 
 | Código | Requisito relacionado | Entrega concreta | Como verificar | Responsáveis | Evidência no GitHub | Situação |
 |---|---|---|---|---|---|---|
-| ES01 | RNF11, RNF12 | Backlog priorizado e vinculado a requisitos | Conferir histórias e tarefas selecionadas | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES02 | RNF12 | Objetivo, seleção, responsáveis e entregas | Conferir plano e Sprint Backlog | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES03 | RNF11 | Critérios de aceite verificáveis | Relacionar critérios das histórias às evidências | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir links de issues e PRs da sprint | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES05 | RNF12 | Evolução incremental | Examinar commits e merges do período | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES06 | RNF12 | Review, feedback e adaptação do backlog | Conferir resultados e decisões no encerramento | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES07 | RNF11, RNF12 | DoD aplicada às entregas concluídas | Conferir critérios, resultados e limites de validação | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES08 | RNF08 | Documentação compatível com a entrega | Conferir links, comandos, contratos e limites | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| ES09 | RNF12 | Participação verificável dos cinco integrantes | Conferir artefatos por integrante, além de commits | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| DW01 | RP01, RP02; RNF09 interno | React/TS, Node/TS e separação das partes | Conferir código e dependências usadas | Equipe; detalhar no planejamento | [Plano](./plano-de-entregas.md); registro da Sprint 3 a criar | Planejado; revalidar os itens anteriores |
-| DW06 | RP06; RNF05 interno | Login JWT e proteção no backend | Validar login, rejeição de token e acesso autorizado | Backend; autoria nos PRs vinculados | [Entregas e testes](#entregas-do-backend-na-sprint-3) | Implementado e validado na #169 |
-| DW03, DW06 | Configuração de monitoramento | Consultar e alterar o intervalo de coleta pela área autenticada | Validar valores de 10 a 3.600 segundos, autorização, persistência e aplicação pelo agendador | Backend; autoria nos PRs vinculados | [Contrato implementado](./API.md#24-configuração-de-monitoramento--implementada), PRs #204/#205/#211 | Implementado e validado na #169 |
-| DW02, DW03, DW07 | Recursos das sprints anteriores | Preservar integrações, API e execução | Revalidar comportamento e regressões | Equipe | Código e verificações da entrega | Planejado e cumulativo |
-| DW04, DW05 | Cenários regionais; RF15 cumulativo | Simulações avançadas e preservação da comparação da Sprint 2 | Delimitar cenários adicionais e conferir resultados com dados reais | A definir | Issues e PRs a definir; #83/#84 como limite do escopo anterior | Planejado; delimitação pendente |
-| BD01–BD04 | RP03; histórico e análises | Consultas e modelo para cenários adicionais | Conferir filtros e relacionamentos por período | A definir | SQL e evidências a definir | Planejado e cumulativo |
-| TP01–TP03 | Autenticação e análises | Manter modelagem, tipos e tratamento de falhas | Validar regras e comportamentos de falha | Equipe | Código e verificações a definir | Planejado e cumulativo |
+| ES01 | RNF11, RNF12 | Backlog vinculado a requisitos e histórias | Conferir histórias, tarefas e pendências | Equipe | [Backlog](./sprint-3/sprint-3.md#-sprint-backlog--sprint-3) | 35 tarefas: 33 fechadas e duas abertas em 22/11 |
+| ES02 | RNF12 | Objetivo, período e responsáveis | Conferir registro e atribuições | Equipe | [Sprint 3](./sprint-3/sprint-3.md) | Objetivo, período e responsáveis documentados |
+| ES03 | RNF11 | Critérios verificáveis | Relacionar critérios de US15/US17 aos artefatos | Equipe | [DoD aplicada](./sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) | Evidências e limites por critério registrados |
+| ES04 | RNF11 | Rastreabilidade requisito → tarefa → código | Seguir issues, PRs e arquivos | Equipe | [Evidências](./sprint-3/evidencias-dod.md#evidências-e-limites-de-conclusão) | PRs das 33 tarefas fechadas vinculados |
+| ES05 | RNF12 | Evolução incremental | Conferir integrações do período | Equipe | [PRs da sprint](./sprint-3/evidencias-dod.md#evidências-e-limites-de-conclusão) | Histórico e evoluções complementares registrados |
+| ES06 | RNF12 | Review, feedback e adaptação | Registrar apresentação e decisões da equipe | Equipe | [Review](./sprint-3/sprint-3.md#-sprint-review) | Consolidação parcial; review final e feedback sem registro |
+| ES07 | RNF11, RNF12 | DoD sustentada por evidências | Conferir código, testes, integração e limites | Equipe | [DoD da Sprint 3](./sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) | Validação técnica registrada; aceite formal sem registro |
+| ES08 | RNF08 | Documentação compatível com as entregas | Conferir contratos, arquiteturas e acompanhamento | Pedro e equipe | [PR #214](https://github.com/Team-Zero-DSM/GreenER/pull/214), [registro](./sprint-3/sprint-3.md) | Documentação técnica integrada e registro da sprint atualizado |
+| ES09 | RNF12 | Participação verificável dos cinco integrantes | Conferir atribuições e autoria dos PRs | Todos | [Participação](./sprint-3/sprint-3.md#participação-da-equipe) | Contribuições vinculadas; sem contagem de presença da Sprint 3 |
+| DW01 | RP01, RP02; RNF09 interno | React/TS e Node/TS em módulos separados | Conferir código e compilação | Equipe | [CI da #169](https://github.com/Team-Zero-DSM/GreenER/actions/runs/44851909389) | Lint, tipos e builds aprovados na revisão da #169 |
+| DW06 | RP06; RNF05 interno | JWT, perfil e permissões no backend | Validar credenciais, tokens e papéis | Pedro e Henrique; Vitor na tela administrativa | [Contas e administração](./sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) | Implementados; testes de API registrados na #169 |
+| DW03, DW06 | RF03; RNF04/RNF05 internos | Configuração do intervalo e aplicação pelo agendador | Conferir 10–3.600 s, persistência, autorização e fallback | Pedro e Vitor | PRs #204/#205/#213 e [testes](./sprint-3/evidencias-dod.md#resultados-registrados-na-validação-da-169) | Implementados e validados na revisão da #169 |
+| DW04, DW05 | RF08, RF09, RF11, RF16 | Painel pessoal, widgets e dados reais | Conferir configuração persistida e atualização | Paulo | #143–#150; [critérios da US17](./sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) | Implementados; homologação visual completa sem novo registro |
+| DW03, DW04 | RF08, RF10; RNF05 interno | Prévia e PDF com histórico real | Conferir API, filtros, tela e download | Pedro e Gabriel | PRs #207/#208/#217 e [testes](./sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) | Integrados; assinatura e cabeçalhos do PDF testados |
+| DW02, DW03, DW07 | Recursos das sprints anteriores | Preservar integrações, API e Docker | Conferir regressões e construção das imagens | Equipe | [CI da #169](https://github.com/Team-Zero-DSM/GreenER/actions/runs/44851909389) | Validação técnica na revisão indicada; sem nova execução no HEAD |
+| DW04, DW05 | Cenários regionais; RF15 cumulativo | Preservar comparação da Sprint 2 | Distinguir funcionalidade existente de nova simulação | Equipe | #83/#84; [limites de escopo](./sprint-3/evidencias-dod.md#dependências-e-pendências-para-o-encerramento) | Sem nova entrega específica de cenário avançado identificada |
+| BD01–BD04 | RP03; RNF06 interno | Contas, painel, consultas e migrações | Conferir API × SQL e preservação nas migrações 002/003 | Pedro e Paulo | [Testes e migrações](./sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) | Validados em bancos descartáveis; banco de uso não alterado |
+| TP01–TP03 | Modelagem, tipos e falhas | Manter separação modular e isolamento de falhas | Conferir schemas, autorização e continuidade | Equipe | [Suíte e CI](./sprint-3/evidencias-dod.md#resultados-registrados-na-validação-da-169) | Testes registrados; sem alegação de cobertura exaustiva |
 
 ## Decisões de escopo e pendências de planejamento
 
@@ -207,7 +231,7 @@ aceite formal das User Stories.
 | Persistência e histórico de métricas | Entregas técnicas da Sprint 1. | Relacionados às tarefas de backend/banco e BD01–BD04; não incluem automaticamente a US10 na seleção. |
 | Histórico de status | Ampliação da Sprint 2 vinculada a US04/US05. | #89–#91; preservação dos dados verificada em banco de teste com schema da Sprint 1. |
 | Comparação entre serviços | Sprint 2, vinculada às issues #76, #82–#86 e #93. | Tela de comparação integrada à API pelo [PR #129](https://github.com/Team-Zero-DSM/GreenER/pull/129). |
-| Cenários regionais | #83/#84 já preveem opções regionais na comparação da Sprint 2. | Delimitar o que será simulação avançada adicional da Sprint 3 antes de fechar seu backlog. |
+| Cenários regionais | #83/#84 já preveem opções regionais na comparação da Sprint 2. | Não foi identificada tarefa de nova simulação avançada no milestone da Sprint 3; não contar novamente as opções regionais da Sprint 2. |
 | Indicadores consolidados | US07 fechada na Sprint 2. A [validação](./sprint-2/evidencias-dod.md#validação-da-us07) cobre os cards regionais e os quatro totais do ambiente no banco. | A [demonstração](https://www.youtube.com/watch?v=jaLqoq2bONs&t=280s) apresenta a tela de visão geral no plano da Sprint 3. |
 | Mapa/globo | Globo integrado na Sprint 1. Continuação de T15 na Sprint 2, com Gabriel. | A #32 identifica o saldo e o PR #118 fornece evidência da listagem regional para a review. |
 | Intervalo pela aplicação | Implementado na Sprint 3. | #163 persiste a configuração e #164 aplica o valor no agendador; #169 valida os fluxos básicos. |
