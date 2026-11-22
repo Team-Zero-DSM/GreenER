@@ -24,6 +24,7 @@ export function ReportsPage() {
     const [pdfState, setPdfState] = useState<PdfState>('idle');
 
     const { data: catalog, status, error, reload } = useReport(filters);
+
     const report = useMemo(
         () => (catalog ? selectServices(catalog, new Set(excludedServiceIds)) : null),
         [catalog, excludedServiceIds],
@@ -35,7 +36,9 @@ export function ReportsPage() {
               .sort()
               .join('\n')
         : '';
+
     const serviceIds = useMemo(() => (idsKey ? idsKey.split('\n') : []), [idsKey]);
+
     const history = useReportHistory(
         serviceIds,
         chart.range,
@@ -53,6 +56,7 @@ export function ReportsPage() {
 
     async function handlePdf() {
         setPdfState('working');
+
         try {
             await reportsApi.downloadPdf(filters);
             setPdfState('idle');
@@ -76,6 +80,7 @@ export function ReportsPage() {
                         >
                             Baixar CSV
                         </button>
+
                         <button
                             type="button"
                             className={buttonPrimaryClass}
@@ -88,71 +93,78 @@ export function ReportsPage() {
                 }
             />
 
-            <p role="status" className="min-h-5 text-sm text-destructive print:hidden">
-                {pdfState === 'error' ? 'Não foi possível gerar o PDF. Tente de novo.' : ''}
-            </p>
+            <div className="mt-4">
+                {pdfState === 'error' && (
+                    <p role="alert" className="mb-3 text-sm text-destructive print:hidden">
+                        Não foi possível gerar o PDF. Tente de novo.
+                    </p>
+                )}
 
-            <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
-                <ReportFiltersPanel
-                    filters={filters}
-                    catalog={catalog?.sections ?? []}
-                    excludedServiceIds={excludedServiceIds}
-                    chart={chart}
-                    onChange={setFilters}
-                    onExcludedChange={setExcludedServiceIds}
-                    onChartChange={setChart}
-                    onClear={clearAll}
-                />
+                <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+                    <ReportFiltersPanel
+                        filters={filters}
+                        catalog={catalog?.sections ?? []}
+                        excludedServiceIds={excludedServiceIds}
+                        chart={chart}
+                        onChange={setFilters}
+                        onExcludedChange={setExcludedServiceIds}
+                        onChartChange={setChart}
+                        onClear={clearAll}
+                    />
 
-                <section aria-label="Prévia do relatório" className="min-w-0">
-                    {status === 'error' ? (
-                        <div role="alert" className="grid justify-items-start gap-3">
-                            <p className="text-sm text-destructive">
-                                Não foi possível gerar a prévia{error ? `: ${error}` : '.'}
-                            </p>
-                            <button type="button" className={buttonClass} onClick={reload}>
-                                Tentar de novo
-                            </button>
-                        </div>
-                    ) : !catalog || !report ? (
-                        <p className="text-muted-foreground">Gerando prévia...</p>
-                    ) : catalog.total === 0 && status === 'ready' ? (
-                        <div className="grid justify-items-start gap-3">
-                            <p className="text-muted-foreground">
-                                Nenhum serviço encontrado com esses filtros.
-                            </p>
-                            <button type="button" className={buttonClass} onClick={clearAll}>
-                                Limpar filtros
-                            </button>
-                        </div>
-                    ) : report.total === 0 ? (
-                        <div className="grid justify-items-start gap-3">
-                            <p className="text-muted-foreground">Nenhum serviço selecionado.</p>
-                            <button
-                                type="button"
-                                className={buttonClass}
-                                onClick={() => setExcludedServiceIds([])}
-                            >
-                                Selecionar todos
-                            </button>
-                        </div>
-                    ) : (
-                        <ReportErrorBoundary resetKey={report}>
-                            <ReportSheet
-                                data={report}
-                                totalCount={catalog.total}
-                                loading={status === 'loading'}
-                                chart={chart}
-                                history={{
-                                    status: history.status,
-                                    data: history.data,
-                                    error: history.error,
-                                    onRetry: history.reload,
-                                }}
-                            />
-                        </ReportErrorBoundary>
-                    )}
-                </section>
+                    <section aria-label="Prévia do relatório" className="min-w-0">
+                        {status === 'error' ? (
+                            <div role="alert" className="grid justify-items-start gap-3">
+                                <p className="text-sm text-destructive">
+                                    Não foi possível gerar a prévia{error ? `: ${error}` : '.'}
+                                </p>
+
+                                <button type="button" className={buttonClass} onClick={reload}>
+                                    Tentar de novo
+                                </button>
+                            </div>
+                        ) : !catalog || !report ? (
+                            <p className="text-muted-foreground">Gerando prévia...</p>
+                        ) : catalog.total === 0 && status === 'ready' ? (
+                            <div className="grid justify-items-start gap-3">
+                                <p className="text-muted-foreground">
+                                    Nenhum serviço encontrado com esses filtros.
+                                </p>
+
+                                <button type="button" className={buttonClass} onClick={clearAll}>
+                                    Limpar filtros
+                                </button>
+                            </div>
+                        ) : report.total === 0 ? (
+                            <div className="grid justify-items-start gap-3">
+                                <p className="text-muted-foreground">Nenhum serviço selecionado.</p>
+
+                                <button
+                                    type="button"
+                                    className={buttonClass}
+                                    onClick={() => setExcludedServiceIds([])}
+                                >
+                                    Selecionar todos
+                                </button>
+                            </div>
+                        ) : (
+                            <ReportErrorBoundary resetKey={report}>
+                                <ReportSheet
+                                    data={report}
+                                    totalCount={catalog.total}
+                                    loading={status === 'loading'}
+                                    chart={chart}
+                                    history={{
+                                        status: history.status,
+                                        data: history.data,
+                                        error: history.error,
+                                        onRetry: history.reload,
+                                    }}
+                                />
+                            </ReportErrorBoundary>
+                        )}
+                    </section>
+                </div>
             </div>
         </PageShell>
     );

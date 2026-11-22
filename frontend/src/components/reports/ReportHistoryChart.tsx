@@ -1,3 +1,4 @@
+import { AnimatedContent } from '@/components/shared/AnimatedContent';
 import type { ChartType } from '@/types/report';
 import type { HistoryRange } from '@/types/service';
 
@@ -71,88 +72,96 @@ export function ReportHistoryChart({
     const line = points
         .map((p, i) => `${i === 0 ? 'M' : 'L'}${xCenter(i).toFixed(1)},${y(p.value).toFixed(1)}`)
         .join(' ');
+
     const area =
         n > 0
             ? `${line} L${xCenter(n - 1).toFixed(1)},${baseline} L${xCenter(0).toFixed(1)},${baseline} Z`
             : '';
 
     return (
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="h-auto w-full">
-            {GRID.map((f) => (
-                <g key={f}>
-                    <line
-                        x1={PAD.left}
-                        x2={W - PAD.right}
-                        y1={y(max * f)}
-                        y2={y(max * f)}
-                        stroke="#d6dcd8"
-                        strokeWidth={1}
-                    />
+        <AnimatedContent animationKey={type} className="print:!h-auto print:!overflow-visible">
+            <svg
+                viewBox={`0 0 ${W} ${H}`}
+                role="img"
+                aria-label={ariaLabel}
+                className="h-auto w-full"
+            >
+                {GRID.map((f) => (
+                    <g key={f}>
+                        <line
+                            x1={PAD.left}
+                            x2={W - PAD.right}
+                            y1={y(max * f)}
+                            y2={y(max * f)}
+                            stroke="#d6dcd8"
+                            strokeWidth={1}
+                        />
+                        <text
+                            x={PAD.left - 6}
+                            y={y(max * f)}
+                            textAnchor="end"
+                            dominantBaseline="middle"
+                            fontSize={11}
+                            fill="#5b6b6e"
+                        >
+                            {formatAxis(max * f)}
+                        </text>
+                    </g>
+                ))}
+
+                {type === 'line' ? (
+                    <>
+                        <path d={area} fill={color} fillOpacity={0.12} />
+                        <path
+                            d={line}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth={2}
+                            strokeLinejoin="round"
+                            strokeLinecap="round"
+                        />
+                    </>
+                ) : (
+                    points.map((p, i) => (
+                        <rect
+                            key={p.time}
+                            x={xCenter(i) - barW / 2}
+                            y={y(p.value)}
+                            width={barW}
+                            height={Math.max(baseline - y(p.value), 0)}
+                            fill={color}
+                            rx={1}
+                        />
+                    ))
+                )}
+
+                {GRID.map((f) => (
                     <text
-                        x={PAD.left - 6}
-                        y={y(max * f)}
-                        textAnchor="end"
-                        dominantBaseline="middle"
+                        key={`x-${f}`}
+                        x={PAD.left + f * innerW}
+                        y={H - 6}
+                        textAnchor={f === 0 ? 'start' : f === 1 ? 'end' : 'middle'}
                         fontSize={11}
                         fill="#5b6b6e"
                     >
-                        {formatAxis(max * f)}
+                        {axisTime(range, from + f * span)}
                     </text>
-                </g>
-            ))}
+                ))}
 
-            {type === 'line' ? (
-                <>
-                    <path d={area} fill={color} fillOpacity={0.12} />
-                    <path
-                        d={line}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth={2}
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                    />
-                </>
-            ) : (
-                points.map((p, i) => (
+                {/* Colunas invisíveis: mostram o valor do intervalo ao passar o mouse. */}
+                {points.map((p, i) => (
                     <rect
-                        key={p.time}
-                        x={xCenter(i) - barW / 2}
-                        y={y(p.value)}
-                        width={barW}
-                        height={Math.max(baseline - y(p.value), 0)}
-                        fill={color}
-                        rx={1}
-                    />
-                ))
-            )}
-
-            {GRID.map((f) => (
-                <text
-                    key={`x-${f}`}
-                    x={PAD.left + f * innerW}
-                    y={H - 6}
-                    textAnchor={f === 0 ? 'start' : f === 1 ? 'end' : 'middle'}
-                    fontSize={11}
-                    fill="#5b6b6e"
-                >
-                    {axisTime(range, from + f * span)}
-                </text>
-            ))}
-
-            {/* Colunas invisíveis: mostram o valor do intervalo ao passar o mouse. */}
-            {points.map((p, i) => (
-                <rect
-                    key={`hit-${p.time}`}
-                    x={PAD.left + colW * i}
-                    y={PAD.top}
-                    width={colW}
-                    height={innerH}
-                    fill="transparent"
-                >
-                    <title>{`${fullFmt.format(new Date(p.time))}: ${formatValue(p.value)}`}</title>
-                </rect>
-            ))}
-        </svg>
+                        key={`hit-${p.time}`}
+                        x={PAD.left + colW * i}
+                        y={PAD.top}
+                        width={colW}
+                        height={innerH}
+                        fill="transparent"
+                    >
+                        <title>{`${fullFmt.format(new Date(p.time))}: ${formatValue(p.value)}`}</title>
+                    </rect>
+                ))}
+            </svg>
+        </AnimatedContent>
     );
 }

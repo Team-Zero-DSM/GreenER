@@ -15,11 +15,16 @@ dos cálculos ambientais estão em [docs/cálculo.md](../docs/cálculo.md).
 | `monitoring`  | Expõe os horários, contadores e dependências da rodada mantidos em memória.                                                       |
 | `comparisons` | Compara amostras em um período comum e simula emissões com o fator atual de outra região.                                         |
 | `rankings`    | Publica GET /api/v1/rankings com classificação por energia ou CO₂e e período configurável.                                        |
+| `accounts`    | Cadastro, login, perfil, alteração de senha, recuperação e criação do primeiro administrador.                                     |
+| `dashboards`  | Consulta e salva o painel pessoal em `painel_usuario`.                                                                            |
+| `project`     | Administração de usuários, intervalo de coleta e versões dos coeficientes.                                                        |
+| `reports`     | Prévia e PDF com dados históricos; reutiliza as consultas consolidadas de `analytics`.                                            |
 
 `app.ts` configura o Express e monta `/api/v1`. `index.ts` registra os
 roteadores, incluindo `/service` como alias de `/services`. `server.ts`
-inicia o servidor HTTP e o job de coleta. Autenticação JWT, configuração do
-job por HTTP e uma rota separada de cenários são propostas futuras.
+inicia o servidor HTTP e o job de coleta. `requireAccount` valida a sessão nas
+rotas protegidas, e `requireAdmin` restringe `/project/*`. Contratos completos,
+permissões e exemplos estão no documento da API.
 
 Consulte os [comandos de execução](../README.md#como-executar), o
 [contrato da API](../docs/API.md) e o [modelo do banco](../database/arquitetura.md).
@@ -162,9 +167,14 @@ backend/
 │   │   ├── metrics-api.schema.ts
 │   │   └── metrics-api.mapper.ts
 │   ├── jobs/
-│   │   └── collections.job.ts
+│   │   ├── collections.job.ts
+│   │   └── collection-interval.ts
 │   ├── modules/
+│   │   ├── accounts/
 │   │   ├── analytics/
+│   │   ├── dashboards/
+│   │   ├── project/
+│   │   ├── reports/
 │   │   ├── collections/
 │   │   ├── comparisons/
 │   │   ├── monitoring/
@@ -172,12 +182,13 @@ backend/
 │   │   ├── regions/
 │   │   └── services/
 │   ├── scripts/
-│   │   └── sync-regions.ts
+│   │   ├── sync-regions.ts
+│   │   └── create-admin.ts
 │   └── shared/
 │       ├── errors/
 │       ├── middleware/
 │       └── types/
-└── tests/unit/
+└── tests/                 # unit/ e integration/
 ```
 
 O módulo `monitoring` expõe `GET /api/v1/monitoring/status`. O
@@ -216,30 +227,46 @@ Cada camada possui uma responsabilidade específica.
 As variáveis são carregadas com `dotenv/config`. Use [.env.example](./.env.example)
 como referência e execute os comandos Node.js dentro de `backend/`.
 
-| Variável                                              | Uso atual                                                                             |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `PORT`                                                | Porta HTTP; padrão `3000` quando ausente.                                             |
-| `CORS_ORIGIN`                                         | Origem permitida pelo middleware CORS; exemplo `http://localhost:5173`.               |
-| `DATABASE_HOST`                                       | `database` no Compose; `localhost` ao executar Node.js no host.                       |
-| `DATABASE_PORT`                                       | `5432` no Compose; `5433` no host.                                                    |
-| `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | No Compose de desenvolvimento: `greener`, `postgres`, `postgres`.                     |
-| `METRICS_API_URL`, `CARBON_API_URL`                   | Bases das integrações externas, obrigatórias para criar o serviço de coleta.          |
-| `COLLECTION_INTERVAL_SECONDS`                         | Espera após cada rodada; padrão de 30 segundos para valor não positivo ou não finito. |
-| `JWT_SECRET`                                          | Presente no exemplo; ainda sem autenticação implementada nas rotas.                   |
+| Variável                                              | Uso atual                                                                                                                               |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                            | Em produção, exige segredo JWT de pelo menos 32 bytes e TLS nas conexões SMTP que não usam a porta 465.                                 |
+| `PORT`                                                | Porta HTTP; padrão 3000.                                                                                                                |
+| `CORS_ORIGIN`                                         | Origem do frontend; exemplo local `http://localhost:5173`.                                                                              |
+| `DATABASE_URL`                                        | Connection string do PostgreSQL. Quando definida, tem prioridade sobre as variáveis separadas de conexão.                               |
+| `DATABASE_HOST`, `DATABASE_PORT`                      | Sem `DATABASE_URL`: `database:5432` no Compose ou `localhost:5433` no host.                                                             |
+| `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD` | Sem `DATABASE_URL`: nome, usuário e senha do banco. O Compose de desenvolvimento usa `greener`, `postgres`, `postgres`.                 |
+| `DATABASE_SSL`                                        | Somente o valor `true` ativa SSL; a configuração atual do driver usa `rejectUnauthorized: false`.                                       |
+| `METRICS_API_URL`, `CARBON_API_URL`                   | Bases das integrações, obrigatórias ao carregar as rotas de coleta.                                                                     |
+| `COLLECTION_INTERVAL_SECONDS`                         | Fallback se a configuração não existir no banco. Número positivo e finito ou padrão de 30 segundos. O seed persistido usa 300 segundos. |
+| `JWT_SECRET`                                          | Segredo para assinatura e verificação HS256. Obrigatório para autenticação; mínimo de 32 bytes em produção.                             |
+| `APP_PUBLIC_URL`                                      | Base HTTP/HTTPS do frontend para montar o link `/login#token=...`.                                                                      |
+| `SMTP_FROM`                                           | Remetente do e-mail de recuperação, obrigatório também no envio via Brevo.                                                              |
+| `SMTP_HOST`, `SMTP_PORT`                              | Host obrigatório ao usar SMTP; porta inteira de 1 a 65535, padrão 587. Porta 465 usa TLS direto.                                        |
+| `SMTP_USER`, `SMTP_PASSWORD`                          | Credenciais SMTP; informar as duas ou omitir ambas.                                                                                     |
+| `BREVO_API_KEY`                                       | Quando preenchida, seleciona envio por API HTTP em vez de SMTP.                                                                         |
+| `TEST_DATABASE_URL`                                   | Conexão administrativa dos testes de integração; o usuário precisa criar e remover bancos descartáveis.                                 |
 
-| Comando                | Finalidade                                                            |
-| ---------------------- | --------------------------------------------------------------------- |
-| `npm ci`               | Instalar as dependências do lockfile.                                 |
-| `npm run dev`          | Executar `src/server.ts` com reinício ao alterar arquivos TypeScript. |
-| `npm run build`        | Compilar o TypeScript para `dist/`.                                   |
-| `npm start`            | Executar `dist/server.js` após o build.                               |
-| `npm test`             | Executar os testes com Vitest.                                        |
-| `npm run test:watch`   | Manter os testes em execução durante o desenvolvimento.               |
-| `npm run lint`         | Verificar o código com ESLint, sem avisos permitidos.                 |
-| `npm run format:check` | Conferir a formatação com Prettier.                                   |
+O [README](../README.md#recuperação-de-senha) contém exemplos de configuração de
+e-mail. Credenciais reais ficam no ambiente de execução.
 
-As rotas atuais são públicas. A presença de `bcrypt`, `jsonwebtoken` e
-`JWT_SECRET` não implica que o login já esteja disponível.
+| Comando                | Finalidade                                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `npm ci`               | Instalar as dependências do lockfile.                                                                          |
+| `npm run dev`          | Executar `src/server.ts` com reinício ao alterar TypeScript.                                                   |
+| `npm run build`        | Compilar para `dist/`.                                                                                         |
+| `npm start`            | Executar `dist/server.js` após o build.                                                                        |
+| `npm run admin:create` | Criar/promover o primeiro administrador por nome, e-mail e senha. Recusa se já existir um administrador ativo. |
+| `npm test`             | Executar Vitest; sem `TEST_DATABASE_URL`, os testes de integração são ignorados.                               |
+| `npm run test:watch`   | Manter os testes em execução durante o desenvolvimento.                                                        |
+| `npm run lint`         | Verificar ESLint, sem avisos permitidos.                                                                       |
+| `npm run format:check` | Conferir Prettier.                                                                                             |
+
+A [suíte da #169](./tests/integration/modules/accounts/accounts.routes.test.ts)
+usa a API local com bancos descartáveis, simula o envio de recuperação e define
+suas próprias URLs locais de integração. As evidências e a relação com as User
+Stories estão no [plano de entregas](../docs/plano-de-entregas.md#entregas-do-backend-na-sprint-3).
+
+---
 
 # 7. Validação com Zod
 
@@ -622,19 +649,26 @@ Collection Service
 
 # 17. Configuração do Intervalo
 
-O código em `jobs/collections.job.ts` lê `COLLECTION_INTERVAL_SECONDS`.
-O valor deve ser um número positivo finito; caso contrário, o padrão é
-30 segundos. O primeiro ciclo começa quando o servidor HTTP inicia.
-Cada novo ciclo é agendado com `setTimeout` após o fim da rodada anterior.
+`jobs/collection-interval.ts` consulta `ProjectRepository.getInterval()`.
+O valor de `configuracao_sistema` tem prioridade; sem configuração, usa
+`COLLECTION_INTERVAL_SECONDS` positivo e finito ou o padrão de 30 segundos.
+Um banco novo tem uma linha com 300 segundos. Erro de leitura preserva o
+último valor conhecido pelo job.
 
-```text
-Backend iniciado → rodada → fim da rodada → espera configurada → nova rodada
-```
+O primeiro ciclo começa ao iniciar o servidor HTTP. O job relê o valor antes
+da coleta e antes de agendar a próxima rodada com `setTimeout`, após a conclusão
+da anterior. Uma alteração pela API afeta as próximas leituras sem reiniciar
+o processo; um timer já agendado mantém sua espera até executar.
 
-Não há leitura de `configuracao_sistema` pelo job nem alteração do intervalo
-por endpoint. A tabela existe com padrão de 300 segundos, sem controlar o
-agendamento atual. Configuração pela aplicação está prevista para depois,
-com sprint ainda a definir.
+`startCollectionJob()` é idempotente. Uma execução pendente termina antes de
+um reinício solicitado com parada/início, evitando rodadas sobrepostas e timers
+duplicados. `stopCollectionJob()` cancela o próximo timer e limpa sua previsão.
+O monitoramento publica o intervalo efetivo e a próxima execução.
+
+A consulta e a alteração administrativas usam
+[`/api/v1/project/collection`](../docs/API.md#24-configuração-de-monitoramento--implementada),
+com `intervalSeconds` inteiro de 10 a 3.600 segundos. O intervalo da amostra,
+usado no cálculo de energia, continua separado do agendamento.
 
 ---
 
@@ -1012,44 +1046,42 @@ GreenER.
 
 ---
 
-# 30. Monitoramento Settings — planejado
+# 30. Configuração do projeto — implementada
 
-O módulo `monitoring-settings` deverá administrar as configurações do
-monitoramento. Ainda não está implementado; sua sprint de entrega não foi definida.
+O módulo `project` aplica `requireAccount` e `requireAdmin` a todas as rotas:
 
-Possíveis configurações:
+| Recurso                 | Operações                                                                |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `/project/collection`   | GET e PATCH do intervalo persistido, com responsável e horário.          |
+| `/project/coefficients` | GET da versão ativa, POST de ativação e POST em `/preview` para simular. |
+| `/project/members`      | GET com busca/filtro e PATCH em `/:id` para papel/acesso.                |
 
-```text
-collection_interval_seconds
-```
+A ativação de coeficientes é transacional e mantém uma única versão ativa.
+Coletas anteriores continuam associadas à versão usada. A fórmula compartilhada
+em `collections.estimate.ts` atende coleta e prévia.
 
-Fluxo de alteração:
+O gerenciamento de usuários revalida o administrador na transação, protege
+o último administrador ativo e revoga sessões quando papel ou acesso mudam.
+Desativar uma conta remove seus tokens de recuperação. O primeiro administrador
+é configurado pelo [comando do README](../README.md#primeiro-administrador).
 
-```text
-Route
-    ↓
-Zod
-    ↓
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-PostgreSQL
-```
-
-Os contratos propostos de configuração e simulação estão em
-[docs/API.md](../docs/API.md). Quando implementados, deverão aplicar a proteção
-prevista para cada operação. JWT será entregue na Sprint 3.
+O módulo `reports` permite prévia e exportação em PDF para qualquer conta ativa
+autenticada. `MetricsSnapshotRepository` lê totais e séries na mesma transação
+`REPEATABLE READ READ ONLY`; `reports.pdf.ts` gera o arquivo em memória com
+PDFKit. Contratos e limitações estão na [API](../docs/API.md#29-relatórios-e-exportação-em-pdf).
 
 ---
 
 # 31. Autenticação — Sprint 3
 
-A autenticação JWT das operações protegidas será implementada no backend
-na Sprint 3. Dependências, JWT_SECRET e tabela usuario já existem, mas não
-comprovam login, emissão de token ou autorização. Os diagramas abaixo são propostas.
+O módulo `accounts` implementa cadastro, login, perfil e recuperação. Senhas
+usam bcrypt com custo 12; tokens JWT usam HS256 e validade de 8 horas. A
+recuperação guarda somente SHA-256 do token e expira após 30 minutos.
+O envio pode usar SMTP ou a API HTTP da Brevo, conforme o ambiente.
+
+O middleware consulta a conta ativa e compara a versão da sessão a cada
+requisição protegida. Alteração de senha, recuperação, mudança de e-mail,
+papel ou acesso invalidam sessões anteriores conforme o [contrato](../docs/API.md#23-autenticação-e-perfil).
 
 Fluxo simplificado:
 
@@ -1089,7 +1121,7 @@ flowchart TD
 
 ---
 
-# 32. Acesso às Rotas Protegidas — fluxo planejado
+# 32. Acesso às Rotas Protegidas
 
 ```mermaid
 flowchart TD
@@ -1117,7 +1149,10 @@ flowchart TD
     D -->|Não| F
 ```
 
-O controle de acesso não deve depender apenas do frontend.
+`requireAccount` retorna 401 para sessão ausente, inválida, expirada, revogada
+ou conta inativa. `requireAdmin` retorna 403 para visualizadores nas rotas de
+configuração do projeto. As consultas públicas permanecem indicadas na tabela
+[de operações](../docs/API.md#21-operações-implementadas).
 
 ---
 
@@ -1311,25 +1346,25 @@ flowchart LR
 
 # 37. Resumo das Responsabilidades
 
-| Componente                | Responsabilidade                                                                                               |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Frontend                  | Apresentar informações e permitir interação com o usuário                                                      |
-| Routes                    | Definir endpoints HTTP                                                                                         |
-| Zod                       | Validar entradas e dados externos em runtime                                                                   |
-| Controllers               | Receber requisições e produzir respostas HTTP                                                                  |
-| Services                  | Implementar e coordenar regras de negócio                                                                      |
-| Repositories              | Concentrar acesso ao PostgreSQL                                                                                |
-| Integrations              | Concentrar comunicação com APIs externas                                                                       |
-| Collection Job            | Iniciar periodicamente os ciclos de monitoramento                                                              |
-| Auth (Sprint 3)           | Autenticar usuários e emitir tokens JWT; ainda não implementado                                                |
-| Regions                   | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
-| Analytics                 | Consulta histórico e totais das amostras por serviço.                                                          |
-| Comparisons               | Compara serviços e simula emissões em outra região.                                                            |
-| Collections e Services    | Consultam a última tentativa e o histórico de observações por serviço.                                         |
-| PostgreSQL                | Persiste serviços, regiões, parâmetros, amostras e observações.                                                |
-| Metrics API               | Fornecer serviços e métricas                                                                                   |
-| Carbon API                | Fornecer intensidade de carbono                                                                                |
-| JWT Middleware (Sprint 3) | Proteção planejada, ainda ausente                                                                              |
+| Componente             | Responsabilidade                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Frontend               | Apresentar informações e permitir interação com o usuário                                                      |
+| Routes                 | Definir endpoints HTTP                                                                                         |
+| Zod                    | Validar entradas e dados externos em runtime                                                                   |
+| Controllers            | Receber requisições e produzir respostas HTTP                                                                  |
+| Services               | Implementar e coordenar regras de negócio                                                                      |
+| Repositories           | Concentrar acesso ao PostgreSQL                                                                                |
+| Integrations           | Concentrar comunicação com APIs externas                                                                       |
+| Collection Job         | Iniciar periodicamente os ciclos de monitoramento                                                              |
+| Accounts               | Cadastro, sessão JWT, perfil e recuperação de senha.                                                           |
+| Regions                | Consulta regiões, fatores ambientais, contadores e totais do período; a sincronização continua em collections. |
+| Analytics              | Consulta histórico e totais das amostras por serviço.                                                          |
+| Comparisons            | Compara serviços e simula emissões em outra região.                                                            |
+| Collections e Services | Consultam a última tentativa e o histórico de observações por serviço.                                         |
+| PostgreSQL             | Persiste serviços, regiões, parâmetros, amostras e observações.                                                |
+| Metrics API            | Fornecer serviços e métricas                                                                                   |
+| Carbon API             | Fornecer intensidade de carbono                                                                                |
+| JWT Middleware         | Verificação da assinatura, expiração, conta ativa e versão da sessão; autorização administrativa.              |
 
 ---
 
@@ -1347,7 +1382,7 @@ collections
 
 services
 
-monitoring-settings
+project
 ```
 
 ---
@@ -1460,13 +1495,14 @@ persistidos em `status_coleta`. Consulte as [rotas disponíveis](../docs/API.md#
 - pasta `integrations`;
 - pasta `jobs`;
 - timeout de 8 segundos;
-- intervalo atual por variável de ambiente; configuração pela aplicação futura;
+- intervalo persistido no banco, com fallback para o ambiente;
+- autenticação e autorização por middleware nas rotas protegidas;
 - organização interna dos arquivos dos módulos.
 
 ## Parâmetros de operação
 
-`COLLECTION_INTERVAL_SECONDS` controla a espera entre rodadas. O job não lê
-o campo de configuração já existente no banco. `monitoring-settings` é futuro.
+`configuracao_sistema` fornece a espera entre rodadas. Sem a linha persistida,
+`COLLECTION_INTERVAL_SECONDS` ou 30 segundos fornecem o fallback.
 O intervalo da amostra da API é usado no cálculo energético e não agenda o job.
 A interface acompanha o estado do job e busca os dados após a conclusão das rodadas;
 o intervalo da amostra continua independente desse agendamento.
@@ -1537,7 +1573,7 @@ agenda a seguinte enquanto estiver ativo.
 ```text
 Collection Job
       ↓
-ler intervalo do ambiente
+ler intervalo persistido, com fallback para o ambiente
       ↓
 Collection Service
       ↓

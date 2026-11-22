@@ -9,14 +9,16 @@ interface ProfileInformationCardProps {
 
 export function ProfileInformationCard({ profile }: ProfileInformationCardProps) {
     return (
-        <div className="flex items-center gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
-                <UserRound className="size-7" aria-hidden="true" />
+        <div className="flex items-center gap-4 py-2 sm:gap-5 sm:py-3">
+            {/* Avatar do usuário. */}
+            <div className="flex size-16 shrink-0 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-400/10 text-emerald-300 shadow-[0_0_24px_rgba(52,211,153,0.08)]">
+                <UserRound className="size-8" aria-hidden="true" />
             </div>
 
-            <div className="min-w-0 flex-1 space-y-1">
+            {/* Nome, função e e-mail. */}
+            <div className="min-w-0 flex-1 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="break-words text-lg font-semibold text-foreground">
+                    <h2 className="break-words text-xl leading-tight font-semibold text-foreground sm:text-2xl">
                         {profile.name}
                     </h2>
 
@@ -28,7 +30,9 @@ export function ProfileInformationCard({ profile }: ProfileInformationCardProps)
                     </Badge>
                 </div>
 
-                <p className="break-all text-sm text-muted-foreground">{profile.email}</p>
+                <p className="break-all text-sm text-muted-foreground sm:text-base">
+                    {profile.email}
+                </p>
             </div>
         </div>
     );

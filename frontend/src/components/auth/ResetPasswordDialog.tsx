@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { AuthInput } from '@/components/auth/AuthInput';
+
 import { resetPassword } from '@/api/auth';
+
 import { isCommonPassword } from '@/lib/commonPasswords';
 
 interface ResetPasswordDialogProps {
@@ -112,19 +114,22 @@ export function ResetPasswordDialog({
                     handleClose();
                 }
             }}
-            className="fixed left-1/2 top-1/2 m-0 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-700 bg-slate-950 p-0 text-slate-100 shadow-2xl backdrop:bg-slate-950/75"
+            className="fixed left-1/2 top-1/2 m-0 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/70 bg-card/80 p-0 text-card-foreground shadow-2xl backdrop-blur-xl backdrop:bg-background/75"
         >
             <div className="flex flex-col gap-6 p-6 sm:p-8">
                 {!isTokenValid ? (
                     <>
                         <div className="flex flex-col gap-2">
-                            <h2 id="reset-password-title" className="text-xl font-semibold">
+                            <h2
+                                id="reset-password-title"
+                                className="text-xl font-semibold text-foreground"
+                            >
                                 Link inválido
                             </h2>
 
                             <p
                                 id="reset-password-description"
-                                className="text-sm leading-relaxed text-slate-400"
+                                className="text-sm leading-relaxed text-muted-foreground"
                             >
                                 Não foi possível identificar um token válido no link de recuperação.
                                 Solicite um novo link para continuar.
@@ -159,13 +164,16 @@ export function ResetPasswordDialog({
                                 </svg>
                             </div>
 
-                            <h2 id="reset-password-title" className="text-xl font-semibold">
+                            <h2
+                                id="reset-password-title"
+                                className="text-xl font-semibold text-foreground"
+                            >
                                 Senha redefinida!
                             </h2>
 
                             <p
                                 id="reset-password-description"
-                                className="text-sm leading-relaxed text-slate-400"
+                                className="text-sm leading-relaxed text-muted-foreground"
                             >
                                 Sua senha foi alterada com sucesso. Agora você pode entrar na sua
                                 conta utilizando a nova senha.
@@ -183,13 +191,16 @@ export function ResetPasswordDialog({
                 ) : (
                     <>
                         <div className="flex flex-col gap-2">
-                            <h2 id="reset-password-title" className="text-xl font-semibold">
+                            <h2
+                                id="reset-password-title"
+                                className="text-xl font-semibold text-foreground"
+                            >
                                 Redefinir senha
                             </h2>
 
                             <p
                                 id="reset-password-description"
-                                className="text-sm leading-relaxed text-slate-400"
+                                className="text-sm leading-relaxed text-muted-foreground"
                             >
                                 Escolha uma nova senha para sua conta.
                             </p>
@@ -235,7 +246,7 @@ export function ResetPasswordDialog({
                                     type="button"
                                     onClick={onRequestNewLink}
                                     disabled={isSubmitting}
-                                    className="inline-flex min-h-10 w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="inline-flex min-h-10 w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     Solicitar outro link
                                 </button>
@@ -244,7 +255,7 @@ export function ResetPasswordDialog({
                                     type="button"
                                     onClick={handleClose}
                                     disabled={isSubmitting}
-                                    className="inline-flex min-h-10 w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="inline-flex min-h-10 w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     Cancelar
                                 </button>

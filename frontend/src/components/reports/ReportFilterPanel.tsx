@@ -1,3 +1,4 @@
+import { AnimatedContent } from '@/components/shared/AnimatedContent';
 import { ChartCard } from '@/components/charts/ChartCard';
 import { buttonClass } from '@/components/reports/reportStyles';
 import { HISTORY_RANGES, RANGE_LABEL } from '@/lib/reports/historyRanges';
@@ -19,6 +20,15 @@ interface Props {
 
 function toggle<T>(list: T[], item: T): T[] {
     return list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
+}
+
+function getLocalDateString() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 }
 
 const CHART_TYPES: { value: ChartType; label: string }[] = [
@@ -45,6 +55,8 @@ export function ReportFiltersPanel({
     onChartChange,
     onClear,
 }: Props) {
+    const today = getLocalDateString();
+
     const excluded = new Set(excludedServiceIds);
     const allIds = catalog.flatMap((s) => s.services.map((x) => x.id));
     const selectedCount = allIds.filter((id) => !excluded.has(id)).length;
@@ -61,15 +73,19 @@ export function ReportFiltersPanel({
         (filters.from ? 1 : 0) +
         (filters.to ? 1 : 0) +
         (selectedCount < allIds.length ? 1 : 0);
+
     const subtitle =
         activeCount === 0
             ? 'Sem nenhum filtro, o relatório inclui tudo'
             : `${activeCount} ${activeCount === 1 ? 'filtro ativo' : 'filtros ativos'}`;
+
     const rangeHint = filters.from
         ? 'Usando o período do filtro “Última atualização”.'
         : filters.to
           ? 'Termina na data “Até” do filtro.'
           : null;
+
+    const fromMax = filters.to && filters.to < today ? filters.to : today;
 
     return (
         <aside
@@ -82,6 +98,7 @@ export function ReportFiltersPanel({
                         <legend className={legendClass}>
                             Serviços ({selectedCount} de {allIds.length})
                         </legend>
+
                         {allIds.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
                                 Os serviços aparecem aqui quando o relatório carregar.
@@ -97,6 +114,7 @@ export function ReportFiltersPanel({
                                     >
                                         Todos
                                     </button>
+
                                     <button
                                         type="button"
                                         className={`${toggleBase} ${toggleIdle}`}
@@ -106,6 +124,7 @@ export function ReportFiltersPanel({
                                         Nenhum
                                     </button>
                                 </div>
+
                                 <div className="max-h-72 overflow-y-auto rounded-lg border border-white/10 p-3">
                                     {catalog.map((section) => {
                                         const ids = section.services.map((s) => s.id);
@@ -114,6 +133,7 @@ export function ReportFiltersPanel({
                                         ).length;
                                         const all = selectedHere === ids.length;
                                         const some = selectedHere > 0 && !all;
+
                                         return (
                                             <div
                                                 key={section.region.code}
@@ -131,6 +151,7 @@ export function ReportFiltersPanel({
                                                     />
                                                     {section.region.name}
                                                 </label>
+
                                                 <ul className="grid gap-1.5 pl-6">
                                                     {section.services.map((service) => (
                                                         <li key={service.id}>
@@ -165,6 +186,7 @@ export function ReportFiltersPanel({
 
                     <fieldset>
                         <legend className={legendClass}>Status</legend>
+
                         <ul className="grid gap-2">
                             {REPORT_STATUSES.map((status) => (
                                 <li key={status}>
@@ -180,6 +202,7 @@ export function ReportFiltersPanel({
                                                 })
                                             }
                                         />
+
                                         <span
                                             className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo[status].className}`}
                                         >
@@ -196,6 +219,7 @@ export function ReportFiltersPanel({
 
                     <fieldset>
                         <legend className={legendClass}>Última atualização</legend>
+
                         <div className="grid gap-3">
                             <label className="grid gap-1 text-sm text-muted-foreground">
                                 De
@@ -203,10 +227,11 @@ export function ReportFiltersPanel({
                                     type="date"
                                     className={fieldClass}
                                     value={filters.from}
-                                    max={filters.to || undefined}
+                                    max={fromMax}
                                     onChange={(e) => onChange({ ...filters, from: e.target.value })}
                                 />
                             </label>
+
                             <label className="grid gap-1 text-sm text-muted-foreground">
                                 Até
                                 <input
@@ -214,6 +239,7 @@ export function ReportFiltersPanel({
                                     className={fieldClass}
                                     value={filters.to}
                                     min={filters.from || undefined}
+                                    max={today}
                                     onChange={(e) => onChange({ ...filters, to: e.target.value })}
                                 />
                             </label>
@@ -231,59 +257,72 @@ export function ReportFiltersPanel({
 
                     <fieldset className="border-t border-white/10 pt-5">
                         <legend className={legendClass}>Gráfico de histórico</legend>
+
                         <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
                             <input
                                 type="checkbox"
                                 className="size-4 accent-cyan-400"
                                 checked={chart.enabled}
                                 onChange={(e) =>
-                                    onChartChange({ ...chart, enabled: e.target.checked })
+                                    onChartChange({
+                                        ...chart,
+                                        enabled: e.target.checked,
+                                    })
                                 }
                             />
                             Incluir no relatório
                         </label>
-                        {chart.enabled && (
-                            <div className="mt-3 grid gap-3">
-                                <div
-                                    role="group"
-                                    aria-label="Tipo de gráfico"
-                                    className="flex gap-2"
-                                >
-                                    {CHART_TYPES.map(({ value, label }) => (
-                                        <button
-                                            key={value}
-                                            type="button"
-                                            aria-pressed={chart.type === value}
-                                            onClick={() => onChartChange({ ...chart, type: value })}
-                                            className={`${toggleBase} ${chart.type === value ? togglePressed : toggleIdle}`}
-                                        >
-                                            {label}
-                                        </button>
-                                    ))}
-                                </div>
-                                <label className="grid gap-1 text-sm text-muted-foreground">
-                                    Período
-                                    <select
-                                        className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-50`}
-                                        disabled={Boolean(filters.from)}
-                                        value={chart.range}
-                                        onChange={(e) =>
-                                            onChartChange({
-                                                ...chart,
-                                                range: e.target.value as HistoryRange,
-                                            })
-                                        }
+
+                        <AnimatedContent
+                            animationKey={chart.enabled ? 'chart-enabled' : 'chart-disabled'}
+                            className="mt-3 print:!h-auto print:!overflow-visible"
+                        >
+                            {chart.enabled && (
+                                <div className="grid gap-3">
+                                    <div
+                                        role="group"
+                                        aria-label="Tipo de gráfico"
+                                        className="flex gap-2"
                                     >
-                                        {HISTORY_RANGES.map((range) => (
-                                            <option key={range} value={range}>
-                                                {RANGE_LABEL[range]}
-                                            </option>
+                                        {CHART_TYPES.map(({ value, label }) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                aria-pressed={chart.type === value}
+                                                onClick={() =>
+                                                    onChartChange({ ...chart, type: value })
+                                                }
+                                                className={`${toggleBase} ${chart.type === value ? togglePressed : toggleIdle}`}
+                                            >
+                                                {label}
+                                            </button>
                                         ))}
-                                    </select>
-                                    {rangeHint && <span className="text-xs">{rangeHint}</span>}
-                                </label>
-                            </div>
-                        )}
+                                    </div>
+
+                                    <label className="grid gap-1 text-sm text-muted-foreground">
+                                        Período
+                                        <select
+                                            className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-50`}
+                                            disabled={Boolean(filters.from)}
+                                            value={chart.range}
+                                            onChange={(e) =>
+                                                onChartChange({
+                                                    ...chart,
+                                                    range: e.target.value as HistoryRange,
+                                                })
+                                            }
+                                        >
+                                            {HISTORY_RANGES.map((range) => (
+                                                <option key={range} value={range}>
+                                                    {RANGE_LABEL[range]}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {rangeHint && <span className="text-xs">{rangeHint}</span>}
+                                    </label>
+                                </div>
+                            )}
+                        </AnimatedContent>
                     </fieldset>
                 </div>
             </ChartCard>

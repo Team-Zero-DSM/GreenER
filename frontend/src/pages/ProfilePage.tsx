@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { UserRound, ShieldCheck, Settings, LogOut } from 'lucide-react';
 
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageShell } from '@/components/shared/PageShell';
-
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 import { ProfileInformationCard } from '@/components/profile/ProfileInformationCard';
 import { ProfileInformationForm } from '@/components/profile/ProfileInformationForm';
 import { ProfilePasswordForm } from '@/components/profile/ProfilePasswordForm';
 import { ProfileMenuItem } from '@/components/profile/ProfileMenuItem';
 
+import { AnimatedContent } from '@/components/shared/AnimatedContent';
+
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 
 import type { UpdateProfileRequest } from '@/types/profile';
+
+import { ProfileGlobeBackground } from '@/components/globe/ProfileGlobeBackground';
 
 type ProfileSection = 'overview' | 'information' | 'security';
 
@@ -37,118 +38,134 @@ export function ProfilePage() {
     async function handleSaveProfile(data: UpdateProfileRequest) {
         await saveProfile(data);
 
-        // Volta ao menu somente depois da operação bem-sucedida.
+        // Retorna ao menu somente depois do salvamento bem-sucedido.
         setActiveSection('overview');
     }
 
     return (
-        <PageShell>
-            <PageHeader
-                title="Meu perfil"
-                description="Gerencie suas informações pessoais e as configurações da sua conta."
-            />
+        <>
+            {/* Fundo espacial e globo 3D. */}
+            <ProfileGlobeBackground />
 
-            {/* Carregamento inicial */}
-            {isLoading && (
-                <Card className="mx-auto w-full max-w-2xl border border-border/70">
-                    <CardContent className="flex min-h-40 items-center justify-center">
-                        <p className="text-sm text-muted-foreground">
-                            Carregando informações do perfil...
-                        </p>
-                    </CardContent>
-                </Card>
-            )}
+            <main className="relative z-10 grid h-[calc(100dvh_-_var(--header-h,5rem)_-_7rem)] min-h-0 w-full grid-cols-1 grid-rows-[minmax(0,1fr)] items-center overflow-hidden overscroll-none px-3 py-2 md:h-auto md:min-h-[calc(100svh_-_var(--header-h,_5rem)_-_4rem)] md:grid-rows-none md:overflow-visible md:px-4 md:py-8 lg:grid-cols-2 lg:px-0 lg:py-6">
+                {/* Divisão visual exclusiva do desktop. */}
+                <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-8 left-1/2 hidden w-px -translate-x-1/2 bg-linear-to-b from-transparent via-border/50 to-transparent lg:block"
+                />
 
-            {/* Erro ao carregar o perfil */}
-            {!isLoading && error && (
-                <Card className="mx-auto w-full max-w-2xl border border-border/70">
-                    <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
-                        <p className="text-sm text-red-400">{error}</p>
+                {/* Card centralizado na direita no desktop e ocupando a largura disponível no mobile. */}
+                <section className="mx-auto flex max-h-full min-h-0 w-full max-w-2xl flex-col lg:col-start-2 lg:w-[90%] lg:max-w-4xl">
+                    <Card className="max-h-full min-h-0 w-full overflow-hidden border border-border/70 bg-card/75 sm:bg-card/65">
+                        {/* Cabeçalho do perfil. */}
+                        <CardHeader className="gap-1 px-4 sm:px-8">
+                            <CardTitle className="text-2xl font-semibold">Meu perfil</CardTitle>
 
-                        <button
-                            type="button"
-                            onClick={reload}
-                            className="min-h-11 rounded-lg bg-emerald-400 px-4 text-sm font-semibold text-slate-950 hover:bg-emerald-300"
-                        >
-                            Tentar novamente
-                        </button>
-                    </CardContent>
-                </Card>
-            )}
+                            <CardDescription className="text-sm leading-relaxed xl:whitespace-nowrap">
+                                Gerencie suas informações pessoais e a segurança da sua conta.
+                            </CardDescription>
+                        </CardHeader>
 
-            {/* Conteúdo do perfil */}
-            {!isLoading && !error && profile && (
-                <Card className="mx-auto min-h-[34rem] w-full max-w-2xl border border-border/70 bg-card/80">
-                    <CardContent className="space-y-6 p-6 sm:p-8">
-                        {/* Área fixa: identificação do usuário */}
-                        <ProfileInformationCard profile={profile} />
+                        {/* Carregamento inicial. */}
+                        {isLoading && (
+                            <CardContent className="flex min-h-[24rem] items-center justify-center px-4 sm:px-8">
+                                <p role="status" className="text-sm text-muted-foreground">
+                                    Carregando informações do perfil...
+                                </p>
+                            </CardContent>
+                        )}
 
-                        <div className="border-t border-border/70" />
+                        {/* Erro ao carregar o perfil. */}
+                        {!isLoading && error && (
+                            <CardContent className="flex min-h-[24rem] flex-col items-center justify-center gap-4 px-4 text-center sm:px-8">
+                                <p role="alert" className="text-sm text-red-400">
+                                    {error}
+                                </p>
 
-                        {/* Área dinâmica: opções e formulários */}
-                        <div className="min-h-[20rem]">
-                            {/* Menu principal */}
-                            {activeSection === 'overview' && (
-                                <div className="space-y-2">
-                                    <ProfileMenuItem
-                                        icon={UserRound}
-                                        title="Informações pessoais"
-                                        description="Alterar nome e e-mail"
-                                        onClick={() => setActiveSection('information')}
-                                    />
+                                <button
+                                    type="button"
+                                    onClick={reload}
+                                    className="min-h-11 rounded-lg bg-emerald-400 px-4 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-300"
+                                >
+                                    Tentar novamente
+                                </button>
+                            </CardContent>
+                        )}
 
-                                    <ProfileMenuItem
-                                        icon={ShieldCheck}
-                                        title="Segurança da conta"
-                                        description="Gerenciar senha de acesso"
-                                        onClick={() => setActiveSection('security')}
-                                    />
+                        {/* Conteúdo do perfil. */}
+                        {!isLoading && !error && profile && (
+                            <CardContent className="space-y-4 px-4 py-3 sm:space-y-6 sm:px-8 sm:py-6">
+                                {/* Identificação fixa do usuário. */}
+                                <ProfileInformationCard profile={profile} />
 
-                                    {/* Configurações exclusivas do administrador */}
-                                    {profile.role === 'admin' && (
-                                        <ProfileMenuItem
-                                            icon={Settings}
-                                            title="Configurações do sistema"
-                                            description="Gerenciar configurações administrativas"
-                                            to="/configuracoes"
+                                <div className="border-t border-border/70" />
+
+                                {/* Conteúdo dinâmico com transição entre seções. */}
+                                <AnimatedContent animationKey={activeSection}>
+                                    {/* Menu principal. */}
+                                    {activeSection === 'overview' && (
+                                        <div className="space-y-2">
+                                            <ProfileMenuItem
+                                                icon={UserRound}
+                                                title="Informações pessoais"
+                                                description="Alterar nome e e-mail"
+                                                onClick={() => setActiveSection('information')}
+                                            />
+
+                                            <ProfileMenuItem
+                                                icon={ShieldCheck}
+                                                title="Segurança da conta"
+                                                description="Gerenciar senha de acesso"
+                                                onClick={() => setActiveSection('security')}
+                                            />
+
+                                            {/* Opção exclusiva do administrador. */}
+                                            {profile.role === 'admin' && (
+                                                <ProfileMenuItem
+                                                    icon={Settings}
+                                                    title="Configurações do sistema"
+                                                    description="Gerenciar configurações administrativas"
+                                                    to="/configuracoes"
+                                                />
+                                            )}
+
+                                            {/* Sair da conta. */}
+                                            <div className="mt-4 border-t border-border/70 pt-3">
+                                                <ProfileMenuItem
+                                                    icon={LogOut}
+                                                    title="Sair da conta"
+                                                    description="Encerrar sua sessão na plataforma"
+                                                    tone="danger"
+                                                    onClick={logout}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Edição das informações pessoais. */}
+                                    {activeSection === 'information' && (
+                                        <ProfileInformationForm
+                                            profile={profile}
+                                            onSave={handleSaveProfile}
+                                            onBack={() => setActiveSection('overview')}
+                                            isSaving={isSavingProfile}
                                         />
                                     )}
 
-                                    {/* Sair da conta */}
-                                    <div className="mt-4 border-t border-border/70 pt-3">
-                                        <ProfileMenuItem
-                                            icon={LogOut}
-                                            title="Sair da conta"
-                                            description="Encerrar sua sessão na plataforma"
-                                            tone="danger"
-                                            onClick={logout}
+                                    {/* Alteração de senha. */}
+                                    {activeSection === 'security' && (
+                                        <ProfilePasswordForm
+                                            onSubmit={savePassword}
+                                            onBack={() => setActiveSection('overview')}
+                                            isSubmitting={isChangingPassword}
                                         />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Formulário de informações pessoais */}
-                            {activeSection === 'information' && (
-                                <ProfileInformationForm
-                                    profile={profile}
-                                    onSave={handleSaveProfile}
-                                    onBack={() => setActiveSection('overview')}
-                                    isSaving={isSavingProfile}
-                                />
-                            )}
-
-                            {/* Formulário de segurança */}
-                            {activeSection === 'security' && (
-                                <ProfilePasswordForm
-                                    onSubmit={savePassword}
-                                    onBack={() => setActiveSection('overview')}
-                                    isSubmitting={isChangingPassword}
-                                />
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-        </PageShell>
+                                    )}
+                                </AnimatedContent>
+                            </CardContent>
+                        )}
+                    </Card>
+                </section>
+            </main>
+        </>
     );
 }
