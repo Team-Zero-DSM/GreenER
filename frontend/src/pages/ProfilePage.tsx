@@ -1,14 +1,7 @@
-
 import { useState } from 'react';
 import { UserRound, ShieldCheck, Settings, LogOut } from 'lucide-react';
 
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 import { ProfileInformationCard } from '@/components/profile/ProfileInformationCard';
 import { ProfileInformationForm } from '@/components/profile/ProfileInformationForm';
@@ -40,8 +33,7 @@ export function ProfilePage() {
         savePassword,
     } = useProfile();
 
-    const [activeSection, setActiveSection] =
-        useState<ProfileSection>('overview');
+    const [activeSection, setActiveSection] = useState<ProfileSection>('overview');
 
     async function handleSaveProfile(data: UpdateProfileRequest) {
         await saveProfile(data);
@@ -67,9 +59,7 @@ export function ProfilePage() {
                     <Card className="max-h-full min-h-0 w-full overflow-hidden border border-border/70 bg-card/75 sm:bg-card/65">
                         {/* Cabeçalho do perfil. */}
                         <CardHeader className="gap-1 px-4 sm:px-8">
-                            <CardTitle className="text-2xl font-semibold">
-                                Meu perfil
-                            </CardTitle>
+                            <CardTitle className="text-2xl font-semibold">Meu perfil</CardTitle>
 
                             <CardDescription className="text-sm leading-relaxed xl:whitespace-nowrap">
                                 Gerencie suas informações pessoais e a segurança da sua conta.
@@ -79,10 +69,7 @@ export function ProfilePage() {
                         {/* Carregamento inicial. */}
                         {isLoading && (
                             <CardContent className="flex min-h-[24rem] items-center justify-center px-4 sm:px-8">
-                                <p
-                                    role="status"
-                                    className="text-sm text-muted-foreground"
-                                >
+                                <p role="status" className="text-sm text-muted-foreground">
                                     Carregando informações do perfil...
                                 </p>
                             </CardContent>
@@ -122,18 +109,14 @@ export function ProfilePage() {
                                                 icon={UserRound}
                                                 title="Informações pessoais"
                                                 description="Alterar nome e e-mail"
-                                                onClick={() =>
-                                                    setActiveSection('information')
-                                                }
+                                                onClick={() => setActiveSection('information')}
                                             />
 
                                             <ProfileMenuItem
                                                 icon={ShieldCheck}
                                                 title="Segurança da conta"
                                                 description="Gerenciar senha de acesso"
-                                                onClick={() =>
-                                                    setActiveSection('security')
-                                                }
+                                                onClick={() => setActiveSection('security')}
                                             />
 
                                             {/* Opção exclusiva do administrador. */}
@@ -164,9 +147,7 @@ export function ProfilePage() {
                                         <ProfileInformationForm
                                             profile={profile}
                                             onSave={handleSaveProfile}
-                                            onBack={() =>
-                                                setActiveSection('overview')
-                                            }
+                                            onBack={() => setActiveSection('overview')}
                                             isSaving={isSavingProfile}
                                         />
                                     )}
@@ -175,9 +156,7 @@ export function ProfilePage() {
                                     {activeSection === 'security' && (
                                         <ProfilePasswordForm
                                             onSubmit={savePassword}
-                                            onBack={() =>
-                                                setActiveSection('overview')
-                                            }
+                                            onBack={() => setActiveSection('overview')}
                                             isSubmitting={isChangingPassword}
                                         />
                                     )}

@@ -1,4 +1,3 @@
-
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import {
@@ -10,6 +9,7 @@ import {
     Menu,
     Server,
     UserRound,
+    ClipboardList,
     X,
 } from 'lucide-react';
 
@@ -45,14 +45,19 @@ const navItems = [
         icon: ArrowLeftRight,
         prefixes: ['/comparacao'],
     },
+    {
+        to: '/relatorio',
+        label: 'Relatório',
+        icon: ClipboardList,
+        prefixes: ['/relatorio'],
+    },
 ];
 
 // Links com indicador inferior animado.
 const navLinkClass =
-    'group relative inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-[13px] font-semibold whitespace-nowrap tracking-[0.075em] transition-colors after:absolute after:bottom-1 after:left-3 after:right-3 after:h-[2px] after:origin-center after:scale-x-0 after:rounded-full after:bg-linear-to-r after:from-emerald-300 after:to-cyan-400 after:transition-transform after:duration-200 sm:px-4 xl:gap-2.5 xl:text-sm';
+    'group relative inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-semibold whitespace-nowrap tracking-normal transition-colors after:absolute after:bottom-1 after:left-2 after:right-2 after:h-[2px] after:origin-center after:scale-x-0 after:rounded-full after:bg-linear-to-r after:from-emerald-300 after:to-cyan-400 after:transition-transform after:duration-200 xl:gap-2 xl:px-2.5 xl:text-sm';
 
-const activeClass =
-    'border-transparent text-emerald-200 after:scale-x-100';
+const activeClass = 'border-transparent text-emerald-200 after:scale-x-100';
 
 const idleClass =
     'border-transparent text-slate-300/80 hover:text-emerald-100 hover:after:scale-x-100';
@@ -96,10 +101,7 @@ function DashboardHeader({
         if (!header) return;
 
         const update = () =>
-            document.documentElement.style.setProperty(
-                '--header-h',
-                `${header.offsetHeight}px`,
-            );
+            document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
 
         update();
 
@@ -154,14 +156,11 @@ function DashboardHeader({
             }
         >
             <div className="grid h-[76px] w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center px-3 sm:px-5 lg:h-[104px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-6 2xl:px-8">
-
                 {/* Menu mobile esquerdo. */}
                 <button
                     type="button"
                     aria-label={
-                        mobileMenu === 'navigation'
-                            ? 'Fechar navegação'
-                            : 'Abrir navegação'
+                        mobileMenu === 'navigation' ? 'Fechar navegação' : 'Abrir navegação'
                     }
                     aria-expanded={mobileMenu === 'navigation'}
                     aria-controls="mobile-navigation-menu"
@@ -178,23 +177,19 @@ function DashboardHeader({
                 {/* Navegação principal do desktop. */}
                 <nav
                     aria-label="Seções do dashboard"
-                    className="col-start-1 row-start-1 hidden min-w-0 items-center justify-self-start gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex sm:gap-1 lg:gap-2 xl:gap-2.5"
+                    className="col-start-1 row-start-1 hidden min-w-0 items-center justify-self-start gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mr-4 lg:flex sm:gap-1 lg:gap-2 xl:mr-6 xl:gap-2.5 2xl:mr-8"
                 >
                     {navItems.map(({ to, label, icon: Icon, prefixes }) => {
                         const isActive =
                             pathname === to ||
-                            prefixes.some((prefix) =>
-                                pathname.startsWith(prefix),
-                            );
+                            prefixes.some((prefix) => pathname.startsWith(prefix));
 
                         return (
                             <NavLink
                                 key={to}
                                 to={to}
                                 aria-label={label}
-                                className={`${navLinkClass} ${
-                                    isActive ? activeClass : idleClass
-                                }`}
+                                className={`${navLinkClass} ${isActive ? activeClass : idleClass}`}
                             >
                                 <Icon
                                     aria-hidden="true"
@@ -205,9 +200,7 @@ function DashboardHeader({
                                     }`}
                                 />
 
-                                <span className="hidden xl:inline">
-                                    {label}
-                                </span>
+                                <span className="hidden xl:inline">{label}</span>
                             </NavLink>
                         );
                     })}
@@ -217,7 +210,7 @@ function DashboardHeader({
                 <NavLink
                     to="/inicio"
                     aria-label="Página inicial GreenER"
-                    className="group relative isolate col-start-2 row-start-1 flex h-[68px] w-[168px] items-center justify-center justify-self-center [filter:drop-shadow(0_12px_26px_rgba(0,0,0,0.28))] transition-[filter] duration-300 hover:[filter:drop-shadow(0_12px_26px_rgba(0,0,0,0.28))_drop-shadow(0_0_16px_rgba(34,211,238,0.28))_drop-shadow(0_0_28px_rgba(52,211,153,0.16))] sm:w-[190px] lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:h-full lg:w-[260px] 2xl:w-[290px]"
+                    className="group relative isolate col-start-2 row-start-1 flex h-[68px] w-[168px] items-center justify-center justify-self-center [filter:drop-shadow(0_12px_26px_rgba(0,0,0,0.28))] transition-[filter] duration-300 hover:[filter:drop-shadow(0_12px_26px_rgba(0,0,0,0.28))_drop-shadow(0_0_16px_rgba(34,211,238,0.28))_drop-shadow(0_0_28px_rgba(52,211,153,0.16)] sm:w-[190px] lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:h-full lg:w-[260px] 2xl:w-[290px]"
                 >
                     <svg
                         aria-hidden="true"
@@ -226,60 +219,19 @@ function DashboardHeader({
                         className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
                     >
                         <defs>
-                            <linearGradient
-                                id="greener-header-fill"
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                            >
-                                <stop
-                                    offset="0%"
-                                    stopColor="#10283B"
-                                    stopOpacity="0.99"
-                                />
-                                <stop
-                                    offset="100%"
-                                    stopColor="#071522"
-                                    stopOpacity="0.98"
-                                />
+                            <linearGradient id="greener-header-fill" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#10283B" stopOpacity="0.99" />
+                                <stop offset="100%" stopColor="#071522" stopOpacity="0.98" />
                             </linearGradient>
 
-                            <linearGradient
-                                id="greener-header-border"
-                                x1="0"
-                                y1="0"
-                                x2="1"
-                                y2="1"
-                            >
-                                <stop
-                                    offset="0%"
-                                    stopColor="#6EE7D1"
-                                    stopOpacity="0.42"
-                                />
-                                <stop
-                                    offset="100%"
-                                    stopColor="#22D3EE"
-                                    stopOpacity="0.22"
-                                />
+                            <linearGradient id="greener-header-border" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="#6EE7D1" stopOpacity="0.42" />
+                                <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.22" />
                             </linearGradient>
 
-                            <radialGradient
-                                id="greener-header-glow"
-                                cx="50%"
-                                cy="0%"
-                                r="90%"
-                            >
-                                <stop
-                                    offset="0%"
-                                    stopColor="#22D3EE"
-                                    stopOpacity="0.10"
-                                />
-                                <stop
-                                    offset="100%"
-                                    stopColor="#22D3EE"
-                                    stopOpacity="0"
-                                />
+                            <radialGradient id="greener-header-glow" cx="50%" cy="0%" r="90%">
+                                <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.10" />
+                                <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
                             </radialGradient>
                         </defs>
 
@@ -335,7 +287,6 @@ function DashboardHeader({
 
                 {/* Controles da região direita no desktop. */}
                 <div className="col-start-3 row-start-1 hidden min-w-0 items-center justify-self-end gap-1 sm:gap-2 lg:flex lg:gap-3">
-
                     {/* Switch de monitoramento. */}
                     <button
                         type="button"
@@ -343,14 +294,8 @@ function DashboardHeader({
                         aria-checked={monitoringOpen}
                         aria-label="Monitoramento"
                         aria-controls="monitoring-panel"
-                        onClick={() =>
-                            setMonitoringOpen((open) => !open)
-                        }
-                        title={
-                            monitoringOpen
-                                ? 'Desativar monitoramento'
-                                : 'Ativar monitoramento'
-                        }
+                        onClick={() => setMonitoringOpen((open) => !open)}
+                        title={monitoringOpen ? 'Desativar monitoramento' : 'Ativar monitoramento'}
                         className="group inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-300/80 transition-colors hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 sm:gap-2 sm:px-1.5"
                     >
                         <Activity
@@ -362,9 +307,7 @@ function DashboardHeader({
                             }`}
                         />
 
-                        <span className="hidden xl:inline">
-                            Monitoramento
-                        </span>
+                        <span className="hidden xl:inline">Monitoramento</span>
 
                         <span
                             aria-hidden="true"
@@ -384,26 +327,19 @@ function DashboardHeader({
                         </span>
                     </button>
 
-                    <div
-                        aria-hidden="true"
-                        className="mx-0.5 h-6 w-px bg-white/10 sm:mx-1"
-                    />
+                    <div aria-hidden="true" className="mx-0.5 h-6 w-px bg-white/10 sm:mx-1" />
 
                     {/* Painel personalizado. */}
                     <NavLink
                         to="/painel"
                         aria-label="Painel personalizado"
                         className={`${iconButtonClass} ${
-                            pathname === '/painel' ||
-                            pathname.startsWith('/painel/')
+                            pathname === '/painel' || pathname.startsWith('/painel/')
                                 ? iconButtonActiveClass
                                 : ''
                         }`}
                     >
-                        <LayoutDashboard
-                            aria-hidden="true"
-                            className="size-7"
-                        />
+                        <LayoutDashboard aria-hidden="true" className="size-7" />
                     </NavLink>
 
                     {/* Perfil do usuário. */}
@@ -411,16 +347,12 @@ function DashboardHeader({
                         to="/perfil"
                         aria-label="Perfil"
                         className={`${iconButtonClass} ${
-                            pathname === '/perfil' ||
-                            pathname.startsWith('/perfil/')
+                            pathname === '/perfil' || pathname.startsWith('/perfil/')
                                 ? iconButtonActiveClass
                                 : ''
                         }`}
                     >
-                        <UserRound
-                            aria-hidden="true"
-                            className="size-7"
-                        />
+                        <UserRound aria-hidden="true" className="size-7" />
                     </NavLink>
                 </div>
 
@@ -428,9 +360,7 @@ function DashboardHeader({
                 <button
                     type="button"
                     aria-label={
-                        mobileMenu === 'actions'
-                            ? 'Fechar opções'
-                            : 'Abrir opções pessoais'
+                        mobileMenu === 'actions' ? 'Fechar opções' : 'Abrir opções pessoais'
                     }
                     aria-expanded={mobileMenu === 'actions'}
                     aria-controls="mobile-actions-menu"
@@ -456,9 +386,7 @@ function DashboardHeader({
                         {navItems.map(({ to, label, icon: Icon, prefixes }) => {
                             const isActive =
                                 pathname === to ||
-                                prefixes.some((prefix) =>
-                                    pathname.startsWith(prefix),
-                                );
+                                prefixes.some((prefix) => pathname.startsWith(prefix));
 
                             return (
                                 <NavLink
@@ -474,9 +402,7 @@ function DashboardHeader({
                                     <Icon
                                         aria-hidden="true"
                                         className={`size-5 shrink-0 ${
-                                            isActive
-                                                ? 'text-emerald-300'
-                                                : 'text-slate-400'
+                                            isActive ? 'text-emerald-300' : 'text-slate-400'
                                         }`}
                                     />
                                     <span>{label}</span>
@@ -495,7 +421,6 @@ function DashboardHeader({
                     className={`${mobileMenuClass} right-3 w-[min(18rem,calc(100vw-1.5rem))] lg:hidden`}
                 >
                     <div className="flex flex-col gap-1">
-
                         {/* Monitoramento. */}
                         <button
                             type="button"
@@ -511,9 +436,7 @@ function DashboardHeader({
                                 <Activity
                                     aria-hidden="true"
                                     className={`size-5 shrink-0 ${
-                                        monitoringOpen
-                                            ? 'text-emerald-300'
-                                            : 'text-slate-400'
+                                        monitoringOpen ? 'text-emerald-300' : 'text-slate-400'
                                     }`}
                                 />
                                 <span>Monitoramento</span>
@@ -544,16 +467,12 @@ function DashboardHeader({
                             to="/painel"
                             onClick={() => setMobileMenu(null)}
                             className={`${mobileMenuItemClass} ${
-                                pathname === '/painel' ||
-                                pathname.startsWith('/painel/')
+                                pathname === '/painel' || pathname.startsWith('/painel/')
                                     ? 'bg-emerald-400/10 text-emerald-200'
                                     : 'text-slate-200 hover:bg-white/[0.05] hover:text-emerald-100'
                             }`}
                         >
-                            <LayoutDashboard
-                                aria-hidden="true"
-                                className="size-5 shrink-0"
-                            />
+                            <LayoutDashboard aria-hidden="true" className="size-5 shrink-0" />
                             <span>Painel personalizado</span>
                         </NavLink>
 
@@ -562,16 +481,12 @@ function DashboardHeader({
                             to="/perfil"
                             onClick={() => setMobileMenu(null)}
                             className={`${mobileMenuItemClass} ${
-                                pathname === '/perfil' ||
-                                pathname.startsWith('/perfil/')
+                                pathname === '/perfil' || pathname.startsWith('/perfil/')
                                     ? 'bg-emerald-400/10 text-emerald-200'
                                     : 'text-slate-200 hover:bg-white/[0.05] hover:text-emerald-100'
                             }`}
                         >
-                            <UserRound
-                                aria-hidden="true"
-                                className="size-5 shrink-0"
-                            />
+                            <UserRound aria-hidden="true" className="size-5 shrink-0" />
                             <span>Perfil</span>
                         </NavLink>
                     </div>
@@ -584,18 +499,15 @@ function DashboardHeader({
 export function DashboardLayout() {
     const { pathname } = useLocation();
 
-    const isLandingPage =
-        pathname === '/inicio' || pathname === '/inicio/';
+    const isLandingPage = pathname === '/inicio' || pathname === '/inicio/';
 
-    const isProfilePage =
-        pathname === '/perfil' || pathname.startsWith('/perfil/');
+    const isProfilePage = pathname === '/perfil' || pathname.startsWith('/perfil/');
 
     const [monitoringOpen, setMonitoringOpen] = useState(false);
 
     return (
         <MonitoringProvider>
             <div className="relative dark flex min-h-screen flex-col bg-background text-foreground">
-
                 <DashboardHeader
                     pathname={pathname}
                     monitoringOpen={monitoringOpen}
@@ -626,7 +538,8 @@ export function DashboardLayout() {
                 {!isLandingPage && !isProfilePage && (
                     <footer className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
                         <p className="mx-auto max-w-7xl text-center">
-                            Os dados são estimativas baseadas nas métricas disponíveis e nos fatores regionais de emissão.
+                            Os dados são estimativas baseadas nas métricas disponíveis e nos fatores
+                            regionais de emissão.
                         </p>
                     </footer>
                 )}

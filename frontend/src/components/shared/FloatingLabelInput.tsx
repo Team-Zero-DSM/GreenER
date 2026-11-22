@@ -102,17 +102,11 @@ export function FloatingLabelInput({
     }, [label]);
 
     // Calcula o espaço que o rótulo e seu complemento ocupam na borda.
-    const notchStart = Math.max(
-        BORDER_RADIUS * 0.6,
-        LABEL_LEFT - 5,
-    );
+    const notchStart = Math.max(BORDER_RADIUS * 0.6, LABEL_LEFT - 5);
 
     const notchEnd = Math.max(
         notchStart + 8,
-        Math.min(
-            fieldWidth - 12,
-            LABEL_LEFT + labelWidth * LABEL_SCALE + 8,
-        ),
+        Math.min(fieldWidth - 12, LABEL_LEFT + labelWidth * LABEL_SCALE + 8),
     );
 
     const notchCenter = (notchStart + notchEnd) / 2;
@@ -136,28 +130,17 @@ export function FloatingLabelInput({
         Z
     `;
 
-    const borderColor = error
-        ? '#f87171'
-        : isFocused
-          ? '#34d399'
-          : 'rgba(148, 163, 184, 0.35)';
+    const borderColor = error ? '#f87171' : isFocused ? '#34d399' : 'rgba(148, 163, 184, 0.35)';
 
-    const describedBy = [
-        ariaDescribedBy,
-        error ? errorId : undefined,
-    ]
-        .filter(Boolean)
-        .join(' ') || undefined;
+    const describedBy =
+        [ariaDescribedBy, error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
 
     function handlePasswordVisibility() {
         setShowPassword((previous) => !previous);
     }
 
     return (
-        <div
-            className={`fli w-full ${className ?? ''}`}
-            data-focused={isFocused}
-        >
+        <div className={`fli w-full ${className ?? ''}`} data-focused={isFocused}>
             <style>{`
                 .fli-label {
                     transition:
@@ -198,10 +181,7 @@ export function FloatingLabelInput({
 
             {/* Espaço superior reservado para o rótulo flutuante. */}
             <div className="pt-3">
-                <div
-                    ref={fieldRef}
-                    className="relative h-12 w-full"
-                >
+                <div ref={fieldRef} className="relative h-12 w-full">
                     {/* Borda SVG com recorte animado. */}
                     <svg
                         className="pointer-events-none absolute inset-0 overflow-visible"
@@ -234,13 +214,10 @@ export function FloatingLabelInput({
                                 height={BORDER_INSET + STROKE_WIDTH + 3}
                                 fill="black"
                                 style={{
-                                    transform: isFloating
-                                        ? 'scaleX(1)'
-                                        : 'scaleX(0)',
+                                    transform: isFloating ? 'scaleX(1)' : 'scaleX(0)',
                                     transformOrigin: `${notchCenter}px 0`,
                                     transformBox: 'view-box',
-                                    transition:
-                                        'transform 260ms cubic-bezier(.3,.7,.3,1)',
+                                    transition: 'transform 260ms cubic-bezier(.3,.7,.3,1)',
                                 }}
                             />
                         </mask>
@@ -283,9 +260,11 @@ export function FloatingLabelInput({
                             {Array.from(label).map((character, index) => (
                                 <span
                                     key={index}
-                                    style={{
-                                        '--letter-index': index,
-                                    } as CSSProperties}
+                                    style={
+                                        {
+                                            '--letter-index': index,
+                                        } as CSSProperties
+                                    }
                                 >
                                     {character === ' ' ? '\u00A0' : character}
                                 </span>
@@ -341,9 +320,7 @@ export function FloatingLabelInput({
                             type="button"
                             onPointerDown={(event) => event.preventDefault()}
                             onClick={handlePasswordVisibility}
-                            aria-label={
-                                showPassword ? 'Ocultar senha' : 'Mostrar senha'
-                            }
+                            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                             aria-pressed={showPassword}
                             className="
                                 absolute inset-y-0 right-1 z-20
@@ -366,11 +343,7 @@ export function FloatingLabelInput({
 
             {/* Mensagem opcional de validação. */}
             {error && (
-                <p
-                    id={errorId}
-                    role="alert"
-                    className="mt-1.5 text-xs text-red-400"
-                >
+                <p id={errorId} role="alert" className="mt-1.5 text-xs text-red-400">
                     {error}
                 </p>
             )}

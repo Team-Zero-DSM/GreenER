@@ -32,9 +32,7 @@ export function AuthInput({
         <div className="flex flex-col gap-1.5">
             {/* Ação adicional do campo, como recuperação de senha. */}
             {labelAction && (
-                <div className="flex items-center justify-end gap-3">
-                    {labelAction}
-                </div>
+                <div className="flex items-center justify-end gap-3">{labelAction}</div>
             )}
 
             {/* Campo compartilhado com rótulo flutuante e tooltip integrado. */}
