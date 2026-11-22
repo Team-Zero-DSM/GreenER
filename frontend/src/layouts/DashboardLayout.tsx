@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-
+import { AnimatedStarfieldBackground } from '@/components/globe/AnimatedStarfieldBackground';
 import {
     Activity,
     ArrowLeftRight,
@@ -534,7 +534,8 @@ export function DashboardLayout() {
 
     return (
         <MonitoringProvider>
-            <div className="dashboard-atmosphere relative flex min-h-screen flex-col text-foreground">
+            <div className="dashboard-atmosphere relative isolate flex min-h-screen flex-col text-foreground">
+                {!isLandingPage && !isProfilePage && <AnimatedStarfieldBackground />}
                 <DashboardHeader
                     pathname={pathname}
                     monitoringOpen={monitoringOpen}
@@ -558,12 +559,12 @@ export function DashboardLayout() {
                     </div>
                 )}
 
-                <div className="flex-1">
+                <div className="relative z-10 flex-1">
                     <Outlet />
                 </div>
 
                 {!isLandingPage && !isProfilePage && (
-                    <footer className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
+                    <footer className="relative z-10 border-t border-border px-6 py-4 text-sm text-muted-foreground">
                         <p className="mx-auto max-w-7xl text-center">
                             Os dados são estimativas baseadas nas métricas disponíveis e nos fatores
                             regionais de emissão.

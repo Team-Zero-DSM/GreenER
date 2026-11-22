@@ -454,7 +454,10 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                                             </p>
                                             <div className="mt-1.5 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                                                 <span className="truncate">
-                                                    {[service.location.city, service.location.country]
+                                                    {[
+                                                        service.location.city,
+                                                        service.location.country,
+                                                    ]
                                                         .filter(Boolean)
                                                         .join(' · ')}
                                                 </span>
@@ -703,26 +706,6 @@ export function CollectionStatusPanel() {
                             setQuery({
                                 ...query,
                                 result: value as CollectionStatusQuery['result'],
-                                page: 1,
-                            })
-                        }
-                    />
-                </div>
-
-                <div className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
-                    <span>Por página</span>
-
-                    <CollectionFilterSelect
-                        label="Quantidade por página"
-                        value={String(query.limit)}
-                        options={[3, 10, 20, 50].map((limit) => ({
-                            value: String(limit),
-                            label: String(limit),
-                        }))}
-                        onChange={(value) =>
-                            setQuery({
-                                ...query,
-                                limit: Number(value),
                                 page: 1,
                             })
                         }

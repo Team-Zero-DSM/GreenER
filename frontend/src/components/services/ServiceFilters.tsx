@@ -85,73 +85,72 @@ function FilterSelect({ value, options, onChange }: FilterSelectProps) {
 
 export function ServiceFilters({ filters, countries, onChange }: ServiceFiltersProps) {
     return (
+        <CardContent className="relative grid gap-4 overflow-visible sm:grid-cols-2 lg:grid-cols-4">
+            <label className={fieldClass}>
+                Buscar serviço
+                <input
+                    type="search"
+                    placeholder="Nome ou ID"
+                    value={filters.search}
+                    onChange={(event) => onChange({ ...filters, search: event.target.value })}
+                    className="min-h-12 w-full rounded-xl border border-border/60 bg-transparent px-3 text-sm font-normal text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10"
+                />
+            </label>
 
-            <CardContent className="relative grid gap-4 overflow-visible sm:grid-cols-2 lg:grid-cols-4">
-                <label className={fieldClass}>
-                    Buscar serviço
-                    <input
-                        type="search"
-                        placeholder="Nome ou ID"
-                        value={filters.search}
-                        onChange={(event) => onChange({ ...filters, search: event.target.value })}
-                        className="min-h-12 w-full rounded-xl border border-border/60 bg-transparent px-3 text-sm font-normal text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10"
-                    />
-                </label>
-
-                <label className={fieldClass}>
-                    Estado
-                    <FilterSelect
-                        value={filters.status}
-                        options={[
-                            { value: 'all', label: 'Todos' },
-                            ...Object.entries(statusInfo)
-                                .filter(([, info]) => visibleStatuses.includes(info.label))
-                                .map(([value, info]) => ({
-                                    value,
-                                    label: info.label,
-                                })),
-                        ]}
-                        onChange={(value) =>
-                            onChange({
-                                ...filters,
-                                status: value as ServiceStatus | 'all',
-                            })
-                        }
-                    />
-                </label>
-
-                <label className={fieldClass}>
-                    País
-                    <FilterSelect
-                        value={filters.country}
-                        options={[
-                            { value: 'all', label: 'Todos' },
-                            ...countries.map((country) => ({
-                                value: country,
-                                label: country,
+            <label className={fieldClass}>
+                Estado
+                <FilterSelect
+                    value={filters.status}
+                    options={[
+                        { value: 'all', label: 'Todos' },
+                        ...Object.entries(statusInfo)
+                            .filter(([, info]) => visibleStatuses.includes(info.label))
+                            .map(([value, info]) => ({
+                                value,
+                                label: info.label,
                             })),
-                        ]}
-                        onChange={(value) => onChange({ ...filters, country: value })}
-                    />
-                </label>
+                    ]}
+                    onChange={(value) =>
+                        onChange({
+                            ...filters,
+                            status: value as ServiceStatus | 'all',
+                        })
+                    }
+                />
+            </label>
 
-                <label className={fieldClass}>
-                    Ordenar por
-                    <FilterSelect
-                        value={filters.sort}
-                        options={[
-                            { value: 'co2e', label: 'Maior emissão' },
-                            { value: 'energy', label: 'Maior consumo' },
-                            { value: 'name', label: 'Nome' },
-                        ]}
-                        onChange={(value) =>
-                            onChange({
-                                ...filters,
-                                sort: value as ServiceSort,
-                            })
-                        }
-                    />
-                </label>
-            </CardContent>
+            <label className={fieldClass}>
+                País
+                <FilterSelect
+                    value={filters.country}
+                    options={[
+                        { value: 'all', label: 'Todos' },
+                        ...countries.map((country) => ({
+                            value: country,
+                            label: country,
+                        })),
+                    ]}
+                    onChange={(value) => onChange({ ...filters, country: value })}
+                />
+            </label>
+
+            <label className={fieldClass}>
+                Ordenar por
+                <FilterSelect
+                    value={filters.sort}
+                    options={[
+                        { value: 'co2e', label: 'Maior emissão' },
+                        { value: 'energy', label: 'Maior consumo' },
+                        { value: 'name', label: 'Nome' },
+                    ]}
+                    onChange={(value) =>
+                        onChange({
+                            ...filters,
+                            sort: value as ServiceSort,
+                        })
+                    }
+                />
+            </label>
+        </CardContent>
     );
 }

@@ -178,7 +178,7 @@ export function ReportFiltersPanel({
                                                                 {service.name}
                                                             </label>
                                                         </li>
-                                                   ))}
+                                                    ))}
                                                 </ul>
                                             </div>
                                         );
@@ -282,9 +282,7 @@ export function ReportFiltersPanel({
                                         options={CHART_TYPES}
                                         className="!flex !w-full !justify-stretch"
                                         buttonClassName="!flex-1"
-                                        onChange={(type) =>
-                                            onChartChange({ ...chart, type })
-                                        }
+                                        onChange={(type) => onChartChange({ ...chart, type })}
                                     />
 
                                     <label className="grid gap-1 text-sm text-muted-foreground">

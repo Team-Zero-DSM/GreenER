@@ -169,12 +169,6 @@ function ServiceDetail({ id }: { id: string }) {
                             </dl>
                         </CardContent>
                     </Card>
-                    <p className="text-xs text-muted-foreground">
-                        Última coleta: {formatDateTime(collection?.collectedAt)} · Status
-                        atualizado: {formatDateTime(service.statusUpdatedAt)}
-                        {history &&
-                            ` · ${history.summary.sampleCount} coletas entre ${formatDateTime(history.period.from)} e ${formatDateTime(history.period.to)}`}
-                    </p>
                     {!collection && (
                         <p className="text-sm text-muted-foreground">
                             Este serviço ainda não possui coleta. O status atual é independente das
