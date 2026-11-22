@@ -500,7 +500,7 @@ export function DashboardLayout() {
 
     return (
         <MonitoringProvider>
-            <div className="relative dark flex min-h-screen flex-col bg-background text-foreground">
+            <div className="dashboard-atmosphere relative flex min-h-screen flex-col text-foreground">
                 <DashboardHeader
                     pathname={pathname}
                     monitoringOpen={monitoringOpen}

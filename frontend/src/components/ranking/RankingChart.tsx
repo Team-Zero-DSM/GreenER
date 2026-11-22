@@ -36,19 +36,23 @@ export function RankingChart({ criterion, items }: RankingChartProps) {
                                     <Link
                                         to={`/servicos/${item.externalId}`}
                                         aria-label={`Ver ${item.name}: ${formatRankingValue(criterion, item[criterion])}`}
-                                        className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 rounded-lg px-3 py-2 text-sm transition-colors duration-200 hover:bg-white/5 sm:grid-cols-[minmax(6rem,8rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-y-0"
+                                        className="group grid grid-cols-[1.75rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl border border-border/50 bg-background/20 px-3 py-2.5 text-sm transition-[border-color,background-color] duration-200 hover:border-primary/20 hover:bg-muted/30 sm:grid-cols-[2rem_minmax(6rem,8rem)_minmax(0,1fr)_minmax(8rem,auto)] sm:gap-x-4 sm:py-3"
                                     >
-                                        <span className="col-start-1 row-start-1 min-w-0 truncate font-medium text-foreground/80 transition-colors group-hover:text-foreground sm:font-normal sm:text-muted-foreground">
+                                        <span className="col-start-1 row-start-1 inline-flex size-6 items-center justify-center rounded-md bg-muted/60 text-[11px] font-medium tabular-nums text-muted-foreground sm:col-start-1 sm:row-start-1">
+                                            {item.position ?? '—'}
+                                        </span>
+
+                                        <span className="col-start-2 row-start-1 min-w-0 truncate font-medium text-foreground sm:col-start-2 sm:row-start-1">
                                             {item.name}
                                         </span>
 
-                                        <span className="col-start-2 row-start-1 whitespace-nowrap text-right text-xs font-semibold tabular-nums text-foreground/80 sm:col-start-3 sm:text-sm">
+                                        <span className="col-start-3 row-start-1 whitespace-nowrap text-right text-xs font-medium tabular-nums text-foreground sm:col-start-4 sm:text-sm">
                                             {formatRankingValue(criterion, item[criterion])}
                                         </span>
 
-                                        <div className="col-span-2 col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-secondary/70 ring-1 ring-white/5 sm:col-span-1 sm:col-start-2 sm:row-start-1">
+                                        <div className="col-span-2 col-start-2 row-start-2 h-1.5 overflow-hidden rounded-full bg-secondary/80 sm:col-span-1 sm:col-start-3 sm:row-start-1">
                                             <div
-                                                className="h-full rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,0.25)] transition-[width,background-color] duration-500 ease-out group-hover:bg-emerald-200"
+                                                className="h-full rounded-full bg-primary/80 transition-[width,background-color] duration-500 ease-out group-hover:bg-primary"
                                                 style={{ width: `${widthPercent}%` }}
                                             />
                                         </div>

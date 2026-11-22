@@ -91,7 +91,7 @@
     --sidebar-border: rgba(255, 255, 255, 0.14);
     --sidebar-ring: #22d3ee;
     --page-background-image: radial-gradient(ellipse at top, #131a3a, #050816 70%);
-    --card-shadow: 0 12px 40px rgba(3, 6, 20, 0.45);
+    --card-shadow: 0 10px 28px rgba(3, 6, 20, 0.24);
     --panel-drag-surface: #0f1b22;
     --status-good: #22c55e;
     --status-good-foreground: #6ee7b7;
@@ -146,7 +146,7 @@
     --sidebar-border: #d5e3dc;
     --sidebar-ring: #059669;
     --page-background-image: radial-gradient(ellipse at top, #e3f3eb, #f3faf7 70%);
-    --card-shadow: 0 12px 40px rgba(30, 70, 54, 0.08);
+    --card-shadow: 0 10px 28px rgba(30, 70, 54, 0.08);
     --panel-drag-surface: #e6f2ec;
     --status-good: #15803d;
     --status-good-foreground: #166534;

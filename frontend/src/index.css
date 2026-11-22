@@ -22,6 +22,43 @@
     }
 }
 
+.dashboard-atmosphere {
+    background-color: var(--background);
+    background-image:
+        radial-gradient(
+            ellipse at 12% 24%,
+            color-mix(in srgb, var(--ring) 9%, transparent),
+            transparent 38%
+        ),
+        radial-gradient(
+            ellipse at 88% 72%,
+            color-mix(in srgb, var(--primary) 8%, transparent),
+            transparent 42%
+        ),
+        radial-gradient(
+            1px 1px at 12% 19%,
+            color-mix(in srgb, var(--foreground) 35%, transparent) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            1px 1px at 73% 14%,
+            color-mix(in srgb, var(--foreground) 30%, transparent) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            1px 1px at 86% 42%,
+            color-mix(in srgb, var(--foreground) 25%, transparent) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            1px 1px at 38% 82%,
+            color-mix(in srgb, var(--foreground) 25%, transparent) 50%,
+            transparent 100%
+        ),
+        var(--page-background-image);
+    background-attachment: fixed;
+}
+
 .region-slider {
     --swiper-navigation-size: 2.5rem;
     --swiper-navigation-color: var(--foreground);
