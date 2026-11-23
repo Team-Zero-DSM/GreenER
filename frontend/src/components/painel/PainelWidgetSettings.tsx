@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 
@@ -111,16 +110,11 @@ export function PainelWidgetSettings({
                         </span>
 
                         <div className="space-y-1">
-                            <h2
-                                id="painel-configuracao-titulo"
-                                className="text-lg font-semibold"
-                            >
+                            <h2 id="painel-configuracao-titulo" className="text-lg font-semibold">
                                 Configurar widget
                             </h2>
 
-                            <p className="truncate text-sm text-muted-foreground">
-                                {widget.title}
-                            </p>
+                            <p className="truncate text-sm text-muted-foreground">{widget.title}</p>
                         </div>
                     </div>
 
@@ -169,7 +163,6 @@ export function PainelWidgetSettings({
                     {metrics.length > 1 ? (
                         <label className={FIELD_LABEL}>
                             Métrica
-
                             <DropdownSelect
                                 value={metricId}
                                 onChange={changeMetric}
@@ -253,12 +246,9 @@ export function PainelWidgetSettings({
                     {/* Região */}
                     <label className={FIELD_LABEL}>
                         Filtrar por região
-
                         <DropdownSelect
                             value={form.region ?? ''}
-                            onChange={(value) =>
-                                setForm({ ...form, region: value || undefined })
-                            }
+                            onChange={(value) => setForm({ ...form, region: value || undefined })}
                             className="mt-2"
                             options={[
                                 { value: '', label: 'Todas as regiões' },
@@ -292,9 +282,7 @@ export function PainelWidgetSettings({
                                     className="mt-0.5 size-4 shrink-0 accent-primary"
                                 />
 
-                                <span>
-                                    Destacar o indicador quando o valor passar do limite
-                                </span>
+                                <span>Destacar o indicador quando o valor passar do limite</span>
                             </label>
 
                             {form.alert && (

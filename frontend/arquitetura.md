@@ -213,20 +213,20 @@ no [contrato da API](../docs/API.md#29-relatórios-e-exportação-em-pdf).
 
 ### 6.7. Rotas da aplicação
 
-| Rota | Componente | Comportamento |
-|---|---|---|
-| `/` | `Navigate` | Redireciona para `/login`. |
-| `/login` | `AuthPage` | Cadastro, login e recuperação de senha em `AuthLayout`. |
-| `/inicio` | `LandingPage` | Globo, regiões e totais das últimas 24 horas. |
-| `/dashboard` | `DashboardPage` | Serviços, filtros, status e última coleta. |
-| `/servicos/:id` | `ServiceDetailPage` | Detalhe e histórico do serviço. |
-| `/regioes` | `RegionPage` | Visualizações e indicadores regionais. |
-| `/ranking` | `RankingPage` | Classificação por critério e período. |
-| `/comparacao` | `ComparisonPage` | Comparação de serviços e cenários regionais. |
-| `/painel` | `PainelPage` | Widgets e configuração pessoal do painel. |
-| `/relatorio` | `ReportsPage` | Filtros, prévia, histórico, CSV e impressão. |
-| `/perfil` | `ProfilePage` | Dados pessoais e segurança da conta. |
-| `/configuracoes` | `AdminSettingsPage` | Coleta, estimativas e usuários para administradores. |
+| Rota             | Componente          | Comportamento                                           |
+| ---------------- | ------------------- | ------------------------------------------------------- |
+| `/`              | `Navigate`          | Redireciona para `/login`.                              |
+| `/login`         | `AuthPage`          | Cadastro, login e recuperação de senha em `AuthLayout`. |
+| `/inicio`        | `LandingPage`       | Globo, regiões e totais das últimas 24 horas.           |
+| `/dashboard`     | `DashboardPage`     | Serviços, filtros, status e última coleta.              |
+| `/servicos/:id`  | `ServiceDetailPage` | Detalhe e histórico do serviço.                         |
+| `/regioes`       | `RegionPage`        | Visualizações e indicadores regionais.                  |
+| `/ranking`       | `RankingPage`       | Classificação por critério e período.                   |
+| `/comparacao`    | `ComparisonPage`    | Comparação de serviços e cenários regionais.            |
+| `/painel`        | `PainelPage`        | Widgets e configuração pessoal do painel.               |
+| `/relatorio`     | `ReportsPage`       | Filtros, prévia, histórico, CSV e impressão.            |
+| `/perfil`        | `ProfilePage`       | Dados pessoais e segurança da conta.                    |
+| `/configuracoes` | `AdminSettingsPage` | Coleta, estimativas e usuários para administradores.    |
 
 As páginas internas usam `ProtectedRoute` e `DashboardLayout`. O histórico
 fica no detalhe; não há rota `/history`. A autorização administrativa também

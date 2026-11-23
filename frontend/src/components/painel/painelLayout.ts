@@ -102,11 +102,7 @@ function findNearestFreePosition(
         (a, b) => Math.abs(a - origin.x) - Math.abs(b - origin.x) || a - b,
     );
 
-    const lastOccupiedRow = Math.max(
-        origin.y,
-        0,
-        ...placed.map((item) => item.y + item.h),
-    );
+    const lastOccupiedRow = Math.max(origin.y, 0, ...placed.map((item) => item.y + item.h));
 
     // Primeiro tenta encontrar espaço na mesma linha da posição original.
     for (const x of xPositions) {
@@ -182,10 +178,8 @@ export function moveWidgetWithSwap(
         .filter((widget) => widget.id !== id && widgetsOverlap(snapped, widget))
         .sort((a, b) => {
             // Prioriza quem consegue ocupar a posição original do widget arrastado.
-            const aFits =
-                a.w <= originalPosition.w && a.h <= originalPosition.h ? 0 : 1;
-            const bFits =
-                b.w <= originalPosition.w && b.h <= originalPosition.h ? 0 : 1;
+            const aFits = a.w <= originalPosition.w && a.h <= originalPosition.h ? 0 : 1;
+            const bFits = b.w <= originalPosition.w && b.h <= originalPosition.h ? 0 : 1;
 
             return aFits - bFits || byRowThenColumn(a, b);
         });
