@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+
+import { useState, type ReactNode, type PointerEvent } from 'react';
 import { CircleAlert, Ellipsis, GripVertical, Inbox } from 'lucide-react';
 
 import {
@@ -13,24 +14,16 @@ interface PainelWidgetFrameProps {
     status: PainelWidgetStatus;
     errorMessage?: string;
     actions?: readonly PainelWidgetAction[];
-    // Controles extras do cabeçalho, mostrados antes do menu de ações.
     headerExtra?: ReactNode;
-    // Cor da paleta escolhida para o widget, mostrada como marcador ao lado do título.
     accentColor?: string;
-    // Destaca o contêiner com borda tracejada enquanto o painel está em edição.
     editing?: boolean;
-    // Destaca o contêiner quando o indicador passou do limite de alerta.
     alerting?: boolean;
-    // Realça o contêiner enquanto ele é arrastado.
     active?: boolean;
-    // Mostra a alça de arrastar ao lado do título. O gesto em si é tratado pelo
-    // widget inteiro, na grade.
     showGrip?: boolean;
     children?: ReactNode;
 }
 
-// Contêiner comum a todos os widgets: cabeçalho com título e menu de ações, e os
-// avisos de carregamento, erro e sem dados. Cada widget só cuida do próprio conteúdo.
+// Contêiner comum a todos os widgets.
 export function PainelWidgetFrame({
     title,
     subtitle,
@@ -47,9 +40,15 @@ export function PainelWidgetFrame({
 }: PainelWidgetFrameProps) {
     const [menuOpen, setMenuOpen] = useState(false);
 
+    // Impede que os cliques nos controles do menu iniciem o arraste do widget.
+    function stopPointerPropagation(event: PointerEvent<HTMLDivElement>) {
+        event.stopPropagation();
+    }
+
     return (
         <div
-            className={`flex h-full min-w-0 flex-col rounded-xl border bg-card p-4 transition-[border-color,box-shadow,background-color] duration-200 ${
+            data-widget-menu-open={menuOpen ? 'true' : undefined}
+            className={`flex h-full min-w-0 flex-col overflow-visible rounded-xl border bg-card p-4 transition-[border-color,box-shadow,background-color] duration-200 ${
                 alerting
                     ? 'border-destructive/70 bg-destructive/5'
                     : editing
@@ -87,11 +86,17 @@ export function PainelWidgetFrame({
                         <h2 className="truncate text-sm font-semibold">
                             {title}
                             {alerting && (
-                                <span className="sr-only"> (acima do limite de alerta)</span>
+                                <span className="sr-only">
+                                    {' '}
+                                    (acima do limite de alerta)
+                                </span>
                             )}
                         </h2>
+
                         {subtitle && (
-                            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+                            <p className="truncate text-xs text-muted-foreground">
+                                {subtitle}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -100,10 +105,14 @@ export function PainelWidgetFrame({
 
                 {actions.length > 0 && (
                     <div
-                        className="relative shrink-0"
+                        className="relative z-50 shrink-0"
+                        onPointerDown={stopPointerPropagation}
                         onBlur={(event) => {
-                            // Fecha quando o foco sai do menu inteiro, não ao ir do botão para um item.
-                            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                            if (
+                                !event.currentTarget.contains(
+                                    event.relatedTarget as Node | null,
+                                )
+                            ) {
                                 setMenuOpen(false);
                             }
                         }}
@@ -114,7 +123,11 @@ export function PainelWidgetFrame({
                             aria-haspopup="menu"
                             aria-expanded={menuOpen}
                             onClick={() => setMenuOpen((open) => !open)}
-                            className={`-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${menuOpen ? 'border-primary/20 bg-primary/10 text-primary' : 'border-transparent text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground'}`}
+                            className={`-mt-1 -mr-1 inline-flex size-8 items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                                menuOpen
+                                    ? 'border-primary/20 bg-primary/10 text-primary'
+                                    : 'border-transparent text-muted-foreground hover:bg-primary/[0.06] hover:text-foreground'
+                            }`}
                         >
                             <Ellipsis aria-hidden="true" className="size-4" />
                         </button>
@@ -122,7 +135,7 @@ export function PainelWidgetFrame({
                         {menuOpen && (
                             <ul
                                 role="menu"
-                                className={`absolute right-0 z-10 mt-2 min-w-44 ${DROPDOWN_SURFACE_CLASS_NAME}`}
+                                className={`absolute right-0 z-50 mt-2 min-w-44 ${DROPDOWN_SURFACE_CLASS_NAME}`}
                             >
                                 {actions.map((action) => (
                                     <li key={action.label} role="none">

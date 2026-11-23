@@ -50,16 +50,21 @@ function sameLayout(a: readonly PainelWidget[], b: readonly PainelWidget[]): boo
 
 export function PainelPage() {
     const [range, setRange] = useState<HistoryRange>('24h');
+
     // Configuração salva do painel (carregada ao abrir a página) e, durante a
     // edição, o rascunho com as alterações ainda não salvas. Sem rascunho, o
     // painel está no modo de visualização.
     const { config, isLoading, notice, saveConfig } = usePainelConfig();
+
     const [draft, setDraft] = useState<PainelConfig | null>(null);
     const [catalogOpen, setCatalogOpen] = useState(false);
+
     // Widget com o painel de configuração aberto.
     const [settingsWidgetId, setSettingsWidgetId] = useState<string | null>(null);
+
     // Template escolhido no seletor que ainda espera a confirmação do usuário.
     const [pendingTemplate, setPendingTemplate] = useState<PainelTemplateId | null>(null);
+
     // Histórico do modo de edição, para desfazer e refazer alterações.
     const [history, setHistory] = useState<PainelHistory>(EMPTY_HISTORY);
 
@@ -70,6 +75,7 @@ export function PainelPage() {
 
     const editing = draft !== null;
     const current = draft ?? config;
+
     const settingsWidget = current.widgets.find((widget) => widget.id === settingsWidgetId);
 
     // A grade trabalha com o arranjo do tamanho de tela em uso; cada tamanho
@@ -84,6 +90,7 @@ export function PainelPage() {
     // Guarda o estado atual antes de uma alteração, para o "Desfazer" voltar a ele.
     // Uma alteração nova apaga o que havia para refazer.
     const draftRef = useRef(draft);
+
     useEffect(() => {
         draftRef.current = draft;
     });
@@ -94,14 +101,17 @@ export function PainelPage() {
 
         setHistory((previous) => {
             const last = previous.past[previous.past.length - 1];
-            if (last && sameConfig(last, snapshot)) return { past: previous.past, future: [] };
+
+            if (last && sameConfig(last, snapshot)) {
+                return { past: previous.past, future: [] };
+            }
 
             return { past: [...previous.past, snapshot].slice(-HISTORY_LIMIT), future: [] };
         });
     }, []);
 
-    // Volta (ou avança) no histórico, pulando estados iguais ao atual, como o de um
-    // arraste cancelado.
+    // Volta (ou avança) no histórico, pulando estados iguais ao atual,
+    // como o de um arraste cancelado.
     const travel = useCallback((direction: 'undo' | 'redo') => {
         const present = draftRef.current;
         if (!present) return;
@@ -109,52 +119,60 @@ export function PainelPage() {
         setHistory((previous) => {
             const from = direction === 'undo' ? [...previous.past] : [...previous.future];
             const to = direction === 'undo' ? [...previous.future] : [...previous.past];
+
             let target = from.pop();
 
-            while (target && sameConfig(target, present)) target = from.pop();
+            while (target && sameConfig(target, present)) {
+                target = from.pop();
+            }
+
             if (!target) return previous;
 
             to.push(present);
             setDraft(target);
 
-            return direction === 'undo' ? { past: from, future: to } : { past: to, future: from };
+            return direction === 'undo'
+                ? { past: from, future: to }
+                : { past: to, future: from };
         });
     }, []);
 
     const canUndo = history.past.some((entry) => !draft || !sameConfig(entry, draft));
     const canRedo = history.future.length > 0;
 
-    // Ctrl+Z desfaz; Ctrl+Shift+Z ou Ctrl+Y refazem (Cmd no Mac).
-    useEffect(() => {
-        if (!editing) return;
-
-        function handleShortcut(event: globalThis.KeyboardEvent) {
-            if (!(event.ctrlKey || event.metaKey) || event.altKey || isTyping(event.target)) return;
-
-            const key = event.key.toLowerCase();
-
-            if (key === 'z') {
-                event.preventDefault();
-                travel(event.shiftKey ? 'redo' : 'undo');
-            } else if (key === 'y') {
-                event.preventDefault();
-                travel('redo');
-            }
-        }
-
-        window.addEventListener('keydown', handleShortcut);
-        return () => window.removeEventListener('keydown', handleShortcut);
-    }, [editing, travel]);
-
     // Coloca um widget do catálogo no primeiro espaço livre do arranjo em uso.
     function addCatalogWidget(widget: PainelWidget) {
         pushHistory();
 
+        let widgetToAdd = widget;
+
+        // Séries temporais podem ser adicionadas mais de uma vez.
+        // Cada ocorrência precisa de um ID próprio para permitir configurações independentes.
+        if (widget.type === 'serie-temporal') {
+            const metricId = widget.metric ?? widget.id;
+
+            const sameMetricCount = current.widgets.filter(
+                (item) =>
+                    item.type === 'serie-temporal' &&
+                    (item.metric ?? item.id) === metricId,
+            ).length;
+
+            widgetToAdd = {
+                ...widget,
+                id: `${widget.id}-${crypto.randomUUID()}`,
+                metric: metricId,
+                title:
+                    sameMetricCount > 0
+                        ? `${widget.title} (${sameMetricCount + 1})`
+                        : widget.title,
+            };
+        }
+
         if (breakpoint === 'mobile') {
             // No celular o widget novo entra no fim da pilha.
-            changeDraftWidgets([...layoutWidgets, widget]);
+            changeDraftWidgets([...layoutWidgets, widgetToAdd]);
         } else {
-            const sized = breakpoint === 'tablet' ? toTabletSize(widget) : widget;
+            const sized = breakpoint === 'tablet' ? toTabletSize(widgetToAdd) : widgetToAdd;
 
             changeDraftWidgets(addWidget(layoutWidgets, sized, PAINEL_COLUMNS[breakpoint]));
         }
@@ -164,16 +182,20 @@ export function PainelPage() {
 
     // Alterações do modo de edição que ainda não foram salvas.
     const hasUnsavedChanges = draft !== null && JSON.stringify(draft) !== JSON.stringify(config);
+
     // Painel salvo que já não é igual ao template de onde partiu.
     const isCustomized =
         config.tablet !== undefined ||
         config.mobileOrder !== undefined ||
         !sameLayout(config.widgets, getPainelTemplate(config.template).widgets);
 
-    // Aplica um template: os widgets do painel são trocados pelos do template. No
-    // modo de edição a troca fica no rascunho; fora dele, já é salva.
+    // Aplica um template: os widgets do painel são trocados pelos do template.
+    // No modo de edição a troca fica no rascunho; fora dele, já é salva.
     function applyTemplate(id: PainelTemplateId) {
-        const next: PainelConfig = { template: id, widgets: getPainelTemplate(id).widgets };
+        const next: PainelConfig = {
+            template: id,
+            widgets: getPainelTemplate(id).widgets,
+        };
 
         if (editing) {
             pushHistory();
@@ -185,8 +207,8 @@ export function PainelPage() {
         setPendingTemplate(null);
     }
 
-    // Trocar de template apaga o arranjo atual, então pede confirmação quando há
-    // alterações não salvas ou um painel personalizado que seria perdido.
+    // Trocar de template apaga o arranjo atual, então pede confirmação quando
+    // há alterações não salvas ou um painel personalizado que seria perdido.
     function requestTemplate(id: PainelTemplateId) {
         if (hasUnsavedChanges || (!editing && isCustomized)) {
             setPendingTemplate(id);
@@ -195,8 +217,8 @@ export function PainelPage() {
         }
     }
 
-    // Troca um widget pela versão configurada. No modo de edição a troca fica no
-    // rascunho; fora dele, já é salva.
+    // Troca um widget pela versão configurada.
+    // No modo de edição a troca fica no rascunho; fora dele, já é salva.
     function applyWidgetSettings(widget: PainelWidget) {
         const next: PainelConfig = {
             ...current,
@@ -224,6 +246,31 @@ export function PainelPage() {
         setCatalogOpen(false);
     }
 
+    // Ctrl+Z desfaz; Ctrl+Shift+Z ou Ctrl+Y refazem (Cmd no Mac).
+    useEffect(() => {
+        if (!editing) return;
+
+        function handleShortcut(event: globalThis.KeyboardEvent) {
+            if (!(event.ctrlKey || event.metaKey) || event.altKey || isTyping(event.target)) {
+                return;
+            }
+
+            const key = event.key.toLowerCase();
+
+            if (key === 'z') {
+                event.preventDefault();
+                travel(event.shiftKey ? 'redo' : 'undo');
+            } else if (key === 'y') {
+                event.preventDefault();
+                travel('redo');
+            }
+        }
+
+        window.addEventListener('keydown', handleShortcut);
+
+        return () => window.removeEventListener('keydown', handleShortcut);
+    }, [editing, travel]);
+
     return (
         <PainelShell fullscreen={fullscreen.active}>
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
@@ -231,6 +278,7 @@ export function PainelPage() {
                     <h1 className="text-3xl font-semibold tracking-tight">
                         Painel de monitoramento
                     </h1>
+
                     {!fullscreen.active && (
                         <p className="text-muted-foreground">
                             Indicadores de operação e impacto ambiental reunidos em um painel

@@ -6,11 +6,13 @@ import type { PainelWidget } from '@/types/painel';
 import { PAINEL_WIDGET_CATALOG, PAINEL_WIDGET_TYPE_LABELS } from './painelLayoutPadrao';
 
 interface PainelWidgetCatalogProps {
-    // Ids dos widgets que já estão no painel, para não adicionar o mesmo duas vezes.
+    // IDs dos widgets que já estão no painel.
     widgetIdsInUse: readonly string[];
     onAdd: (widget: PainelWidget) => void;
     onClose: () => void;
 }
+
+const MAX_WIDGETS = 40;
 
 // Catálogo com os widgets disponíveis para adicionar ao painel no modo de edição.
 export function PainelWidgetCatalog({ widgetIdsInUse, onAdd, onClose }: PainelWidgetCatalogProps) {
@@ -26,9 +28,11 @@ export function PainelWidgetCatalog({ widgetIdsInUse, onAdd, onClose }: PainelWi
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose]);
 
+    const limitReached = widgetIdsInUse.length >= MAX_WIDGETS;
+
     return (
         <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center"
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-black/60 p-4 sm:items-center"
             onClick={onClose}
         >
             <section
@@ -61,13 +65,18 @@ export function PainelWidgetCatalog({ widgetIdsInUse, onAdd, onClose }: PainelWi
 
                 <ul className="grid gap-3 overflow-y-auto p-4 sm:grid-cols-2">
                     {PAINEL_WIDGET_CATALOG.map((item) => {
-                        const inUse = widgetIdsInUse.includes(item.widget.id);
+                        const allowsMultiple = item.widget.type === 'serie-temporal';
+
+                        const inUse =
+                            !allowsMultiple && widgetIdsInUse.includes(item.widget.id);
+
+                        const disabled = inUse || limitReached;
 
                         return (
                             <li key={item.widget.id}>
                                 <button
                                     type="button"
-                                    disabled={inUse}
+                                    disabled={disabled}
                                     onClick={() => onAdd(item.widget)}
                                     className="flex h-full w-full items-start gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-emerald-400/45 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-border disabled:hover:bg-card"
                                 >
@@ -89,6 +98,8 @@ export function PainelWidgetCatalog({ widgetIdsInUse, onAdd, onClose }: PainelWi
                                                 <Check aria-hidden="true" className="size-3.5" />
                                                 No painel
                                             </>
+                                        ) : limitReached ? (
+                                            'Limite atingido'
                                         ) : (
                                             <>
                                                 <Plus aria-hidden="true" className="size-3.5" />

@@ -226,7 +226,28 @@
     }
 }
 
-/* Tela cheia: sem barras de rolagem dentro dos widgets (ex.: tabelas). */
 [data-fill] .painel-body * {
     scrollbar-width: none;
+}
+
+.dashboard-atmosphere:has([data-painel-fullscreen='true']) > header,
+.dashboard-atmosphere:has([data-painel-fullscreen='true']) > #monitoring-panel,
+.dashboard-atmosphere:has([data-painel-fullscreen='true']) > footer {
+    display: none !important;
+}
+
+input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.painel-card:has([data-widget-menu-open='true']) {
+    position: relative;
+    z-index: 60;
 }

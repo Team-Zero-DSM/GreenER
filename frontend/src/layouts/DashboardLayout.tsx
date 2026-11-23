@@ -536,6 +536,7 @@ export function DashboardLayout() {
         <MonitoringProvider>
             <div className="dashboard-atmosphere relative isolate flex min-h-screen flex-col text-foreground">
                 {!isLandingPage && !isProfilePage && <AnimatedStarfieldBackground />}
+
                 <DashboardHeader
                     pathname={pathname}
                     monitoringOpen={monitoringOpen}
@@ -559,7 +560,9 @@ export function DashboardLayout() {
                     </div>
                 )}
 
-                <div className="relative z-10 flex-1">
+                {/* Removido o z-10 para não prender overlays dentro de um contexto
+                    abaixo do cabeçalho global. */}
+                <div className="relative flex-1">
                     <Outlet />
                 </div>
 
