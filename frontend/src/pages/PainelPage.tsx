@@ -131,9 +131,7 @@ export function PainelPage() {
             to.push(present);
             setDraft(target);
 
-            return direction === 'undo'
-                ? { past: from, future: to }
-                : { past: to, future: from };
+            return direction === 'undo' ? { past: from, future: to } : { past: to, future: from };
         });
     }, []);
 
@@ -152,9 +150,7 @@ export function PainelPage() {
             const metricId = widget.metric ?? widget.id;
 
             const sameMetricCount = current.widgets.filter(
-                (item) =>
-                    item.type === 'serie-temporal' &&
-                    (item.metric ?? item.id) === metricId,
+                (item) => item.type === 'serie-temporal' && (item.metric ?? item.id) === metricId,
             ).length;
 
             widgetToAdd = {
@@ -162,9 +158,7 @@ export function PainelPage() {
                 id: `${widget.id}-${crypto.randomUUID()}`,
                 metric: metricId,
                 title:
-                    sameMetricCount > 0
-                        ? `${widget.title} (${sameMetricCount + 1})`
-                        : widget.title,
+                    sameMetricCount > 0 ? `${widget.title} (${sameMetricCount + 1})` : widget.title,
             };
         }
 

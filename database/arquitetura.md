@@ -3,8 +3,8 @@
 O [schema.sql](./schema.sql) define o esquema PostgreSQL usado pelo GreenER.
 O banco vigente tem dez tabelas e atende autenticação, recuperação de senha,
 painéis pessoais, configurações administrativas e histórico de métricas e
-observações. O dicionário abaixo acompanha o SQL; os diagramas são artefatos
-de modelagem de referência.
+observações. O DER da versão final e o dicionário abaixo acompanham o SQL;
+os diagramas anteriores permanecem como histórico da modelagem.
 
 ## Histórico de tentativas (`status_coleta`)
 
@@ -42,7 +42,8 @@ Esta seção reúne os artefatos de modelagem de dados desenvolvidos para o proj
 
 Os diagramas servem como apoio para análise, implementação e evolução da solução ao longo das sprints, permitindo visualizar as principais entidades, atributos e relacionamentos do banco de dados da plataforma.
 
-Além da visualização em imagem, os diagramas possuem seus respectivos arquivos editáveis no Lucidchart, possibilitando consulta detalhada e navegação pelos elementos modelados.
+Os diagramas originais possuem arquivos editáveis no Lucidchart. O DER da versão
+final tem uma fonte Graphviz versionada junto à imagem SVG.
 
 ---
 
@@ -60,13 +61,16 @@ Ferramenta utilizada para a criação e manutenção dos diagramas do projeto.
 
 Por meio dela são desenvolvidos os diagramas utilizados na documentação da aplicação, permitindo representar visualmente os principais aspectos da solução.
 
+O DER da versão final usa Graphviz, com a definição das tabelas e dos vínculos
+no [arquivo DOT](./images/DiagramaDERFinal.dot).
+
 ---
 
 ## 📋 Diagramas originais
 
-Os arquivos Lucidchart e os SVGs originais registram o modelo inicial. O DER
-de referência inclui `status_coleta`; as estruturas da Sprint 3 estão
-detalhadas no dicionário e nas migrações.
+Os arquivos Lucidchart e os SVGs originais registram a evolução do modelo.
+O DER final inclui as dez tabelas do schema, com contas, recuperação de senha,
+dashboards, painel pessoal, configurações e histórico de monitoramento.
 
 | Diagrama | Descrição                                                                                       |
 | -------- | ----------------------------------------------------------------------------------------------- |
@@ -123,14 +127,35 @@ Representar, em nível conceitual, as entidades do domínio da plataforma GreenE
 
 ## Visualização
 
-![DER de referência do GreenER, com chaves e cardinalidades](./images/DiagramaDERAtual.svg)
+![DER final do GreenER, com dez tabelas, tipos, chaves e cardinalidades](./images/DiagramaDERFinal.svg)
 
-[Abrir o DER de referência em tamanho completo](./images/DiagramaDERAtual.svg)
+[Abrir o DER final em tamanho completo](./images/DiagramaDERFinal.svg) ·
+[Fonte editável em Graphviz](./images/DiagramaDERFinal.dot)
 
-## Modelo original
+O diagrama corresponde às **dez tabelas, 77 colunas e nove chaves estrangeiras**
+do [schema.sql](./schema.sql). Cada coluna apresenta seu tipo PostgreSQL,
+as chaves aplicáveis e a aceitação de `NULL`.
 
-O diagrama inicial está disponível em [SVG](./images/DiagramaDER.svg) e no
-[Lucidchart](https://lucid.app/lucidchart/a428841e-d545-4f2d-b834-a19170ff7bd1/view).
+**Legenda:** `PK` indica chave primária, `FK` indica chave estrangeira e `UK`
+indica uma coluna única. `U1` identifica a restrição composta
+`UNIQUE (servico_id, coletado_em)` da tabela `coleta`.
+
+As cardinalidades seguem as restrições do banco:
+
+- `painel_usuario.usuario_id` é PK e FK: cada painel pertence a um usuário,
+  e cada usuário pode ter zero ou um painel pessoal.
+- `configuracao_sistema` aceita no máximo uma linha. Seu vínculo com o usuário
+  que fez a alteração é opcional.
+- `status_coleta.coleta_id` é opcional e não é único: uma observação pode não
+  ter coleta associada, e uma coleta pode ser referenciada por várias observações.
+- Tokens, dashboards e painel pessoal têm exclusão em cascata pelo usuário.
+  Esses vínculos estão indicados nos respectivos cartões.
+
+## Modelos anteriores
+
+- [DER de referência com sete tabelas](./images/DiagramaDERAtual.svg).
+- [DER inicial em SVG](./images/DiagramaDER.svg) e seu
+  [arquivo no Lucidchart](https://lucid.app/lucidchart/a428841e-d545-4f2d-b834-a19170ff7bd1/view).
 
 ## Objetivo
 

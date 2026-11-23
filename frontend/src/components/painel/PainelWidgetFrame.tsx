@@ -1,4 +1,3 @@
-
 import { useState, type ReactNode, type PointerEvent } from 'react';
 import { CircleAlert, Ellipsis, GripVertical, Inbox } from 'lucide-react';
 
@@ -86,17 +85,12 @@ export function PainelWidgetFrame({
                         <h2 className="truncate text-sm font-semibold">
                             {title}
                             {alerting && (
-                                <span className="sr-only">
-                                    {' '}
-                                    (acima do limite de alerta)
-                                </span>
+                                <span className="sr-only"> (acima do limite de alerta)</span>
                             )}
                         </h2>
 
                         {subtitle && (
-                            <p className="truncate text-xs text-muted-foreground">
-                                {subtitle}
-                            </p>
+                            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
                         )}
                     </div>
                 </div>
@@ -108,11 +102,7 @@ export function PainelWidgetFrame({
                         className="relative z-50 shrink-0"
                         onPointerDown={stopPointerPropagation}
                         onBlur={(event) => {
-                            if (
-                                !event.currentTarget.contains(
-                                    event.relatedTarget as Node | null,
-                                )
-                            ) {
+                            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
                                 setMenuOpen(false);
                             }
                         }}

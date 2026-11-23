@@ -67,8 +67,7 @@ export function PainelWidgetCatalog({ widgetIdsInUse, onAdd, onClose }: PainelWi
                     {PAINEL_WIDGET_CATALOG.map((item) => {
                         const allowsMultiple = item.widget.type === 'serie-temporal';
 
-                        const inUse =
-                            !allowsMultiple && widgetIdsInUse.includes(item.widget.id);
+                        const inUse = !allowsMultiple && widgetIdsInUse.includes(item.widget.id);
 
                         const disabled = inUse || limitReached;
 

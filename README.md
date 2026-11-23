@@ -229,7 +229,7 @@ As entregas seguem o calendário das sprints registrado abaixo.
 ```mermaid
 graph TD
     S1[Sprint 1: Monitoramento, Persistência, Histórico e Interface] --> S2[Sprint 2: Ranking, Comparação, Histórico de Status e Regiões]
-    S2 --> S3[Sprint 3: JWT e Cenários Avançados]
+    S2 --> S3[Sprint 3: JWT, Painel Personalizável e Relatórios]
 ```
 
 ---
@@ -249,12 +249,13 @@ Disponíveis na versão integrada:
 - Cadastro, login JWT, perfil, alteração e recuperação de senha.
 - Painel pessoal com configuração persistida por usuário.
 - Administração de usuários, intervalo de coleta e versões dos coeficientes.
-- Prévia de relatórios por período e exportação em PDF com linha, barras ou tabela.
+- Relatórios com seleção de serviços, histórico em linhas ou barras, CSV e impressão em PDF.
+- API de prévia e geração de PDF por período, com linha, barras ou tabela.
 
 O ranking de impacto ambiental já possui rota pública no backend
 (`GET /api/v1/rankings`) e integração com a página de ranking da interface.
 
-Pendências e entregas futuras:
+Entregas por sprint e acompanhamento:
 
 - **Sprint 2:** apresentar os serviços associados ao inspecionar uma região,
   como continuação da T15, que permanece parcialmente entregue.
@@ -262,10 +263,11 @@ Pendências e entregas futuras:
   histórico de status das coletas e ampliação das visualizações regionais.
   Escopo e acompanhamento no [registro da Sprint 2](./docs/sprint-2/sprint-2.md)
   e no [plano de entregas](./docs/plano-de-entregas.md).
-- **Sprint 3:** delimitação de cenários avançados adicionais às opções regionais
-  já disponíveis na comparação. Autenticação e configurações administrativas
-  estão implementadas; contratos e evidências do backend estão no
-  [plano de entregas](./docs/plano-de-entregas.md#entregas-do-backend-na-sprint-3).
+- **Sprint 3:** autenticação, perfil, painel personalizável, administração,
+  configuração da coleta e das estimativas e relatórios em PDF entregues.
+  As 34 tarefas somam 154 pontos no
+  [registro da sprint](./docs/sprint-3/sprint-3.md), com implementação e testes
+  relacionados nas [evidências da DoD](./docs/sprint-3/evidencias-dod.md).
 
 Somente **US01, US03, US08 e US09** foram selecionadas para a Sprint 1.
 Persistência, histórico e globo não acrescentam automaticamente outras histórias.
@@ -301,11 +303,11 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
 
 ### Sprints
 
-| Sprint | Link                                                                                                | Início     | Entrega    | Status |
-| ------ | --------------------------------------------------------------------------------------------------- | ---------- | ---------- | ------ |
-| 01     | [sprint 1](./docs/sprint-1/sprint-1.md)                                                             | 28/09/2026 | 19/10/2026 | ✅     |
-| 02     | [sprint 2](./docs/sprint-2/sprint-2.md)                                                             | 20/10/2026 | 09/11/2026 |✅     |
-| 03     | [planejamento da sprint 3](./docs/plano-de-entregas.md#sprint-3--autenticação-e-cenários-avançados) | 10/11/2026 | 23/11/2026 | ❌     |
+| Sprint | Link                                    | Início     | Entrega    | Status |
+| ------ | --------------------------------------- | ---------- | ---------- | ------ |
+| 01     | [sprint 1](./docs/sprint-1/sprint-1.md) | 28/09/2026 | 19/10/2026 | ✅     |
+| 02     | [sprint 2](./docs/sprint-2/sprint-2.md) | 20/10/2026 | 09/11/2026 | ✅     |
+| 03     | [sprint 3](./docs/sprint-3/sprint-3.md) | 10/11/2026 | 23/11/2026 | 🔄     |
 
 #### Legenda
 
@@ -342,6 +344,11 @@ Parâmetros e limitações das estimativas estão em [cálculo.md](./docs/cálcu
 | RF13       | Visualização geográfica          | O sistema poderá apresentar a posição aproximada dos serviços em um mapa. A ausência de coordenadas não deve impedir a visualização das demais informações. |
 | RF14       | Ranking de impacto               | O sistema deve apresentar ranking dos serviços por maior consumo energético ou maior emissão de CO₂e.                                                       |
 | RF15       | Comparação entre serviços        | O sistema deve permitir comparar métricas e impacto ambiental entre dois ou mais serviços.                                                                  |
+| RF16       | Painel personalizável            | O sistema deve permitir que o usuário escolha, adicione, remova, posicione, redimensione e configure os indicadores do seu painel de monitoramento.         |
+
+RF16 é uma ampliação do backlog interno definida na
+[US17 — Painel de monitoramento personalizável](https://github.com/Team-Zero-DSM/GreenER/issues/142),
+entregue na Sprint 3.
 
 O mapa é opcional no desafio original. A Sprint 1 entregou a primeira versão
 do globo. A lista de serviços ao inspecionar uma região entrou na Sprint 2,
@@ -440,6 +447,10 @@ decisões técnicas da equipe.
 - Os valores retornados em cada coleta devem ser processados pela aplicação.
 - Alterações nos valores das métricas devem ser consideradas nas novas coletas.
 
+**Evolução na Sprint 3:** o administrador pode configurar o intervalo entre
+rodadas, aplicado pelo agendador sem reiniciar a aplicação.
+[Implementação e validação](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done).
+
 </details>
 
 <details>
@@ -500,6 +511,10 @@ decisões técnicas da equipe.
 - Cada serviço monitorado deve possuir um cálculo de emissão de CO₂e.
 - Os cálculos devem utilizar os dados obtidos durante o monitoramento.
 
+**Evolução na Sprint 3:** administradores podem consultar, simular e ativar
+coeficientes de estimativa, preservando os parâmetros associados às coletas
+anteriores. [Implementação e validação](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done).
+
 #### US07 — Indicadores ambientais consolidados
 
 **Como** usuário da plataforma,  
@@ -557,6 +572,30 @@ decisões técnicas da equipe.
 - O intervalo de atualização deve ser definido pela aplicação.
 - O dashboard deve refletir os dados obtidos na atualização mais recente.
 
+#### US17 — Painel de monitoramento personalizável
+
+**Como** usuário autenticado,
+**quero** montar um painel de monitoramento em tela cheia a partir de templates ou de uma configuração própria,
+**para** acompanhar os indicadores operacionais e ambientais mais relevantes para minha operação.
+
+**Prioridade:** Alta
+
+**Requisitos relacionados:** RF16, RF08, RF09, RF11, RNF01, RNF02, RNF03, RNF05
+
+**Critérios de aceitação:**
+
+- O painel deve estar disponível na área logada e ocupar toda a largura da tela.
+- O usuário deve poder escolher um template pré-definido de painel.
+- O usuário deve poder adicionar, remover, arrastar, redimensionar e reposicionar os indicadores.
+- O usuário deve poder escolher o tipo de gráfico, as cores e a métrica de cada indicador.
+- A configuração do painel deve ser mantida entre acessos.
+- Os indicadores devem exibir dados reais do monitoramento e atualizar automaticamente.
+- O painel deve funcionar em desktop, tablet e mobile.
+
+**Entrega:** implementada na Sprint 3; [issue #142](https://github.com/Team-Zero-DSM/GreenER/issues/142)
+fechada. As [evidências da DoD](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done)
+relacionam os critérios ao código, aos testes e aos limites de validação visual.
+
 </details>
 
 <details>
@@ -578,6 +617,11 @@ decisões técnicas da equipe.
 - As coletas realizadas devem ser armazenadas.
 - Os dados devem permanecer associados ao respectivo serviço.
 - Deve ser possível consultar dados referentes a diferentes momentos de coleta.
+
+**Evolução na Sprint 3:** a tela de relatórios permite selecionar serviços,
+filtrar status e atualização, incluir o histórico e exportar CSV ou imprimir
+em PDF. A API oferece separadamente prévia e PDF com métricas e período selecionados.
+[Implementação e validação](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done).
 
 #### US11 — Visualização da localização dos serviços
 
@@ -657,20 +701,30 @@ decisões técnicas da equipe.
 
 #### US15 — Autenticação de usuários
 
-**Como** usuário autorizado,  
-**quero** me autenticar na plataforma,  
-**para** acessar os recursos que exigem autorização.
+**Como** usuário da plataforma,
+**quero** criar uma conta, realizar login e gerenciar minhas informações de perfil,
+**para** acessar os recursos autorizados e manter meus dados pessoais e de acesso atualizados.
 
 **Prioridade:** Alta
 
-**Requisitos relacionados:** RNF05
+**Requisitos relacionados:** RNF01, RNF05
 
 **Critérios de aceitação:**
 
+- O sistema deve permitir o cadastro de novos usuários.
 - A autenticação deve ser realizada pelo backend.
 - O sistema deve utilizar JWT após uma autenticação válida.
 - Recursos protegidos não devem ser acessíveis por usuários não autenticados.
 - O controle de acesso deve ser realizado no backend, não apenas na interface.
+- O usuário autenticado deve poder visualizar suas informações de perfil, incluindo nome e e-mail.
+- O usuário deve poder atualizar suas informações pessoais.
+- O sistema deve permitir solicitar a alteração de senha.
+- A interface deve apresentar feedback adequado para operações realizadas e possíveis erros.
+- As interfaces de autenticação e perfil devem ser responsivas.
+
+**Entrega:** implementada na Sprint 3; [issue #151](https://github.com/Team-Zero-DSM/GreenER/issues/151)
+fechada. Cadastro, login, perfil, alteração e recuperação de senha, permissões e
+testes estão nas [evidências da DoD](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done).
 
 #### US16 — Continuidade do monitoramento diante de falhas
 
@@ -688,6 +742,11 @@ decisões técnicas da equipe.
 - Falhas em APIs externas não devem encerrar a aplicação.
 - Falhas identificadas devem ser tratadas e sinalizadas adequadamente.
 - O sistema deve permanecer disponível para as demais funcionalidades não afetadas.
+
+**Situação:** a [issue #155](https://github.com/Team-Zero-DSM/GreenER/issues/155)
+está fechada. Há testes de falha isolada com continuidade das demais coletas
+e de preservação do intervalo quando a leitura da configuração falha.
+[Evidências e limites](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done).
 
 </details>
 
@@ -712,24 +771,25 @@ Uma User Story será considerada concluída quando:
 <summary><b>📦 Product Backlog</b></summary>
 <br>
 
-| **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados** | **Implementação / validação**                 |
-| ------ | -------------------------- | ---------------------------------------------- | -------------- | --------------------- | --------------------------------------------- |
-| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10           | ✅ Concluída na Sprint 1                       |
-| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04            | ✅ Concluída na Sprint 1                       |
-| US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04           | ✅ Concluída na Sprint 2                      |
-| US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04           | ✅ Concluída na Sprint 2                      |
-| US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10           | ✅ Implementada na Sprint 1                    |
-| US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                  | ✅ Implementada na Sprint 1                    |
-| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                  | Issue fechada na Sprint 2; [validação registrada](./docs/sprint-2/evidencias-dod.md#validação-da-us07) |
-| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03    | ✅ Concluída na Sprint 2                      |
-| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02           | ✅ Concluída na Sprint 1                       |
-| US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06           | ✅ Implementada na Sprint 1                    |
-| US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                  | ✅ Implementada na Sprint 1                    |
-| US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                  | ✅ Implementada na Sprint 1                    |
-| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                  | ✅ Concluída na Sprint 2                      |
-| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                  | ✅ Concluída na Sprint 2                      |
-| US15   | Acesso e Segurança         | Autenticação de usuários                       | Alta           | RNF05                 | ❌                                            |
-| US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                 | 🔄 Base implementada; ampliar validação       |
+| **ID** | **Épico**                  | **Item / Nome**                                | **Prioridade** | **RF/RNF vinculados**                              | **Implementação / validação**                                                                                                                                                                                                  |
+| ------ | -------------------------- | ---------------------------------------------- | -------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| US01   | Monitoramento dos Serviços | Descoberta de serviços                         | Alta           | RF01, RNF10                                        | ✅ Concluída na Sprint 1                                                                                                                                                                                                       |
+| US03   | Monitoramento dos Serviços | Coleta periódica de métricas                   | Alta           | RF03, RF04                                         | ✅ Concluída na Sprint 1; [intervalo configurável na Sprint 3](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done)                                                                                              |
+| US04   | Detecção de Problemas      | Identificação de indisponibilidade             | Alta           | RF05, RNF04                                        | ✅ Concluída na Sprint 2                                                                                                                                                                                                       |
+| US05   | Detecção de Problemas      | Identificação de ausência de métricas          | Alta           | RF06, RNF04                                        | ✅ Concluída na Sprint 2                                                                                                                                                                                                       |
+| US02   | Monitoramento dos Serviços | Monitoramento dinâmico dos serviços            | Alta           | RF02, RNF10                                        | ✅ Implementada na Sprint 1                                                                                                                                                                                                    |
+| US06   | Impacto Ambiental          | Cálculo do impacto individual                  | Alta           | RF07                                               | ✅ Implementada na Sprint 1; [configuração de coeficientes na Sprint 3](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done)                                                                                     |
+| US07   | Impacto Ambiental          | Indicadores ambientais consolidados            | Média          | RF08                                               | Issue fechada na Sprint 2; [validação original](./docs/sprint-2/evidencias-dod.md#validação-da-us07) e [indicadores no painel e nos relatórios da Sprint 3](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done) |
+| US08   | Dashboard e Visualização   | Dashboard operacional                          | Alta           | RF09, RNF01, RNF03                                 | ✅ Concluída na Sprint 2; [evolução visual e refatoração na Sprint 3](./docs/sprint-3/sprint-3.md#evidências-e-rastreabilidade)                                                                                                |
+| US09   | Dashboard e Visualização   | Atualização automática do dashboard            | Alta           | RF11, RNF02                                        | ✅ Concluída na Sprint 1                                                                                                                                                                                                       |
+| US10   | Histórico e Localização    | Consulta do histórico de coletas               | Média          | RF10, RNF06                                        | ✅ Implementada na Sprint 1; [prévia e PDF na Sprint 3](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done)                                                                                                     |
+| US11   | Histórico e Localização    | Visualização da localização dos serviços       | Média          | RF12                                               | ✅ Implementada na Sprint 1                                                                                                                                                                                                    |
+| US12   | Histórico e Localização    | Visualização geográfica dos serviços           | Média          | RF13                                               | ✅ Implementada na Sprint 1                                                                                                                                                                                                    |
+| US13   | Análise e Comparação       | Ranking de impacto                             | Média          | RF14                                               | ✅ Concluída na Sprint 2                                                                                                                                                                                                       |
+| US14   | Análise e Comparação       | Comparação entre serviços                      | Média          | RF15                                               | ✅ Concluída na Sprint 2                                                                                                                                                                                                       |
+| US15   | Acesso e Segurança         | Autenticação de usuários                       | Alta           | RNF01, RNF05                                       | ✅ Implementada na Sprint 3; [#151 fechada](https://github.com/Team-Zero-DSM/GreenER/issues/151), com [evidências](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done)                                          |
+| US16   | Acesso e Segurança         | Continuidade do monitoramento diante de falhas | Alta           | RNF04                                              | ✅ Implementação e [testes registrados](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done); [#155 fechada](https://github.com/Team-Zero-DSM/GreenER/issues/155)                                                |
+| US17   | Dashboard e Visualização   | Painel de monitoramento personalizável         | Alta           | RF16, RF08, RF09, RF11, RNF01, RNF02, RNF03, RNF05 | ✅ Implementada na Sprint 3;[#142 fechada](https://github.com/Team-Zero-DSM/GreenER/issues/142), com [evidências](./docs/sprint-3/evidencias-dod.md#aplicação-da-definition-of-done)                                           |
 
 <br>
 
@@ -740,8 +800,12 @@ entregas da Sprint 1. A US02 ainda exige validação completa das transições d
 descoberta, ausência e restabelecimento. As entregas da Sprint 2 têm seu próprio
 [registro de evidências](./docs/sprint-2/evidencias-dod.md).
 
-US04 registra falhas e recuperação no histórico. A US16 tem tratamento de
-falhas implementado e requer validação de cenários adicionais.
+A Sprint 3 registra US06, US10, US15, US16 e US17 fechadas e amplia funcionalidades de histórias anteriores,
+conforme suas [evidências](./docs/sprint-3/evidencias-dod.md). Implementação
+registrada e fechamento de issue não substituem o aceite formal do cliente.
+
+US04 registra falhas e recuperação no histórico. A US16 possui tratamento de
+falhas e testes de continuidade registrados; sua issue está fechada.
 A US05 usa `metrics_missing` para HTTP 500 da consulta de métricas, que significa
 serviço indisponível ou exportador de métricas indisponível; HTTP 404 significa
 serviço removido ou métricas inexistentes e resulta em `unavailable`.
@@ -751,7 +815,7 @@ registra os critérios de aceite da US07. O [teste da Sprint 2](./docs/sprint-2/
 documenta os indicadores exibidos por região e os totais do ambiente conferidos no banco.
 
 - ❌ — Não iniciada
-- 🔄 — Parcialmente implementada ou com validação de falhas pendente
+- 🔄 — Parcialmente implementada, com validação adicional ou fechamento da história pendente
 - ✅ — História concluída ou implementação registrada na documentação da sprint
 
 ### Rastreabilidade das oito histórias implementadas
