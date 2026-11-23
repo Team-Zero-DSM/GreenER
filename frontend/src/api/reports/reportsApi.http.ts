@@ -4,7 +4,7 @@ import { toReportRegions } from '@/lib/reports/regionLabel';
 import type { ReportData, ReportFilters } from '@/types/report';
 import type { ReportsApi } from './reportContract';
 import { loadReportHistory } from './history';
-import { downloadReportPdf } from './reportPdf';
+import { getReportPdf } from './reportPdf';
 
 function toReportData(raw: unknown): ReportData {
     return raw as ReportData;
@@ -23,5 +23,5 @@ export const httpReportsApi: ReportsApi = {
     getHistory(serviceIds, query, signal) {
         return loadReportHistory(serviceIds, query, signal);
     },
-    downloadPdf: downloadReportPdf,
+    getPdf: getReportPdf,
 };

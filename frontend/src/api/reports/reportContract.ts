@@ -15,5 +15,5 @@ export interface ReportsApi {
         query: HistoryQuery,
         signal?: AbortSignal,
     ): Promise<ReportHistory>;
-    downloadPdf(request: ReportPdfRequest): Promise<void>;
+    getPdf(request: ReportPdfRequest, signal?: AbortSignal): Promise<Blob>;
 }
