@@ -97,6 +97,16 @@ export const PAINEL_EXTRA_WIDGETS: readonly PainelWidget[] = [
         w: 4,
         h: 4,
     },
+    {
+        id: 'energia-no-tempo',
+        type: 'serie-temporal',
+        chart: 'area',
+        title: 'Consumo de energia por região',
+        x: 0,
+        y: 0,
+        w: 8,
+        h: 4,
+    },
 ];
 
 // Todos os widgets que existem no painel, com o tamanho padrão de cada um.
@@ -118,6 +128,7 @@ const PAINEL_WIDGET_DESCRIPTIONS: Record<string, string> = {
     disponibilidade: 'Disponibilidade média dos serviços monitorados.',
     'intensidade-carbono': 'Gramas de CO₂e emitidos por kWh consumido.',
     'co2e-por-regiao': 'Evolução da emissão de CO₂e ao longo do período, por região.',
+    'energia-no-tempo': 'Evolução do consumo de energia ao longo do período, por região.',
     'status-servicos': 'Quantos serviços estão ativos, indisponíveis ou sem métricas.',
     'top-emissores': 'Os cinco serviços que mais emitiram CO₂e no período.',
     'falhas-coleta': 'Últimas tentativas de coleta que falharam.',
