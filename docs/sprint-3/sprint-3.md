@@ -189,7 +189,7 @@ Link da apresentação da sprint:
 <p align="left">
   <a href="https://www.youtube.com/watch?v=WEvmOK2wEvc" target="_blank">
     <img 
-      src="" 
+      src="GreenER-Thumbnail-Sprint_3.png"
       alt="GreenER - Sprint 3"
       width="600"
       style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);"
