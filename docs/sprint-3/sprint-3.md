@@ -2,16 +2,14 @@
 
 ## Situação da entrega
 
-Situação consolidada em **22/11/2026**, antes do encerramento previsto para 23/11.
 O [milestone da Sprint 3](https://github.com/Team-Zero-DSM/GreenER/milestone/3?closed=1)
-reúne **35 tarefas: 33 fechadas e duas abertas**, além das histórias US15 e US17,
-ambas fechadas no GitHub. As tarefas abertas são o tema claro (#175) e a
-refatoração final do frontend (#176).
+reúne **34 tarefas concluídas**, além de cinco histórias fechadas no GitHub:
+US06, US10, US15, US16 e US17. Todas estão em Done no Projects.
+A refatoração final do frontend (#176) foi entregue pelo PR #220.
 
 As entregas incluem autenticação e perfil, painel personalizável, administração,
 configuração da coleta e das estimativas, relatórios em PDF e ajustes visuais.
-O fechamento de uma issue indica o estado registrado no GitHub; testes,
-integração e limites de validação estão nas [evidências da DoD](./evidencias-dod.md).
+Os PRs e os resultados dos testes estão nas [evidências da DoD](./evidencias-dod.md).
 
 ## 🎯 Sprint Goal
 
@@ -26,8 +24,7 @@ anteriores e aprimorar a consistência visual e a responsividade.
 ## 📅 Período
 
 - **Início:** 10/11/2026
-- **Término previsto:** 23/11/2026
-- **Data desta consolidação:** 22/11/2026
+- **Término:** 23/11/2026
 
 ---
 
@@ -38,16 +35,16 @@ anteriores e aprimorar a consistência visual e a responsividade.
 | **US15** | Autenticação de usuários ([#151](https://github.com/Team-Zero-DSM/GreenER/issues/151)) | Selecionada no milestone; issue fechada. Cadastro, login, perfil, recuperação e controle de acesso. |
 | **US17** | Painel de monitoramento personalizável ([#142](https://github.com/Team-Zero-DSM/GreenER/issues/142)) | Selecionada no milestone; issue fechada. Widgets, templates, edição, persistência e adaptação por dispositivo. |
 | **US03** | Coleta periódica de métricas | Ampliação: intervalo configurável e aplicação nas próximas rodadas (#163/#164). |
-| **US06** | Cálculo do impacto individual | Ampliação: consulta, simulação e ativação de coeficientes (#165). |
+| **US06** | Cálculo do impacto individual ([#153](https://github.com/Team-Zero-DSM/GreenER/issues/153)) | Presente no milestone; issue fechada. Ampliação: consulta, simulação e ativação de coeficientes (#165). |
 | **US07** | Indicadores ambientais consolidados | Reutilizados no painel e nos relatórios (#144/#149/#167/#168). |
-| **US08** | Dashboard operacional | Evolução visual, administração e responsividade; #175/#176 ainda abertas. |
-| **US10** | Consulta do histórico de coletas | Ampliação: prévia e exportação de relatórios (#167/#168). |
+| **US08** | Dashboard operacional | Evolução visual, administração, responsividade e refatoração final (#176). |
+| **US10** | Consulta do histórico de coletas ([#154](https://github.com/Team-Zero-DSM/GreenER/issues/154)) | Presente no milestone; issue fechada. Ampliação: prévia e exportação de relatórios (#167/#168). |
 | **US14** | Comparação entre serviços | Vínculo registrado na tarefa de frontend dos relatórios (#195). |
-| **US16** | Continuidade do monitoramento diante de falhas | Ampliação da validação e preservação do intervalo diante de falhas de leitura (#164/#169). |
+| **US16** | Continuidade do monitoramento diante de falhas ([#155](https://github.com/Team-Zero-DSM/GreenER/issues/155)) | Presente no milestone; issue fechada. Ampliação da validação e preservação do intervalo diante de falhas de leitura (#164/#169). |
 
-US15 e US17 são as duas histórias presentes no milestone. As demais são
-relacionadas às tarefas e às funcionalidades ampliadas, sem reclassificar as
-entregas das sprints anteriores. RF16 é o requisito do painel personalizável
+US06, US10, US15, US16 e US17 são as cinco histórias presentes no milestone.
+As demais são relacionadas às tarefas e às funcionalidades ampliadas, sem
+reclassificar as entregas das sprints anteriores. RF16 é o requisito do painel personalizável
 definido na issue #142. Os demais códigos RF/RNF seguem a nomenclatura interna
 do projeto.
 
@@ -92,35 +89,30 @@ contabilizada como uma nova entrega de cenários avançados nesta sprint.
 | **T28** | [#170](https://github.com/Team-Zero-DSM/GreenER/issues/170) — Atualizar documentação do backend e do banco de dados | Pedro | ✅ | 3 |
 | **T29** | [#172](https://github.com/Team-Zero-DSM/GreenER/issues/172) — Desenvolvimento componentes da tela de administrador | Vitor | ✅ | 3 |
 | **T30** | [#173](https://github.com/Team-Zero-DSM/GreenER/issues/173) — Reformulação do design padrão do site | Vitor | ✅ | 8 |
-| **T31** | [#175](https://github.com/Team-Zero-DSM/GreenER/issues/175) — Desenvolvimento do tema claro | Vitor | ⏳ | 5 |
-| **T32** | [#176](https://github.com/Team-Zero-DSM/GreenER/issues/176) — Refatoração da versão final do front-end | Vitor | ⏳ | 5 |
-| **T33** | [#183](https://github.com/Team-Zero-DSM/GreenER/issues/183) — Refinar o design das páginas de cadastro e perfil | Henrique | ✅ | 3 |
-| **T34** | [#195](https://github.com/Team-Zero-DSM/GreenER/issues/195) — Implementar página de relatórios | Gabriel | ✅ | — |
-| **T35** | [#196](https://github.com/Team-Zero-DSM/GreenER/issues/196) — Adicionar responsividade a landing page | Gabriel | ✅ | — |
+| **T31** | [#176](https://github.com/Team-Zero-DSM/GreenER/issues/176) — Refatoração da versão final do front-end | Vitor | ✅ | 5 |
+| **T32** | [#183](https://github.com/Team-Zero-DSM/GreenER/issues/183) — Refinar o design das páginas de cadastro e perfil | Henrique | ✅ | 3 |
+| **T33** | [#195](https://github.com/Team-Zero-DSM/GreenER/issues/195) — Implementar página de relatórios | Gabriel | ✅ | 5 |
+| **T34** | [#196](https://github.com/Team-Zero-DSM/GreenER/issues/196) — Adicionar responsividade a landing page | Gabriel | ✅ | 3 |
 
 ### 📌 Legenda e progresso
 
 - ✅ Issue fechada, com PR de implementação integrado.
-- ⏳ Issue aberta; conclusão não registrada.
-- **—** Campo `Estimate` não preenchido no GitHub Projects (#195 e #196).
 
-**Progresso por tarefas: 33 de 35 fechadas; duas abertas.** Os valores do campo
-`Estimate` foram consultados no
+**Progresso por tarefas: 34 de 34 concluídas, somando 154 pontos.**
+Os 154 pontos estão registrados no campo `Estimate` do
 [GitHub Projects](https://github.com/orgs/Team-Zero-DSM/projects/3/views/10),
-com o filtro `milestone:"Sprint 3"`, em 22/11/2026.
+incluindo **5 pontos para #195** e **3 pontos para #196**.
 
-| Situação no Projects | Pontos preenchidos |
+| Situação | Pontos do backlog documentado |
 |---|---:|
-| Done | 141 |
-| In progress — #176 | 5 |
-| Backlog — #175 | 5 |
+| Done | 154 |
+| In progress | 0 |
+| Backlog | 0 |
 | Ready / In review | 0 |
-| **Total estimado preenchido** | **151** |
+| **Total** | **154** |
 
-As **33 tarefas com estimativa** somam 151 pontos: 141 em tarefas concluídas e
-10 nas duas pendentes. As tarefas #195 e #196 estão concluídas, mas sem
-`Estimate` preenchido; foram mantidas com **—**, sem atribuir zero ou estimar
-valores. O burndown não foi alterado.
+As 34 tarefas possuem pontuação no Projects e na documentação, com o total
+de 154 pontos em Done.
 
 Os responsáveis vêm das atribuições das issues; quando ausentes, da autoria dos
 PRs correspondentes, conforme o [registro de evidências](./evidencias-dod.md#sprint-backlog).
@@ -142,7 +134,7 @@ O gráfico e os dados de burndown permanecem fora desta atualização documental
 | Administração e coleta — US03/US15/US16 | #161–#164, #172 | [Tela administrativa](../../frontend/src/pages/AdminSettingsPage.tsx), [API](../../backend/src/modules/project/) e [agendador](../../backend/src/jobs/collections.job.ts). PRs #199, #203–#205 e #213. |
 | Estimativas ambientais — US06/US15, RF07 | #165, #172 | [Cálculo compartilhado](../../backend/src/modules/collections/collections.estimate.ts) e [contrato](../API.md#27-parâmetros-de-estimativa). PR #206 e integração da tela no #213. |
 | Relatórios — US10/US07 e vínculo de frontend com US14 | #167, #168, #195 | [API e PDF](../../backend/src/modules/reports/), [consulta consolidada](../../backend/src/modules/analytics/metrics-snapshot.repository.ts) e [página](../../frontend/src/pages/ReportsPage.tsx). PRs #207, #208 e #217. |
-| Design e responsividade — US08/US15, RNF01/RNF03 | #173, #183, #196 | PRs #219, #215 e #218. Tema claro (#175) e refatoração final (#176) continuam abertos. |
+| Design, responsividade e refatoração — US08/US15, RNF01/RNF03 | #173, #176, #183, #196 | PRs #219, #220, #215 e #218. |
 | Testes, banco e documentação — RNF04/RNF06/RNF08 | #156, #169, #170 | [Suíte](../../backend/tests/), [migrações](../../database/migrations/), [API](../API.md), [backend](../../backend/arquitetura.md) e [banco](../../database/arquitetura.md). PRs #174, #211 e #214. |
 
 Os links individuais de todos os PRs estão no
@@ -156,61 +148,31 @@ Os links individuais de todos os PRs estão no
 | Paulo | Painel personalizável, widgets, edição, templates, persistência, dados reais e responsividade (#143–#150). Evoluções do painel e configuração de publicação nos PRs #209, #210 e #212. |
 | Gabriel | Página de relatórios (#195) e adaptação da página inicial para mobile e tablet (#196). |
 | Pedro | Contas, JWT, recuperação, primeiro administrador, gerenciamento de usuários, coleta, estimativas, relatórios, testes e documentação (#156–#165, #167–#170). |
-| Vitor | Tela administrativa (#172) e padronização visual (#173). Tema claro (#175) e refatoração final (#176) ainda abertos. |
+| Vitor | Tela administrativa (#172), padronização visual (#173) e refatoração final (#176), entregue no PR #220. |
 
-A participação acima é sustentada por issues e PRs. O arquivo de
-[dailies desta pasta](./dailies.md) ainda contém registros identificados como
-Sprint 2 e foi preservado. Esses registros não foram usados para atribuir
-presença ou descrever cerimônias da Sprint 3.
+A participação acima é sustentada pelas issues e pelos PRs relacionados.
 
 ## Verificações e Definition of Done
 
 | Critério | Resultado registrado |
 |---|---|
-| Implementação integrada | 33 tarefas fechadas com PRs integrados; #175 e #176 permanecem abertas. |
-| Testes do backend | O PR #211 registra 111 testes aprovados com PostgreSQL 17, incluindo 48 adicionados na #169. |
-| Integração e construção | O [CI da #169](https://github.com/Team-Zero-DSM/GreenER/actions/runs/44851909389) aprovou backend, frontend e construção das imagens Docker. |
-| Banco e migrações | Teste de aplicação e repetição das migrações 002/003 preservando usuários e coletas em banco descartável. |
+| Implementação integrada | 34 tarefas concluídas com PRs integrados; #176 entregue no PR #220. |
+| Testes do backend | 111 testes aprovados com PostgreSQL 17; [PR #211](https://github.com/Team-Zero-DSM/GreenER/pull/211) e [suíte do backend](../../backend/tests/). |
+| Integração e construção | Execução conjunta em Docker e HTTP 200; três [testes de cache](../../frontend/tests/painelStorage.test.ts), lint, TypeScript e build do frontend aprovados. |
+| Banco e migrações | Migrações 002/003 testadas; coletas e painéis preservados após reinício do PostgreSQL. Resultados nas [evidências da DoD](./evidencias-dod.md#validação-integrada). |
 | Critérios e limites | Cobertura de autenticação, permissões, painel, administração e relatórios detalhada nas [evidências da DoD](./evidencias-dod.md#aplicação-da-definition-of-done). |
 | Documentação | API, arquitetura do backend, banco e cálculo atualizados no PR #214; acompanhamento da sprint neste documento. |
-| Aceite e encerramento | Feedback do cliente e aceite formal sem registro localizado para esta consolidação. |
 
-Os resultados dos testes são evidências da revisão validada no PR #211,
-não uma nova execução no HEAD desta documentação. O envio real de e-mail,
-a homologação visual completa e o desempenho sob carga não são comprovados
-por essa suíte.
+Os resultados e as instruções de execução estão nas
+[evidências da DoD](./evidencias-dod.md). As verificações usaram dados
+sintéticos em ambiente isolado.
 
 ## 🔎 Sprint Review
 
-Até 22/11, as entregas integradas permitem cadastrar e autenticar usuários,
+As entregas integradas permitem cadastrar e autenticar usuários,
 gerenciar o perfil, recuperar a senha, montar e salvar um painel pessoal,
 administrar acessos, configurar a coleta e as estimativas e gerar relatórios em
 PDF. A interface recebeu padronização visual e ajustes de responsividade.
 
-A review final, o feedback da apresentação e o aceite do cliente aguardam
-registro da equipe. Tema claro e refatoração final continuam como pendências
-do milestone; esta consolidação não encerra a sprint.
-
----
-
-## 🔄 Sprint Retrospective
-
-### O que funcionou?
-
-Aguardando registro da equipe na retrospectiva da Sprint 3.
-
-### O que não funcionou?
-
-Aguardando registro da equipe na retrospectiva da Sprint 3.
-
-### O que melhorar na próxima entrega?
-
-Aguardando registro das decisões da equipe.
-
----
-
-## 🎥 Demonstração da Sprint
-
-Link da apresentação da Sprint 3 ainda não registrado. O vídeo da Sprint 2
-permanece no documento da respectiva sprint.
-
+As 34 tarefas do milestone estão concluídas, incluindo a refatoração final
+(#176), integrada pelo PR #220.

@@ -4,6 +4,10 @@ import type { PainelConfig, PainelWidget } from '@/types/painel';
 // de persistência do backend não respondem.
 const STORAGE_KEY = 'greener:painel:config';
 
+function storageKey(userId: string): string {
+    return `${STORAGE_KEY}:${userId}`;
+}
+
 function isWidget(value: unknown): value is PainelWidget {
     if (typeof value !== 'object' || value === null) return false;
 
@@ -18,9 +22,11 @@ function isWidget(value: unknown): value is PainelWidget {
 }
 
 // Devolve null quando não há nada guardado ou o conteúdo não tem o formato esperado.
-export function readStoredPainelConfig(): PainelConfig | null {
+export function readStoredPainelConfig(userId: string): PainelConfig | null {
     try {
-        const stored: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null');
+        const stored: unknown = JSON.parse(
+            window.localStorage.getItem(storageKey(userId)) ?? 'null',
+        );
 
         if (typeof stored !== 'object' || stored === null) return null;
 
@@ -37,9 +43,9 @@ export function readStoredPainelConfig(): PainelConfig | null {
     }
 }
 
-export function writeStoredPainelConfig(config: PainelConfig): void {
+export function writeStoredPainelConfig(userId: string, config: PainelConfig): void {
     try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        window.localStorage.setItem(storageKey(userId), JSON.stringify(config));
     } catch {
         // Sem espaço ou armazenamento bloqueado: o painel segue só na memória.
     }

@@ -1,32 +1,36 @@
 # Arquitetura do Frontend — GreenER
 
-Este documento define a arquitetura-alvo da aplicação web GreenER e orienta
-sua construção. A arquitetura principal do backend está em
+Este documento descreve a organização e as funcionalidades da aplicação web
+GreenER na versão integrada da Sprint 3. A arquitetura do backend está em
 [`../backend/arquitetura.md`](../backend/arquitetura.md); os contratos de
 comunicação estão em [`../docs/API.md`](../docs/API.md), e o modelo ambiental
 está em [`../docs/cálculo.md`](../docs/cálculo.md).
 
 ## Estado atual e escopo
 
-O documento distingue a implementação atual das funcionalidades futuras.
-
-- `App.tsx` define início, lista e detalhe dentro de `DashboardLayout`.
-- `api/services.ts`, `api/regions.ts` e `api/monitoring.ts` consultam o backend real.
+- `App.tsx` define login, início, serviços, regiões, ranking, comparação,
+  relatórios, perfil, painel e configurações.
+- `AuthProvider` mantém a sessão e consulta o perfil para restaurar o acesso.
+  `ProtectedRoute` exige autenticação nas páginas internas.
+- Os módulos de `api/` consultam o backend real e enviam JWT nas operações protegidas.
 - `useApiQuery` busca ao montar, ao mudar dependências e quando `refreshKey` muda.
 - `MonitoringProvider` observa `lastRoundFinishedAt` e solicita novas consultas.
 - `ServiceDetailPage` usa detalhe e histórico persistido; os gráficos não usam mocks.
 - `MonitoringBar` apresenta estado real, previsão de coleta e horário de atualização.
-- `GlobeView` e cards regionais estão integrados; energia e emissões somam amostras
-  das últimas 24 horas. Apresentar os serviços associados ao inspecionar uma região
-  é o saldo de T15 transferido para a Sprint 2, com Gabriel.
-- JWT permanece na Sprint 3. Configuração do intervalo pela aplicação não existe.
-- Arquivos em `mocks/` não comprovam seu uso pelas telas atuais.
+- O globo e os cards regionais exibem dados do backend; energia e emissões
+  somam as amostras das últimas 24 horas.
+- `PainelPage` permite escolher templates, editar widgets e salvar a configuração
+  por usuário em `/api/v1/dashboards/me`.
+- `AdminSettingsPage` reúne intervalo de coleta, parâmetros de estimativa e
+  gerenciamento de usuários, com autorização de administrador no backend.
+- `ReportsPage` apresenta seleção de serviços, filtros, prévia, histórico,
+  exportação CSV e impressão pelo navegador.
 
 ## 1. Objetivo do frontend
 
 O frontend é a interface pela qual usuários acompanham os serviços de software
 monitorados pelo GreenER e compreendem suas métricas operacionais e seu impacto
-ambiental estimado. A arquitetura-alvo prevê uma visão consolidada e detalhada dos
+ambiental estimado. A interface oferece uma visão consolidada e detalhada dos
 serviços, localização, histórico, classificações, comparações e análises de
 cenários, além de atualizar as informações sem recarga manual.
 
@@ -38,7 +42,7 @@ valores ambientais.
 
 ## 2. Responsabilidades e limites
 
-Na arquitetura-alvo, o frontend deverá:
+O frontend:
 
 - apresenta dashboard, listagens e detalhes de serviços;
 - apresenta métricas operacionais, estado, região e momento da última
@@ -107,7 +111,7 @@ A stack do frontend é:
 - ESLint e Prettier para análise e formatação.
 
 O código usa TypeScript estrito, JSX e o alias `@/` para importações a partir
-de `src/`. O CSS global centraliza tokens de tema, tipografia, cores, bordas e
+de `src/`. O CSS global e `styles/theme.css` centralizam tema, tipografia, cores, bordas e
 raios. Componentes derivados de shadcn/ui seguem esse sistema visual e devem
 ser reutilizados em vez de duplicados.
 
@@ -117,152 +121,116 @@ páginas não duplicam transporte HTTP nem lógica de sessão.
 
 ## 5. Estrutura de diretórios
 
-### Estrutura implementada
-
-```text
-src/
-├── App.tsx, main.tsx, index.css
-├── api/                 # services.ts, regions.ts, monitoring.ts
-├── components/          # 3d, landing, charts, services, ui, MonitoringBar
-├── contexts/            # MonitoringProvider.tsx, monitoring.ts
-├── hooks/               # useApiQuery, useMonitoringStatus, useServices, useServiceDetail
-├── layouts/             # DashboardLayout.tsx
-├── lib/
-├── mocks/               # arquivos demonstrativos; não alimentam as páginas atuais
-├── pages/               # LandingPage, DashboardPage, ServiceDetailPage
-└── types/
-```
-
-O transporte atual está em `api/`, e o layout em `layouts/`. Não há migração
-para `services/` ou `components/layout/` implementada. A árvore a seguir é uma proposta.
-
-### Estrutura-alvo
-
 ```text
 frontend/
-├── arquitetura.md
-├── .env.example
-├── components.json
-├── Dockerfile
-├── index.html
-├── package.json
-├── vite.config.ts
+├── arquitetura.md, Dockerfile, .env.example, package.json
+├── tests/               # testes do armazenamento do painel por usuário
 └── src/
-    ├── App.tsx
-    ├── main.tsx
-    ├── index.css
-    ├── app/
-    │   ├── router.tsx
-    │   └── providers.tsx
-    ├── components/
-    │   ├── ui/
-    │   ├── layout/
-    │   ├── services/
-    │   ├── metrics/
-    │   └── analytics/
-    ├── pages/
-    │   ├── DashboardPage.tsx
-    │   ├── ServiceDetailPage.tsx
-    │   ├── HistoryPage.tsx
-    │   ├── RankingPage.tsx
-    │   ├── ComparisonPage.tsx
-    │   ├── ScenarioPage.tsx
-    │   ├── RegionsPage.tsx
-    │   └── LoginPage.tsx
-    ├── services/
-    │   ├── api-client.ts
-    │   ├── auth-api.ts
-    │   ├── services-api.ts
-    │   ├── collections-api.ts
-    │   ├── regions-api.ts
-    │   └── analytics-api.ts
-    ├── hooks/
-    ├── contexts/
-    ├── types/
-    └── lib/
-        └── utils.ts
+    ├── App.tsx, main.tsx, index.css
+    ├── api/             # cliente HTTP, sessão, contas, serviços, regiões,
+    │                    # monitoramento, ranking, comparação, painel e relatórios
+    ├── components/      # auth, painel, reports, charts, globe, services, shared e ui
+    ├── contexts/        # AuthProvider, MonitoringProvider e contratos de contexto
+    ├── hooks/           # autenticação, consultas, perfil, painel e histórico
+    ├── layouts/         # AuthLayout e DashboardLayout
+    ├── lib/             # transformação de dados e exportação de relatórios
+    ├── pages/           # composição das telas
+    ├── styles/          # tokens e tema compartilhado
+    ├── types/           # modelos e contratos TypeScript
+    └── utils/           # formatação, status e armazenamento do painel
 ```
-
-Esta estrutura é a organização-alvo. Diretórios e módulos descritos são
-responsabilidades arquiteturais: eles serão criados e preenchidos conforme as
-telas e integrações forem construídas, sem manter pastas vazias ou adicionar
-camadas sem uso.
 
 ### 5.1. Responsabilidades por área
 
-- `app/`: composição da aplicação, rotas e providers globais.
-- `components/ui/`: primitives e controles visuais reutilizáveis.
-- `components/layout/`: navegação, cabeçalho, estrutura lateral e contêineres
-  compartilhados.
-- `components/services/`: lista, cartão, identificação e estado de serviços.
-- `components/metrics/`: indicadores operacionais e componentes para métricas
-  individuais ou agregadas.
-- `components/analytics/`: elementos de gráficos, tabelas, classificação,
-  comparação e simulação.
-- `pages/`: composição das telas do produto, sem implementação de transporte
-  HTTP ou lógica de domínio.
-- `services/`: cliente HTTP e módulos de operações da API GreenER.
-- `hooks/`: consultas, atualização automática, filtros e comportamentos
-  reutilizáveis.
-- `contexts/`: sessão e estado compartilhado necessários à aplicação;
-  `app/providers.tsx` compõe os providers globais.
-- `types/`: contratos de resposta e modelos de apresentação do frontend,
-  sincronizados com a API interna.
-- `lib/`: utilitários independentes de domínio, incluindo `cn` para composição
-  de classes.
+- `main.tsx`: inicializa o React, `BrowserRouter` e `AuthProvider`.
+- `App.tsx`: declara as rotas e aplica `ProtectedRoute` às páginas internas.
+- `layouts/`: separa a autenticação da navegação principal. `DashboardLayout`
+  compõe o cabeçalho, a barra e o provider de monitoramento.
+- `pages/`: reúne componentes, hooks e ações de cada tela.
+- `components/`: organiza formulários, widgets, gráficos e controles compartilhados.
+- `api/`: concentra URLs, requisições, autenticação e contratos de transporte.
+- `hooks/`: controla carregamento, filtros, atualização e gravação dos dados.
+- `contexts/`: compartilha sessão e estado de monitoramento.
+- `types/`: define os dados recebidos da API e os modelos usados pela interface.
+- `lib/` e `utils/`: reúnem transformações, exportação, formatação e armazenamento local.
 
 ## 6. Áreas do produto e navegação
 
-### 6.1. Dashboard
+### 6.1. Serviços e indicadores
 
-A tela inicial apresenta o panorama dos serviços: totais e estados operacionais,
-métricas recentes, distribuição regional e indicadores ambientais agregados
-calculados conforme o modelo documentado. Inclui o horário da última atualização
-e permite navegar para o detalhe de um serviço.
+`DashboardPage` apresenta serviços, estados operacionais e métricas recentes.
+`ServiceDetailPage` reúne identificação, região, métricas, gráficos e histórico
+persistido. Os valores incluem unidades e período de consulta.
 
-### 6.2. Detalhe do serviço
+### 6.2. Histórico, ranking e comparação
 
-A tela de detalhe identifica o serviço, sua região e estado e apresenta suas
-métricas operacionais e ambientais, além da evolução temporal. Todos os valores
-exibem unidade, período e indicação de estimativa quando aplicável.
+O histórico é consultado no detalhe de cada serviço. `RankingPage` apresenta
+classificações com filtros de critério e período. `ComparisonPage` consulta
+os serviços selecionados no mesmo intervalo e permite comparar cenários regionais.
+Os resultados vêm dos endpoints do backend.
 
-### 6.3. Histórico implementado e ranking planejado
+### 6.3. Regiões
 
-A área de histórico permite acompanhar métricas e indicadores ambientais ao
-longo do tempo, por serviço e período. Na Sprint 2, o ranking deverá apresentar classificações
-comparáveis calculadas pelo backend e identifica o critério usado.
+`LandingPage` apresenta o globo e os cards regionais. `RegionPage` reúne
+as visualizações de regiões, intensidade de carbono e indicadores ambientais.
+Esses dados são consultados pela API do GreenER.
 
-### 6.4. Comparação e cenários — Sprint 3
+### 6.4. Autenticação, perfil e configurações
 
-A área planejada de comparação permitirá analisar serviços e regiões com o mesmo contexto
-temporal e critérios explícitos. A simulação apresenta hipóteses e parâmetros
-do cenário, diferenciando resultados simulados de observações históricas.
+`AuthPage` reúne cadastro, login, solicitação de recuperação e redefinição
+de senha. `AuthProvider` guarda a sessão, restaura o perfil e encerra o acesso
+quando o backend rejeita o token. `ProfilePage` permite editar nome e e-mail
+e alterar a senha atual.
 
-### 6.5. Regiões
+`AdminSettingsPage` permite salvar o intervalo de coleta, simular e ativar
+coeficientes e gerenciar papéis e acessos. A tela restringe as ações ao papel
+administrador; o backend valida o JWT e a permissão em todas essas operações.
+O intervalo é persistido e aplicado pelo agendador nas próximas rodadas.
 
-A visualização atual apresenta globo, cards e dados regionais do backend.
-Apresentar os serviços associados ao inspecionar uma região é a continuação
-de T15 na Sprint 2; ainda não está entregue. Um mapa e outras visualizações geográficas complementam listas e
-valores tabulares; a informação permanece acessível sem depender apenas da
-representação cartográfica.
+### 6.5. Painel personalizável
 
-### 6.6. Autenticação e configurações — planejadas
+`PainelPage` permite escolher templates, adicionar e remover widgets,
+reposicionar, redimensionar e configurar os indicadores. O layout usa grades
+para desktop e tablet e uma lista ordenada no mobile.
 
-Autenticação JWT será entregue na Sprint 3. A autorização será validada pelo
-backend; login e proteção de rotas ainda não estão implementados.
-A configuração do intervalo pela aplicação fica para etapa posterior, com sprint a definir.
+`usePainelConfig` consulta e grava o painel em `/api/v1/dashboards/me`.
+A configuração local usa o ID do usuário na chave de armazenamento, mantendo
+as preferências separadas entre contas do mesmo navegador.
+
+### 6.6. Relatórios
+
+`ReportsPage` reúne filtros e prévia na mesma página. Os serviços são agrupados
+por região e podem ser selecionados individualmente, por grupo ou pelos botões
+Todos e Nenhum. Os filtros incluem status e data da última atualização.
+O histórico de energia e CO₂e pode ser incluído em linhas ou barras.
+
+A fonte ativa, definida em `api/reports/reportConfig.ts`, é `services`.
+`reportsApi.services.ts` consulta serviços, regiões e histórico pela API e
+prepara os dados exibidos. A exportação CSV usa os serviços selecionados;
+Exportar PDF aciona `window.print()` e permite salvar pelo diálogo do navegador.
+Os endpoints de prévia e PDF do backend são operações separadas, descritas
+no [contrato da API](../docs/API.md#29-relatórios-e-exportação-em-pdf).
 
 ### 6.7. Rotas da aplicação
 
-| Rota implementada | Componente          | Comportamento atual                                   |
-| ----------------- | ------------------- | ----------------------------------------------------- |
-| `/`               | `LandingPage`       | Globo, cards regionais e totais das últimas 24 horas. |
-| `/dashboard`      | `DashboardPage`     | Serviços reais, filtros, status e última coleta.      |
-| `/servicos/:id`   | `ServiceDetailPage` | Detalhe, gráficos e totais do histórico persistido.   |
+| Rota | Componente | Comportamento |
+|---|---|---|
+| `/` | `Navigate` | Redireciona para `/login`. |
+| `/login` | `AuthPage` | Cadastro, login e recuperação de senha em `AuthLayout`. |
+| `/inicio` | `LandingPage` | Globo, regiões e totais das últimas 24 horas. |
+| `/dashboard` | `DashboardPage` | Serviços, filtros, status e última coleta. |
+| `/servicos/:id` | `ServiceDetailPage` | Detalhe e histórico do serviço. |
+| `/regioes` | `RegionPage` | Visualizações e indicadores regionais. |
+| `/ranking` | `RankingPage` | Classificação por critério e período. |
+| `/comparacao` | `ComparisonPage` | Comparação de serviços e cenários regionais. |
+| `/painel` | `PainelPage` | Widgets e configuração pessoal do painel. |
+| `/relatorio` | `ReportsPage` | Filtros, prévia, histórico, CSV e impressão. |
+| `/perfil` | `ProfilePage` | Dados pessoais e segurança da conta. |
+| `/configuracoes` | `AdminSettingsPage` | Coleta, estimativas e usuários para administradores. |
 
-As três rotas usam `DashboardLayout`. `/services/:serviceId` não existe na interface.
-Histórico está no detalhe; não há página `/history`. Login, ranking, comparação,
-cenários e configurações continuam futuros. Contratos em [API.md](../docs/API.md).
+As páginas internas usam `ProtectedRoute` e `DashboardLayout`. O histórico
+fica no detalhe; não há rota `/history`. A autorização administrativa também
+é aplicada pelo backend, conforme o [contrato](../docs/API.md).
 
 ## 7. Atualização e estados de interface
 
@@ -330,6 +298,8 @@ melhoram a experiência, mas não substituem autorização no servidor.
 Os scripts de qualidade do frontend são:
 
 ```text
+npm test             executar os testes do armazenamento do painel
+npm run typecheck    verificar tipos TypeScript
 npm run build        verificar tipos e gerar o build
 npm run lint         executar ESLint
 npm run format:check verificar formatação com Prettier
@@ -346,9 +316,11 @@ O frontend segue o [plano de entregas](../docs/plano-de-entregas.md):
 1. **Sprint 1:** monitoramento, persistência, histórico, dashboard, mapa/globo,
    integração real e atualização automática.
 2. **Sprint 2:** rankings e continuação de T15: serviços associados à região inspecionada.
-3. **Sprint 3:** autenticação JWT, comparação e simulação de cenários regionais.
+3. **Sprint 3:** autenticação JWT, perfil, painel personalizável, administração
+   de usuários, intervalo de coleta, coeficientes de estimativa e relatórios.
 
-Configuração do intervalo pela aplicação: etapa futura, com sprint ainda a definir.
+Ranking e comparação regional, implementados na Sprint 2, continuam disponíveis
+na versão integrada.
 
 As etapas organizam a implementação; não reduzem o escopo final do produto. As
 telas descritas nesta arquitetura são parte da experiência GreenER e devem ser
