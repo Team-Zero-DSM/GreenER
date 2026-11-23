@@ -9,6 +9,7 @@ import { PageShell } from '@/components/shared/PageShell';
 import { SECONDARY_ACTION_BUTTON_CLASS_NAME } from '@/components/shared/actionButtonStyles';
 import { useReport } from '@/hooks/useReport';
 import { useReportHistory } from '@/hooks/useReportHistory';
+import { buildPdfRequest } from '@/lib/reports/buildPdfRequest';
 import { exportReportCsv } from '@/lib/reports/exportCsv';
 import { selectServices } from '@/lib/reports/selectServices';
 import type { ReportChartOptions, ReportFilters } from '@/types/report';
@@ -72,7 +73,7 @@ export function ReportsPage() {
         setPdfState('working');
 
         try {
-            await reportsApi.downloadPdf(filters);
+            await reportsApi.downloadPdf(buildPdfRequest(serviceIds, chart, filters));
             setPdfState('idle');
         } catch {
             setPdfState('error');
