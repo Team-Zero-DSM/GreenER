@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/api/session';
 import { fetchRegions } from '@/api/regions';
-import { postJson } from '@/api/services';
+import { postJson } from '@/api/client';
 import { downloadBlob } from '@/lib/reports/download';
 import { toReportRegions } from '@/lib/reports/regionLabel';
 import type { ReportData, ReportFilters } from '@/types/report';

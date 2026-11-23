@@ -5,7 +5,7 @@ import { AuthContext } from './auth';
 import { saveAuthSession, getAuthSession, clearAuthSession } from '@/api/session';
 
 import { getCurrentUser } from '@/api/auth';
-import { ApiError } from '@/api/services';
+import { ApiError } from '@/api/client';
 
 import type { AuthenticatedUser, AuthSession } from '@/types/auth';
 

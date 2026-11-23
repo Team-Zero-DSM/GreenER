@@ -1,4 +1,4 @@
-import { getJson } from './services';
+import { getJson } from '@/api/client';
 
 export type CollectionResult = 'success' | 'failure' | 'pending';
 

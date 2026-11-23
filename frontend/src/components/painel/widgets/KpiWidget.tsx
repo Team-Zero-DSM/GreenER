@@ -32,30 +32,26 @@ export function KpiWidget({ data, alerting = false }: KpiWidgetProps) {
           : 'text-destructive';
 
     return (
-        // O widget é um contêiner do CSS: quando fica largo (ex.: template Executivo),
-        // o valor e os textos crescem para serem lidos de longe.
-        <div className="@container flex flex-1 flex-col justify-end gap-1">
-            <p className="painel-kpi-label text-xs text-muted-foreground @md:text-sm @xl:text-base">
+        <div className="flex min-h-0 flex-1 flex-col justify-between gap-y-1">
+            <p className="painel-kpi-label line-clamp-2 text-xs text-muted-foreground @md:text-sm">
                 {label}
             </p>
-            <p className="flex flex-wrap items-baseline gap-x-1.5">
+            <p className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
                 <span
-                    className={`painel-kpi-value text-3xl font-bold tracking-tight tabular-nums @md:text-5xl @xl:text-7xl ${
+                    className={`painel-kpi-value whitespace-nowrap text-3xl font-bold tracking-tight tabular-nums ${
                         alerting ? 'text-destructive' : ''
                     }`}
                 >
                     {formattedValue}
                 </span>
-                <span className="text-sm text-muted-foreground @md:text-lg @xl:text-2xl">
-                    {unit}
-                </span>
+                <span className="painel-kpi-unit text-sm text-muted-foreground">{unit}</span>
             </p>
             {variation === null ? (
-                <p className="painel-kpi-extra text-xs text-muted-foreground @xl:text-sm">
+                <p className="painel-kpi-extra line-clamp-1 text-xs text-muted-foreground">
                     Sem período anterior para comparar
                 </p>
             ) : (
-                <p className="painel-kpi-extra flex flex-wrap items-center gap-x-1 text-xs @xl:text-sm">
+                <p className="painel-kpi-extra flex min-w-0 flex-wrap items-center gap-x-1 text-xs">
                     <span
                         className={`inline-flex items-center gap-0.5 font-semibold tabular-nums ${variationColor}`}
                     >

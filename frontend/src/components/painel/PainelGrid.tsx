@@ -14,6 +14,7 @@ import type { PainelBreakpoint, PainelSourceGetter, PainelWidget } from '@/types
 import {
     arrangeWidgets,
     moveWidget,
+    moveWidgetWithSwap,
     PAINEL_WIDGET_MIN_SIZE,
     removeWidget,
     resizeWidget,
@@ -78,7 +79,7 @@ interface PainelGesture {
     rowGap: number;
     columns: number;
     initialWidgets: readonly PainelWidget[];
-    // Última célula em que o widget encaixou, para só reorganizar quando ela muda.
+    // Última posição final em que o widget encaixou.
     lastCell: string;
     lastDx: number;
     lastDy: number;
@@ -113,6 +114,7 @@ function cellKey(widget: PainelWidget | undefined): string {
 // Retângulo do elemento em coordenadas da página (não mudam com a rolagem).
 function pageBox(element: Element): Box {
     const rect = element.getBoundingClientRect();
+
     return {
         left: rect.left + window.scrollX,
         top: rect.top + window.scrollY,
@@ -149,6 +151,7 @@ export function PainelGrid({
     // Valores mais recentes, lidos pelas funções estáveis entregues aos widgets.
     const latest = useRef({ widgets, columns, canArrange, onWidgetsChange, onBeforeChange });
     const configureRef = useRef(onConfigureWidget);
+
     useLayoutEffect(() => {
         latest.current = { widgets, columns, canArrange, onWidgetsChange, onBeforeChange };
         configureRef.current = onConfigureWidget;
@@ -157,6 +160,7 @@ export function PainelGrid({
     // Posições de antes da última alteração, para animar cada widget do lugar
     // antigo até o novo (técnica FLIP).
     const snapshotRef = useRef<Map<string, Box> | null>(null);
+
     // Posições medidas depois da última mudança. Servem de "antes" para mudanças
     // que vêm de fora da grade (desfazer, adicionar widget, trocar de template).
     const lastBoxesRef = useRef(new Map<string, Box>());
@@ -165,7 +169,9 @@ export function PainelGrid({
     // Com a janela redimensionada as posições guardadas deixam de valer.
     useEffect(() => {
         const forget = () => lastBoxesRef.current.clear();
+
         window.addEventListener('resize', forget);
+
         return () => window.removeEventListener('resize', forget);
     }, []);
 
@@ -174,9 +180,11 @@ export function PainelGrid({
         if (!grid) return;
 
         const boxes = new Map<string, Box>();
+
         grid.querySelectorAll<HTMLElement>('[data-painel-id]').forEach((element) => {
             boxes.set(element.dataset.painelId as string, pageBox(element));
         });
+
         snapshotRef.current = boxes;
     }, []);
 
@@ -203,7 +211,9 @@ export function PainelGrid({
             const ty = gesture.startTop + dy - element.offsetTop;
             const rotate = reduced ? 0 : gesture.tilt;
             const scale = reduced ? 1 : 1.025;
+
             element.style.transform = `translate3d(${tx}px, ${ty}px, 0) rotate(${rotate}deg) scale(${scale})`;
+
             return;
         }
 
@@ -228,6 +238,7 @@ export function PainelGrid({
         if (!gesture?.started) return;
 
         let scroll = 0;
+
         if (gesture.clientY < AUTO_SCROLL_EDGE) {
             scroll = -((AUTO_SCROLL_EDGE - gesture.clientY) / AUTO_SCROLL_EDGE) * AUTO_SCROLL_MAX;
         } else if (gesture.clientY > window.innerHeight - AUTO_SCROLL_EDGE) {
@@ -235,6 +246,7 @@ export function PainelGrid({
                 ((gesture.clientY - (window.innerHeight - AUTO_SCROLL_EDGE)) / AUTO_SCROLL_EDGE) *
                 AUTO_SCROLL_MAX;
         }
+
         if (scroll !== 0) window.scrollBy(0, scroll);
 
         const dx = gesture.clientX - gesture.startClientX + (window.scrollX - gesture.startScrollX);
@@ -242,13 +254,16 @@ export function PainelGrid({
 
         // Inclinação suave na direção do movimento, como um cartão de verdade.
         const velocity = dx - gesture.lastDx;
+
         gesture.tilt += (clamp(velocity * 0.35, -5, 5) - gesture.tilt) * 0.18;
         gesture.lastDx = dx;
         gesture.lastDy = dy;
 
         const { widget, initialWidgets, columns: gridColumns } = gesture;
+
         const stepX = Math.round(dx / gesture.columnStep);
         const stepY = Math.round(dy / gesture.rowStep);
+
         const changed =
             gesture.kind === 'move'
                 ? moveWidget(
@@ -265,16 +280,28 @@ export function PainelGrid({
                       widget.h + (gesture.edge === 'e' ? 0 : stepY),
                       gridColumns,
                   );
-        const cell = cellKey(changed.find((item) => item.id === widget.id));
+
+        // Movimentação utiliza troca inteligente.
+        // Redimensionamento continua usando a reorganização tradicional.
+        const arranged =
+            gesture.kind === 'move'
+                ? moveWidgetWithSwap(changed, widget.id, widget, gridColumns)
+                : arrangeWidgets(changed, widget.id);
+
+        // Compara a posição final, não a posição provisória calculada pelo ponteiro.
+        // Isso evita atualizações repetidas enquanto o widget permanece encaixado
+        // na mesma posição de outro widget.
+        const cell = cellKey(arranged.find((item) => item.id === widget.id));
 
         if (cell !== gesture.lastCell) {
             gesture.lastCell = cell;
-            // Os outros widgets abrem espaço para o que está sendo editado.
-            commit(arrangeWidgets(changed, widget.id));
+
+            commit(arranged);
             navigator.vibrate?.(6);
         }
 
         applyGestureVisual();
+
         gesture.frame = requestAnimationFrame(() => frameRef.current());
     }, [applyGestureVisual, commit]);
 
@@ -282,6 +309,7 @@ export function PainelGrid({
     // removidos pela mesma referência, e chamam sempre a versão mais nova das funções.
     const finishRef = useRef<(cancelled: boolean) => void>(() => undefined);
     const startRef = useRef<() => void>(() => undefined);
+
     const listeners = useMemo(
         () => ({
             move(event: PointerEvent) {
@@ -296,16 +324,25 @@ export function PainelGrid({
                         event.clientX - gesture.startClientX,
                         event.clientY - gesture.startClientY,
                     );
+
                     if (gesture.kind === 'move' && distance < DRAG_THRESHOLD) return;
+
                     startRef.current();
                 }
             },
+
             up(event: PointerEvent) {
-                if (event.pointerId === gestureRef.current?.pointerId) finishRef.current(false);
+                if (event.pointerId === gestureRef.current?.pointerId) {
+                    finishRef.current(false);
+                }
             },
+
             cancel(event: PointerEvent) {
-                if (event.pointerId === gestureRef.current?.pointerId) finishRef.current(true);
+                if (event.pointerId === gestureRef.current?.pointerId) {
+                    finishRef.current(true);
+                }
             },
+
             key(event: KeyboardEvent) {
                 if (event.key === 'Escape') finishRef.current(true);
             },
@@ -319,16 +356,21 @@ export function PainelGrid({
 
         gesture.started = true;
         latest.current.onBeforeChange?.();
+
         gesture.element.style.willChange = 'transform';
         document.body.style.cursor = gesture.kind === 'move' ? 'grabbing' : 'nwse-resize';
         document.body.style.userSelect = 'none';
+
         setActiveId(gesture.widget.id);
+
         gesture.frame = requestAnimationFrame(() => frameRef.current());
     };
 
     const finishGesture = (cancelled: boolean) => {
         const gesture = gestureRef.current;
+
         gestureRef.current = null;
+
         window.removeEventListener('pointermove', listeners.move);
         window.removeEventListener('pointerup', listeners.up);
         window.removeEventListener('pointercancel', listeners.cancel);
@@ -337,6 +379,7 @@ export function PainelGrid({
         if (!gesture?.started) return;
 
         cancelAnimationFrame(gesture.frame);
+
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
 
@@ -351,8 +394,10 @@ export function PainelGrid({
             // Solta o widget: ele sai de onde está o ponteiro e assenta na célula com
             // uma mola, partindo da inclinação e da escala que tinha no arrasto.
             const from = element.style.transform;
+
             element.style.transform = '';
             element.style.willChange = '';
+
             if (!reduced && from) {
                 requestAnimationFrame(() => {
                     const settle = play(
@@ -360,15 +405,18 @@ export function PainelGrid({
                         [{ transform: from }, { transform: 'none' }],
                         PAINEL_SPRING_DROP,
                     );
+
                     animationsRef.current.set(element, settle);
                 });
             }
         } else {
             const fromWidth = element.style.width;
             const fromHeight = element.style.height;
+
             element.style.width = '';
             element.style.height = '';
             element.style.willChange = '';
+
             if (!reduced && fromWidth) {
                 requestAnimationFrame(() => {
                     play(
@@ -387,6 +435,7 @@ export function PainelGrid({
         }
 
         const placed = latest.current.widgets.find((item) => item.id === gesture.widget.id);
+
         if (placed) {
             setAnnouncement(
                 cancelled
@@ -394,6 +443,7 @@ export function PainelGrid({
                     : `${placed.title}: coluna ${placed.x + 1}, linha ${placed.y + 1}, ${placed.w} por ${placed.h}.`,
             );
         }
+
         setActiveId(null);
     };
 
@@ -411,8 +461,11 @@ export function PainelGrid({
             event: ReactPointerEvent<HTMLElement>,
         ) => {
             const grid = gridRef.current;
+
             const { widgets: current, canArrange: allowed, columns: gridColumns } = latest.current;
+
             const widget = current.find((item) => item.id === id);
+
             const element = grid?.querySelector<HTMLElement>(
                 `[data-painel-id="${CSS.escape(id)}"]`,
             );
@@ -476,10 +529,14 @@ export function PainelGrid({
     // posição antiga até a nova com uma mola, e o widget ativo continua colado no ponteiro.
     useLayoutEffect(() => {
         const grid = gridRef.current;
+
         const before =
             snapshotRef.current ?? (lastBoxesRef.current.size > 0 ? lastBoxesRef.current : null);
+
         snapshotRef.current = null;
+
         applyGestureVisual();
+
         if (!grid) return;
 
         const measured = new Map<string, Box>();
@@ -487,23 +544,30 @@ export function PainelGrid({
 
         grid.querySelectorAll<HTMLElement>('[data-painel-id]').forEach((element) => {
             const id = element.dataset.painelId as string;
+
             if (id === gestureRef.current?.widget.id && gestureRef.current.started) return;
 
             const old = before?.get(id);
             const running = animationsRef.current.get(element);
             const now = pageBox(element);
+
             measured.set(id, now);
 
             if (!before || reduced) return;
+
             if (old && Math.abs(old.left - now.left) < 0.5 && Math.abs(old.top - now.top) < 0.5) {
                 if (
                     Math.abs(old.width - now.width) < 0.5 &&
                     Math.abs(old.height - now.height) < 0.5
-                )
+                ) {
                     return;
+                }
             }
+
             running?.cancel();
+
             const settled = running ? pageBox(element) : now;
+
             if (running) measured.set(id, settled);
 
             if (!old) {
@@ -518,6 +582,7 @@ export function PainelGrid({
                         PAINEL_SPRING_DROP,
                     );
                 }
+
                 return;
             }
 
@@ -525,11 +590,14 @@ export function PainelGrid({
             const dy = old.top - settled.top;
             const sx = old.width / (settled.width || 1);
             const sy = old.height / (settled.height || 1);
+
             const resized = Math.abs(sx - 1) > 0.01 || Math.abs(sy - 1) > 0.01;
+
             if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && !resized) return;
 
             // O conteúdo dos widgets não é esticado; só o marcador de destino muda de escala.
             const scale = id === GHOST_ID && resized ? ` scale(${sx}, ${sy})` : '';
+
             const animation = play(
                 element,
                 [
@@ -541,6 +609,7 @@ export function PainelGrid({
                 ],
                 PAINEL_SPRING_LAYOUT,
             );
+
             animationsRef.current.set(element, animation);
             animation.onfinish = () => animationsRef.current.delete(element);
         });
@@ -557,22 +626,39 @@ export function PainelGrid({
                 ArrowUp: [0, -1],
                 ArrowDown: [0, 1],
             };
+
             const step = steps[event.key];
+
             const { widgets: current, columns: gridColumns, canArrange: allowed } = latest.current;
+
             const widget = current.find((item) => item.id === id);
+
             if (!step || !widget || !allowed || event.target !== event.currentTarget) return;
 
             event.preventDefault();
+
             const [dx, dy] = step;
-            const changed = event.shiftKey
+
+            const resizing = event.shiftKey;
+
+            const changed = resizing
                 ? resizeWidget(current, id, widget.w + dx, widget.h + dy, gridColumns)
                 : moveWidget(current, id, widget.x + dx, widget.y + dy, gridColumns);
-            const arranged = arrangeWidgets(changed, id);
+
+            // Movimentação usa troca inteligente.
+            // Redimensionamento mantém a reorganização tradicional.
+            const arranged = resizing
+                ? arrangeWidgets(changed, id)
+                : moveWidgetWithSwap(changed, id, widget, gridColumns);
+
             const placed = arranged.find((item) => item.id === id);
+
             if (!placed || cellKey(placed) === cellKey(widget)) return;
 
             latest.current.onBeforeChange?.();
+
             commit(arranged);
+
             setAnnouncement(
                 `${placed.title}: coluna ${placed.x + 1}, linha ${placed.y + 1}, ${placed.w} por ${placed.h}.`,
             );
@@ -584,20 +670,28 @@ export function PainelGrid({
         () => ({
             onPointerDown: (id, event) => {
                 if ((event.target as Element).closest(INTERACTIVE)) return;
+
                 beginGesture('move', 'se', id, event);
             },
+
             onResizeStart: (id, edge, event) => {
                 event.stopPropagation();
                 beginGesture('resize', edge, id, event);
             },
+
             onKeyDown: handleKeyDown,
+
             onConfigure: (id) => {
                 const widget = latest.current.widgets.find((item) => item.id === id);
+
                 if (widget) configureRef.current?.(widget);
             },
+
             onRemove: (id) => {
                 const { widgets: current, columns: gridColumns } = latest.current;
+
                 latest.current.onBeforeChange?.();
+
                 commit(
                     // No celular não há posições a reorganizar: o widget só sai da pilha.
                     gridColumns === PAINEL_COLUMNS.mobile
@@ -605,8 +699,10 @@ export function PainelGrid({
                         : removeWidget(current, id),
                 );
             },
+
             onShift: (id, direction) => {
                 latest.current.onBeforeChange?.();
+
                 commit(shiftWidget(latest.current.widgets, id, direction));
             },
         }),

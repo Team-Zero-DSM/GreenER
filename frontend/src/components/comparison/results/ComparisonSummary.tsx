@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Info, Leaf, Percent, Star, UsersRound } from 'lucide-react';
@@ -23,6 +23,147 @@ type ClassificacaoComparacao = 'acima' | 'abaixo' | 'igual' | 'indisponivel';
 interface PosicaoTooltip {
     x: number;
     y: number;
+}
+
+function posicionarTooltip(ancora: DOMRect, tooltip: HTMLElement): PosicaoTooltip {
+    const margem = 8;
+    const espacamento = 8;
+    const largura = tooltip.offsetWidth;
+    const altura = tooltip.offsetHeight;
+    const larguraViewport = window.visualViewport?.width ?? window.innerWidth;
+    const alturaViewport = window.visualViewport?.height ?? window.innerHeight;
+
+    const x = Math.max(
+        margem,
+        Math.min(ancora.left + ancora.width / 2 - largura / 2, larguraViewport - largura - margem),
+    );
+
+    let y = ancora.top - altura - espacamento;
+
+    if (y < margem) {
+        y = ancora.bottom + espacamento;
+    }
+
+    if (y + altura > alturaViewport - margem) {
+        y = Math.max(margem, alturaViewport - altura - margem);
+    }
+
+    return { x, y };
+}
+
+function ComparisonHelpTooltip() {
+    const tooltipId = useId();
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
+    const [visible, setVisible] = useState(false);
+    const [pinned, setPinned] = useState(false);
+    const [position, setPosition] = useState<PosicaoTooltip | null>(null);
+
+    useLayoutEffect(() => {
+        if (!visible) return;
+
+        const updatePosition = () => {
+            const trigger = triggerRef.current;
+            const tooltip = tooltipRef.current;
+
+            if (trigger && tooltip) {
+                setPosition(posicionarTooltip(trigger.getBoundingClientRect(), tooltip));
+            }
+        };
+
+        updatePosition();
+        window.addEventListener('resize', updatePosition);
+        window.addEventListener('scroll', updatePosition, true);
+
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition, true);
+        };
+    }, [visible]);
+
+    useEffect(() => {
+        if (!visible) return;
+
+        const closeOnOutsidePress = (event: PointerEvent) => {
+            const target = event.target as Node;
+            if (triggerRef.current?.contains(target) || tooltipRef.current?.contains(target))
+                return;
+
+            setPinned(false);
+            setVisible(false);
+        };
+
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setPinned(false);
+                setVisible(false);
+            }
+        };
+
+        document.addEventListener('pointerdown', closeOnOutsidePress);
+        document.addEventListener('keydown', closeOnEscape);
+
+        return () => {
+            document.removeEventListener('pointerdown', closeOnOutsidePress);
+            document.removeEventListener('keydown', closeOnEscape);
+        };
+    }, [visible]);
+
+    function togglePinned() {
+        const next = !pinned;
+        setPinned(next);
+        setVisible(next);
+    }
+
+    return (
+        <>
+            <button
+                ref={triggerRef}
+                type="button"
+                aria-label="Informações sobre como comparar serviços"
+                aria-describedby={visible ? tooltipId : undefined}
+                aria-expanded={visible}
+                onPointerEnter={(event) => {
+                    if (event.pointerType === 'mouse') setVisible(true);
+                }}
+                onPointerLeave={(event) => {
+                    if (event.pointerType === 'mouse' && !pinned) setVisible(false);
+                }}
+                onFocus={() => setVisible(true)}
+                onBlur={() => {
+                    if (!pinned) setVisible(false);
+                }}
+                onClick={togglePinned}
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+                <Info className="size-4" />
+            </button>
+
+            {visible &&
+                createPortal(
+                    <div
+                        ref={tooltipRef}
+                        id={tooltipId}
+                        role="tooltip"
+                        className="pointer-events-none fixed z-[9999] w-64 max-w-[calc(100vw-1rem)] rounded-xl border border-border bg-popover p-3 text-left text-xs leading-relaxed text-popover-foreground shadow-xl"
+                        style={{
+                            left: position?.x ?? 0,
+                            top: position?.y ?? 0,
+                            visibility: position ? 'visible' : 'hidden',
+                        }}
+                    >
+                        <strong className="mb-2 block">Como fazer uma comparação</strong>
+                        <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
+                        <span className="mb-2 block">2. Defina o serviço de referência.</span>
+                        <span className="mb-2 block">3. Escolha o período analisado.</span>
+                        <span className="block">
+                            4. Escolha uma região para simular as emissões.
+                        </span>
+                    </div>,
+                    document.body,
+                )}
+        </>
+    );
 }
 
 function formatarValor(valor: number | null, metrica: ComparisonMetric): string {
@@ -279,34 +420,7 @@ export function ComparisonSummary({
                             resultados.
                         </p>
 
-                        <span className="group relative inline-flex shrink-0">
-                            <button
-                                type="button"
-                                aria-label="Informações sobre como comparar serviços"
-                                className="flex size-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                                <Info className="size-4" />
-                            </button>
-
-                            <span
-                                role="tooltip"
-                                className="invisible absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-border bg-popover p-3 text-left text-xs leading-relaxed text-popover-foreground opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-                            >
-                                <strong className="mb-2 block">Como fazer uma comparação</strong>
-
-                                <span className="mb-2 block">1. Selecione de 2 a 5 serviços.</span>
-
-                                <span className="mb-2 block">
-                                    2. Defina o serviço de referência.
-                                </span>
-
-                                <span className="mb-2 block">3. Escolha o período analisado.</span>
-
-                                <span className="block">
-                                    4. Escolha uma região para simular as emissões.
-                                </span>
-                            </span>
-                        </span>
+                        <ComparisonHelpTooltip />
                     </CardContent>
                 </Card>
             ) : (

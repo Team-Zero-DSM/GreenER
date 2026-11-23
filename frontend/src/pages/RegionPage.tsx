@@ -8,6 +8,7 @@ import { RegionsCarousel } from '@/components/regions/RegionsCarousel';
 import { RegionsMap2D } from '@/components/regions/RegionsMap2D';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageShell } from '@/components/shared/PageShell';
+import { SECONDARY_ACTION_BUTTON_CLASS_NAME } from '@/components/shared/actionButtonStyles';
 
 export function RegionPage() {
     const fetcher = useCallback(() => fetchRegionsLast24Hours(), []);
@@ -21,7 +22,7 @@ export function RegionPage() {
                 actions={
                     <Link
                         to="/inicio#explorar"
-                        className="inline-flex shrink-0 items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-cyan-400/50 hover:bg-cyan-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                        className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-10 shrink-0 px-4 py-2 text-sm`}
                     >
                         Ver no globo 3D
                     </Link>

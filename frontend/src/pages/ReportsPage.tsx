@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
+
 import { reportsApi } from '@/api/reports/reportIndex';
 import { ReportErrorBoundary } from '@/components/reports/ReportErrorBoundary';
 import { ReportFiltersPanel } from '@/components/reports/ReportFilterPanel';
 import { ReportSheet } from '@/components/reports/ReportSheet';
-import { buttonClass, buttonPrimaryClass } from '@/components/reports/reportStyles';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageShell } from '@/components/shared/PageShell';
+import { SECONDARY_ACTION_BUTTON_CLASS_NAME } from '@/components/shared/actionButtonStyles';
 import { useReport } from '@/hooks/useReport';
 import { useReportHistory } from '@/hooks/useReportHistory';
 import { exportReportCsv } from '@/lib/reports/exportCsv';
@@ -20,14 +21,27 @@ type PdfState = 'idle' | 'working' | 'error';
 export function ReportsPage() {
     const [filters, setFilters] = useState<ReportFilters>(EMPTY_FILTERS);
     const [chart, setChart] = useState<ReportChartOptions>(DEFAULT_CHART);
-    const [excludedServiceIds, setExcludedServiceIds] = useState<string[]>([]);
+
+    // null representa o estado inicial: nenhum serviço selecionado.
+    const [excludedServiceIds, setExcludedServiceIds] = useState<string[] | null>(null);
+
     const [pdfState, setPdfState] = useState<PdfState>('idle');
 
     const { data: catalog, status, error, reload } = useReport(filters);
 
+    const allServiceIds = useMemo(
+        () =>
+            catalog?.sections.flatMap((section) => section.services.map((service) => service.id)) ??
+            [],
+        [catalog],
+    );
+
+    // Quando null, todos os serviços ficam excluídos.
+    const effectiveExcludedServiceIds = excludedServiceIds ?? allServiceIds;
+
     const report = useMemo(
-        () => (catalog ? selectServices(catalog, new Set(excludedServiceIds)) : null),
-        [catalog, excludedServiceIds],
+        () => (catalog ? selectServices(catalog, new Set(effectiveExcludedServiceIds)) : null),
+        [catalog, effectiveExcludedServiceIds],
     );
 
     const idsKey = report
@@ -51,7 +65,7 @@ export function ReportsPage() {
 
     function clearAll() {
         setFilters(EMPTY_FILTERS);
-        setExcludedServiceIds([]);
+        setExcludedServiceIds(null);
     }
 
     async function handlePdf() {
@@ -74,7 +88,7 @@ export function ReportsPage() {
                     <div className="flex flex-wrap gap-2">
                         <button
                             type="button"
-                            className={buttonClass}
+                            className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-10 shrink-0 px-4 py-2 text-sm`}
                             onClick={() => report && exportReportCsv(report)}
                             disabled={!canExport}
                         >
@@ -83,7 +97,7 @@ export function ReportsPage() {
 
                         <button
                             type="button"
-                            className={buttonPrimaryClass}
+                            className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-10 shrink-0 px-4 py-2 text-sm`}
                             onClick={handlePdf}
                             disabled={!canExport || pdfState === 'working'}
                         >
@@ -104,10 +118,10 @@ export function ReportsPage() {
                     <ReportFiltersPanel
                         filters={filters}
                         catalog={catalog?.sections ?? []}
-                        excludedServiceIds={excludedServiceIds}
+                        excludedServiceIds={effectiveExcludedServiceIds}
                         chart={chart}
                         onChange={setFilters}
-                        onExcludedChange={setExcludedServiceIds}
+                        onExcludedChange={(next) => setExcludedServiceIds(next)}
                         onChartChange={setChart}
                         onClear={clearAll}
                     />
@@ -119,7 +133,11 @@ export function ReportsPage() {
                                     Não foi possível gerar a prévia{error ? `: ${error}` : '.'}
                                 </p>
 
-                                <button type="button" className={buttonClass} onClick={reload}>
+                                <button
+                                    type="button"
+                                    className={SECONDARY_ACTION_BUTTON_CLASS_NAME}
+                                    onClick={reload}
+                                >
                                     Tentar de novo
                                 </button>
                             </div>
@@ -131,22 +149,16 @@ export function ReportsPage() {
                                     Nenhum serviço encontrado com esses filtros.
                                 </p>
 
-                                <button type="button" className={buttonClass} onClick={clearAll}>
+                                <button
+                                    type="button"
+                                    className={SECONDARY_ACTION_BUTTON_CLASS_NAME}
+                                    onClick={clearAll}
+                                >
                                     Limpar filtros
                                 </button>
                             </div>
                         ) : report.total === 0 ? (
-                            <div className="grid justify-items-start gap-3">
-                                <p className="text-muted-foreground">Nenhum serviço selecionado.</p>
-
-                                <button
-                                    type="button"
-                                    className={buttonClass}
-                                    onClick={() => setExcludedServiceIds([])}
-                                >
-                                    Selecionar todos
-                                </button>
-                            </div>
+                            <p className="text-muted-foreground">Nenhum serviço selecionado.</p>
                         ) : (
                             <ReportErrorBoundary resetKey={report}>
                                 <ReportSheet

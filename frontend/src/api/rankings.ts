@@ -1,4 +1,4 @@
-import { getJson } from '@/api/services';
+import { getJson } from '@/api/client';
 import type { RankingCriterion, RankingResponse } from '@/types/ranking';
 import type { HistoryRange } from '@/types/service';
 

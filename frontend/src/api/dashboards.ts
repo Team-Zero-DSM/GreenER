@@ -1,4 +1,4 @@
-import { getJson, putJson } from '@/api/services';
+import { getJson, putJson } from '@/api/client';
 import type { PainelConfig } from '@/types/painel';
 
 interface DashboardResponse {

@@ -12,7 +12,7 @@ import { AuthLayout } from '@/layouts/AuthLayout';
 import { AdminSettingsPage } from '@/pages/AdminSettingsPage';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import ReportsPage from './pages/ReportsPage';
+import ReportsPage from '@/pages/ReportsPage';
 
 export default function App() {
     return (

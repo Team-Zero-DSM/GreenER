@@ -1,4 +1,4 @@
-import { getJson, patchJson, postJson } from '@/api/services';
+import { getJson, patchJson, postJson } from '@/api/client';
 import type { ProfileRole } from '@/types/profile';
 
 export interface CollectionSettings {

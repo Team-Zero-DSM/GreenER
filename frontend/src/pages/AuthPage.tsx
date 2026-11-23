@@ -7,7 +7,7 @@ import { AuthForm } from '@/components/auth/AuthForm';
 import { AnimatedContent } from '@/components/shared/AnimatedContent';
 
 import { registerAccount, loginAccount } from '@/api/auth';
-import { ApiError } from '@/api/services';
+import { ApiError } from '@/api/client';
 
 import { useAuth } from '@/hooks/useAuth';
 

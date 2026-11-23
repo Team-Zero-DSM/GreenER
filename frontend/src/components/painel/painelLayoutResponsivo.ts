@@ -124,7 +124,14 @@ export function setLayoutWidgets(
 
     for (const widget of widgets) {
         if (!desktop.some((item) => item.id === widget.id)) {
-            const size = PAINEL_WIDGET_LIBRARY.find((item) => item.id === widget.id) ?? widget;
+            const metricId = widget.metric ?? widget.id;
+
+            const size =
+                PAINEL_WIDGET_LIBRARY.find(
+                    (item) =>
+                        item.id === widget.id ||
+                        (item.type === widget.type && (item.metric ?? item.id) === metricId),
+                ) ?? widget;
 
             desktop = addWidget(desktop, { ...widget, w: size.w, h: size.h });
         }
