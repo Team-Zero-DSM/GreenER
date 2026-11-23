@@ -94,22 +94,7 @@ contabilizada como uma nova entrega de cenários avançados nesta sprint.
 | **T33** | [#195](https://github.com/Team-Zero-DSM/GreenER/issues/195) — Implementar página de relatórios | Gabriel | ✅ | 5 |
 | **T34** | [#196](https://github.com/Team-Zero-DSM/GreenER/issues/196) — Adicionar responsividade a landing page | Gabriel | ✅ | 3 |
 
-### 📌 Legenda e progresso
-
-- ✅ Issue fechada, com PR de implementação integrado.
-
-**Progresso por tarefas: 34 de 34 concluídas, somando 154 pontos.**
-Os 154 pontos estão registrados no campo `Estimate` do
-[GitHub Projects](https://github.com/orgs/Team-Zero-DSM/projects/3/views/10),
-incluindo **5 pontos para #195** e **3 pontos para #196**.
-
-| Situação | Pontos do backlog documentado |
-|---|---:|
-| Done | 154 |
-| In progress | 0 |
-| Backlog | 0 |
-| Ready / In review | 0 |
-| **Total** | **154** |
+### 📌 Progresso
 
 As 34 tarefas possuem pontuação no Projects e na documentação, com o total
 de 154 pontos em Done.
