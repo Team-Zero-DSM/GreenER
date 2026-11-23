@@ -8,7 +8,7 @@ export const reportFiltersSchema = z.strictObject({
     serviceIds: z
         .array(z.string().trim().min(1).max(200))
         .min(1)
-        .max(20)
+        .max(100)
         .refine((ids) => new Set(ids).size === ids.length, 'Não repita os serviços selecionados.'),
     range: snapshotRangeSchema,
     metrics: z

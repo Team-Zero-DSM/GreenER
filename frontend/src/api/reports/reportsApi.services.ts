@@ -6,6 +6,7 @@ import type { ReportService } from '@/types/report';
 import type { ServiceSummary } from '@/types/service';
 import type { ReportsApi } from './reportContract';
 import { loadReportHistory } from './history';
+import { getReportPdf } from './reportPdf';
 
 function toReportService(s: ServiceSummary): ReportService {
     return {
@@ -37,7 +38,5 @@ export const servicesReportsApi: ReportsApi = {
     getHistory(serviceIds, query, signal) {
         return loadReportHistory(serviceIds, query, signal);
     },
-    async downloadPdf() {
-        window.print();
-    },
+    getPdf: getReportPdf,
 };

@@ -1,22 +1,20 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 
-import { reportsApi } from '@/api/reports/reportIndex';
-import { ReportErrorBoundary } from '@/components/reports/ReportErrorBoundary';
 import { ReportFiltersPanel } from '@/components/reports/ReportFilterPanel';
-import { ReportSheet } from '@/components/reports/ReportSheet';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageShell } from '@/components/shared/PageShell';
 import { SECONDARY_ACTION_BUTTON_CLASS_NAME } from '@/components/shared/actionButtonStyles';
 import { useReport } from '@/hooks/useReport';
-import { useReportHistory } from '@/hooks/useReportHistory';
+import { useReportPdf } from '@/hooks/useReportPdf';
+import { buildPdfRequest } from '@/lib/reports/buildPdfRequest';
 import { exportReportCsv } from '@/lib/reports/exportCsv';
+import { downloadBlob } from '@/lib/reports/download';
 import { selectServices } from '@/lib/reports/selectServices';
 import type { ReportChartOptions, ReportFilters } from '@/types/report';
 
 const EMPTY_FILTERS: ReportFilters = { statuses: [], from: '', to: '' };
 const DEFAULT_CHART: ReportChartOptions = { enabled: true, type: 'line', range: '24h' };
-
-type PdfState = 'idle' | 'working' | 'error';
+const ReportPdfPreview = lazy(() => import('@/components/reports/ReportPdfPreview'));
 
 export function ReportsPage() {
     const [filters, setFilters] = useState<ReportFilters>(EMPTY_FILTERS);
@@ -24,8 +22,6 @@ export function ReportsPage() {
 
     // null representa o estado inicial: nenhum serviço selecionado.
     const [excludedServiceIds, setExcludedServiceIds] = useState<string[] | null>(null);
-
-    const [pdfState, setPdfState] = useState<PdfState>('idle');
 
     const { data: catalog, status, error, reload } = useReport(filters);
 
@@ -53,30 +49,20 @@ export function ReportsPage() {
 
     const serviceIds = useMemo(() => (idsKey ? idsKey.split('\n') : []), [idsKey]);
 
-    const history = useReportHistory(
-        serviceIds,
-        chart.range,
-        filters.from,
-        filters.to,
-        chart.enabled,
-    );
-
     const canExport = status === 'ready' && report !== null && report.total > 0;
+    const pdfRequest = useMemo(
+        () => (canExport ? buildPdfRequest(serviceIds, chart, filters) : null),
+        [canExport, serviceIds, chart, filters],
+    );
+    const pdf = useReportPdf(pdfRequest);
 
     function clearAll() {
         setFilters(EMPTY_FILTERS);
         setExcludedServiceIds(null);
     }
 
-    async function handlePdf() {
-        setPdfState('working');
-
-        try {
-            await reportsApi.downloadPdf(filters);
-            setPdfState('idle');
-        } catch {
-            setPdfState('error');
-        }
+    function handlePdf() {
+        if (pdf.file) downloadBlob(pdf.file.blob, pdf.file.filename);
     }
 
     return (
@@ -99,21 +85,15 @@ export function ReportsPage() {
                             type="button"
                             className={`${SECONDARY_ACTION_BUTTON_CLASS_NAME} min-h-10 shrink-0 px-4 py-2 text-sm`}
                             onClick={handlePdf}
-                            disabled={!canExport || pdfState === 'working'}
+                            disabled={!canExport || pdf.status !== 'ready'}
                         >
-                            {pdfState === 'working' ? 'Gerando PDF...' : 'Exportar PDF'}
+                            {pdf.status === 'loading' ? 'Gerando PDF...' : 'Exportar PDF'}
                         </button>
                     </div>
                 }
             />
 
             <div className="mt-4">
-                {pdfState === 'error' && (
-                    <p role="alert" className="mb-3 text-sm text-destructive print:hidden">
-                        Não foi possível gerar o PDF. Tente de novo.
-                    </p>
-                )}
-
                 <div className="grid min-w-0 grid-cols-1 items-start gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
                     <ReportFiltersPanel
                         filters={filters}
@@ -141,8 +121,10 @@ export function ReportsPage() {
                                     Tentar de novo
                                 </button>
                             </div>
-                        ) : !catalog || !report ? (
-                            <p className="text-muted-foreground">Gerando prévia...</p>
+                        ) : status === 'loading' || !catalog || !report ? (
+                            <p role="status" className="text-muted-foreground">
+                                Gerando prévia...
+                            </p>
                         ) : catalog.total === 0 && status === 'ready' ? (
                             <div className="grid justify-items-start gap-3">
                                 <p className="text-muted-foreground">
@@ -159,21 +141,33 @@ export function ReportsPage() {
                             </div>
                         ) : report.total === 0 ? (
                             <p className="text-muted-foreground">Nenhum serviço selecionado.</p>
+                        ) : pdf.status === 'error' ? (
+                            <div role="alert" className="grid justify-items-start gap-3">
+                                <p className="text-sm text-destructive">
+                                    Não foi possível gerar a prévia do PDF: {pdf.error}
+                                </p>
+                                <button
+                                    type="button"
+                                    className={SECONDARY_ACTION_BUTTON_CLASS_NAME}
+                                    onClick={pdf.reload}
+                                >
+                                    Tentar de novo
+                                </button>
+                            </div>
+                        ) : pdf.file ? (
+                            <Suspense
+                                fallback={
+                                    <p role="status" className="text-muted-foreground">
+                                        Preparando prévia...
+                                    </p>
+                                }
+                            >
+                                <ReportPdfPreview blob={pdf.file.blob} onRetry={pdf.reload} />
+                            </Suspense>
                         ) : (
-                            <ReportErrorBoundary resetKey={report}>
-                                <ReportSheet
-                                    data={report}
-                                    totalCount={catalog.total}
-                                    loading={status === 'loading'}
-                                    chart={chart}
-                                    history={{
-                                        status: history.status,
-                                        data: history.data,
-                                        error: history.error,
-                                        onRetry: history.reload,
-                                    }}
-                                />
-                            </ReportErrorBoundary>
+                            <p role="status" className="text-muted-foreground">
+                                Gerando prévia do PDF...
+                            </p>
                         )}
                     </section>
                 </div>

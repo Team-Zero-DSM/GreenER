@@ -3,6 +3,7 @@ import type {
     ReportData,
     ReportFilters,
     ReportHistory,
+    ReportPdfRequest,
     ReportRegion,
 } from '@/types/report';
 
@@ -14,5 +15,5 @@ export interface ReportsApi {
         query: HistoryQuery,
         signal?: AbortSignal,
     ): Promise<ReportHistory>;
-    downloadPdf(filters: ReportFilters): Promise<void>;
+    getPdf(request: ReportPdfRequest, signal?: AbortSignal): Promise<Blob>;
 }

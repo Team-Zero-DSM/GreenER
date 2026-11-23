@@ -78,3 +78,15 @@ export interface HistoryQuery {
     window?: HistoryWindow;
     truncated: boolean;
 }
+
+// Corpo aceito por POST /api/v1/reports/pdf (backend/src/modules/reports/reports.schema.ts).
+export type ReportPdfMetric = 'energy' | 'carbon' | 'cpu' | 'memory' | 'power';
+
+export interface ReportPdfRequest {
+    title?: string;
+    serviceIds: string[];
+    range: HistoryRange;
+    metrics: ReportPdfMetric[];
+    visualization: 'line' | 'bars' | 'table';
+    end?: string;
+}
