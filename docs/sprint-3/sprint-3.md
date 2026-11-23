@@ -106,7 +106,9 @@ PRs correspondentes, conforme o [registro de evidências](./evidencias-dod.md#sp
 
 ## 📈 Burndown da Sprint
 
-O gráfico e os dados de burndown permanecem fora desta atualização documental.
+<p align="center">
+    <img src="./BurndownSprint3.svg" alt="Gráfico de Burndown">
+</p>
 
 ---
 
@@ -161,3 +163,36 @@ PDF. A interface recebeu padronização visual e ajustes de responsividade.
 
 As 34 tarefas do milestone estão concluídas, incluindo a refatoração final
 (#176), integrada pelo PR #220.
+
+---
+
+## 🔄 Sprint Retrospective
+
+### O que funcionou?
+
+> A organização e a divisão das tarefas continuaram funcionando muito bem. Cada integrante teve clareza sobre suas responsabilidades e pôde trabalhar nas áreas em que tinha mais afinidade. Isso facilitou o acompanhamento das entregas e contribuiu para a conclusão de todas as tarefas previstas para a Sprint Final, garantindo a entrega do produto.
+
+### O que não funcionou?
+
+> Feriados, finais de semana e atividades acadêmicas impactaram um pouco o ritmo de desenvolvimento, fazendo com que o progresso se afastasse temporariamente do Burndown planejado. Apesar desses imprevistos, a equipe conseguiu se reorganizar e concluir todas as entregas previstas, sem comprometer o resultado final do projeto.
+
+### O que melhorar?
+
+> Manter o formato de organização e divisão das tarefas que apresentou bons resultados ao longo do projeto, aprimorando-o conforme a experiência adquirida pela equipe. Também identificamos a importância de antecipar entregas, manter um ritmo de desenvolvimento constante e evitar o acúmulo de tarefas no final dos ciclos, práticas que poderão ser aplicadas em projetos futuros.
+
+---
+
+## 🎥 Demonstração da Sprint
+
+Link da apresentação da sprint: 
+
+<p align="left">
+  <a href="https://www.youtube.com/watch?v=WEvmOK2wEvc" target="_blank">
+    <img 
+      src="" 
+      alt="GreenER - Sprint 3"
+      width="600"
+      style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);"
+    />
+  </a>
+</p>
