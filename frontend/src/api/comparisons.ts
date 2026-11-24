@@ -1,4 +1,4 @@
-import { postJson } from '@/api/services';
+import { postJson } from '@/api/client';
 
 import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
 

@@ -1,6 +1,11 @@
 import { useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+    getDropdownTriggerClassName,
+} from '@/components/shared/dropdownStyles';
 import { statusInfo } from '@/lib/serviceStatus';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import type { ServiceStatus } from '@/types/service';
@@ -19,7 +24,6 @@ interface FilterSelectProps {
 }
 
 const fieldClass = 'flex flex-col gap-1 text-sm font-medium';
-const inputClass = 'h-9 rounded-md border border-input bg-secondary px-3 text-sm font-normal';
 const visibleStatuses = ['Disponível', 'Sem métricas', 'Indisponível'];
 
 function FilterSelect({ value, options, onChange }: FilterSelectProps) {
@@ -38,11 +42,7 @@ function FilterSelect({ value, options, onChange }: FilterSelectProps) {
                 type="button"
                 aria-expanded={open}
                 onClick={() => setOpen((current) => !current)}
-                className={`flex h-9 w-full items-center justify-between gap-2 rounded-md border px-3 text-sm font-normal transition-colors ${
-                    open
-                        ? 'border-emerald-400/40 bg-emerald-400/5'
-                        : 'border-input bg-secondary hover:border-emerald-400/30'
-                }`}
+                className={getDropdownTriggerClassName(open)}
             >
                 <span className="truncate">{selected?.label ?? value}</span>
                 <ChevronDown
@@ -56,7 +56,7 @@ function FilterSelect({ value, options, onChange }: FilterSelectProps) {
             {open && (
                 <div
                     ref={pickerRef}
-                    className="absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto rounded-lg border border-border bg-background p-2 shadow-xl shadow-black/30"
+                    className={`absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto ${DROPDOWN_SURFACE_CLASS_NAME}`}
                 >
                     <div className="flex flex-col gap-1">
                         {options.map((option) => {
@@ -70,11 +70,7 @@ function FilterSelect({ value, options, onChange }: FilterSelectProps) {
                                         onChange(option.value);
                                         setOpen(false);
                                     }}
-                                    className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                                        selected
-                                            ? 'bg-emerald-400/10 font-medium text-emerald-300'
-                                            : 'text-foreground/80 hover:bg-emerald-400/[0.07] hover:text-emerald-200'
-                                    }`}
+                                    className={getDropdownOptionClassName(selected)}
                                 >
                                     {option.label}
                                 </button>
@@ -89,74 +85,72 @@ function FilterSelect({ value, options, onChange }: FilterSelectProps) {
 
 export function ServiceFilters({ filters, countries, onChange }: ServiceFiltersProps) {
     return (
-        <Card aria-label="Filtros" className="relative z-20 overflow-visible">
-            <CardContent className="relative grid gap-4 overflow-visible sm:grid-cols-2 lg:grid-cols-4">
-                <label className={fieldClass}>
-                    Buscar
-                    <input
-                        type="search"
-                        className={inputClass}
-                        placeholder="Nome ou ID"
-                        value={filters.search}
-                        onChange={(event) => onChange({ ...filters, search: event.target.value })}
-                    />
-                </label>
+        <CardContent className="relative grid gap-4 overflow-visible sm:grid-cols-2 lg:grid-cols-4">
+            <label className={fieldClass}>
+                Buscar serviço
+                <input
+                    type="search"
+                    placeholder="Nome ou ID"
+                    value={filters.search}
+                    onChange={(event) => onChange({ ...filters, search: event.target.value })}
+                    className="min-h-12 w-full rounded-xl border border-border/60 bg-transparent px-3 text-sm font-normal text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-primary/30 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/10"
+                />
+            </label>
 
-                <label className={fieldClass}>
-                    Estado
-                    <FilterSelect
-                        value={filters.status}
-                        options={[
-                            { value: 'all', label: 'Todos' },
-                            ...Object.entries(statusInfo)
-                                .filter(([, info]) => visibleStatuses.includes(info.label))
-                                .map(([value, info]) => ({
-                                    value,
-                                    label: info.label,
-                                })),
-                        ]}
-                        onChange={(value) =>
-                            onChange({
-                                ...filters,
-                                status: value as ServiceStatus | 'all',
-                            })
-                        }
-                    />
-                </label>
-
-                <label className={fieldClass}>
-                    País
-                    <FilterSelect
-                        value={filters.country}
-                        options={[
-                            { value: 'all', label: 'Todos' },
-                            ...countries.map((country) => ({
-                                value: country,
-                                label: country,
+            <label className={fieldClass}>
+                Estado
+                <FilterSelect
+                    value={filters.status}
+                    options={[
+                        { value: 'all', label: 'Todos' },
+                        ...Object.entries(statusInfo)
+                            .filter(([, info]) => visibleStatuses.includes(info.label))
+                            .map(([value, info]) => ({
+                                value,
+                                label: info.label,
                             })),
-                        ]}
-                        onChange={(value) => onChange({ ...filters, country: value })}
-                    />
-                </label>
+                    ]}
+                    onChange={(value) =>
+                        onChange({
+                            ...filters,
+                            status: value as ServiceStatus | 'all',
+                        })
+                    }
+                />
+            </label>
 
-                <label className={fieldClass}>
-                    Ordenar por
-                    <FilterSelect
-                        value={filters.sort}
-                        options={[
-                            { value: 'co2e', label: 'Maior emissão' },
-                            { value: 'energy', label: 'Maior consumo' },
-                            { value: 'name', label: 'Nome' },
-                        ]}
-                        onChange={(value) =>
-                            onChange({
-                                ...filters,
-                                sort: value as ServiceSort,
-                            })
-                        }
-                    />
-                </label>
-            </CardContent>
-        </Card>
+            <label className={fieldClass}>
+                País
+                <FilterSelect
+                    value={filters.country}
+                    options={[
+                        { value: 'all', label: 'Todos' },
+                        ...countries.map((country) => ({
+                            value: country,
+                            label: country,
+                        })),
+                    ]}
+                    onChange={(value) => onChange({ ...filters, country: value })}
+                />
+            </label>
+
+            <label className={fieldClass}>
+                Ordenar por
+                <FilterSelect
+                    value={filters.sort}
+                    options={[
+                        { value: 'co2e', label: 'Maior emissão' },
+                        { value: 'energy', label: 'Maior consumo' },
+                        { value: 'name', label: 'Nome' },
+                    ]}
+                    onChange={(value) =>
+                        onChange({
+                            ...filters,
+                            sort: value as ServiceSort,
+                        })
+                    }
+                />
+            </label>
+        </CardContent>
     );
 }

@@ -2,91 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-}
-
-:root {
-    --background: #050816;
-    --foreground: #e8ecf8;
-    --card: rgba(255, 255, 255, 0.06);
-    --card-foreground: #e8ecf8;
-    --popover: #0b1026;
-    --popover-foreground: #e8ecf8;
-    --primary: #34d399;
-    --primary-foreground: #050816;
-    --secondary: #131a3a;
-    --secondary-foreground: #e8ecf8;
-    --muted: rgba(255, 255, 255, 0.06);
-    --muted-foreground: #a3acc9;
-    --accent: rgba(255, 255, 255, 0.1);
-    --accent-foreground: #e8ecf8;
-    --destructive: #f87171;
-    --border: rgba(255, 255, 255, 0.14);
-    --input: rgba(255, 255, 255, 0.14);
-    --ring: #22d3ee;
-    --chart-1: #3987e5;
-    --chart-2: #d95926;
-    --chart-3: #199e70;
-    --chart-4: #c98500;
-    --chart-5: #d55181;
-    --radius: 0.875rem;
-    --sidebar: #0b1026;
-    --sidebar-foreground: #e8ecf8;
-    --sidebar-primary: #34d399;
-    --sidebar-primary-foreground: #050816;
-    --sidebar-accent: rgba(255, 255, 255, 0.1);
-    --sidebar-accent-foreground: #e8ecf8;
-    --sidebar-border: rgba(255, 255, 255, 0.14);
-    --sidebar-ring: #22d3ee;
-    color-scheme: dark;
-}
-
-.dark {
-    color-scheme: dark;
-}
+@import './styles/theme.css';
 
 @layer base {
     * {
@@ -94,7 +10,7 @@
     }
     body {
         @apply min-h-screen bg-background text-foreground;
-        background-image: radial-gradient(ellipse at top, #131a3a, #050816 70%);
+        background-image: var(--page-background-image);
         background-attachment: fixed;
     }
     html {
@@ -102,30 +18,71 @@
     }
     [data-slot='card'] {
         backdrop-filter: blur(14px) saturate(140%);
-        box-shadow: 0 12px 40px rgba(3, 6, 20, 0.45);
+        box-shadow: var(--card-shadow);
     }
+}
+
+.dashboard-atmosphere {
+    background-color: var(--background);
+    background-image:
+        radial-gradient(
+            ellipse at 12% 24%,
+            color-mix(in srgb, var(--ring) 9%, transparent),
+            transparent 38%
+        ),
+        radial-gradient(
+            ellipse at 88% 72%,
+            color-mix(in srgb, var(--primary) 8%, transparent),
+            transparent 42%
+        ),
+        radial-gradient(
+            1px 1px at 12% 19%,
+            color-mix(in srgb, var(--foreground) 35%, transparent) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            1px 1px at 73% 14%,
+            color-mix(in srgb, var(--foreground) 30%, transparent) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            1px 1px at 86% 42%,
+            color-mix(in srgb, var(--foreground) 25%, transparent) 50%,
+            transparent 100%
+        ),
+        radial-gradient(
+            1px 1px at 38% 82%,
+            color-mix(in srgb, var(--foreground) 25%, transparent) 50%,
+            transparent 100%
+        ),
+        var(--page-background-image);
+    background-attachment: fixed;
 }
 
 .region-slider {
     --swiper-navigation-size: 2.5rem;
-    --swiper-navigation-color: #e8ecf8;
+    --swiper-navigation-color: var(--foreground);
     --swiper-navigation-sides-offset: 0rem;
-    --swiper-pagination-color: #e8ecf8;
-    --swiper-pagination-bullet-inactive-color: rgba(232, 236, 248, 0.35);
+    --swiper-pagination-color: var(--foreground);
+    --swiper-pagination-bullet-inactive-color: color-mix(
+        in srgb,
+        var(--foreground) 35%,
+        transparent
+    );
     --swiper-pagination-bullet-inactive-opacity: 1;
 }
 
 .region-slider .swiper-button-prev,
 .region-slider .swiper-button-next {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 9999px;
     transition: background-color 0.2s;
 }
 
 .region-slider .swiper-button-prev:hover,
 .region-slider .swiper-button-next:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--accent);
 }
 
 .region-slider .swiper-button-prev svg,
@@ -151,4 +108,146 @@
     .region-slider .swiper-pagination {
         display: none;
     }
+}
+
+/* Painel: grade guia e marcador de destino que aparecem enquanto um widget é arrastado. */
+@keyframes painel-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes painel-ghost-pulse {
+    50% {
+        box-shadow: 0 0 48px -6px color-mix(in srgb, var(--primary) 55%, transparent);
+    }
+}
+
+.painel-guides {
+    animation: painel-fade-in 180ms ease-out;
+}
+
+.painel-ghost {
+    animation:
+        painel-fade-in 120ms ease-out,
+        painel-ghost-pulse 1.6s ease-in-out infinite;
+}
+
+/* Seletor de template: a lista e o cartão de resumo surgem com um leve deslize. */
+@keyframes painel-pop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+}
+
+@keyframes painel-tooltip-in {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+    }
+}
+
+.painel-popover {
+    transform-origin: top left;
+    animation: painel-pop-in 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.painel-tooltip {
+    animation: painel-tooltip-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* O corpo do widget é um contêiner de tamanho para que KPIs e conteúdo visual
+   respondam ao espaço real da célula, em todos os templates e tamanhos de tela. */
+.painel-body {
+    container-type: size;
+}
+
+[data-fill] .painel-card {
+    min-height: 0;
+}
+
+[data-fill] .painel-card > :first-child {
+    padding: clamp(0.625rem, 1.5vh, 1rem);
+}
+
+[data-fill] .painel-body {
+    overflow: hidden;
+    margin-top: clamp(0.25rem, 1vh, 0.75rem);
+}
+
+[data-painel-id] .painel-kpi-value {
+    font-size: clamp(1.5rem, min(42cqh, 16cqw), 4.5rem);
+    line-height: 1;
+}
+
+[data-painel-id] .painel-kpi-unit {
+    font-size: clamp(0.75rem, min(18cqh, 5cqw), 1.5rem);
+}
+
+/* Só oculta os textos auxiliares quando o espaço vertical realmente fica curto. */
+@container (max-height: 56px) {
+    .painel-kpi-extra {
+        display: none;
+    }
+}
+
+@container (max-height: 38px) {
+    .painel-kpi-label {
+        display: none;
+    }
+}
+
+/* Widget pego pelo usuário: fundo sólido, para a sombra e o encaixe atrás não
+   aparecerem através dele. */
+.painel-card[data-active] > :first-child {
+    background-color: var(--panel-drag-surface);
+}
+
+/* Modo de edição: o widget sobe um pouco ao passar o mouse, avisando que pode ser pego. */
+[data-editing='true'] .painel-card:not([data-active]) {
+    transition: translate 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-editing='true'] .painel-card:not([data-active]):hover {
+    translate: 0 -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .painel-guides,
+    .painel-ghost,
+    .painel-popover,
+    .painel-tooltip {
+        animation: none;
+    }
+
+    [data-editing='true'] .painel-card:not([data-active]):hover {
+        translate: none;
+    }
+}
+
+[data-fill] .painel-body * {
+    scrollbar-width: none;
+}
+
+.dashboard-atmosphere:has([data-painel-fullscreen='true']) > header,
+.dashboard-atmosphere:has([data-painel-fullscreen='true']) > #monitoring-panel,
+.dashboard-atmosphere:has([data-painel-fullscreen='true']) > footer {
+    display: none !important;
+}
+
+input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.painel-card:has([data-widget-menu-open='true']) {
+    position: relative;
+    z-index: 60;
 }

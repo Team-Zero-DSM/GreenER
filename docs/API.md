@@ -25,7 +25,9 @@ fornecê-las ao restante da aplicação.
 
 A implementação atual oferece listagem e detalhe de serviços, histórico de métricas,
 resultados das tentativas de coleta, estado do monitoramento, dados regionais e
-comparação de serviços e ranking ambiental. O dashboard e o
+comparação de serviços e ranking ambiental. Também oferece cadastro, login,
+perfil, recuperação de senha, painel pessoal, administração e relatórios em PDF.
+O dashboard e o
 detalhe de serviço da interface consomem a lista, o detalhe e o histórico de
 serviços, sem dados simulados. Essas telas buscam a API ao abrir, ao trocar
 filtro, serviço ou período e depois de cada rodada de coleta do backend
@@ -52,6 +54,24 @@ para listagem, detalhe, histórico de métricas e histórico de tentativas.
 | `GET` | `/api/v1/monitoring/status` | Informar horários, contadores e resultados observados pelo job. | Não exige. |
 | `GET` | `/api/v1/rankings` | Classificar serviços por energia ou CO₂e no período. | Não exige. |
 | `POST` | `/api/v1/comparisons` | Comparar os totais e 120 pontos por seleção, com simulação opcional de região. | Não exige. |
+| `GET` | `/api/v1/dashboards/me` | Entregar o painel de monitoramento salvo do usuário, ou `null`. | JWT. |
+| `PUT` | `/api/v1/dashboards/me` | Validar e salvar o painel de monitoramento do usuário. | JWT. |
+| `POST` | `/api/v1/auth/register` | Cadastrar um visualizador e emitir uma sessão. | Não exige. |
+| `POST` | `/api/v1/auth/login` | Validar e-mail e senha e emitir uma sessão. | Não exige. |
+| `POST` | `/api/v1/auth/forgot-password` | Solicitar um link de redefinição por e-mail. | Não exige. |
+| `POST` | `/api/v1/auth/reset-password` | Consumir o token de recuperação e redefinir a senha. | Token de recuperação no corpo. |
+| `GET` | `/api/v1/profile` | Consultar o próprio perfil. | JWT. |
+| `PATCH` | `/api/v1/profile` | Alterar o próprio nome e e-mail. | JWT. |
+| `PATCH` | `/api/v1/profile/password` | Alterar a senha mediante confirmação da senha atual. | JWT. |
+| `GET` | `/api/v1/project/collection` | Consultar intervalo salvo, intervalo efetivo e horários. | JWT de administrador. |
+| `PATCH` | `/api/v1/project/collection` | Persistir o intervalo e o responsável pela alteração. | JWT de administrador. |
+| `GET` | `/api/v1/project/coefficients` | Consultar a versão ativa dos coeficientes. | JWT de administrador. |
+| `POST` | `/api/v1/project/coefficients/preview` | Comparar coeficientes atuais e propostos em uma amostra fixa. | JWT de administrador. |
+| `POST` | `/api/v1/project/coefficients` | Ativar uma nova versão dos coeficientes. | JWT de administrador. |
+| `GET` | `/api/v1/project/members` | Listar e pesquisar usuários por nome, e-mail e acesso. | JWT de administrador. |
+| `PATCH` | `/api/v1/project/members/:id` | Alterar papel e situação de acesso. | JWT de administrador. |
+| `POST` | `/api/v1/reports/preview` | Gerar a prévia do relatório com os filtros selecionados. | JWT. |
+| `POST` | `/api/v1/reports/pdf` | Gerar o PDF com os mesmos filtros e regras da prévia. | JWT. |
 
 `externalId` é o identificador da API externa salvo em `servico.external_id`,
 por exemplo `billing-api`; não é o BIGINT interno. O parâmetro aceita de 1 a
@@ -303,56 +323,318 @@ amostras recebem posições sequenciais a partir de 1. Serviços sem amostras
 ficam no final, com totais e `position` iguais a `null` e `sampleCount: 0`.
 Sem serviços cadastrados, retorna `items: []`. Falha interna retorna 500.
 
-### 2.3. Operações planejadas
+### 2.3. Autenticação e perfil
 
-Os caminhos abaixo descrevem contratos propostos.
+As rotas de cadastro, login e recuperação recebem JSON. O cadastro usa
+`name`, `email` e `password`; o login usa `email` e `password`.
 
-| Método | Caminho | Responsabilidade |
-|---|---|---|
-| `POST` | `/auth/login` | Validar as credenciais do usuário e emitir um JWT. |
-| `POST` | `/scenarios` | Calcular uma simulação com serviço, região e hipóteses explicitamente informados. |
-| `GET` | `/monitoring-settings` | Consultar as configurações de monitoramento. |
-| `PATCH` | `/monitoring-settings` | Atualizar as configurações de monitoramento. |
-
-No contrato planejado, `POST /auth/login` recebe `username` e `password` e
-retorna um `accessToken` JWT. O token será enviado nas chamadas autenticadas pelo cabeçalho
-`Authorization: Bearer <accessToken>`. Operações que alteram configurações ou
-iniciam simulações exigem autenticação JWT; o backend autentica e autoriza cada
-chamada.
-
-No contrato planejado, `POST /scenarios` recebe `serviceId`, `targetRegionCode`, `from` e `to`. A
-resposta identifica o cenário como simulação e inclui as hipóteses e parâmetros
-utilizados, distinguindo-o de resultados observados.
-
-### 2.4. Configuração de monitoramento — planejada
-
-O corpo usado para atualizar o intervalo de coleta é:
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+```
 
 ```json
 {
-  "collectionIntervalSeconds": 30
+  "name": "Ana Silva",
+  "email": "ana@example.com",
+  "password": "girassol-azul-42"
 }
 ```
 
-Esta alteração por HTTP ainda não está implementada. Hoje o job lê
-`COLLECTION_INTERVAL_SECONDS`; a linha de `configuracao_sistema` não controla
-o job. Na entrega dessa funcionalidade, o valor deverá configurar o intervalo
-do Collection Job. Ele é independente da
-frequência com que o frontend atualiza o dashboard e do intervalo que a API de
-métricas associa aos dados de uma coleta.
+Nome: de 1 a 100 caracteres após remover espaços nas extremidades. E-mail:
+formato válido, até 254 caracteres, normalizado para minúsculas. Senha: mínimo
+de 8 caracteres e máximo de 72 bytes; cadastro, redefinição e troca também
+rejeitam senhas comuns. O login aceita senhas de contas antigas sem aplicar
+essa última restrição. O cadastro sempre atribui o papel `visualizador`.
+E-mail já utilizado retorna 409.
+
+Cadastro retorna 201 e login retorna 200, ambos com esta estrutura:
+
+```json
+{
+  "token": "<JWT>",
+  "user": { "id": "1", "name": "Ana Silva", "email": "ana@example.com", "role": "visualizador" }
+}
+```
+
+O JWT usa HS256 e validade de 8 horas. Nas rotas protegidas, envie
+`Authorization: Bearer <token>`. O middleware verifica assinatura, expiração,
+conta ativa e `versao_sessao` no banco a cada chamada. Credenciais incorretas
+retornam 401 com `E-mail ou senha incorretos.`. Configuração de autenticação
+indisponível retorna 503; `JWT_SECRET` precisa ter ao menos 32 bytes em produção.
+
+| Operação | Corpo | Resposta e efeitos |
+|---|---|---|
+| `GET /api/v1/profile` | Sem corpo. | 200 com `{ id, name, email, role }`. |
+| `PATCH /api/v1/profile` | `{ "name": "Ana Souza", "email": "ana.souza@example.com" }` | 200 com `{ token, user }`. Alterar o e-mail revoga as sessões anteriores e remove tokens de recuperação; alterar apenas o nome preserva a versão da sessão. |
+| `PATCH /api/v1/profile/password` | `{ "currentPassword": "girassol-azul-42", "newPassword": "caderno-verde-42" }` | 200 com `{ token, user }`. Confirma a senha atual, revoga sessões anteriores e remove tokens de recuperação. Senha atual incorreta retorna 400. |
+
+As duas alterações de perfil rejeitam campos extras. `PATCH /profile` exige
+nome e e-mail e usa a sessão autenticada; a confirmação da senha atual pertence
+à rota `/profile/password`.
+
+#### Recuperação de senha
+
+1. `POST /api/v1/auth/forgot-password` recebe `{ "email": "ana@example.com" }`.
+2. Com o envio configurado, responde 202 com
+   `{ "message": "Se houver uma conta ativa, enviaremos um link de redefinição." }`,
+   inclusive para e-mail desconhecido ou conta inativa.
+3. Para uma conta ativa, envia um link no formato
+   `APP_PUBLIC_URL/login#token=<token>`. O token tem 64 caracteres hexadecimais;
+   apenas seu SHA-256 é armazenado em `redefinicao_senha`, por 30 minutos.
+4. `POST /api/v1/auth/reset-password` recebe `token` e `password` e retorna 204
+   sem corpo. O uso bem-sucedido invalida sessões e todos os tokens de
+   recuperação da conta. Token expirado, inexistente ou reutilizado retorna 400.
+
+A configuração de envio está no [guia de execução](../README.md#recuperação-de-senha).
+Configuração ausente retorna 503. O envio ocorre em segundo plano: 202 indica
+solicitação aceita, e uma falha posterior de entrega é registrada no backend.
+
+Há limites por IP em janelas de 15 minutos, mantidos em memória: 15 tentativas
+de cadastro, 30 de login, 10 de solicitação de recuperação e 20 de redefinição.
+Ao atingir o limite, a rota retorna 429. Reiniciar o processo limpa os contadores.
+
+### 2.4. Configuração de monitoramento — implementada
+
+`GET` e `PATCH /api/v1/project/collection` exigem administrador autenticado.
+O `PATCH` recebe somente o campo abaixo, inteiro de 10 a 3.600 segundos:
+
+```json
+{ "intervalSeconds": 120 }
+```
+
+Responde 200 com `{ "intervalSeconds": 120 }` e persiste o valor, o ID do
+administrador e o horário da alteração. O `GET` responde 200, por exemplo:
+
+```json
+{
+  "intervalSeconds": 120,
+  "effectiveIntervalSeconds": 300,
+  "lastRoundAt": "2026-11-21T12:00:02.000Z",
+  "nextRoundAt": "2026-11-21T12:05:02.000Z"
+}
+```
+
+`intervalSeconds` é o valor salvo; `effectiveIntervalSeconds` é o último valor
+aplicado pelo agendador. Eles podem diferir até a próxima leitura do banco.
+Datas ainda não observadas são `null`. O job consulta a configuração antes da
+coleta e antes de agendar a próxima rodada; mudanças não exigem reinício.
+Uma espera já agendada não é cancelada pela alteração no endpoint.
+
+Ao iniciar novamente, o job recupera o valor persistido. Sem linha de configuração,
+usa `COLLECTION_INTERVAL_SECONDS` quando positivo e finito ou o padrão de
+30 segundos. Em erro de leitura, preserva o último intervalo conhecido.
+Um banco novo recebe 300 segundos no seed, que prevalecem sobre o fallback
+do ambiente. O intervalo do job continua independente do intervalo da amostra
+usado na estimativa de energia e da atualização da interface.
 
 ### 2.5. Respostas e falhas
 
-As respostas dos endpoints implementados são JSON e representam dados preparados pelo backend para o
-recurso solicitado. As rotas validam `body`, `params` e `query parameters`
+As respostas de negócio são JSON; a exportação retorna um arquivo PDF.
+As rotas validam `body`, `params` e `query parameters`
 antes de executar os controllers. Dados inválidos de requisição resultam em
-`400`. A resposta `401` está prevista para as futuras rotas protegidas; JWT
-ainda não está implementado. Falhas de negócio e de integração são retornadas como erros explícitos,
+`400`. As rotas protegidas, como `/dashboards/me`, respondem `401` quando o
+JWT falta, é inválido, expirou ou foi revogado. As rotas administrativas retornam
+403 para visualizadores autenticados. Conflitos de e-mail ou do último
+administrador retornam 409; limites de tentativas retornam 429.
+Falhas de negócio e de integração são retornadas como erros explícitos,
 sem respostas com aparência de sucesso ou métricas substituídas por zero.
 
 O frontend deverá apresentar carregamento, sucesso, ausência de dados,
 desatualização e falha ao integrar estas rotas. Os horários reais retornados
 pelo backend não devem ser substituídos pelo horário da requisição.
+
+### 2.6. Painel de monitoramento — implementado
+
+```http
+GET /api/v1/dashboards/me
+PUT /api/v1/dashboards/me
+Authorization: Bearer <token>
+```
+
+Guardam o painel de monitoramento (tela `/painel`) do usuário autenticado. O
+token é o `token` devolvido por `POST /api/v1/auth/login`. Sem token, com token
+inválido, expirado ou de conta desativada, as duas rotas respondem 401 com
+`{ "error": { "message": "Entre na sua conta para continuar." } }`.
+
+Cada usuário tem um painel, gravado na tabela `painel_usuario`
+([migração](../database/migrations/003_painel_usuario.sql)). O `GET` responde
+200 com `{ "dashboard": null }` enquanto o usuário não salvou nenhum painel; o
+frontend então mostra o template Visão geral. O `PUT` cria ou substitui o painel
+e responde 200 com `{ "dashboard": <configuração salva> }`.
+
+Corpo do `PUT` e formato de `dashboard`:
+
+```json
+{
+    "template": "visao-geral",
+    "widgets": [
+        { "id": "co2e-total", "type": "kpi", "title": "CO₂e no período", "x": 0, "y": 0, "w": 3, "h": 2,
+          "palette": "padrao", "alert": { "direction": "acima", "threshold": 500 } },
+        { "id": "co2e-por-regiao", "type": "serie-temporal", "title": "Emissão de CO₂e por região",
+          "chart": "area", "region": "br-sp", "x": 0, "y": 2, "w": 12, "h": 4 }
+    ],
+    "tablet": { "co2e-total": { "x": 0, "y": 0, "w": 3, "h": 2 } },
+    "mobileOrder": ["co2e-por-regiao", "co2e-total"]
+}
+```
+
+| Campo | Regra |
+| --- | --- |
+| `template` | `visao-geral`, `sustentabilidade`, `operacional`, `executivo` ou `em-branco`. |
+| `widgets` | Até 40 widgets, com `id` único (letras minúsculas, números e hífens, até 64). |
+| `widgets[].type` | `kpi`, `serie-temporal`, `distribuicao`, `tabela` ou `status`. |
+| `widgets[].metric` | Opcional. Sem ele, vale a métrica com o mesmo `id` do widget. A métrica precisa existir e ser do mesmo tipo do widget (lista em `backend/src/modules/dashboards/dashboards.catalog.ts`). |
+| `widgets[].title` | Texto de 1 a 60 caracteres. |
+| `widgets[].chart` | Opcional. `linha`, `area` ou `barras` em `serie-temporal`; `pizza`, `rosca` ou `barras-horizontais` em `distribuicao`. Os outros tipos não aceitam. |
+| `widgets[].palette` | Opcional: `padrao`, `oceano`, `solar`, `floresta` ou `contraste`. |
+| `widgets[].region` | Opcional: código da região, de 1 a 64 caracteres. |
+| `widgets[].alert` | Opcional, só em `kpi`: `direction` (`acima` ou `abaixo`) e `threshold` numérico. |
+| `x`, `y`, `w`, `h` | Inteiros. A grade do desktop tem 12 colunas: `x >= 0`, `x + w <= 12`, `y` até 200 e `h` até 24. O tamanho mínimo depende do tipo: `kpi` 2x2, `serie-temporal` 4x3 e os demais 3x3. |
+| `tablet` | Opcional. Posição de cada widget na grade de 6 colunas do tablet, pelo `id`, com as mesmas regras e `x + w <= 6`. Só aceita ids presentes em `widgets`. |
+| `mobileOrder` | Opcional. Ordem dos widgets no celular, sem repetir ids e só com ids presentes em `widgets`. |
+
+Campos desconhecidos ou fora dessas regras retornam 400 com `details`
+indicando o campo, por exemplo `{ "field": "widgets.0", "message": "O widget
+passa da grade de 12 colunas" }`. Falha interna retorna 500.
+
+### 2.7. Parâmetros de estimativa
+
+As três rotas `/api/v1/project/coefficients` exigem administrador autenticado.
+O `GET` retorna a versão ativa, com `id` como string e os quatro coeficientes
+como números; retorna `null` se não houver versão ativa.
+
+`POST /coefficients/preview` e `POST /coefficients` recebem:
+
+```json
+{
+  "cpuMaxWatts": 200,
+  "ramWattsPerGb": 1,
+  "diskWattsPerGb": 0.5,
+  "networkWattsPerGb": 2
+}
+```
+
+Todos os campos são obrigatórios: números de 0 a 999999,9999, com até quatro
+casas decimais. Campos extras são rejeitados. CPU usa W; os outros fatores
+usam W/GB no modelo. Consulte as [fórmulas e unidades](./cálculo.md).
+
+A prévia retorna 200 com `example`, `current` e `proposed`. Usa CPU de 50%,
+4 GB de memória, 20 GB de disco, 1 GB de rede, uma hora e 100 gCO₂e/kWh.
+`current` e `proposed` têm `cpuWatts`, `memoryWatts`, `diskWatts`, `networkWatts`,
+`powerW`, `energyKwh` e `co2eG`. A proposta acima produz 116 W, 0,116 kWh e
+11,6 gCO₂e. Sem versão ativa, `current` é `null`. A prévia não grava alterações.
+
+A ativação retorna 201, por exemplo:
+
+```json
+{ "id": "2", "cpuMaxWatts": 200, "ramWattsPerGb": 1, "diskWattsPerGb": 0.5, "networkWattsPerGb": 2 }
+```
+
+Uma transação serializa ativações, desativa a versão anterior e insere a nova.
+Coletas anteriores e seus coeficientes são preservados. Uma rodada em andamento
+continua com a versão que carregou; a próxima rodada consulta a nova versão.
+Coleta e prévia reutilizam `collections.estimate.ts`.
+
+### 2.8. Gerenciamento de usuários
+
+`GET /api/v1/project/members` exige administrador autenticado. Aceita `search`
+(até 100 caracteres, busca literal por trecho de nome ou e-mail, sem distinguir
+maiúsculas) e `active` (`true` ou `false`). Sem filtro de acesso, inclui contas
+ativas e inativas. Retorna até 100 usuários, ordenados por acesso ativo,
+nome e ID, sem paginação:
+
+```json
+[
+  { "id": "1", "name": "Ana Silva", "email": "ana@example.com", "role": "admin", "active": true }
+]
+```
+
+`PATCH /api/v1/project/members/:id` exige o ID interno positivo do usuário e
+os dois campos abaixo, mesmo quando somente um deles mudou:
+
+```json
+{ "role": "visualizador", "active": false }
+```
+
+Papéis aceitos: `admin` e `visualizador`. Responde 200 com o usuário no formato
+da listagem. Mudança de papel ou acesso revoga sessões; desativação também
+remove tokens de recuperação. Reativar o usuário não restaura seus tokens antigos.
+O backend revalida o administrador responsável dentro da transação e impede
+desativar ou rebaixar o último administrador ativo (409). Usuário inexistente
+retorna 404; entradas inválidas retornam 400.
+
+### 2.9. Relatórios e exportação em PDF
+
+`POST /api/v1/reports/preview` e `POST /api/v1/reports/pdf` exigem uma conta
+ativa autenticada, tanto administrador como visualizador. Ambos recebem:
+
+```json
+{
+  "title": "Consumo dos serviços",
+  "serviceIds": ["billing-api"],
+  "range": "1h",
+  "metrics": ["energy", "carbon"],
+  "visualization": "line",
+  "end": "2026-11-21T12:00:00Z"
+}
+```
+
+| Campo | Regra |
+|---|---|
+| `title` | Opcional, até 100 caracteres após remover espaços nas extremidades. Ausente ou vazio usa `Relatório de métricas`. |
+| `serviceIds` | De 1 a 20 IDs externos, de 1 a 200 caracteres após remover espaços, sem duplicações. Inclui serviços conhecidos mesmo se atualmente inativos. |
+| `range` | Obrigatório: `1h`, `6h`, `24h`, `7d` ou `30d`. |
+| `metrics` | De 1 a 5 métricas sem repetição: `energy` (kWh), `carbon` (gCO₂e), `cpu` (%), `memory` (GB) e `power` (W). |
+| `visualization` | Obrigatória: `line`, `bars` ou `table`. |
+| `end` | Opcional, data ISO 8601 com fuso; ausente usa o horário atual. |
+
+Campos extras são rejeitados. Serviço inexistente também retorna 400.
+O início é calculado por `range`; a janela é `(start, end]`, com início exclusivo
+e fim inclusivo. Totais e pontos são consultados em uma transação somente de
+leitura com isolamento `REPEATABLE READ`.
+
+Exemplo ilustrativo de resposta 200 da prévia, com uma amostra no período:
+
+```json
+{
+  "range": "1h",
+  "start": "2026-11-21T11:00:00.000Z",
+  "end": "2026-11-21T12:00:00.000Z",
+  "services": [{
+    "id": "billing-api", "name": "Billing API", "status": "available", "active": true,
+    "collectedAt": "2026-11-21T12:00:00.000Z", "regionCode": "br-sp", "region": "São Paulo",
+    "intensity": 100, "samples": 1, "energy": 0.05172, "carbon": 5.172,
+    "cpu": 50, "memory": 4, "power": 51.72
+  }],
+  "points": [{
+    "time": "2026-11-21T11:58:45.000Z", "samples": 1,
+    "energy": 0.05172, "carbon": 5.172, "cpu": 50, "memory": 4, "power": 51.72
+  }],
+  "title": "Consumo dos serviços",
+  "metrics": ["energy", "carbon"],
+  "visualization": "line"
+}
+```
+
+`services` consolida cada serviço; `points` agrega a seleção em até 48 faixas,
+ordenadas por tempo. Energia e carbono são somas; CPU, memória e potência são
+médias das amostras. `time` é o início da faixa. Os campos numéricos são
+retornados para todas as métricas; `metrics` indica as selecionadas para exibição.
+Sem amostras: contagem zero, métricas e `collectedAt` nulos e série vazia.
+Faixas sem amostras não são preenchidas artificialmente. Status, presença na
+descoberta e região são os atuais do cadastro; emissões vêm das coletas gravadas.
+
+A exportação responde 200 com `Content-Type: application/pdf`,
+`Content-Disposition: attachment; filename=GreenER-relatorio.pdf` e o tamanho
+do arquivo. Inclui título, janela em UTC, serviços, métricas, gráficos/tabela,
+ausência de amostras e numeração de páginas. Falha de geração retorna 500 em
+JSON antes de enviar o arquivo.
+
+Para exportar a mesma janela da prévia, envie seu `end` na requisição do PDF.
+As duas operações consultam o histórico novamente; novas amostras gravadas
+entre elas podem mudar o resultado dentro da janela. Não há armazenamento de
+uma cópia congelada do relatório.
 
 ## 3. Greener Metrics Aggregator API
 
@@ -456,8 +738,10 @@ local e não comprova que o fator corresponde ao instante físico da amostra.
 
 ## 5. Segurança e isolamento
 
-Os itens relativos a JWT e autorização descrevem o contrato planejado; não
-comprovam autenticação implementada na versão atual. Sua entrega está prevista para a Sprint 3.
+O middleware `requireAccount` protege perfil, painel, relatórios e administração.
+`requireAdmin` acrescenta a verificação do papel nas rotas `/project/*`.
+As consultas públicas de serviços, regiões, comparação, ranking e estado do
+monitoramento continuam disponíveis sem JWT, conforme a tabela de operações.
 
 - O navegador comunica-se somente com a API do GreenER.
 - Credenciais e segredos das integrações externas permanecem no backend.
@@ -519,10 +803,10 @@ Exemplo de resposta HTTP 200:
 - `running` indica uma rodada em execução. Durante a rodada,
   `nextCollectionAt` é `null`; depois, informa a previsão do próximo início.
   Parar o job também remove essa previsão.
-- O intervalo é lido de `COLLECTION_INTERVAL_SECONDS`, com padrão de 30
-  segundos. A barra integrada usa `serverTime` e `nextCollectionAt`, ajustando
-  a diferença entre o relógio do servidor e o navegador. O valor do ambiente
-  pode ser diferente do padrão; prevalece a configuração do ambiente em execução.
+- O intervalo efetivo é o último aplicado pelo job a partir de
+  `configuracao_sistema`, com fallback para o ambiente ou 30 segundos, conforme
+  a seção 2.4. A barra integrada usa `serverTime` e `nextCollectionAt`, ajustando
+  a diferença entre os relógios do servidor e do navegador.
 - `attemptedServices` conta os serviços selecionados para consultar métricas;
   `collectedServices` conta coletas válidas efetivamente gravadas;
   `failedServices` é a diferença. Uma falha anterior à seleção pode encerrar

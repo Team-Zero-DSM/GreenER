@@ -1,21 +1,22 @@
 # 🏗️ Arquitetura e Modelagem
 
 O [schema.sql](./schema.sql) define o esquema PostgreSQL usado pelo GreenER.
-O [DER atual](#diagrama-entidade-relacionamento-der) inclui o histórico de
-tentativas em `status_coleta`. `usuario` e `configuracao_sistema` preparam a
-estrutura para autenticação e configuração de monitoramento.
+O banco vigente tem dez tabelas e atende autenticação, recuperação de senha,
+painéis pessoais, configurações administrativas e histórico de métricas e
+observações. O DER da versão final e o dicionário abaixo acompanham o SQL;
+os diagramas anteriores permanecem como histórico da modelagem.
 
 ## Histórico de tentativas (`status_coleta`)
 
-| Coluna | Tipo | Uso |
-|---|---|---|
-| `id` | `UUID` | Chave primária gerada por `uuid_generate_v4()`. |
-| `servico_id` | `BIGINT` | FK obrigatória para `servico.id`. |
-| `coleta_id` | `UUID` | FK opcional para `coleta.id`, preenchida pelo backend nas observações de sucesso. |
-| `observado_em` | `TIMESTAMPTZ` | Horário do registro da observação, com padrão `now()`. |
-| `descricao` | `TEXT` | Mensagem obrigatória associada à observação. |
-| `http_status` | `SMALLINT` | Código HTTP de erro quando disponível, com `CHECK` entre 100 e 599. O backend grava `NULL` em sucessos e falhas sem código. |
-| `tipo` | `TEXT` | Classificação obrigatória definida pelo backend, como `success`, `service_missing` ou `timeout`. |
+| Coluna         | Tipo          | Uso                                                                                                                         |
+| -------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | `UUID`        | Chave primária gerada por `uuid_generate_v4()`.                                                                             |
+| `servico_id`   | `BIGINT`      | FK obrigatória para `servico.id`.                                                                                           |
+| `coleta_id`    | `UUID`        | FK opcional para `coleta.id`, preenchida pelo backend nas observações de sucesso.                                           |
+| `observado_em` | `TIMESTAMPTZ` | Horário do registro da observação, com padrão `now()`.                                                                      |
+| `descricao`    | `TEXT`        | Mensagem obrigatória associada à observação.                                                                                |
+| `http_status`  | `SMALLINT`    | Código HTTP de erro quando disponível, com `CHECK` entre 100 e 599. O backend grava `NULL` em sucessos e falhas sem código. |
+| `tipo`         | `TEXT`        | Classificação obrigatória definida pelo backend, como `success`, `service_missing` ou `timeout`.                            |
 
 `idx_status_coleta_servico_tempo` indexa `(servico_id, observado_em DESC)`.
 As consultas ordenam pelo horário e usam o UUID como desempate. A listagem
@@ -23,12 +24,12 @@ de status usa a observação mais recente de cada serviço e consulta a última
 amostra salva separadamente. O histórico por serviço retorna até 100 registros.
 Consulte o [contrato da API](../docs/API.md#status-das-coletas-por-serviço).
 
-| Informação | Fonte | Significado |
-|---|---|---|
-| `servico.ativo` | Descoberta de serviços | Indica se o serviço está listado no agregador. |
-| `servico.status` | Estado operacional atual | `available`, `metrics_missing` ou `unavailable`. |
-| `coleta` | Amostras válidas | Métricas, estimativas e contexto usados nas consultas históricas. |
-| `status_coleta` | Observações persistidas | Registra sucessos, falhas e ausências confirmadas na descoberta. |
+| Informação       | Fonte                    | Significado                                                       |
+| ---------------- | ------------------------ | ----------------------------------------------------------------- |
+| `servico.ativo`  | Descoberta de serviços   | Indica se o serviço está listado no agregador.                    |
+| `servico.status` | Estado operacional atual | `available`, `metrics_missing` ou `unavailable`.                  |
+| `coleta`         | Amostras válidas         | Métricas, estimativas e contexto usados nas consultas históricas. |
+| `status_coleta`  | Observações persistidas  | Registra sucessos, falhas e ausências confirmadas na descoberta.  |
 
 As gravações da amostra, do estado atual e da observação são comandos separados.
 Uma amostra pode existir mesmo quando o registro da observação falha.
@@ -41,7 +42,8 @@ Esta seção reúne os artefatos de modelagem de dados desenvolvidos para o proj
 
 Os diagramas servem como apoio para análise, implementação e evolução da solução ao longo das sprints, permitindo visualizar as principais entidades, atributos e relacionamentos do banco de dados da plataforma.
 
-Além da visualização em imagem, os diagramas possuem seus respectivos arquivos editáveis no Lucidchart, possibilitando consulta detalhada e navegação pelos elementos modelados.
+Os diagramas originais possuem arquivos editáveis no Lucidchart. O DER da versão
+final tem uma fonte Graphviz versionada junto à imagem SVG.
 
 ---
 
@@ -59,17 +61,21 @@ Ferramenta utilizada para a criação e manutenção dos diagramas do projeto.
 
 Por meio dela são desenvolvidos os diagramas utilizados na documentação da aplicação, permitindo representar visualmente os principais aspectos da solução.
 
+O DER da versão final usa Graphviz, com a definição das tabelas e dos vínculos
+no [arquivo DOT](./images/DiagramaDERFinal.dot).
+
 ---
 
 ## 📋 Diagramas originais
 
-Os arquivos Lucidchart e os SVGs originais registram o modelo inicial. O DER
-atual acompanha o SQL e inclui `status_coleta`.
+Os arquivos Lucidchart e os SVGs originais registram a evolução do modelo.
+O DER final inclui as dez tabelas do schema, com contas, recuperação de senha,
+dashboards, painel pessoal, configurações e histórico de monitoramento.
 
-| Diagrama | Descrição                                                                                                  |
-| -------- | ---------------------------------------------------------------------------------------------------------- |
-| MER      | Modelo conceitual do banco de dados, com as entidades, seus relacionamentos e cardinalidades               |
-| DER      | Modelo lógico do banco de dados, com tabelas, atributos, tipos, chaves primárias e estrangeiras           |
+| Diagrama | Descrição                                                                                       |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| MER      | Modelo conceitual do banco de dados, com as entidades, seus relacionamentos e cardinalidades    |
+| DER      | Modelo lógico do banco de dados, com tabelas, atributos, tipos, chaves primárias e estrangeiras |
 
 ---
 
@@ -108,11 +114,11 @@ Representar, em nível conceitual, as entidades do domínio da plataforma GreenE
 
 ## Relacionamentos
 
-| Relacionamento | Entidades                          | Cardinalidade                                                                                |
-| -------------- | ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| `HOSPEDA`      | `REGIAO` e `SERVICO`               | Uma região hospeda zero ou muitos serviços; um serviço pertence a uma região                 |
-| `GERA`         | `SERVICO` e `COLETA`               | Um serviço gera zero ou muitas coletas; uma coleta pertence a um serviço                     |
-| `UTILIZA`      | `PARAMETRO_ESTIMATIVA` e `COLETA`  | Um parâmetro é usado em zero ou muitas coletas; uma coleta usa um parâmetro                  |
+| Relacionamento | Entidades                          | Cardinalidade                                                                                     |
+| -------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `HOSPEDA`      | `REGIAO` e `SERVICO`               | Uma região hospeda zero ou muitos serviços; um serviço pertence a uma região                      |
+| `GERA`         | `SERVICO` e `COLETA`               | Um serviço gera zero ou muitas coletas; uma coleta pertence a um serviço                          |
+| `UTILIZA`      | `PARAMETRO_ESTIMATIVA` e `COLETA`  | Um parâmetro é usado em zero ou muitas coletas; uma coleta usa um parâmetro                       |
 | `ATUALIZA`     | `USUARIO` e `CONFIGURACAO_SISTEMA` | Um usuário referencia zero ou uma configuração global; cada configuração tem no máximo um usuário |
 
 ---
@@ -121,14 +127,35 @@ Representar, em nível conceitual, as entidades do domínio da plataforma GreenE
 
 ## Visualização
 
-![DER atual do GreenER, com as sete tabelas, chaves e cardinalidades](./images/DiagramaDERAtual.svg)
+![DER final do GreenER, com dez tabelas, tipos, chaves e cardinalidades](./images/DiagramaDERFinal.svg)
 
-[Abrir o DER atual em tamanho completo](./images/DiagramaDERAtual.svg)
+[Abrir o DER final em tamanho completo](./images/DiagramaDERFinal.svg) ·
+[Fonte editável em Graphviz](./images/DiagramaDERFinal.dot)
 
-## Modelo original
+O diagrama corresponde às **dez tabelas, 77 colunas e nove chaves estrangeiras**
+do [schema.sql](./schema.sql). Cada coluna apresenta seu tipo PostgreSQL,
+as chaves aplicáveis e a aceitação de `NULL`.
 
-O diagrama inicial está disponível em [SVG](./images/DiagramaDER.svg) e no
-[Lucidchart](https://lucid.app/lucidchart/a428841e-d545-4f2d-b834-a19170ff7bd1/view).
+**Legenda:** `PK` indica chave primária, `FK` indica chave estrangeira e `UK`
+indica uma coluna única. `U1` identifica a restrição composta
+`UNIQUE (servico_id, coletado_em)` da tabela `coleta`.
+
+As cardinalidades seguem as restrições do banco:
+
+- `painel_usuario.usuario_id` é PK e FK: cada painel pertence a um usuário,
+  e cada usuário pode ter zero ou um painel pessoal.
+- `configuracao_sistema` aceita no máximo uma linha. Seu vínculo com o usuário
+  que fez a alteração é opcional.
+- `status_coleta.coleta_id` é opcional e não é único: uma observação pode não
+  ter coleta associada, e uma coleta pode ser referenciada por várias observações.
+- Tokens, dashboards e painel pessoal têm exclusão em cascata pelo usuário.
+  Esses vínculos estão indicados nos respectivos cartões.
+
+## Modelos anteriores
+
+- [DER de referência com sete tabelas](./images/DiagramaDERAtual.svg).
+- [DER inicial em SVG](./images/DiagramaDER.svg) e seu
+  [arquivo no Lucidchart](https://lucid.app/lucidchart/a428841e-d545-4f2d-b834-a19170ff7bd1/view).
 
 ## Objetivo
 
@@ -136,32 +163,39 @@ Representar o modelo lógico do banco de dados PostgreSQL da plataforma GreenER,
 
 ## Relacionamentos
 
-| Tabela referenciada | Tabela com a FK | Chave estrangeira | Cardinalidade |
-| --- | --- | --- | --- |
-| `regiao` | `servico` | `regiao_id` | 1 para 0..N |
-| `servico` | `coleta` | `servico_id` | 1 para 0..N |
-| `parametro_estimativa` | `coleta` | `parametro_estimativa_id` | 1 para 0..N |
-| `servico` | `status_coleta` | `servico_id` | 1 para 0..N |
-| `coleta` | `status_coleta` | `coleta_id` | 0..1 para 0..N |
-| `usuario` | `configuracao_sistema` | `atualizado_por` | 0..1 para 0..1 |
+| Tabela referenciada    | Tabela com a FK        | Chave estrangeira         | Cardinalidade  |
+| ---------------------- | ---------------------- | ------------------------- | -------------- |
+| `regiao`               | `servico`              | `regiao_id`               | 1 para 0..N    |
+| `servico`              | `coleta`               | `servico_id`              | 1 para 0..N    |
+| `parametro_estimativa` | `coleta`               | `parametro_estimativa_id` | 1 para 0..N    |
+| `servico`              | `status_coleta`        | `servico_id`              | 1 para 0..N    |
+| `coleta`               | `status_coleta`        | `coleta_id`               | 0..1 para 0..N |
+| `usuario`              | `configuracao_sistema` | `atualizado_por`          | 0..1 para 0..1 |
+| `usuario` | `redefinicao_senha` | `usuario_id` | 1 para 0..N |
+| `usuario` | `dashboard` | `usuario_id` | 1 para 0..N |
+| `usuario` | `painel_usuario` | `usuario_id` (também PK) | 1 para 0..1 |
 
 ## Dicionário de dados
 
 Os tipos e campos abaixo correspondem ao [schema.sql](./schema.sql). Todas as
 datas usam `TIMESTAMPTZ`. Campos opcionais aceitam `NULL`.
 
-| Tabela | Colunas |
-| --- | --- |
-| `usuario` | `id BIGINT` (identity, PK); `email TEXT` (único); `senha_hash TEXT`; `papel TEXT` (padrão `admin`); `criado_em TIMESTAMPTZ`. |
-| `regiao` | `id BIGINT` (identity, PK); `codigo TEXT` (único); `pais TEXT`; `regiao TEXT`; `cidade TEXT` (opcional); `latitude` e `longitude DOUBLE PRECISION` (opcionais); `carbon_intensity NUMERIC`; `renewable_share_percent NUMERIC`; `atualizado_em TIMESTAMPTZ`. |
-| `servico` | `id BIGINT` (identity, PK); `external_id TEXT` (único); `nome TEXT`; `metrics_path TEXT`; `status TEXT` (padrão `available`); `status_atualizado_em TIMESTAMPTZ`; `ativo BOOLEAN` (padrão `true`); `ultima_vez_visto_em TIMESTAMPTZ`; `regiao_id BIGINT` (FK). |
-| `parametro_estimativa` | `id BIGINT` (identity, PK); `cpu_max_watts`, `ram_watts_per_gb`, `disk_watts_per_gb`, `network_watts_per_gb`: `NUMERIC(10,4)`; `ativo BOOLEAN` (padrão `false`); `criado_em TIMESTAMPTZ`. |
-| `configuracao_sistema` | `id BOOLEAN` (PK, apenas `true`); `intervalo_coleta_segundos INTEGER` (padrão `300`); `atualizado_por BIGINT` (FK opcional); `atualizado_em TIMESTAMPTZ`. |
-| `coleta` | `id UUID` (PK); `servico_id BIGINT` e `parametro_estimativa_id BIGINT` (FKs); `coletado_em TIMESTAMPTZ`; `intervalo_metrica_segundos INTEGER`; `cpu_percent`, `memory_gb`, `disk_gb`, `network_gb`: `DOUBLE PRECISION`; `cpu_watts`, `memory_watts`, `disk_watts`, `network_watts`, `potencia_estimada_w`: `NUMERIC(14,6)`; `energia_estimada_kwh` e `co2e_estimado_g`: `NUMERIC(20,10)`; `carbon_intensity NUMERIC(12,4)`. |
-| `status_coleta` | Colunas detalhadas na seção Histórico de tentativas, no início deste documento. |
+| Tabela                 | Colunas                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `usuario` | `id BIGINT` (identity, PK); `email TEXT` (único, com índice adicional em minúsculas); `senha_hash TEXT`; `nome TEXT`; `acesso_ativo BOOLEAN` (padrão `true`); `versao_sessao INTEGER` (padrão `0`); `papel TEXT` (padrão `visualizador`); `criado_em TIMESTAMPTZ`. |
+| `redefinicao_senha` | `token_hash TEXT` (PK, SHA-256 do token); `usuario_id BIGINT` (FK, exclusão em cascata); `expira_em TIMESTAMPTZ`; `usado_em TIMESTAMPTZ` (opcional). |
+| `dashboard` | `id BIGINT` (identity, PK); `usuario_id BIGINT` (FK, exclusão em cascata); `nome TEXT` (1 a 48 caracteres); `periodo TEXT` (`1h`, `6h`, `24h`, `7d`, `30d`); `widgets JSONB` (array). |
+| `painel_usuario` | `usuario_id BIGINT` (PK e FK, exclusão em cascata); `template TEXT`; `widgets JSONB` (array); `posicoes_tablet JSONB` (objeto opcional); `ordem_mobile JSONB` (array opcional); `atualizado_em TIMESTAMPTZ`. |
+| `regiao`               | `id BIGINT` (identity, PK); `codigo TEXT` (único); `pais TEXT`; `regiao TEXT`; `cidade TEXT` (opcional); `latitude` e `longitude DOUBLE PRECISION` (opcionais); `carbon_intensity NUMERIC`; `renewable_share_percent NUMERIC`; `atualizado_em TIMESTAMPTZ`.                                                                                                                                                                 |
+| `servico`              | `id BIGINT` (identity, PK); `external_id TEXT` (único); `nome TEXT`; `metrics_path TEXT`; `status TEXT` (padrão `available`); `status_atualizado_em TIMESTAMPTZ`; `ativo BOOLEAN` (padrão `true`); `ultima_vez_visto_em TIMESTAMPTZ`; `regiao_id BIGINT` (FK).                                                                                                                                                              |
+| `parametro_estimativa` | `id BIGINT` (identity, PK); `cpu_max_watts`, `ram_watts_per_gb`, `disk_watts_per_gb`, `network_watts_per_gb`: `NUMERIC(10,4)`; `ativo BOOLEAN` (padrão `false`); `criado_em TIMESTAMPTZ`.                                                                                                                                                                                                                                   |
+| `configuracao_sistema` | `id BOOLEAN` (PK, apenas `true`); `intervalo_coleta_segundos INTEGER` (padrão `300`); `atualizado_por BIGINT` (FK opcional); `atualizado_em TIMESTAMPTZ`.                                                                                                                                                                                                                                                                   |
+| `coleta`               | `id UUID` (PK); `servico_id BIGINT` e `parametro_estimativa_id BIGINT` (FKs); `coletado_em TIMESTAMPTZ`; `intervalo_metrica_segundos INTEGER`; `cpu_percent`, `memory_gb`, `disk_gb`, `network_gb`: `DOUBLE PRECISION`; `cpu_watts`, `memory_watts`, `disk_watts`, `network_watts`, `potencia_estimada_w`: `NUMERIC(14,6)`; `energia_estimada_kwh` e `co2e_estimado_g`: `NUMERIC(20,10)`; `carbon_intensity NUMERIC(12,4)`. |
+| `status_coleta`        | Colunas detalhadas na seção Histórico de tentativas, no início deste documento.                                                                                                                                                                                                                                                                                                                                             |
 
-Todas as colunas de data têm padrão `now()`. Os UUIDs têm padrão
-`uuid_generate_v4()`. CPU usa %, recursos usam GB, potência usa W, energia
+Datas de criação, atualização e coleta têm padrão `now()`. A expiração do
+token de recuperação é definida pelo backend; `usado_em` começa nulo. Os UUIDs
+têm padrão `uuid_generate_v4()`. CPU usa %, recursos usam GB, potência usa W, energia
 usa kWh, emissões usam gCO₂e e intensidade usa gCO₂e/kWh. O intervalo da
 métrica é medido em segundos.
 
@@ -169,20 +203,23 @@ métrica é medido em segundos.
 
 Além dos índices das PKs e restrições `UNIQUE`, o schema declara:
 
-| Índice | Colunas / condição |
-| --- | --- |
-| `ux_parametro_estimativa_ativo` | `parametro_estimativa(ativo) WHERE ativo = true`, único. |
-| `idx_servico_regiao` | `servico(regiao_id)`. |
-| `idx_servico_ativo` | `servico(ativo)`. |
-| `idx_coleta_servico_tempo` | `coleta(servico_id, coletado_em DESC)`. |
-| `idx_coleta_tempo` | `coleta(coletado_em DESC)`. |
-| `idx_status_coleta_servico_tempo` | `status_coleta(servico_id, observado_em DESC)`. |
+| Índice                            | Colunas / condição                                       |
+| --------------------------------- | -------------------------------------------------------- |
+| `ux_parametro_estimativa_ativo`   | `parametro_estimativa(ativo) WHERE ativo = true`, único. |
+| `idx_servico_regiao`              | `servico(regiao_id)`.                                    |
+| `idx_servico_ativo`               | `servico(ativo)`.                                        |
+| `idx_coleta_servico_tempo`        | `coleta(servico_id, coletado_em DESC)`.                  |
+| `idx_coleta_tempo`                | `coleta(coletado_em DESC)`.                              |
+| `idx_status_coleta_servico_tempo` | `status_coleta(servico_id, observado_em DESC)`.          |
+| `ux_usuario_email_lower` | `usuario(lower(email))`, único. |
+| `idx_redefinicao_usuario` | `redefinicao_senha(usuario_id)`. |
+| `idx_dashboard_usuario` | `dashboard(usuario_id, id)`. |
 
 ## Regras de Negócio no Banco
 
 Algumas regras são garantidas pelo próprio banco e não aparecem graficamente no diagrama:
 
-- **Integridade referencial:** as FKs não declaram exclusão em cascata. Excluir um registro ainda referenciado gera conflito. `status_coleta.tipo` é texto livre no SQL; a classificação é feita pelo backend. O banco não garante que a coleta vinculada a uma observação pertença ao mesmo serviço da observação.
+- **Integridade referencial:** tokens de recuperação, dashboards e painel pessoal usam `ON DELETE CASCADE` na FK do usuário. As demais FKs preservam a restrição de exclusão de registros referenciados. `status_coleta.tipo` é texto livre no SQL; a classificação é feita pelo backend. O banco não garante que a coleta vinculada a uma observação pertença ao mesmo serviço da observação.
 - **Configuração única:** `configuracao_sistema` aceita apenas uma linha (`id BOOLEAN` com `CHECK (id = true)`).
 - **Parâmetro ativo único:** índice único parcial em `parametro_estimativa(ativo) WHERE ativo = true`, que permite apenas um conjunto de parâmetros ativo por vez.
 - **Coleta única por instante:** `UNIQUE (servico_id, coletado_em)` impede duas coletas do mesmo serviço no mesmo instante.
@@ -190,22 +227,48 @@ Algumas regras são garantidas pelo próprio banco e não aparecem graficamente 
 - **Valores válidos:** `CHECK` impede valores negativos nas métricas e nos cálculos, limita percentuais entre 0 e 100 e limita o intervalo de configuração armazenado entre 10 e 3600 segundos. Esse CHECK não valida a variável de ambiente que agenda o job.
 - **Fator de carbono da coleta.** `coleta.carbon_intensity` guarda o fator regional usado no cálculo. Atualizações posteriores de `regiao.carbon_intensity` preservam as estimativas armazenadas. A coleta não guarda uma FK para a região original. Por isso, os totais regionais agrupam as amostras pela região atual do serviço.
 
+## Contas, recuperação e configurações da Sprint 3
+
+- `usuario.papel` aceita `admin` ou `visualizador`; novos cadastros recebem
+  `visualizador`. A busca de e-mail usa minúsculas, protegidas por índice único.
+- O JWT guarda a versão da sessão e o middleware compara com
+  `usuario.versao_sessao` e `acesso_ativo` a cada chamada. Senhas ficam em
+  bcrypt; alterar senha/e-mail, papel ou acesso revoga sessões conforme a API.
+- `redefinicao_senha` guarda SHA-256 do token, validade de 30 minutos e
+  marcador de uso. A redefinição é transacional e remove os tokens da conta.
+- `painel_usuario` é a tabela usada pela API do painel pessoal. `dashboard`
+  permanece no schema, mas não é a persistência de `/dashboards/me`.
+- `configuracao_sistema` tem uma única linha, inicializada com 300 segundos.
+  O job usa esse valor; sem linha, recorre ao ambiente ou a 30 segundos.
+- A ativação de coeficientes insere uma nova versão em transação e mantém no
+  máximo uma ativa. `coleta.parametro_estimativa_id` preserva a versão usada;
+  coletas anteriores não são recalculadas.
+- A proteção do último administrador e a revogação de sessões são regras do
+  backend dentro de transações, não constraints autônomas do banco.
+
+Contratos e exemplos: [autenticação](../docs/API.md#23-autenticação-e-perfil),
+[administração](../docs/API.md#28-gerenciamento-de-usuários) e
+[parâmetros](../docs/API.md#27-parâmetros-de-estimativa).
+
 ## Operação do banco e persistência
 
-O [schema.sql](./schema.sql) cria sete tabelas,
+O [schema.sql](./schema.sql) cria dez tabelas,
 chaves, restrições, índices e a extensão `uuid-ossp`, em uma transação.
 O seed insere um conjunto ativo de parâmetros e uma linha de configuração.
 Serviços, regiões e coletas são obtidos durante a execução; não são seed estático.
 
-| Tabela | Uso pela aplicação atual |
-|---|---|
-| regiao | Sincronização da Carbon API e fator regional para as coletas. |
-| servico | Descoberta, estado e consultas por external_id. |
-| parametro_estimativa | Conjunto ativo para as estimativas. |
-| coleta | Gravação e consulta de detalhe, histórico e totais. |
-| status_coleta | Gravação das observações e consulta da última tentativa e do histórico por serviço. |
-| usuario | Estrutura disponível; autenticação prevista para a Sprint 3. |
-| configuracao_sistema | Linha inicial disponível; ainda não controla o job. |
+| Tabela               | Uso pela aplicação atual                                                            |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| regiao               | Sincronização da Carbon API e fator regional para as coletas.                       |
+| servico              | Descoberta, estado e consultas por external_id.                                     |
+| parametro_estimativa | Conjunto ativo para as estimativas.                                                 |
+| coleta               | Gravação e consulta de detalhe, histórico e totais.                                 |
+| status_coleta        | Gravação das observações e consulta da última tentativa e do histórico por serviço. |
+| usuario | Cadastro, login, perfil, papel, acesso e versão das sessões JWT. |
+| redefinicao_senha | Tokens de recuperação com hash, expiração e uso único. |
+| dashboard | Estrutura de dashboards nomeados disponível no schema. |
+| painel_usuario | Painel pessoal usado por GET/PUT `/dashboards/me`; um por usuário. |
+| configuracao_sistema | Intervalo persistido, consultado pelo job e alterado por administradores. |
 
 O Compose usa PostgreSQL 17 e publica a porta `localhost:5433`. O backend
 executado no Compose usa `database:5432`.
@@ -230,23 +293,74 @@ Uma alteração posterior no arquivo não migra volumes existentes.
 
 ### Conferir um volume existente
 
-```powershell
-docker compose exec -T database psql -U postgres -d greener -c "SELECT to_regclass('public.status_coleta') AS tabela, to_regclass('public.idx_status_coleta_servico_tempo') AS indice;"
-```
-
-Se algum resultado vier vazio, faça backup do banco e aplique a
-[migração de status de coleta](./migrations/001_status_coleta.sql) a partir da
-raiz do repositório, com o container do banco ativo.
+Um volume antigo precisa das migrações que ainda não foram aplicadas. O Compose
+não reaplica `schema.sql` quando o volume já existe. Confira as tabelas com:
 
 ```powershell
-Get-Content -Raw database/migrations/001_status_coleta.sql |
-    docker compose exec -T database psql -X -v ON_ERROR_STOP=1 -U postgres -d greener
+docker compose exec -T database psql -U postgres -d greener -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;"
 ```
 
-A migração cria a tabela e o índice em uma transação e pode ser reaplicada.
-Repita a consulta acima para conferir a estrutura e consulte as coletas
-existentes. Amostras anteriores à migração podem não ter observações de
-tentativa correspondentes.
+### Migrar um volume existente para a Sprint 3
+
+Execute na raiz do repositório, com o serviço do banco ativo. Pare o backend
+durante a manutenção para evitar novas coletas e alterações concorrentes.
+
+1. Faça um backup e registre a quantidade e a última coleta antes da migração:
+
+```powershell
+docker compose up -d --wait database
+docker compose stop backend
+docker compose exec -T database pg_dump -U postgres -d greener --file=/tmp/greener-before-sprint3.sql
+docker compose cp database:/tmp/greener-before-sprint3.sql ./greener-before-sprint3.sql
+docker compose exec -T database psql -U postgres -d greener -c "SELECT count(*) AS coletas, max(coletado_em) AS ultima_coleta FROM coleta;"
+docker compose exec -T database psql -U postgres -d greener -c "SELECT lower(email), count(*) FROM usuario GROUP BY lower(email) HAVING count(*) > 1;"
+```
+
+O arquivo de backup contém dados do ambiente e deve ser guardado fora do Git.
+Se a última consulta encontrar e-mails duplicados sem distinguir maiúsculas,
+concilie essas contas antes de criar o índice único da migração 002.
+
+2. Aplique os arquivos em ordem; cada um executa sua própria transação:
+
+```powershell
+docker compose cp ./database/migrations/001_status_coleta.sql database:/tmp/001_status_coleta.sql
+docker compose exec -T database psql -X -v ON_ERROR_STOP=1 -U postgres -d greener -f /tmp/001_status_coleta.sql
+docker compose cp ./database/migrations/002_contas_e_dashboards.sql database:/tmp/002_contas_e_dashboards.sql
+docker compose exec -T database psql -X -v ON_ERROR_STOP=1 -U postgres -d greener -f /tmp/002_contas_e_dashboards.sql
+docker compose cp ./database/migrations/003_painel_usuario.sql database:/tmp/003_painel_usuario.sql
+docker compose exec -T database psql -X -v ON_ERROR_STOP=1 -U postgres -d greener -f /tmp/003_painel_usuario.sql
+```
+
+| Migração | Alteração |
+|---|---|
+| [001](./migrations/001_status_coleta.sql) | Cria histórico de tentativas e índice por serviço/horário. |
+| [002](./migrations/002_contas_e_dashboards.sql) | Acrescenta nome, acesso e versão de sessão; preenche nomes antigos pelo prefixo do e-mail; altera o papel padrão para visualizador; cria recuperação e dashboards. |
+| [003](./migrations/003_painel_usuario.sql) | Cria o painel pessoal persistido por usuário. |
+
+Os scripts podem ser reaplicados sobre as estruturas compatíveis previstas.
+A migração 002 mantém os IDs, e-mails, hashes e papéis dos usuários existentes;
+o novo padrão de papel vale para inserções futuras. Nenhum desses scripts
+apaga coletas ou redefine os parâmetros ambientais.
+
+3. Confira a estrutura e compare as coletas com o registro anterior:
+
+```powershell
+docker compose exec -T database psql -U postgres -d greener -c "SELECT id, email, nome, papel, acesso_ativo, versao_sessao FROM usuario ORDER BY id;"
+docker compose exec -T database psql -U postgres -d greener -c "SELECT to_regclass('public.redefinicao_senha'), to_regclass('public.dashboard'), to_regclass('public.painel_usuario');"
+docker compose exec -T database psql -U postgres -d greener -c "SELECT count(*) AS coletas, max(coletado_em) AS ultima_coleta FROM coleta;"
+docker compose up -d backend
+```
+
+Configure o [primeiro administrador](../README.md#primeiro-administrador) se
+a instalação ainda não tiver um ativo. Para PostgreSQL externo, execute os
+mesmos arquivos com `psql`, usando a conexão e o backup daquele ambiente.
+O schema completo é destinado a bancos vazios; atualizar um volume usa as
+migrações acima, preservando seu conteúdo.
+
+O [teste de migração](../backend/tests/integration/database/migrations.test.ts)
+verifica usuários e coletas antes/depois e a reaplicação das migrações 002/003
+em um banco descartável. Isso é uma evidência automatizada de preservação,
+não substitui o backup da instalação.
 
 ### Consultar a estrutura e as coletas existentes
 
@@ -271,6 +385,10 @@ Compose com uma verificação de retenção já executada.
 - `AnalyticsRepository` filtra por período e agrupa amostras em faixas de tempo para pontos e totais. [Código](../backend/src/modules/analytics/analytics.repository.ts)
 - `RegionsRepository` consulta as regiões, os contadores de serviços e os totais por período. [Código](../backend/src/modules/regions/regions.repository.ts)
 - `ComparisonsRepository` consulta o período comum, os totais, os pontos por faixa e o fator da região simulada. [Código](../backend/src/modules/comparisons/comparisons.repository.ts)
+- `AccountsRepository` cadastra contas, gerencia senhas/recuperação e configura o primeiro administrador. [Código](../backend/src/modules/accounts/accounts.repository.ts)
+- `DashboardsRepository` consulta e salva o painel pessoal. [Código](../backend/src/modules/dashboards/dashboards.repository.ts)
+- `ProjectRepository` mantém usuários, intervalo e versões de coeficientes. [Código](../backend/src/modules/project/project.repository.ts)
+- `MetricsSnapshotRepository` lê resumos por serviço e séries temporais na mesma transação para relatórios. [Código](../backend/src/modules/analytics/metrics-snapshot.repository.ts)
 
 As consultas usam placeholders do pg, com valores separados do texto SQL.
 Os fatores ambientais iniciais e suas limitações estão em [cálculo.md](../docs/cálculo.md).

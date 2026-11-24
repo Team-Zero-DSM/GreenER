@@ -68,16 +68,30 @@ export function ExploreSection({
 
     const showingServices = selectedCode !== null;
 
+    const handleSelectRegion = (code: string) => {
+        onSelectRegion(code);
+
+        // Em dispositivos móveis, interrompe a rotação automática ao abrir uma região.
+        if (window.matchMedia('(max-width: 767px)').matches) {
+            setAutoRotate(false);
+        }
+    };
+
     return (
-        <section className="relative z-10 min-w-0" aria-labelledby="explore-title">
-            <div className="flex h-[calc(100svh-var(--header-h,4rem)-1.5rem)] min-h-[400px] flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <h2 id="explore-title" className="text-xl font-bold text-white md:text-2xl">
+        <section className="relative z-10 h-full min-h-0 min-w-0" aria-labelledby="explore-title">
+            <div className="flex h-full min-h-0 flex-col gap-4">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+                    <h2
+                        id="explore-title"
+                        className="min-w-0 break-words text-xl font-bold leading-tight text-white md:text-2xl"
+                    >
                         {showingServices
                             ? `Serviços de ${selectedRegion ? regionTitle(selectedRegion) : selectedCode}`
                             : 'Regiões monitoradas'}
                     </h2>
-                    <DataSourceBadge source={dataSource} />
+                    <div className="shrink-0">
+                        <DataSourceBadge source={dataSource} />
+                    </div>
                 </div>
                 <p className="text-sm text-white/60">
                     {showingServices
@@ -86,7 +100,7 @@ export function ExploreSection({
                 </p>
 
                 <div
-                    className="mt-3 flex flex-nowrap items-center gap-2 overflow-x-auto text-white"
+                    className="mt-3 hidden flex-nowrap items-center gap-2 overflow-x-auto text-white md:flex"
                     role="group"
                     aria-label="Controles do globo"
                 >
@@ -162,7 +176,7 @@ export function ExploreSection({
                             <button
                                 key={region.code}
                                 type="button"
-                                onClick={() => onSelectRegion(region.code)}
+                                onClick={() => handleSelectRegion(region.code)}
                                 aria-pressed={selectedCode === region.code}
                                 className="w-full rounded-xl border border-white/10 bg-white/5 p-4 text-left text-white transition-colors hover:bg-white/10 aria-pressed:border-emerald-400/60 aria-pressed:bg-emerald-400/10"
                             >

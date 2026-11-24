@@ -8,6 +8,8 @@ interface SegmentedControlProps<T extends string> {
     value: T;
     options: readonly SegmentedControlOption<T>[];
     onChange: (value: T) => void;
+    className?: string;
+    buttonClassName?: string;
 }
 
 export function SegmentedControl<T extends string>({
@@ -15,12 +17,14 @@ export function SegmentedControl<T extends string>({
     value,
     options,
     onChange,
+    className,
+    buttonClassName,
 }: SegmentedControlProps<T>) {
     return (
         <div
             role="group"
             aria-label={label}
-            className="inline-flex max-w-full flex-wrap items-center gap-1 rounded-full border border-border bg-background/60 p-1"
+            className={`flex w-full max-w-full flex-nowrap items-center justify-center gap-1 rounded-2xl border border-border/60 bg-card/55 p-1.5 shadow-sm backdrop-blur-md sm:inline-flex sm:w-auto sm:justify-start ${className ?? ''}`}
         >
             {options.map((option) => {
                 const selected = option.value === value;
@@ -31,10 +35,10 @@ export function SegmentedControl<T extends string>({
                         type="button"
                         aria-pressed={selected}
                         onClick={() => onChange(option.value)}
-                        className={`min-h-9 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors ${
+                        className={`min-h-9 min-w-0 flex-1 rounded-xl px-2 py-1.5 text-center text-sm font-medium tracking-tight whitespace-nowrap transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 sm:min-w-fit sm:flex-none sm:px-3.5 ${buttonClassName ?? ''} ${
                             selected
-                                ? 'bg-primary/15 font-semibold text-primary'
-                                : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                                ? 'bg-linear-to-b from-primary/20 to-primary/10 text-primary shadow-sm ring-1 ring-primary/20'
+                                : 'text-muted-foreground hover:bg-background/60 hover:text-foreground'
                         }`}
                     >
                         {option.label}

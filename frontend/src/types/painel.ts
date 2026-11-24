@@ -1,0 +1,138 @@
+export type PainelTemplateId =
+    'visao-geral' | 'sustentabilidade' | 'operacional' | 'executivo' | 'em-branco';
+
+// Tamanhos de tela do painel. Cada um tem a sua quantidade de colunas na grade.
+export type PainelBreakpoint = 'desktop' | 'tablet' | 'mobile';
+
+export type PainelWidgetType = 'kpi' | 'serie-temporal' | 'distribuicao' | 'tabela' | 'status';
+
+export type PainelSeriesChart = 'linha' | 'area' | 'barras';
+
+export type PainelDistributionChart = 'pizza' | 'rosca' | 'barras-horizontais';
+
+export type PainelChartType = PainelSeriesChart | PainelDistributionChart;
+
+// Situação do conteúdo de um widget. O contêiner (PainelWidgetFrame) mostra o
+// aviso de cada situação e só renderiza o conteúdo quando ela é 'ready'.
+export type PainelWidgetStatus = 'loading' | 'error' | 'empty' | 'ready';
+
+export interface PainelWidgetAction {
+    label: string;
+    onSelect?: () => void;
+    disabled?: boolean;
+}
+
+// Limite de alerta: o indicador ganha a cor de destaque quando o valor fica acima
+// (ou abaixo) do limite, na unidade exibida no widget.
+export interface PainelWidgetAlert {
+    direction: 'acima' | 'abaixo';
+    threshold: number;
+}
+
+// Retângulo que um widget ocupa na grade.
+export interface PainelWidgetPosition {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
+// Cada widget ocupa um retângulo da grade de 12 colunas: x e y são a coluna e a
+// linha onde ele começa (a partir de 0), w e h são quantas colunas e linhas ocupa.
+export interface PainelWidget {
+    id: string;
+    type: PainelWidgetType;
+    // Tipo de gráfico, para os widgets que têm mais de uma forma de exibir.
+    chart?: PainelChartType;
+    // Métrica exibida, quando o usuário escolhe uma diferente da original do widget.
+    metric?: string;
+    // Paleta de cores escolhida pelo usuário (id em painelPaletas.ts).
+    palette?: string;
+    // Código da região, quando o widget mostra só os dados dela.
+    region?: string;
+    // Limite de alerta dos indicadores (KPI).
+    alert?: PainelWidgetAlert;
+    title: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
+// Indicador numérico. A variação é calculada contra previousValue (o mesmo
+// intervalo imediatamente anterior); lowerIsBetter diz se cair é bom (emissão)
+// ou ruim (disponibilidade), para colorir a variação.
+export interface PainelKpiData {
+    label: string;
+    value: number;
+    unit: string;
+    previousValue: number | null;
+    lowerIsBetter: boolean;
+    fractionDigits?: number;
+}
+
+// Série temporal com uma ou mais séries (ex.: uma por região). Cada ponto traz o
+// rótulo do eixo do tempo e o valor de cada série, pela chave da série.
+export interface PainelSeriesData {
+    unit: string;
+    series: readonly { key: string; label: string }[];
+    points: readonly { label: string; values: Record<string, number> }[];
+}
+
+// Distribuição de um total entre categorias (ex.: energia por região).
+export interface PainelDistributionData {
+    unit: string;
+    items: readonly { label: string; value: number }[];
+}
+
+// Tabela ou lista simples (ex.: top serviços, últimas falhas). Cada linha traz o
+// texto de cada coluna, pela chave da coluna.
+export interface PainelTableData {
+    columns: readonly { key: string; label: string; align?: 'left' | 'right' }[];
+    rows: readonly { id: string; cells: Record<string, string> }[];
+}
+
+// Quantos serviços estão em cada situação na última rodada de coleta.
+export interface PainelStatusData {
+    available: number;
+    unavailable: number;
+    metricsMissing: number;
+}
+
+// Conteúdo pronto de um widget, já no formato do tipo dele.
+export type PainelWidgetContent =
+    | { type: 'kpi'; data: PainelKpiData }
+    | { type: 'serie-temporal'; data: PainelSeriesData }
+    | { type: 'distribuicao'; data: PainelDistributionData }
+    | { type: 'tabela'; data: PainelTableData }
+    | { type: 'status'; data: PainelStatusData };
+
+// O que a integração com o backend entrega para um widget: a situação da busca
+// e, quando ela deu certo, o conteúdo.
+export interface PainelWidgetSource {
+    status: PainelWidgetStatus;
+    // Período a que os dados se referem, mostrado abaixo do título.
+    subtitle?: string;
+    errorMessage?: string;
+    content?: PainelWidgetContent;
+}
+
+// Fontes de dados do painel, pelo id da métrica.
+export type PainelWidgetSources = Record<string, PainelWidgetSource>;
+
+// Devolve a fonte de dados de um widget, conforme a métrica configurada nele.
+export type PainelSourceGetter = (widget: PainelWidget) => PainelWidgetSource;
+
+// Configuração do painel de um usuário: o template escolhido e os widgets com
+// suas posições. É o que as rotas /dashboards/me leem e gravam.
+export interface PainelConfig {
+    template: PainelTemplateId;
+    // Widgets com a posição do desktop (12 colunas).
+    widgets: readonly PainelWidget[];
+    // Posição de cada widget no tablet (6 colunas), pelo id. Só existe depois que
+    // o usuário arruma o painel no tablet; antes disso o arranjo é automático.
+    tablet?: Record<string, PainelWidgetPosition>;
+    // Ordem dos widgets no celular (ids), de cima para baixo. Só existe depois que
+    // o usuário reordena no celular; antes disso segue a ordem de leitura do desktop.
+    mobileOrder?: readonly string[];
+}

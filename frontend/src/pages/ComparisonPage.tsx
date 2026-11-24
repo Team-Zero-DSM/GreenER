@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { Info } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { useMonitoring } from '@/contexts/monitoring';
 import { PageShell } from '@/components/shared/PageShell';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -28,6 +29,10 @@ import type { HistoryRange } from '@/types/service';
 import type { ComparisonRequest, ComparisonResponse } from '@/types/comparison';
 
 export function ComparisonPage() {
+    // Intervalo real de coleta do projeto, usado para estimar coletas ausentes.
+    const { status } = useMonitoring();
+    const intervaloColetaSegundos = status?.collectionIntervalSeconds;
+
     // Configurações da comparação.
     const [periodo, setPeriodo] = useState<HistoryRange>('24h');
 
@@ -38,18 +43,17 @@ export function ComparisonPage() {
         [],
     );
 
-    // Valida se a seleção permite executar uma comparação.
-    const podeComparar = (() => {
-        if (servicosSelecionados.length < 2) {
-            return false;
-        }
-
+    // O mesmo serviço só pode aparecer duas vezes se cada card estiver numa região diferente.
+    const selecaoRepetida = (() => {
         const identificadores = servicosSelecionados.map((servico) =>
             JSON.stringify([servico.externalId, servico.simulatedRegion]),
         );
 
-        return new Set(identificadores).size === identificadores.length;
+        return new Set(identificadores).size !== identificadores.length;
     })();
+
+    // Valida se a seleção permite executar uma comparação.
+    const podeComparar = servicosSelecionados.length >= 2 && !selecaoRepetida;
 
     // Serviço atualmente escolhido como referência.
     const [servicoPrincipalId, setServicoPrincipalId] = useState<string | null>(null);
@@ -137,8 +141,8 @@ export function ComparisonPage() {
             return null;
         }
 
-        return prepararDadosComparacao(respostaComparacao);
-    }, [respostaComparacao]);
+        return prepararDadosComparacao(respostaComparacao, intervaloColetaSegundos);
+    }, [respostaComparacao, intervaloColetaSegundos]);
 
     // Preserva os serviços da última comparação.
     // Atualiza somente suas cores quando o usuário as altera.
@@ -197,6 +201,14 @@ export function ComparisonPage() {
                     onMetricaChange={setMetrica}
                     onComparar={handleComparar}
                 />
+
+                {selecaoRepetida && (
+                    <p className="text-sm text-amber-300" role="status">
+                        O mesmo serviço foi adicionado mais de uma vez na mesma região. Use
+                        &quot;Simular região&quot; para colocar cada cópia numa região diferente ou
+                        remova a repetida.
+                    </p>
+                )}
 
                 {comparacaoCarregando && (
                     <p className="text-sm text-muted-foreground" role="status">

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
 import { ChevronDown, MapPin, MapPinned, Server, Star, X } from 'lucide-react';
+import { getDropdownCompactTriggerClassName } from '@/components/shared/dropdownStyles';
 
 import type { ServiceSummary } from '@/types/service';
 import type { Region } from '@/types/api';
@@ -174,7 +175,7 @@ export function ComparisonServiceCard({
                                 type="button"
                                 onClick={() => setMostrarCores((atual) => !atual)}
                                 aria-expanded={mostrarCores}
-                                className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-teal-300"
+                                className={getDropdownCompactTriggerClassName(mostrarCores)}
                             >
                                 <span
                                     className="size-6 shrink-0 rounded-full border border-slate-700"
@@ -197,7 +198,7 @@ export function ComparisonServiceCard({
                                 type="button"
                                 onClick={() => setMostrarRegioes((atual) => !atual)}
                                 aria-expanded={mostrarRegioes}
-                                className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-teal-300"
+                                className={getDropdownCompactTriggerClassName(mostrarRegioes)}
                             >
                                 <MapPinned aria-hidden="true" className="size-4 shrink-0" />
 

@@ -6,7 +6,6 @@ import {
     ChevronDown,
     ChevronRight,
     Clock3,
-    Search,
     TriangleAlert,
     X,
 } from 'lucide-react';
@@ -19,6 +18,12 @@ import {
     type CollectionStatusQuery,
 } from '@/api/collection-status';
 import { useApiQuery } from '@/hooks/useApiQuery';
+import { FloatingLabelInput } from '@/components/shared/FloatingLabelInput';
+import {
+    DROPDOWN_SURFACE_CLASS_NAME,
+    getDropdownOptionClassName,
+    getDropdownTriggerClassName,
+} from '@/components/shared/dropdownStyles';
 
 const typeLabels: Record<string, string> = {
     success: 'Coleta realizada',
@@ -57,7 +62,7 @@ function AttemptBadge({
         : 'Sem tentativas';
     return (
         <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${service.result === 'success' ? 'bg-primary/10 text-primary' : service.result === 'pending' ? 'bg-white/5 text-muted-foreground' : 'bg-amber-400/10 text-amber-300'}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${service.result === 'success' ? 'border-primary/15 bg-primary/[0.08] text-primary' : service.result === 'pending' ? 'border-border/70 bg-muted/40 text-muted-foreground' : 'border-amber-400/20 bg-amber-400/[0.08] text-amber-300'}`}
         >
             <Icon size={13} className="shrink-0" aria-hidden="true" />
             {label}
@@ -344,14 +349,19 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                 ))}
             </div>
             <div aria-busy={isUpdating} className="overflow-hidden rounded-xl border bg-card">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-4 sm:px-5 sm:py-5">
                     <div>
-                        <h2 className="text-lg font-semibold">Acompanhamento das coletas</h2>
+                        <h2 className="text-base font-semibold sm:text-lg">
+                            Acompanhamento das coletas
+                        </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Última tentativa e última coleta com sucesso de cada serviço.
                         </p>
                     </div>
-                    <span role="status" className="text-xs text-muted-foreground">
+                    <span
+                        role="status"
+                        className="rounded-full border border-border/70 bg-background/40 px-3 py-1.5 text-xs font-medium text-muted-foreground tabular-nums"
+                    >
                         {isUpdating
                             ? 'Atualizando serviços...'
                             : `${data.pagination.total} serviços encontrados`}
@@ -404,11 +414,18 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                     )}
                 </div>
                 <div className="hidden overflow-x-auto lg:block">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full min-w-[960px] table-fixed text-left text-sm">
                         <caption className="sr-only">
                             Status reais de coleta por serviço. Horários de Brasília.
                         </caption>
-                        <thead className="border-b bg-background/25 text-xs text-muted-foreground">
+                        <colgroup>
+                            <col className="w-[24%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[23%]" />
+                            <col className="w-[20%]" />
+                            <col className="w-[13%]" />
+                        </colgroup>
+                        <thead className="border-b border-border/60 bg-muted/25 text-[11px] text-muted-foreground">
                             <tr>
                                 {[
                                     'Serviço',
@@ -420,40 +437,51 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                                     <th
                                         scope="col"
                                         key={label}
-                                        className="whitespace-nowrap px-5 py-3 font-medium"
+                                        className="whitespace-nowrap px-5 py-3.5 font-semibold uppercase tracking-[0.06em]"
                                     >
                                         {label}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y">
+                        <tbody className="divide-y divide-border/50">
                             {data.items.map((service) => (
                                 <Fragment key={service.externalId}>
-                                    <tr className="hover:bg-white/[0.025]">
-                                        <td className="px-5 py-4">
-                                            <p className="font-medium">{service.name}</p>
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                {[service.location.city, service.location.country]
-                                                    .filter(Boolean)
-                                                    .join(' · ')}
+                                    <tr className="group transition-colors duration-150 hover:bg-muted/25">
+                                        <td className="px-5 py-3.5">
+                                            <p className="truncate font-medium text-foreground">
+                                                {service.name}
                                             </p>
-                                            <p className="mt-1 font-mono text-xs text-muted-foreground">
-                                                {service.location.regionCode}
-                                            </p>
+                                            <div className="mt-1.5 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+                                                <span className="truncate">
+                                                    {[
+                                                        service.location.city,
+                                                        service.location.country,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(' · ')}
+                                                </span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="size-1 shrink-0 rounded-full bg-border"
+                                                />
+                                                <span className="shrink-0 font-mono text-[11px]">
+                                                    {service.location.regionCode}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td className="whitespace-nowrap px-5 py-4 tabular-nums">
+                                        <td className="whitespace-nowrap px-5 py-3.5 text-sm text-muted-foreground tabular-nums">
                                             {service.latestAttempt
                                                 ? formatTimestamp(service.latestAttempt.observedAt)
                                                 : 'Sem registro'}
                                         </td>
-                                        <td className="px-5 py-4">
+                                        <td className="px-5 py-3.5">
                                             <AttemptBadge service={service} />
                                         </td>
-                                        <td className="whitespace-nowrap px-5 py-4 tabular-nums">
+                                        <td className="whitespace-nowrap px-5 py-3.5 text-sm text-muted-foreground tabular-nums">
                                             {formatTimestamp(service.lastSuccessfulCollectionAt)}
                                         </td>
-                                        <td className="px-5 py-4">
+                                        <td className="px-5 py-3.5">
                                             <button
                                                 type="button"
                                                 aria-label={`${expanded === service.externalId ? 'Fechar' : 'Ver'} histórico de ${service.name}`}
@@ -466,7 +494,7 @@ function CollectionStatusResults({ query, onResult, onPage }: ResultsProps) {
                                                             : service.externalId,
                                                     )
                                                 }
-                                                className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-xs font-medium text-primary hover:bg-primary/10"
+                                                className="inline-flex min-h-10 items-center justify-center gap-1 whitespace-nowrap rounded-lg border border-transparent px-3 text-xs font-semibold text-primary transition-colors hover:border-primary/15 hover:bg-primary/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                                             >
                                                 {expanded === service.externalId
                                                     ? 'Fechar'
@@ -572,11 +600,7 @@ function CollectionFilterSelect({ label, value, options, onChange }: CollectionF
                 aria-label={label}
                 aria-expanded={open}
                 onClick={() => setOpen((current) => !current)}
-                className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm transition-colors ${
-                    open
-                        ? 'border-emerald-400/50 bg-emerald-400/[0.05] text-foreground'
-                        : 'border-input bg-secondary text-foreground hover:border-emerald-400/30'
-                }`}
+                className={getDropdownTriggerClassName(open)}
             >
                 <span className="truncate">{selected?.label ?? value}</span>
 
@@ -591,7 +615,7 @@ function CollectionFilterSelect({ label, value, options, onChange }: CollectionF
             {open && (
                 <div
                     ref={pickerRef}
-                    className="absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto rounded-lg border border-border bg-background p-2 shadow-xl shadow-black/40"
+                    className={`absolute left-0 top-full z-[60] mt-2 max-h-60 w-full overflow-y-auto ${DROPDOWN_SURFACE_CLASS_NAME}`}
                 >
                     <div className="flex flex-col gap-1">
                         {options.map((option) => {
@@ -606,11 +630,7 @@ function CollectionFilterSelect({ label, value, options, onChange }: CollectionF
                                         onChange(option.value);
                                         setOpen(false);
                                     }}
-                                    className={`flex w-full items-center justify-between gap-2 rounded-md px-3 py-2.5 text-left text-sm transition-colors ${
-                                        selected
-                                            ? 'bg-emerald-400/10 font-medium text-emerald-300'
-                                            : 'text-foreground/80 hover:bg-emerald-400/[0.07] hover:text-emerald-200'
-                                    }`}
+                                    className={`${getDropdownOptionClassName(selected)} justify-between`}
                                 >
                                     <span>{option.label}</span>
 
@@ -651,25 +671,17 @@ export function CollectionStatusPanel() {
                     event.preventDefault();
                     setQuery({ ...query, search: draft.trim(), page: 1 });
                 }}
-                className="relative z-20 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap"
+                className="relative z-20 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center"
             >
-                <label className="group col-span-2 flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-input bg-secondary/60 px-3 transition-colors focus-within:border-emerald-400/50 focus-within:bg-secondary focus-within:ring-2 focus-within:ring-emerald-400/10 sm:min-w-56">
-                    <Search
-                        size={17}
-                        className="shrink-0 text-muted-foreground transition-colors group-focus-within:text-emerald-300"
-                        aria-hidden="true"
-                    />
-
-                    <input
-                        type="search"
-                        aria-label="Buscar serviço"
-                        maxLength={100}
-                        placeholder="Buscar por nome ou identificador..."
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        className="min-h-11 w-full min-w-0 border-0 bg-transparent py-2.5 text-sm text-foreground outline-none ring-0 placeholder:text-muted-foreground focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                    />
-                </label>
+                <FloatingLabelInput
+                    className="col-span-2 min-w-0 flex-1 sm:min-w-56 sm:-translate-y-1.5"
+                    label="Buscar serviço"
+                    type="search"
+                    maxLength={100}
+                    placeholder="Buscar por nome ou identificador..."
+                    value={draft}
+                    onChange={setDraft}
+                />
 
                 <button
                     type="submit"
@@ -694,26 +706,6 @@ export function CollectionStatusPanel() {
                             setQuery({
                                 ...query,
                                 result: value as CollectionStatusQuery['result'],
-                                page: 1,
-                            })
-                        }
-                    />
-                </div>
-
-                <div className="flex min-w-0 flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center">
-                    <span>Por página</span>
-
-                    <CollectionFilterSelect
-                        label="Quantidade por página"
-                        value={String(query.limit)}
-                        options={[3, 10, 20, 50].map((limit) => ({
-                            value: String(limit),
-                            label: String(limit),
-                        }))}
-                        onChange={(value) =>
-                            setQuery({
-                                ...query,
-                                limit: Number(value),
                                 page: 1,
                             })
                         }

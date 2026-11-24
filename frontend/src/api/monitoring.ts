@@ -1,4 +1,4 @@
-import { getJson } from '@/api/services';
+import { getJson } from '@/api/client';
 import type { MonitoringStatus } from '@/types/monitoring';
 
 export function fetchMonitoringStatus(): Promise<MonitoringStatus> {

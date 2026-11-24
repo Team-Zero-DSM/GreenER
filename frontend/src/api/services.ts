@@ -1,4 +1,5 @@
 import { statusInfo } from '@/lib/serviceStatus';
+import { getJson } from '@/api/client';
 import type {
     HistoryRange,
     LatestCollection,
@@ -9,60 +10,6 @@ import type {
     ServiceStatus,
     ServiceSummary,
 } from '@/types/service';
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
-
-export class ApiError extends Error {
-    constructor(
-        message: string,
-        readonly status: number,
-    ) {
-        super(message);
-    }
-}
-
-export async function getJson<T>(path: string): Promise<T> {
-    const response = await fetch(`${API_URL}/api/v1${path}`);
-
-    if (!response.ok) {
-        // O backend responde { error: { message } } nas falhas.
-        const body = (await response.json().catch(() => null)) as {
-            error?: { message?: string };
-        } | null;
-        throw new ApiError(
-            body?.error?.message ?? `Falha na comunicação com a API (HTTP ${response.status})`,
-            response.status,
-        );
-    }
-
-    return response.json() as Promise<T>;
-}
-
-export async function postJson<TRequest, TResponse>(
-    path: string,
-    body: TRequest,
-): Promise<TResponse> {
-    const response = await fetch(`${API_URL}/api/v1${path}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-        const body = (await response.json().catch(() => null)) as {
-            error?: { message?: string };
-        } | null;
-
-        throw new ApiError(
-            body?.error?.message ?? `Falha na comunicação com a API (HTTP ${response.status})`,
-            response.status,
-        );
-    }
-
-    return response.json() as Promise<TResponse>;
-}
 
 // Estados que o frontend não conhece viram "unknown" para o selo não quebrar.
 function toStatus(status: string): ServiceStatus {
@@ -105,11 +52,16 @@ export interface ServicesQuery {
 
 export async function fetchServices(query: ServicesQuery = {}): Promise<ServiceSummary[]> {
     const params = new URLSearchParams();
+
     if (query.regionCode) params.set('regionCode', query.regionCode);
-    if (query.active !== undefined) params.set('active', String(query.active));
+    if (query.active !== undefined) {
+        params.set('active', String(query.active));
+    }
+
     const search = params.toString() ? `?${params}` : '';
 
-    const data = await getJson<ServicesListResponse>(`/services${search}`);
+    const data = await getJson<ServicesListResponse>(`/services${search}`, { authenticated: true });
+
     return data.services.map(toSummary);
 }
 
@@ -117,9 +69,15 @@ export async function fetchServiceOverview(id: string): Promise<ServiceOverview>
     const data = await getJson<{
         service: ServiceDto;
         latestCollection: LatestCollection | null;
-    }>(`/services/${encodeURIComponent(id)}`);
+    }>(`/services/${encodeURIComponent(id)}`, {
+        authenticated: true,
+    });
+
     return {
-        service: { ...data.service, status: toStatus(data.service.status) },
+        service: {
+            ...data.service,
+            status: toStatus(data.service.status),
+        },
         latestCollection: data.latestCollection,
     };
 }
@@ -127,8 +85,10 @@ export async function fetchServiceOverview(id: string): Promise<ServiceOverview>
 export async function fetchServiceHistory(
     id: string,
     range: HistoryRange,
+    maxPoints = 120,
 ): Promise<ServiceHistory> {
     return getJson<ServiceHistory>(
-        `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=120`,
+        `/services/${encodeURIComponent(id)}/collections?range=${range}&maxPoints=${maxPoints}`,
+        { authenticated: true },
     );
 }
